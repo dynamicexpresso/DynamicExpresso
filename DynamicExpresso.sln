@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Express 2012 for Windows Desktop
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.UnitTest", "test\DynamicExpresso.UnitTest\DynamicExpresso.UnitTest.csproj", "{33157A92-C6B2-4A51-8262-1FEBFD6558BE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{50B4428D-93D9-4056-BCE1-307A72043B2C}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.Core", "src\DynamicExpresso.Core\DynamicExpresso.Core.csproj", "{C6B7C0D2-B84A-4307-9C61-D95613DB564D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NugetPackager", "deploy\NugetPackager\NugetPackager.csproj", "{35AC41DC-3783-466D-BD2C-C1D8EABEA551}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
