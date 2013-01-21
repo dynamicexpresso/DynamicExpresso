@@ -5,9 +5,19 @@ using System.Text;
 
 namespace DynamicExpresso
 {
-    public class ExpressionParameter
+    public class FunctionParameter
     {
-        public ExpressionParameter(string name, Type type, object value = null)
+        public FunctionParameter(string name, object value)
+        {
+            if (value == null)
+                throw new ArgumentNullException("value");
+
+            Name = name;
+            Type = value.GetType();
+            Value = value;
+        }
+
+        public FunctionParameter(string name, Type type, object value = null)
         {
             Name = name;
             Type = type;

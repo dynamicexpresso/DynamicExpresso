@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace DynamicExpresso
 {
-    public class ParserSettings
+    internal class ParserSettings
     {
         static Type[] predefinedTypes = {
             typeof(Object),
@@ -31,18 +32,44 @@ namespace DynamicExpresso
             typeof(Convert)
         };
 
-        Dictionary<string, object> keywords;
+        Dictionary<string, Expression> keywords;
 
         Dictionary<string, object> externals;
 
         Dictionary<string, Type> knownTypes;
 
+        public IDictionary<string, Type> KnownTypes
+        {
+            get { return knownTypes; }
+        }
+        public IDictionary<string, object> Externals
+        {
+            get { return externals; }
+        }
+        public IDictionary<string, Expression> Keywords
+        {
+            get { return keywords; }
+        }
+
         public ParserSettings()
         {
-            keywords = CreateKeywords();
+            keywords = new Dictionary<string, Expression>();
             externals = new Dictionary<string, object>();
             knownTypes = new Dictionary<string, Type>();
 
+            FillKnownTypes();
+            FillKeywords();
+        }
+
+        void FillKeywords()
+        {
+            keywords.Add("true", Expression.Constant(true));
+            keywords.Add("false", Expression.Constant(false));
+            keywords.Add("null", ParserConstants.nullLiteral);
+        }
+
+        void FillKnownTypes()
+        {
             foreach (Type type in predefinedTypes)
                 knownTypes.Add(type.Name, type);
             knownTypes.Add("string", typeof(string));
@@ -53,32 +80,6 @@ namespace DynamicExpresso
             knownTypes.Add("long", typeof(long));
             knownTypes.Add("double", typeof(double));
             knownTypes.Add("decimal", typeof(decimal));
-        }
-
-        Dictionary<string, object> CreateKeywords()
-        {
-            Dictionary<string, object> d = new Dictionary<string, object>();
-            d.Add("true", ParserConstants.trueLiteral);
-            d.Add("false", ParserConstants.falseLiteral);
-            d.Add("null", ParserConstants.nullLiteral);
-            d.Add(ParserConstants.keywordIt, ParserConstants.keywordIt);
-            d.Add(ParserConstants.keywordIif, ParserConstants.keywordIif);
-            d.Add(ParserConstants.keywordNew, ParserConstants.keywordNew);
-
-            return d;
-        }
-
-        public IDictionary<string, Type> KnownTypes
-        {
-            get { return knownTypes; }
-        }
-        public IDictionary<string, object> Externals
-        {
-            get { return externals; }
-        }
-        public IDictionary<string, object> Keywords
-        {
-            get { return keywords; }
         }
     }
 }

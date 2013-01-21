@@ -9,8 +9,6 @@ namespace DynamicExpresso
 {
     internal static class ParserConstants
     {
-        public static readonly Expression trueLiteral = Expression.Constant(true);
-        public static readonly Expression falseLiteral = Expression.Constant(false);
         public static readonly Expression nullLiteral = Expression.Constant(null);
 
         public const string keywordIt = "it";

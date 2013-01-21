@@ -172,8 +172,8 @@ namespace DynamicExpresso
 
         ParserSettings _settings;
 
-        Dictionary<string, object> symbols;
-        Dictionary<Expression, string> literals;
+        Dictionary<string, Expression> _parameters;
+        Dictionary<Expression, string> _literals;
 
         ParameterExpression it;
 
@@ -187,8 +187,8 @@ namespace DynamicExpresso
         {
             _settings = settings;
 
-            symbols = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
-            literals = new Dictionary<Expression, string>();
+            _parameters = new Dictionary<string, Expression>();
+            _literals = new Dictionary<Expression, string>();
 
             ProcessParameters(parameters);
 
@@ -198,18 +198,18 @@ namespace DynamicExpresso
             NextToken();
         }
 
-        void AddSymbol(string name, object value)
+        void AddParameter(string name, Expression value)
         {
-            if (symbols.ContainsKey(name))
+            if (_parameters.ContainsKey(name))
                 throw ParseError(ErrorMessages.DuplicateIdentifier, name);
-            symbols.Add(name, value);
+            _parameters.Add(name, value);
         }
 
         void ProcessParameters(IEnumerable<ParameterExpression> parameters)
         {
             foreach (ParameterExpression pe in parameters)
                 if (!String.IsNullOrEmpty(pe.Name))
-                    AddSymbol(pe.Name, pe);
+                    AddParameter(pe.Name, pe);
             if (parameters.Count() == 1 && String.IsNullOrEmpty(parameters.First().Name))
                 it = parameters.First();
         }
@@ -408,11 +408,10 @@ namespace DynamicExpresso
             return left;
         }
 
-        // -, !, not unary operators
+        // -, ! unary operators
         Expression ParseUnary()
         {
-            if (token.id == TokenId.Minus || token.id == TokenId.Exclamation ||
-                TokenIdentifierIs("not"))
+            if (token.id == TokenId.Minus || token.id == TokenId.Exclamation)
             {
                 Token op = token;
                 NextToken();
@@ -563,7 +562,7 @@ namespace DynamicExpresso
         Expression CreateLiteral(object value, string text)
         {
             ConstantExpression expr = Expression.Constant(value);
-            literals.Add(expr, text);
+            _literals.Add(expr, text);
             return expr;
         }
 
@@ -580,37 +579,43 @@ namespace DynamicExpresso
         Expression ParseIdentifier()
         {
             ValidateToken(TokenId.Identifier);
+
+            if (token.text == ParserConstants.keywordIt)
+                return ParseIt();
+            if (token.text == ParserConstants.keywordIif)
+                return ParseIif();
+            if (token.text == ParserConstants.keywordNew)
+                return ParseNew();
+
             Type knownType;
             if (_settings.KnownTypes.TryGetValue(token.text, out knownType))
             {
                 return ParseTypeAccess(knownType);
             }
-            object value;
-            if (_settings.Keywords.TryGetValue(token.text, out value))
+
+            Expression keywordExpression;
+            if (_settings.Keywords.TryGetValue(token.text, out keywordExpression))
             {
-                if (value == (object)ParserConstants.keywordIt) return ParseIt();
-                if (value == (object)ParserConstants.keywordIif) return ParseIif();
-                if (value == (object)ParserConstants.keywordNew) return ParseNew();
+                LambdaExpression lambda = keywordExpression as LambdaExpression;
+                if (lambda != null) return ParseLambdaInvocation(lambda);
+
                 NextToken();
-                return (Expression)value;
+                return keywordExpression;
             }
-            if (symbols.TryGetValue(token.text, out value) ||
-                _settings.Externals != null && _settings.Externals.TryGetValue(token.text, out value))
+
+            Expression parameterExpression;
+            if (_parameters.TryGetValue(token.text, out parameterExpression))
             {
-                Expression expr = value as Expression;
-                if (expr == null)
-                {
-                    expr = Expression.Constant(value);
-                }
-                else
-                {
-                    LambdaExpression lambda = expr as LambdaExpression;
-                    if (lambda != null) return ParseLambdaInvocation(lambda);
-                }
+                LambdaExpression lambda = parameterExpression as LambdaExpression;
+                if (lambda != null) return ParseLambdaInvocation(lambda);
+
                 NextToken();
-                return expr;
+                return parameterExpression;
             }
-            if (it != null) return ParseMemberAccess(null, it);
+
+            if (it != null) 
+                return ParseMemberAccess(null, it);
+
             throw ParseError(ErrorMessages.UnknownIdentifier, token.text);
         }
 
@@ -1143,7 +1148,7 @@ namespace DynamicExpresso
                 else
                 {
                     string text;
-                    if (literals.TryGetValue(ce, out text))
+                    if (_literals.TryGetValue(ce, out text))
                     {
                         Type target = GetNonNullableType(type);
                         Object value = null;

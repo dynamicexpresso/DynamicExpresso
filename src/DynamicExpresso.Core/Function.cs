@@ -6,11 +6,11 @@ using System.Text;
 
 namespace DynamicExpresso
 {
-    public class ExpressionDefinition
+    public class Function
     {
         readonly LambdaExpression _lamdaExpression;
 
-        public ExpressionDefinition(LambdaExpression lamdaExpression)
+        public Function(LambdaExpression lamdaExpression)
         {
             _lamdaExpression = lamdaExpression;
         }
@@ -20,13 +20,28 @@ namespace DynamicExpresso
             get { return _lamdaExpression.ReturnType; }
         }
 
-        public object Eval(params ExpressionParameter[] parameters)
+        public FunctionParameter[] Parameters
+        {
+            get
+            {
+                return _lamdaExpression.Parameters
+                        .Select(p => new FunctionParameter(p.Name, p.Type))
+                        .ToArray();
+            }
+        }
+
+        public object Invoke(params FunctionParameter[] parameters)
         {
             var args = (from dp in _lamdaExpression.Parameters
                        join rp in parameters
                         on dp.Name equals rp.Name
                        select rp.Value).ToArray();
 
+            return Invoke(args);
+        }
+
+        public object Invoke(params object[] args)
+        {
             return _lamdaExpression.Compile().DynamicInvoke(args);
         }
     }

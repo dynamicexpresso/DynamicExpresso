@@ -46,14 +46,14 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="ParseException.cs" />
-    <Compile Include="ExpressionParser.cs" />
-    <Compile Include="ErrorMessages.cs" />
-    <Compile Include="ExpressionDefinition.cs" />
-    <Compile Include="ExpressionEngine.cs" />
-    <Compile Include="ExpressionParameter.cs" />
-    <Compile Include="ParserConstants.cs" />
-    <Compile Include="ParserSettings.cs" />
+    <Compile Include="Parser\ParseException.cs" />
+    <Compile Include="Parser\ExpressionParser.cs" />
+    <Compile Include="Parser\ErrorMessages.cs" />
+    <Compile Include="Function.cs" />
+    <Compile Include="Interpreter.cs" />
+    <Compile Include="FunctionParameter.cs" />
+    <Compile Include="Parser\ParserConstants.cs" />
+    <Compile Include="Parser\ParserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

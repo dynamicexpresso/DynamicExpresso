@@ -6,5 +6,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyProduct("Dynamic Expresso")]
 [assembly: AssemblyCopyright("Copyright © Davide Icardi 2013")]
 [assembly: ComVisible(false)]
-[assembly: AssemblyVersion("0.1.1.0")]
+[assembly: AssemblyVersion("0.2.0.0")]
 
