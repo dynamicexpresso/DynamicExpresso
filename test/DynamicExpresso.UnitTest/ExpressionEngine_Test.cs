@@ -40,14 +40,32 @@ namespace DynamicExpresso.UnitTest
             Assert.AreEqual(typeof(object), target.Parse("null").ReturnType);
         }
 
-        [Ignore]
         [TestMethod]
-        public void Eval_New_Of_Base_Types()
+        public void Eval_New_Of_Base_Type()
         {
             var target = new Interpreter();
 
             Assert.AreEqual(new DateTime(2015, 1, 24), target.Eval("new DateTime(2015, 1, 24)"));
             Assert.AreEqual(new string('a', 10), target.Eval("new string('a', 10)"));
+        }
+
+        [TestMethod]
+        public void Eval_New_Of_Custom_Type()
+        {
+            var target = new Interpreter();
+
+            target.Using(typeof(Uri));
+
+            Assert.AreEqual(new Uri("http://www.google.com"), target.Eval("new Uri(\"http://www.google.com\")"));
+        }
+
+        [TestMethod]
+        public void Eval_New_And_Member_Access()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual(new DateTime(2015, 1, 24).Month, target.Eval("new DateTime(2015,   1, 24).Month"));
+            Assert.AreEqual(new DateTime(2015, 1, 24).Month + 34, target.Eval("new DateTime( 2015, 1, 24).Month + 34"));
         }
 
         [TestMethod]
@@ -340,6 +358,15 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ParseException))]
+        public void Unknown_New_Type_Is_Not_Supported()
+        {
+            var target = new Interpreter();
+
+            target.Parse("new unkkeyword()");
+        }
+
+        [TestMethod]
         public void Eval_Static_Properties_And_Methods_Of_Custom_Types()
         {
             var target = new Interpreter()
@@ -372,8 +399,6 @@ namespace DynamicExpresso.UnitTest
 
         // Missing tests
         // --------------
-        // - keyword new of base types
-        // - keyword new of custom types
         // - Enum
         // - Type class
         // - Nullable types

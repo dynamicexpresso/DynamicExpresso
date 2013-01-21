@@ -29,6 +29,7 @@ namespace DynamicExpresso
         public const string NoMatchingConstructor = "No matching constructor in type '{0}'";
         public const string AmbiguousConstructorInvocation = "Ambiguous invocation of '{0}' constructor";
         public const string CannotConvertValue = "A value of type '{0}' cannot be converted to type '{1}'";
+        public const string NoApplicableConstructor = "No applicable constructor exists in type '{0}'";
         public const string NoApplicableMethod = "No applicable method '{0}' exists in type '{1}'";
         public const string MethodsAreInaccessible = "Methods on type '{0}' are not accessible";
         public const string MethodIsVoid = "Method '{0}' in type '{1}' does not return a value";

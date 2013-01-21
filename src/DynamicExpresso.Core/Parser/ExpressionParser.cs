@@ -667,41 +667,21 @@ namespace DynamicExpresso
 
         Expression ParseNew()
         {
-            throw new NotImplementedException();
-            //NextToken();
-            //ValidateToken(TokenId.OpenParen, Res.OpenParenExpected);
-            //NextToken();
-            //List<DynamicProperty> properties = new List<DynamicProperty>();
-            //List<Expression> expressions = new List<Expression>();
-            //while (true)
-            //{
-            //    int exprPos = token.pos;
-            //    Expression expr = ParseExpression();
-            //    string propName;
-            //    if (TokenIdentifierIs("as"))
-            //    {
-            //        NextToken();
-            //        propName = GetIdentifier();
-            //        NextToken();
-            //    }
-            //    else
-            //    {
-            //        MemberExpression me = expr as MemberExpression;
-            //        if (me == null) throw ParseError(exprPos, Res.MissingAsClause);
-            //        propName = me.Member.Name;
-            //    }
-            //    expressions.Add(expr);
-            //    properties.Add(new DynamicProperty(propName, expr.Type));
-            //    if (token.id != TokenId.Comma) break;
-            //    NextToken();
-            //}
-            //ValidateToken(TokenId.CloseParen, Res.CloseParenOrCommaExpected);
-            //NextToken();
-            //Type type = DynamicExpression.CreateClass(properties);
-            //MemberBinding[] bindings = new MemberBinding[properties.Count];
-            //for (int i = 0; i < bindings.Length; i++)
-            //    bindings[i] = Expression.Bind(type.GetProperty(properties[i].Name), expressions[i]);
-            //return Expression.MemberInit(Expression.New(type), bindings);
+            NextToken();
+            ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
+
+            Type newType;
+            if (!_settings.KnownTypes.TryGetValue(token.text, out newType))
+                throw ParseError(token.pos, ErrorMessages.UnknownIdentifier, token.text);
+
+            NextToken();
+            var args = ParseArgumentList();
+
+            var constructor = newType.GetConstructor(args.Select(p => p.Type).ToArray());
+            if (constructor == null)
+                throw ParseError(token.pos, ErrorMessages.NoApplicableConstructor, newType);
+
+            return Expression.MemberInit(Expression.New(constructor, args));
         }
 
         Expression ParseLambdaInvocation(LambdaExpression lambda)
