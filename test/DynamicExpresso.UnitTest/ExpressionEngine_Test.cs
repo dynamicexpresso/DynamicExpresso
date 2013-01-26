@@ -253,7 +253,42 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
+        public void Parameters_Are_Case_Sensitive()
+        {
+            var target = new Interpreter();
+
+            double x = 2;
+            string X = "param y";
+            var parameters = new[] {
+                            new FunctionParameter("x", x.GetType(), x),
+                            new FunctionParameter("X", X.GetType(), X)
+                            };
+
+            Assert.AreEqual(x, target.Eval("x", parameters));
+            Assert.AreEqual(X, target.Eval("X", parameters));
+        }
+
+        [TestMethod]
         public void Eval_complex_parameters()
+        {
+            var target = new Interpreter();
+
+            var x = new MyTestService();
+            var y = new Uri("http://www.google.com");
+            var z = CultureInfo.GetCultureInfo("en-US");
+            var parameters = new[] {
+                            new FunctionParameter("x", x.GetType(), x),
+                            new FunctionParameter("y", y.GetType(), y),
+                            new FunctionParameter("z", z.GetType(), z)
+                            };
+
+            Assert.AreEqual(x, target.Eval("x", parameters));
+            Assert.AreEqual(y, target.Eval("y", parameters));
+            Assert.AreEqual(z, target.Eval("z", parameters));
+        }
+
+        [TestMethod]
+        public void Call_Methods_Fields_and_Properties_On_Parameters()
         {
             var target = new Interpreter();
 
@@ -268,15 +303,99 @@ namespace DynamicExpresso.UnitTest
                             new FunctionParameter("w", w.GetType(), w)
                             };
 
-            Assert.AreEqual(x, target.Eval("x", parameters));
-            Assert.AreEqual(x.SomeNumber + 1, target.Eval("x.SomeNumber + 1", parameters));
             Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()", parameters));
             Assert.AreEqual(x.CallMethod(y, z, w), target.Eval("x.CallMethod( y, z,w)", parameters));
+            Assert.AreEqual(x.AProperty + 1, target.Eval("x.AProperty + 1", parameters));
+            Assert.AreEqual(x.AField, target.Eval("x.AField", parameters));
+        }
+
+        [TestMethod]
+        public void Methods_Fields_And_Properties_Are_Case_Sensitive()
+        {
+            var target = new Interpreter();
+
+            var x = new MyTestService();
+            var parameters = new[] {
+                            new FunctionParameter("x", x.GetType(), x)
+                            };
+
+            Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()", parameters));
+            Assert.AreEqual(x.HELLOWORLD(), target.Eval("x.HELLOWORLD()", parameters));
+            Assert.AreEqual(x.AProperty, target.Eval("x.AProperty", parameters));
+            Assert.AreEqual(x.APROPERTY, target.Eval("x.APROPERTY", parameters));
+            Assert.AreEqual(x.AField, target.Eval("x.AField", parameters));
+            Assert.AreEqual(x.AFIELD, target.Eval("x.AFIELD", parameters));
+        }
+
+        [TestMethod]
+        public void Call_method_with_nullable_param()
+        {
+            var target = new Interpreter();
+
+            var x = new MyTestService();
+            var y = "davide";
+            var z = 5;
+            int? w = null;
+            var parameters = new[] {
+                            new FunctionParameter("x", x.GetType(), x),
+                            new FunctionParameter("y", y.GetType(), y),
+                            new FunctionParameter("z", z.GetType(), z),
+                            new FunctionParameter("w", typeof(int?), w)
+                            };
+
+            Assert.AreEqual(x.MethodWithNullableParam(y, z), target.Eval("x.MethodWithNullableParam(y, z)", parameters));
+            Assert.AreEqual(x.MethodWithNullableParam(y, w), target.Eval("x.MethodWithNullableParam(y, w)", parameters));
+            Assert.AreEqual(x.MethodWithNullableParam(y, 30), target.Eval("x.MethodWithNullableParam(y, 30)", parameters));
+            Assert.AreEqual(x.MethodWithNullableParam(y, null), target.Eval("x.MethodWithNullableParam(y, null)", parameters));
         }
 
         [Ignore]
         [TestMethod]
-        public void Eval_parameters_with_delegate()
+        public void Call_method_with_generic_param()
+        {
+            var target = new Interpreter();
+
+            var x = new MyTestService();
+            var y = "davide";
+            double z = 5;
+            int? w = null;
+            var parameters = new[] {
+                            new FunctionParameter("x", x.GetType(), x),
+                            new FunctionParameter("y", y.GetType(), y),
+                            new FunctionParameter("z", z.GetType(), z),
+                            new FunctionParameter("w", typeof(int?), w)
+                            };
+
+            Assert.AreEqual(x.MethodWithGenericParam(x), target.Eval("x.MethodWithGenericParam(x)", parameters));
+            Assert.AreEqual(x.MethodWithGenericParam(y), target.Eval("x.MethodWithGenericParam(y)", parameters));
+            Assert.AreEqual(x.MethodWithGenericParam(z), target.Eval("x.MethodWithGenericParam(z)", parameters));
+            Assert.AreEqual(x.MethodWithGenericParam(w), target.Eval("x.MethodWithGenericParam(w)", parameters));
+        }
+
+        [TestMethod]
+        public void Eval_nullable_parameters()
+        {
+            var target = new Interpreter();
+
+            int? x;
+            x = 39;
+            int? y;
+            y = null;
+
+            var parameters = new[] {
+                            new FunctionParameter("x", typeof(int?), x),
+                            new FunctionParameter("y", typeof(int?), y)
+                            };
+
+            Assert.AreEqual(x, target.Eval("x", parameters));
+            Assert.AreEqual(y, target.Eval("y", parameters));
+            Assert.AreEqual(x.HasValue, target.Eval("x.HasValue", parameters));
+            Assert.AreEqual(y.HasValue, target.Eval("y.HasValue", parameters));
+        }
+
+        [Ignore]
+        [TestMethod]
+        public void Eval_delegates_parameters()
         {
             var target = new Interpreter();
 
@@ -310,8 +429,8 @@ namespace DynamicExpresso.UnitTest
                             new FunctionParameter("y", y.GetType(), y),
                             };
 
-            Assert.AreEqual(x.SomeNumber > y && x.HelloWorld().Length == 10, target.Eval("x.SomeNumber > y && x.HelloWorld().Length == 10", parameters));
-            Assert.AreEqual(x.SomeNumber * (4 + 65) / x.SomeNumber, target.Eval("x.SomeNumber * (4 + 65) / x.SomeNumber", parameters));
+            Assert.AreEqual(x.AProperty > y && x.HelloWorld().Length == 10, target.Eval("x.AProperty > y && x.HelloWorld().Length == 10", parameters));
+            Assert.AreEqual(x.AProperty * (4 + 65) / x.AProperty, target.Eval("x.AProperty * (4 + 65) / x.AProperty", parameters));
         }
 
         [TestMethod]
@@ -326,8 +445,8 @@ namespace DynamicExpresso.UnitTest
                             new FunctionParameter("y", y.GetType(), y),
                             };
 
-            Assert.AreEqual(typeof(bool), target.Parse("x.SomeNumber > y && x.HelloWorld().Length == 10", parameters).ReturnType);
-            Assert.AreEqual(typeof(int), target.Parse("x.SomeNumber * (4 + 65) / x.SomeNumber", parameters).ReturnType);
+            Assert.AreEqual(typeof(bool), target.Parse("x.AProperty > y && x.HelloWorld().Length == 10", parameters).ReturnType);
+            Assert.AreEqual(typeof(int), target.Parse("x.AProperty * (4 + 65) / x.AProperty", parameters).ReturnType);
         }
 
         [TestMethod]
@@ -378,6 +497,26 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
+        public void Eval_Custom_Enum()
+        {
+            var target = new Interpreter()
+                            .Using(typeof(CalendarAlgorithmType));
+
+            Assert.AreEqual(CalendarAlgorithmType.LunisolarCalendar, target.Eval("CalendarAlgorithmType.LunisolarCalendar"));
+            Assert.AreEqual(CalendarAlgorithmType.SolarCalendar, target.Eval("CalendarAlgorithmType.SolarCalendar"));
+        }
+
+        [TestMethod]
+        public void Eval_Type_Methods()
+        {
+            var target = new Interpreter()
+                            .Using(typeof(Type));
+
+            Assert.AreEqual(Type.GetType("System.Globalization.CultureInfo"), target.Eval("Type.GetType(\"System.Globalization.CultureInfo\")"));
+            Assert.AreEqual(DateTime.Now.GetType(), target.Eval("DateTime.Now.GetType()"));
+        }
+
+        [TestMethod]
         public void It_should_be_possible_to_execute_the_same_function_multiple_times()
         {
             var target = new Interpreter();
@@ -399,10 +538,9 @@ namespace DynamicExpresso.UnitTest
 
         // Missing tests
         // --------------
-        // - Enum
-        // - Type class
-        // - Nullable types
-        // - exception during parse and eval
+        // - Indexer
+        // - cast
+        // - exception during parse or eval
         // - is operator
         // - typeof operator
         // - performance test (memory/cpu/threads/handles)
@@ -411,9 +549,17 @@ namespace DynamicExpresso.UnitTest
 
     public class MyTestService
     {
-        public int SomeNumber
+        public DateTime AField = DateTime.Now;
+        public DateTime AFIELD = DateTime.UtcNow;
+
+        public int AProperty
         {
             get { return 769; }
+        }
+
+        public int APROPERTY
+        {
+            get { return 887; }
         }
 
         public string HelloWorld()
@@ -421,14 +567,46 @@ namespace DynamicExpresso.UnitTest
             return "Ciao mondo";
         }
 
+        public string HELLOWORLD()
+        {
+            return "HELLO";
+        }
+
         public string CallMethod(string param1, int param2, DateTime param3)
         {
             return string.Format("{0} {1} {2}", param1, param2, param3);
         }
 
+        public string MethodWithNullableParam(string param1, int? param2)
+        {
+            return string.Format("{0} {1}", param1, param2);
+        }
+
+        public string MethodWithGenericParam<T>(T p)
+        {
+            return string.Format("{0}", p);
+        }
+
         public static int MyStaticMethod()
         {
             return 23;
+        }
+    }
+
+    public class MyTestClass<T>
+    {
+        T _val;
+        public MyTestClass(T val)
+        {
+            _val = val;
+        }
+
+        public override string ToString()
+        {
+            if (_val == null)
+                return "null";
+
+            return _val.ToString();
         }
     }
 }

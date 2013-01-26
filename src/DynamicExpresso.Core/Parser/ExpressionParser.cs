@@ -765,23 +765,28 @@ namespace DynamicExpresso
                     }
                 }
                 Expression[] args = ParseArgumentList();
+
+                //Type[] argsType = args.Select(p => p.Type).ToArray();
+                //return Expression.Call(instance, id, argsType, args);
+
                 MethodBase mb;
                 switch (FindMethod(type, id, instance == null, args, out mb))
                 {
                     case 0:
-                        throw ParseError(errorPos, ErrorMessages.NoApplicableMethod,
-                            id, GetTypeName(type));
+                        throw ParseError(errorPos, ErrorMessages.NoApplicableMethod, id, GetTypeName(type));
                     case 1:
                         MethodInfo method = (MethodInfo)mb;
                         //if (!IsPredefinedType(method.DeclaringType))
                         //    throw ParseError(errorPos, Res.MethodsAreInaccessible, GetTypeName(method.DeclaringType));
+
                         if (method.ReturnType == typeof(void))
-                            throw ParseError(errorPos, ErrorMessages.MethodIsVoid,
-                                id, GetTypeName(method.DeclaringType));
-                        return Expression.Call(instance, (MethodInfo)method, args);
+                        {
+                            throw ParseError(errorPos, ErrorMessages.MethodIsVoid, id, GetTypeName(method.DeclaringType));
+                        }
+
+                        return Expression.Call(instance, method, args);
                     default:
-                        throw ParseError(errorPos, ErrorMessages.AmbiguousMethodInvocation,
-                            id, GetTypeName(type));
+                        throw ParseError(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, GetTypeName(type));
                 }
             }
             else
@@ -996,9 +1001,9 @@ namespace DynamicExpresso
                 (staticAccess ? BindingFlags.Static : BindingFlags.Instance);
             foreach (Type t in SelfAndBaseTypes(type))
             {
-                MemberInfo[] members = t.FindMembers(MemberTypes.Property | MemberTypes.Field,
-                    flags, Type.FilterNameIgnoreCase, memberName);
-                if (members.Length != 0) return members[0];
+                MemberInfo[] members = t.FindMembers(MemberTypes.Property | MemberTypes.Field, flags, Type.FilterName, memberName);
+                if (members.Length != 0) 
+                    return members[0];
             }
             return null;
         }
@@ -1009,10 +1014,10 @@ namespace DynamicExpresso
                 (staticAccess ? BindingFlags.Static : BindingFlags.Instance);
             foreach (Type t in SelfAndBaseTypes(type))
             {
-                MemberInfo[] members = t.FindMembers(MemberTypes.Method,
-                    flags, Type.FilterNameIgnoreCase, methodName);
+                MemberInfo[] members = t.FindMembers(MemberTypes.Method, flags, Type.FilterName, methodName);
                 int count = FindBestMethod(members.Cast<MethodBase>(), args, out method);
-                if (count != 0) return count;
+                if (count != 0) 
+                    return count;
             }
             method = null;
             return 0;
@@ -1100,14 +1105,26 @@ namespace DynamicExpresso
 
         bool IsApplicable(MethodData method, Expression[] args)
         {
-            if (method.Parameters.Length != args.Length) return false;
+            if (method.Parameters.Length != args.Length) 
+                return false;
+
             Expression[] promotedArgs = new Expression[args.Length];
             for (int i = 0; i < args.Length; i++)
             {
                 ParameterInfo pi = method.Parameters[i];
-                if (pi.IsOut) return false;
-                Expression promoted = PromoteExpression(args[i], pi.ParameterType, false);
-                if (promoted == null) return false;
+                if (pi.IsOut) 
+                    return false;
+
+                Expression promoted;
+                //if (pi.ParameterType.IsGenericParameter)
+                //    promoted = args[i];
+                //else
+                //{
+                    promoted = PromoteExpression(args[i], pi.ParameterType, false);
+                    if (promoted == null)
+                        return false;
+                //}
+
                 promotedArgs[i] = promoted;
             }
             method.Args = promotedArgs;
