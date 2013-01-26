@@ -10,7 +10,7 @@ namespace DynamicExpresso.UnitTest
     public class ExpressionEngine_Test
     {
         [TestMethod]
-        public void Eval_Literals()
+        public void Literals()
         {
             var target = new Interpreter();
 
@@ -31,7 +31,15 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Parse_Should_Understand_ReturnType_Of_Literlars()
+        public void Space_Characters_Are_Ignored()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual(46, target.Eval("     45\t\t  + 1 \r  \n"));
+        }
+
+        [TestMethod]
+        public void Should_Understand_ReturnType_Of_Literlars()
         {
             var target = new Interpreter();
 
@@ -41,7 +49,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_New_Of_Base_Type()
+        public void New_Of_Base_Type()
         {
             var target = new Interpreter();
 
@@ -50,7 +58,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_New_Of_Custom_Type()
+        public void New_Of_Custom_Type()
         {
             var target = new Interpreter();
 
@@ -60,7 +68,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_New_And_Member_Access()
+        public void New_And_Member_Access()
         {
             var target = new Interpreter();
 
@@ -69,7 +77,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Literals_WithUS_Culture()
+        public void Literals_WithUS_Culture()
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
             var target = new Interpreter();
@@ -77,7 +85,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Literals_WithIT_Culture()
+        public void Literals_WithIT_Culture()
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("it-IT");
             var target = new Interpreter();
@@ -85,7 +93,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Numeric_Operators()
+        public void Numeric_Operators()
         {
             var target = new Interpreter();
 
@@ -98,7 +106,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Numeric_Operators_Priority()
+        public void Numeric_Operators_Priority()
         {
             var target = new Interpreter();
 
@@ -107,7 +115,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_String_Concatenation()
+        public void String_Concatenation()
         {
             var target = new Interpreter();
 
@@ -115,7 +123,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Numeric_Expression()
+        public void Numeric_Expression()
         {
             var target = new Interpreter();
 
@@ -124,7 +132,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Comparison_Operators()
+        public void Comparison_Operators()
         {
             var target = new Interpreter();
 
@@ -142,7 +150,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Logical_Operators()
+        public void Logical_Operators()
         {
             var target = new Interpreter();
 
@@ -151,7 +159,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Static_Properties_of_Base_Types()
+        public void Static_Properties_of_Base_Types()
         {
             var target = new Interpreter();
 
@@ -166,7 +174,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Static_Methods_of_Base_Types()
+        public void Static_Methods_of_Base_Types()
         {
             var target = new Interpreter();
 
@@ -175,7 +183,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Math_Class_Operators()
+        public void Math_Class()
         {
             var target = new Interpreter();
 
@@ -184,7 +192,43 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_CSharp_Primitive_Type_Keywords()
+        public void Convert_Class()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual(Convert.ToString(3), target.Eval("Convert.ToString(3)"));
+            Assert.AreEqual(Convert.ToInt16("23"), target.Eval("Convert.ToInt16(\"23\")"));
+        }
+
+        [Ignore]
+        [TestMethod]
+        public void Cast()
+        {
+            var target = new Interpreter();
+
+            var x = 51.5;
+            target.SetVariable("x", x);
+
+            Assert.AreEqual((int)x, target.Eval("(int)x"));
+        }
+
+        [TestMethod]
+        public void Indexer()
+        {
+            var target = new Interpreter();
+
+            var x = "ciao";
+            target.SetVariable("x", x);
+            var y = new MyTestService();
+            target.SetVariable("y", y);
+
+            Assert.AreEqual(x[2], target.Eval("x[2]"));
+            Assert.AreEqual(y[2], target.Eval("y[2]"));
+            Assert.AreEqual(y[2].ToString(), target.Eval("y[2].ToString()"));
+        }
+
+        [TestMethod]
+        public void CSharp_Primitive_Type_Keywords()
         {
             var target = new Interpreter();
 
@@ -197,7 +241,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_string_format()
+        public void String_format()
         {
             var target = new Interpreter();
 
@@ -206,7 +250,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_string_format_With_Object_Params()
+        public void String_format_With_Object_Params()
         {
             var target = new Interpreter();
 
@@ -215,7 +259,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_variables()
+        public void Variables()
         {
             var target = new Interpreter()
                             .SetVariable("myk", 23);
@@ -224,7 +268,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_keywords_with_lambda()
+        public void Keywords_with_lambda()
         {
             Expression<Func<double, double, double>> pow = (x, y) => Math.Pow(x, y);
             var target = new Interpreter()
@@ -234,7 +278,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_keywords_with_delegate()
+        public void Keywords_with_delegate()
         {
             Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
             var target = new Interpreter()
@@ -244,7 +288,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_primitive_parameters()
+        public void Primitive_parameters()
         {
             var target = new Interpreter();
 
@@ -279,7 +323,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_complex_parameters()
+        public void Complex_parameters()
         {
             var target = new Interpreter();
 
@@ -298,7 +342,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Call_Methods_Fields_and_Properties_On_Parameters()
+        public void Methods_Fields_and_Properties_On_Parameters()
         {
             var target = new Interpreter();
 
@@ -338,7 +382,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Call_method_with_nullable_param()
+        public void Method_with_nullable_param()
         {
             var target = new Interpreter();
 
@@ -360,7 +404,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Call_method_with_generic_param()
+        public void Method_with_generic_param()
         {
             var target = new Interpreter();
 
@@ -387,7 +431,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_nullable_parameters()
+        public void Nullable_parameters()
         {
             var target = new Interpreter();
 
@@ -408,7 +452,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_delegates_parameters()
+        public void Delegates_parameters()
         {
             var target = new Interpreter();
 
@@ -425,7 +469,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_If_Operators()
+        public void If_Operators()
         {
             var target = new Interpreter();
 
@@ -434,7 +478,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_complex_expression()
+        public void Complex_expression()
         {
             var target = new Interpreter();
 
@@ -445,12 +489,14 @@ namespace DynamicExpresso.UnitTest
                             new FunctionParam("y", y.GetType(), y),
                             };
 
-            Assert.AreEqual(x.AProperty > y && x.HelloWorld().Length == 10, target.Eval("x.AProperty > y && x.HelloWorld().Length == 10", parameters));
+            Assert.AreEqual(x.AProperty > y && x.HelloWorld().Length == 10, target.Eval("x.AProperty      >\t y && \r\n x.HelloWorld().Length == 10", parameters));
             Assert.AreEqual(x.AProperty * (4 + 65) / x.AProperty, target.Eval("x.AProperty * (4 + 65) / x.AProperty", parameters));
+
+            Assert.AreEqual(Convert.ToString(x.AProperty * (4 + 65) / x.AProperty), target.Eval("Convert.ToString(x.AProperty * (4 + 65) / x.AProperty)", parameters));
         }
 
         [TestMethod]
-        public void Parse_Should_Understand_ReturnType_Of_expressions()
+        public void Should_Understand_ReturnType_Of_expressions()
         {
             var target = new Interpreter();
 
@@ -502,7 +548,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Static_Properties_And_Methods_Of_Custom_Types()
+        public void Static_Properties_And_Methods_Of_Custom_Types()
         {
             var target = new Interpreter()
                             .Using(typeof(Uri))
@@ -513,7 +559,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Custom_Enum()
+        public void Custom_Enum()
         {
             var target = new Interpreter()
                             .Using(typeof(CalendarAlgorithmType));
@@ -523,7 +569,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_Type_Methods()
+        public void Type_Static_Methods()
         {
             var target = new Interpreter()
                             .Using(typeof(Type));
@@ -533,7 +579,7 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void It_should_be_possible_to_execute_the_same_function_multiple_times()
+        public void Should_be_possible_to_execute_the_same_function_multiple_times()
         {
             var target = new Interpreter();
 
@@ -554,8 +600,6 @@ namespace DynamicExpresso.UnitTest
 
         // Missing tests
         // --------------
-        // - Indexer
-        // - cast
         // - exception during parse or eval
         // - is operator
         // - typeof operator
@@ -611,6 +655,11 @@ namespace DynamicExpresso.UnitTest
         public static int MyStaticMethod()
         {
             return 23;
+        }
+
+        public DateTime this[int i]
+        {
+            get { return DateTime.Today.AddDays(i); }
         }
     }
 

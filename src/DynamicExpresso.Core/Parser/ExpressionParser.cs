@@ -175,7 +175,7 @@ namespace DynamicExpresso
         Dictionary<string, Expression> _parameters;
         Dictionary<Expression, string> _literals;
 
-        ParameterExpression it;
+        //ParameterExpression it;
 
         string text;
         int textPos;
@@ -210,8 +210,8 @@ namespace DynamicExpresso
             foreach (ParameterExpression pe in parameters)
                 if (!String.IsNullOrEmpty(pe.Name))
                     AddParameter(pe.Name, pe);
-            if (parameters.Count() == 1 && String.IsNullOrEmpty(parameters.First().Name))
-                it = parameters.First();
+            //if (parameters.Count() == 1 && String.IsNullOrEmpty(parameters.First().Name))
+            //    it = parameters.First();
         }
 
         public Expression Parse()
@@ -588,10 +588,8 @@ namespace DynamicExpresso
         {
             ValidateToken(TokenId.Identifier);
 
-            if (token.text == ParserConstants.keywordIt)
-                return ParseIt();
-            if (token.text == ParserConstants.keywordIif)
-                return ParseIif();
+            //if (token.text == ParserConstants.keywordIt)
+            //    return ParseIt();
             if (token.text == ParserConstants.keywordNew)
                 return ParseNew();
 
@@ -621,29 +619,29 @@ namespace DynamicExpresso
                 return parameterExpression;
             }
 
-            if (it != null) 
-                return ParseMemberAccess(null, it);
+            //if (it != null) 
+            //    return ParseMemberAccess(null, it);
 
             throw ParseError(ErrorMessages.UnknownIdentifier, token.text);
         }
 
-        Expression ParseIt()
-        {
-            if (it == null)
-                throw ParseError(ErrorMessages.NoItInScope);
-            NextToken();
-            return it;
-        }
+        //Expression ParseIt()
+        //{
+        //    if (it == null)
+        //        throw ParseError(ErrorMessages.NoItInScope);
+        //    NextToken();
+        //    return it;
+        //}
 
-        Expression ParseIif()
-        {
-            int errorPos = token.pos;
-            NextToken();
-            Expression[] args = ParseArgumentList();
-            if (args.Length != 3)
-                throw ParseError(errorPos, ErrorMessages.IifRequiresThreeArgs);
-            return GenerateConditional(args[0], args[1], args[2], errorPos);
-        }
+        //Expression ParseIif()
+        //{
+        //    int errorPos = token.pos;
+        //    NextToken();
+        //    Expression[] args = ParseArgumentList();
+        //    if (args.Length != 3)
+        //        throw ParseError(errorPos, ErrorMessages.IifRequiresThreeArgs);
+        //    return GenerateConditional(args[0], args[1], args[2], errorPos);
+        //}
 
         Expression GenerateConditional(Expression test, Expression expr1, Expression expr2, int errorPos)
         {
@@ -790,15 +788,15 @@ namespace DynamicExpresso
 
         private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string id)
         {
-            if (instance != null && type != typeof(string))
-            {
-                Type enumerableType = FindGenericType(typeof(IEnumerable<>), type);
-                if (enumerableType != null)
-                {
-                    Type elementType = enumerableType.GetGenericArguments()[0];
-                    return ParseAggregate(instance, elementType, id, errorPos);
-                }
-            }
+            //if (instance != null && type != typeof(string))
+            //{
+            //    Type enumerableType = FindGenericType(typeof(IEnumerable<>), type);
+            //    if (enumerableType != null)
+            //    {
+            //        Type elementType = enumerableType.GetGenericArguments()[0];
+            //        return ParseAggregate(instance, elementType, id, errorPos);
+            //    }
+            //}
             Expression[] args = ParseArgumentList();
 
             //Type[] argsType = args.Select(p => p.Type).ToArray();
@@ -843,35 +841,35 @@ namespace DynamicExpresso
             return null;
         }
 
-        Expression ParseAggregate(Expression instance, Type elementType, string methodName, int errorPos)
-        {
-            ParameterExpression outerIt = it;
-            ParameterExpression innerIt = Expression.Parameter(elementType, "");
-            it = innerIt;
-            Expression[] args = ParseArgumentList();
-            it = outerIt;
-            MethodBase signature;
-            if (FindMethod(typeof(IEnumerableSignatures), methodName, false, args, out signature) != 1)
-                throw ParseError(errorPos, ErrorMessages.NoApplicableAggregate, methodName);
-            Type[] typeArgs;
-            if (signature.Name == "Min" || signature.Name == "Max")
-            {
-                typeArgs = new Type[] { elementType, args[0].Type };
-            }
-            else
-            {
-                typeArgs = new Type[] { elementType };
-            }
-            if (args.Length == 0)
-            {
-                args = new Expression[] { instance };
-            }
-            else
-            {
-                args = new Expression[] { instance, Expression.Lambda(args[0], innerIt) };
-            }
-            return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
-        }
+        //Expression ParseAggregate(Expression instance, Type elementType, string methodName, int errorPos)
+        //{
+        //    ParameterExpression outerIt = it;
+        //    ParameterExpression innerIt = Expression.Parameter(elementType, "");
+        //    it = innerIt;
+        //    Expression[] args = ParseArgumentList();
+        //    it = outerIt;
+        //    MethodBase signature;
+        //    if (FindMethod(typeof(IEnumerableSignatures), methodName, false, args, out signature) != 1)
+        //        throw ParseError(errorPos, ErrorMessages.NoApplicableAggregate, methodName);
+        //    Type[] typeArgs;
+        //    if (signature.Name == "Min" || signature.Name == "Max")
+        //    {
+        //        typeArgs = new Type[] { elementType, args[0].Type };
+        //    }
+        //    else
+        //    {
+        //        typeArgs = new Type[] { elementType };
+        //    }
+        //    if (args.Length == 0)
+        //    {
+        //        args = new Expression[] { instance };
+        //    }
+        //    else
+        //    {
+        //        args = new Expression[] { instance, Expression.Lambda(args[0], innerIt) };
+        //    }
+        //    return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
+        //}
 
         Expression[] ParseArgumentList()
         {
