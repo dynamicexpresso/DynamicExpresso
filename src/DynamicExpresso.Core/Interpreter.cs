@@ -21,7 +21,7 @@ namespace DynamicExpresso
             return this;
         }
 
-        public Interpreter SetFunction<TDelegate>(string name, Expression<TDelegate> expression)
+        public Interpreter SetExpression(string name, Expression expression)
         {
             _settings.Keywords.Add(name, expression);
 

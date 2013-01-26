@@ -224,10 +224,21 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Eval_custom_keywords_with_lambda()
+        public void Eval_keywords_with_lambda()
         {
+            Expression<Func<double, double, double>> pow = (x, y) => Math.Pow(x, y);
             var target = new Interpreter()
-                        .SetFunction<Func<double, double, double>>("pow", (x, y) => Math.Pow(x, y));
+                        .SetExpression("pow", pow);
+
+            Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
+        }
+
+        [TestMethod]
+        public void Eval_keywords_with_delegate()
+        {
+            Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
+            var target = new Interpreter()
+                        .SetVariable("pow", pow);
 
             Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
         }

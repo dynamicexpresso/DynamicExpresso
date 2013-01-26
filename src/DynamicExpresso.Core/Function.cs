@@ -8,23 +8,31 @@ namespace DynamicExpresso
 {
     public class Function
     {
-        readonly LambdaExpression _lamdaExpression;
+        readonly LambdaExpression _lambdaExpression;
 
-        public Function(LambdaExpression lamdaExpression)
+        public Function(LambdaExpression lambdaExpression)
         {
-            _lamdaExpression = lamdaExpression;
+            if (lambdaExpression == null)
+                throw new ArgumentNullException("lambdaExpression");
+
+            _lambdaExpression = lambdaExpression;
+        }
+
+        public LambdaExpression LambdaExpression
+        {
+            get { return _lambdaExpression; }
         }
 
         public Type ReturnType
         {
-            get { return _lamdaExpression.ReturnType; }
+            get { return _lambdaExpression.ReturnType; }
         }
 
         public FunctionParam[] Parameters
         {
             get
             {
-                return _lamdaExpression.Parameters
+                return _lambdaExpression.Parameters
                         .Select(p => new FunctionParam(p.Name, p.Type))
                         .ToArray();
             }
@@ -32,7 +40,7 @@ namespace DynamicExpresso
 
         public object Invoke(params FunctionParam[] parameters)
         {
-            var args = (from dp in _lamdaExpression.Parameters
+            var args = (from dp in _lambdaExpression.Parameters
                        join rp in parameters
                         on dp.Name equals rp.Name
                        select rp.Value).ToArray();
@@ -42,7 +50,12 @@ namespace DynamicExpresso
 
         public object Invoke(params object[] args)
         {
-            return _lamdaExpression.Compile().DynamicInvoke(args);
+            return _lambdaExpression.Compile().DynamicInvoke(args);
+        }
+
+        public override string ToString()
+        {
+            return _lambdaExpression.ToString();
         }
     }
 }
