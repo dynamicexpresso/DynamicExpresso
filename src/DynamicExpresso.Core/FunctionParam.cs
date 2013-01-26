@@ -5,9 +5,9 @@ using System.Text;
 
 namespace DynamicExpresso
 {
-    public class FunctionParameter
+    public class FunctionParam
     {
-        public FunctionParameter(string name, object value)
+        public FunctionParam(string name, object value)
         {
             if (value == null)
                 throw new ArgumentNullException("value");
@@ -17,7 +17,7 @@ namespace DynamicExpresso
             Value = value;
         }
 
-        public FunctionParameter(string name, Type type, object value = null)
+        public FunctionParam(string name, Type type, object value = null)
         {
             Name = name;
             Type = type;

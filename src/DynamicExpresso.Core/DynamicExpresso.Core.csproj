@@ -51,7 +51,7 @@
     <Compile Include="Parser\ErrorMessages.cs" />
     <Compile Include="Function.cs" />
     <Compile Include="Interpreter.cs" />
-    <Compile Include="FunctionParameter.cs" />
+    <Compile Include="FunctionParam.cs" />
     <Compile Include="Parser\ParserConstants.cs" />
     <Compile Include="Parser\ParserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -240,8 +240,8 @@ namespace DynamicExpresso.UnitTest
             double x = 2;
             string y = "param y";
             var parameters = new[] {
-                            new FunctionParameter("x", x.GetType(), x),
-                            new FunctionParameter("y", y.GetType(), y)
+                            new FunctionParam("x", x.GetType(), x),
+                            new FunctionParam("y", y.GetType(), y)
                             };
 
             Assert.AreEqual(x, target.Eval("x", parameters));
@@ -259,8 +259,8 @@ namespace DynamicExpresso.UnitTest
             double x = 2;
             string X = "param y";
             var parameters = new[] {
-                            new FunctionParameter("x", x.GetType(), x),
-                            new FunctionParameter("X", X.GetType(), X)
+                            new FunctionParam("x", x.GetType(), x),
+                            new FunctionParam("X", X.GetType(), X)
                             };
 
             Assert.AreEqual(x, target.Eval("x", parameters));
@@ -276,9 +276,9 @@ namespace DynamicExpresso.UnitTest
             var y = new Uri("http://www.google.com");
             var z = CultureInfo.GetCultureInfo("en-US");
             var parameters = new[] {
-                            new FunctionParameter("x", x.GetType(), x),
-                            new FunctionParameter("y", y.GetType(), y),
-                            new FunctionParameter("z", z.GetType(), z)
+                            new FunctionParam("x", x.GetType(), x),
+                            new FunctionParam("y", y.GetType(), y),
+                            new FunctionParam("z", z.GetType(), z)
                             };
 
             Assert.AreEqual(x, target.Eval("x", parameters));
@@ -296,10 +296,10 @@ namespace DynamicExpresso.UnitTest
             var z = 5;
             var w = DateTime.Today;
             var parameters = new[] {
-                            new FunctionParameter("x", x.GetType(), x),
-                            new FunctionParameter("y", y.GetType(), y),
-                            new FunctionParameter("z", z.GetType(), z),
-                            new FunctionParameter("w", w.GetType(), w)
+                            new FunctionParam("x", x.GetType(), x),
+                            new FunctionParam("y", y.GetType(), y),
+                            new FunctionParam("z", z.GetType(), z),
+                            new FunctionParam("w", w.GetType(), w)
                             };
 
             Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()", parameters));
@@ -315,7 +315,7 @@ namespace DynamicExpresso.UnitTest
 
             var x = new MyTestService();
             var parameters = new[] {
-                            new FunctionParameter("x", x.GetType(), x)
+                            new FunctionParam("x", x.GetType(), x)
                             };
 
             Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()", parameters));
@@ -336,10 +336,10 @@ namespace DynamicExpresso.UnitTest
             var z = 5;
             int? w = null;
             var parameters = new[] {
-                            new FunctionParameter("x", x.GetType(), x),
-                            new FunctionParameter("y", y.GetType(), y),
-                            new FunctionParameter("z", z.GetType(), z),
-                            new FunctionParameter("w", typeof(int?), w)
+                            new FunctionParam("x", x.GetType(), x),
+                            new FunctionParam("y", y.GetType(), y),
+                            new FunctionParam("z", z.GetType(), z),
+                            new FunctionParam("w", typeof(int?), w)
                             };
 
             Assert.AreEqual(x.MethodWithNullableParam(y, z), target.Eval("x.MethodWithNullableParam(y, z)", parameters));
@@ -358,10 +358,10 @@ namespace DynamicExpresso.UnitTest
             double z = 5;
             int? w = null;
             var parameters = new[] {
-                            new FunctionParameter("x", x.GetType(), x),
-                            new FunctionParameter("y", y.GetType(), y),
-                            new FunctionParameter("z", z.GetType(), z),
-                            new FunctionParameter("w", typeof(int?), w)
+                            new FunctionParam("x", x.GetType(), x),
+                            new FunctionParam("y", y.GetType(), y),
+                            new FunctionParam("z", z.GetType(), z),
+                            new FunctionParam("w", typeof(int?), w)
                             };
 
             Assert.AreEqual(x.MethodWithGenericParam(x), target.Eval("x.MethodWithGenericParam(x)", parameters));
@@ -386,8 +386,8 @@ namespace DynamicExpresso.UnitTest
             y = null;
 
             var parameters = new[] {
-                            new FunctionParameter("x", typeof(int?), x),
-                            new FunctionParameter("y", typeof(int?), y)
+                            new FunctionParam("x", typeof(int?), x),
+                            new FunctionParam("y", typeof(int?), y)
                             };
 
             Assert.AreEqual(x, target.Eval("x", parameters));
@@ -402,12 +402,15 @@ namespace DynamicExpresso.UnitTest
             var target = new Interpreter();
 
             Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
+            MyDelegate myDelegate = (x) => x.Length;
 
             var parameters = new[] {
-                            new FunctionParameter("pow", pow.GetType(), pow)
+                            new FunctionParam("pow", pow.GetType(), pow),
+                            new FunctionParam("myDelegate", myDelegate.GetType(), myDelegate)
                             };
 
             Assert.AreEqual(9.0, target.Eval("pow(3, 2)", parameters));
+            Assert.AreEqual(4, target.Eval("myDelegate(\"test\")", parameters));
         }
 
         [TestMethod]
@@ -427,8 +430,8 @@ namespace DynamicExpresso.UnitTest
             var x = new MyTestService();
             var y = 5;
             var parameters = new[] {
-                            new FunctionParameter("x", x.GetType(), x),
-                            new FunctionParameter("y", y.GetType(), y),
+                            new FunctionParam("x", x.GetType(), x),
+                            new FunctionParam("y", y.GetType(), y),
                             };
 
             Assert.AreEqual(x.AProperty > y && x.HelloWorld().Length == 10, target.Eval("x.AProperty > y && x.HelloWorld().Length == 10", parameters));
@@ -443,8 +446,8 @@ namespace DynamicExpresso.UnitTest
             var x = new MyTestService();
             var y = 5;
             var parameters = new[] {
-                            new FunctionParameter("x", x.GetType(), x),
-                            new FunctionParameter("y", y.GetType(), y),
+                            new FunctionParam("x", x.GetType(), x),
+                            new FunctionParam("y", y.GetType(), y),
                             };
 
             Assert.AreEqual(typeof(bool), target.Parse("x.AProperty > y && x.HelloWorld().Length == 10", parameters).ReturnType);
@@ -524,18 +527,18 @@ namespace DynamicExpresso.UnitTest
             var target = new Interpreter();
 
             var functionX = target.Parse("Math.Pow(x, y) + 5",
-                                new FunctionParameter("x", typeof(double)),
-                                new FunctionParameter("y", typeof(double)));
+                                new FunctionParam("x", typeof(double)),
+                                new FunctionParam("y", typeof(double)));
 
             Assert.AreEqual(Math.Pow(15, 12) + 5, functionX.Invoke(15, 12));
             Assert.AreEqual(Math.Pow(5, 1) + 5, functionX.Invoke(5, 1));
             Assert.AreEqual(Math.Pow(11, 8) + 5, functionX.Invoke(11, 8));
-            Assert.AreEqual(Math.Pow(3, 4) + 5, functionX.Invoke(new FunctionParameter("x", 3.0),
-                                                                new FunctionParameter("y", 4.0)));
-            Assert.AreEqual(Math.Pow(9, 2) + 5, functionX.Invoke(new FunctionParameter("x", 9.0),
-                                                                new FunctionParameter("y", 2.0)));
-            Assert.AreEqual(Math.Pow(1, 3) + 5, functionX.Invoke(new FunctionParameter("x", 1.0),
-                                                                new FunctionParameter("y", 3.0)));
+            Assert.AreEqual(Math.Pow(3, 4) + 5, functionX.Invoke(new FunctionParam("x", 3.0),
+                                                                new FunctionParam("y", 4.0)));
+            Assert.AreEqual(Math.Pow(9, 2) + 5, functionX.Invoke(new FunctionParam("x", 9.0),
+                                                                new FunctionParam("y", 2.0)));
+            Assert.AreEqual(Math.Pow(1, 3) + 5, functionX.Invoke(new FunctionParam("x", 1.0),
+                                                                new FunctionParam("y", 3.0)));
         }
 
         // Missing tests
@@ -616,4 +619,6 @@ namespace DynamicExpresso.UnitTest
             return _val.ToString();
         }
     }
+
+    public delegate int MyDelegate(string s);
 }

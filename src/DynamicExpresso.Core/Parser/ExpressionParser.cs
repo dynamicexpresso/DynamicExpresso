@@ -439,6 +439,7 @@ namespace DynamicExpresso
 
         Expression ParsePrimary()
         {
+            var tokenPos = token.pos;
             Expression expr = ParsePrimaryStart();
             while (true)
             {
@@ -450,6 +451,14 @@ namespace DynamicExpresso
                 else if (token.id == TokenId.OpenBracket)
                 {
                     expr = ParseElementAccess(expr);
+                }
+                else if (token.id == TokenId.OpenParen)
+                {
+                    LambdaExpression lambda = expr as LambdaExpression;
+                    if (lambda != null) return ParseLambdaInvocation(lambda, tokenPos);
+
+                    if (typeof(Delegate).IsAssignableFrom(expr.Type))
+                        expr = ParseDelegateInvocation(expr, tokenPos);
                 }
                 else
                 {
@@ -595,8 +604,8 @@ namespace DynamicExpresso
             Expression keywordExpression;
             if (_settings.Keywords.TryGetValue(token.text, out keywordExpression))
             {
-                LambdaExpression lambda = keywordExpression as LambdaExpression;
-                if (lambda != null) return ParseLambdaInvocation(lambda);
+                //LambdaExpression lambda = keywordExpression as LambdaExpression;
+                //if (lambda != null) return ParseLambdaInvocation(lambda);
 
                 NextToken();
                 return keywordExpression;
@@ -605,8 +614,8 @@ namespace DynamicExpresso
             Expression parameterExpression;
             if (_parameters.TryGetValue(token.text, out parameterExpression))
             {
-                LambdaExpression lambda = parameterExpression as LambdaExpression;
-                if (lambda != null) return ParseLambdaInvocation(lambda);
+                //LambdaExpression lambda = parameterExpression as LambdaExpression;
+                //if (lambda != null) return ParseLambdaInvocation(lambda);
 
                 NextToken();
                 return parameterExpression;
@@ -683,15 +692,26 @@ namespace DynamicExpresso
             return Expression.MemberInit(Expression.New(constructor, args));
         }
 
-        Expression ParseLambdaInvocation(LambdaExpression lambda)
+        Expression ParseLambdaInvocation(LambdaExpression lambda, int errorPos)
         {
-            int errorPos = token.pos;
-            NextToken();
+            //int errorPos = token.pos;
+            //NextToken();
             Expression[] args = ParseArgumentList();
             MethodBase method;
             if (FindMethod(lambda.Type, "Invoke", false, args, out method) != 1)
                 throw ParseError(errorPos, ErrorMessages.ArgsIncompatibleWithLambda);
             return Expression.Invoke(lambda, args);
+        }
+
+        Expression ParseDelegateInvocation(Expression delegateExp, int errorPos)
+        {
+            //int errorPos = token.pos;
+            //NextToken();
+            Expression[] args = ParseArgumentList();
+            MethodBase method;
+            if (FindMethod(delegateExp.Type, "Invoke", false, args, out method) != 1)
+                throw ParseError(errorPos, ErrorMessages.ArgsIncompatibleWithLambda);
+            return Expression.Invoke(delegateExp, args);
         }
 
         Expression ParseTypeAccess(Type type)
@@ -754,39 +774,7 @@ namespace DynamicExpresso
             NextToken();
             if (token.id == TokenId.OpenParen)
             {
-                if (instance != null && type != typeof(string))
-                {
-                    Type enumerableType = FindGenericType(typeof(IEnumerable<>), type);
-                    if (enumerableType != null)
-                    {
-                        Type elementType = enumerableType.GetGenericArguments()[0];
-                        return ParseAggregate(instance, elementType, id, errorPos);
-                    }
-                }
-                Expression[] args = ParseArgumentList();
-
-                //Type[] argsType = args.Select(p => p.Type).ToArray();
-                //return Expression.Call(instance, id, argsType, args);
-
-                MethodBase mb;
-                switch (FindMethod(type, id, instance == null, args, out mb))
-                {
-                    case 0:
-                        throw ParseError(errorPos, ErrorMessages.NoApplicableMethod, id, GetTypeName(type));
-                    case 1:
-                        MethodInfo method = (MethodInfo)mb;
-                        //if (!IsPredefinedType(method.DeclaringType))
-                        //    throw ParseError(errorPos, Res.MethodsAreInaccessible, GetTypeName(method.DeclaringType));
-
-                        if (method.ReturnType == typeof(void))
-                        {
-                            throw ParseError(errorPos, ErrorMessages.MethodIsVoid, id, GetTypeName(method.DeclaringType));
-                        }
-
-                        return Expression.Call(instance, method, args);
-                    default:
-                        throw ParseError(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, GetTypeName(type));
-                }
+                return ParseMethodInvocation(type, instance, errorPos, id);
             }
             else
             {
@@ -797,6 +785,43 @@ namespace DynamicExpresso
                 return member is PropertyInfo ?
                     Expression.Property(instance, (PropertyInfo)member) :
                     Expression.Field(instance, (FieldInfo)member);
+            }
+        }
+
+        private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string id)
+        {
+            if (instance != null && type != typeof(string))
+            {
+                Type enumerableType = FindGenericType(typeof(IEnumerable<>), type);
+                if (enumerableType != null)
+                {
+                    Type elementType = enumerableType.GetGenericArguments()[0];
+                    return ParseAggregate(instance, elementType, id, errorPos);
+                }
+            }
+            Expression[] args = ParseArgumentList();
+
+            //Type[] argsType = args.Select(p => p.Type).ToArray();
+            //return Expression.Call(instance, id, argsType, args);
+
+            MethodBase mb;
+            switch (FindMethod(type, id, instance == null, args, out mb))
+            {
+                case 0:
+                    throw ParseError(errorPos, ErrorMessages.NoApplicableMethod, id, GetTypeName(type));
+                case 1:
+                    MethodInfo method = (MethodInfo)mb;
+                    //if (!IsPredefinedType(method.DeclaringType))
+                    //    throw ParseError(errorPos, Res.MethodsAreInaccessible, GetTypeName(method.DeclaringType));
+
+                    if (method.ReturnType == typeof(void))
+                    {
+                        throw ParseError(errorPos, ErrorMessages.MethodIsVoid, id, GetTypeName(method.DeclaringType));
+                    }
+
+                    return Expression.Call(instance, method, args);
+                default:
+                    throw ParseError(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, GetTypeName(type));
             }
         }
 

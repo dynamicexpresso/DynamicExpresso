@@ -35,7 +35,7 @@ namespace DynamicExpresso
             return this;
         }
 
-        public Function Parse(string expressionText, params FunctionParameter[] parameters)
+        public Function Parse(string expressionText, params FunctionParam[] parameters)
         {
             var arguments = (from p in parameters
                             select ParameterExpression.Parameter(p.Type, p.Name)).ToArray();
@@ -48,7 +48,7 @@ namespace DynamicExpresso
             return new Function(lambdaExp);
         }
 
-        public object Eval(string expressionText, params FunctionParameter[] parameters)
+        public object Eval(string expressionText, params FunctionParam[] parameters)
         {
             return Parse(expressionText, parameters).Invoke(parameters);
         }
