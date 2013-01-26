@@ -205,14 +205,13 @@ namespace DynamicExpresso.UnitTest
                             target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today.ToString())"));
         }
 
-        [Ignore]
         [TestMethod]
         public void Eval_string_format_With_Object_Params()
         {
             var target = new Interpreter();
 
             Assert.AreEqual(string.Format("ciao mondo, today is {0}", DateTime.Today),
-                            target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today))"));
+                            target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today)"));
         }
 
         [TestMethod]
@@ -349,7 +348,6 @@ namespace DynamicExpresso.UnitTest
             Assert.AreEqual(x.MethodWithNullableParam(y, null), target.Eval("x.MethodWithNullableParam(y, null)", parameters));
         }
 
-        [Ignore]
         [TestMethod]
         public void Call_method_with_generic_param()
         {
@@ -370,6 +368,11 @@ namespace DynamicExpresso.UnitTest
             Assert.AreEqual(x.MethodWithGenericParam(y), target.Eval("x.MethodWithGenericParam(y)", parameters));
             Assert.AreEqual(x.MethodWithGenericParam(z), target.Eval("x.MethodWithGenericParam(z)", parameters));
             Assert.AreEqual(x.MethodWithGenericParam(w), target.Eval("x.MethodWithGenericParam(w)", parameters));
+
+            Assert.AreEqual(x.MethodWithGenericParam(y, x), target.Eval("x.MethodWithGenericParam(y, x)", parameters));
+            Assert.AreEqual(x.MethodWithGenericParam(y, y), target.Eval("x.MethodWithGenericParam(y, y)", parameters));
+            Assert.AreEqual(x.MethodWithGenericParam(y, z), target.Eval("x.MethodWithGenericParam(y, z)", parameters));
+            Assert.AreEqual(x.MethodWithGenericParam(y, w), target.Eval("x.MethodWithGenericParam(y, w)", parameters));
         }
 
         [TestMethod]
@@ -393,7 +396,6 @@ namespace DynamicExpresso.UnitTest
             Assert.AreEqual(y.HasValue, target.Eval("y.HasValue", parameters));
         }
 
-        [Ignore]
         [TestMethod]
         public void Eval_delegates_parameters()
         {
@@ -585,6 +587,11 @@ namespace DynamicExpresso.UnitTest
         public string MethodWithGenericParam<T>(T p)
         {
             return string.Format("{0}", p);
+        }
+
+        public string MethodWithGenericParam<T>(string a, T p)
+        {
+            return string.Format("{0} {1}", a, p);
         }
 
         public static int MyStaticMethod()

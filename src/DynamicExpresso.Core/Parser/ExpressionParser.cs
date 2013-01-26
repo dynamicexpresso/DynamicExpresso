@@ -216,7 +216,6 @@ namespace DynamicExpresso
 
         public Expression Parse()
         {
-            int exprPos = token.pos;
             Expression expr = ParseConditional();
 
             ValidateToken(TokenId.End, ErrorMessages.SyntaxError);
@@ -1082,7 +1081,7 @@ namespace DynamicExpresso
         {
             MethodData[] applicable = methods.
                 Select(m => new MethodData { MethodBase = m, Parameters = m.GetParameters() }).
-                Where(m => IsApplicable(m, args)).
+                Where(m => CheckIfMethodIsApplicableAndPrepareIt(m, args)).
                 ToArray();
             if (applicable.Length > 1)
             {
@@ -1103,7 +1102,7 @@ namespace DynamicExpresso
             return applicable.Length;
         }
 
-        bool IsApplicable(MethodData method, Expression[] args)
+        bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
         {
             if (method.Parameters.Length != args.Length) 
                 return false;
@@ -1116,18 +1115,36 @@ namespace DynamicExpresso
                     return false;
 
                 Expression promoted;
-                //if (pi.ParameterType.IsGenericParameter)
-                //    promoted = args[i];
-                //else
-                //{
-                    promoted = PromoteExpression(args[i], pi.ParameterType, false);
+                if (pi.ParameterType.IsGenericParameter)
+                {
+                    promoted = args[i];
+                }
+                else
+                {
+                    promoted = PromoteExpression(args[i], pi.ParameterType, true);
                     if (promoted == null)
                         return false;
-                //}
+                }
 
                 promotedArgs[i] = promoted;
             }
             method.Args = promotedArgs;
+
+            if (method.MethodBase.IsGenericMethodDefinition &&
+                method.MethodBase is MethodInfo)
+            {
+                var methodInfo = ((MethodInfo)method.MethodBase);
+                var genericArgsType = new Type[methodInfo.GetGenericArguments().Length];
+                int genericArgsTypeIndex = 0;
+                for (int i = 0; i < method.Args.Length; i++)
+                {
+                    if (method.Parameters[i].ParameterType.IsGenericParameter)
+                        genericArgsType[genericArgsTypeIndex++] = method.Args[i].Type;
+                }
+
+                method.MethodBase = methodInfo.MakeGenericMethod(genericArgsType);
+            }
+
             return true;
         }
 
