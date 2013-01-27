@@ -24,6 +24,7 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 Usages and examples
 ===================
 
+TODO ContinuousPackager
 TODO Counter Catch (filter counters and transform values)
 TODO xrc (page declaration)
 TODO ZenoSetup (for setup commands)
@@ -59,13 +60,21 @@ This project is based on two past works:
 Other resources or similar projects
 ===================================
 
-- Roslyn Project - compilar as a services - http://msdn.microsoft.com/en-us/vstudio/roslyn.aspx
-	- If Roslyn will be available in the future this project can directly use the Roslyn compiler/interpreter.
+Below you can find a list of some similar projects that I have evaluated or that can be interesting to study. 
+For one reason or another none of these projects exactly fit my needs so I decided to write my own interpreter.
+
+- Roslyn Project - Compiler as a service - http://msdn.microsoft.com/en-us/vstudio/roslyn.aspx
+	- When Roslyn will be available this project can probably directly use the Roslyn compiler/interpreter.
+- Mono.CSharp - C# Compiler Service and Runtime Evaulator - http://docs.go-mono.com/index.aspx?link=N%3AMono.CSharp
+- C sharp Eval http://kamimucode.com/Home.aspx/C-sharp-Eval/1
+	- Very interesting but a little complex and no more updated
+- CSharp Eval http://csharp-eval.com/
 - Jint - Javascript interpreter for .NET - http://jint.codeplex.com/
 - Jurassic - Javascript compiler for .NET - http://jurassic.codeplex.com/
 - Javascrpt.net - javascript V8 engine - http://javascriptdotnet.codeplex.com/
 - CS-Script - http://www.csscript.net/
 - IronJS, IronRuby, IronPython
+- paxScript.NET http://eco148-88394.innterhost.net/paxscriptnet/
 
 
 License
