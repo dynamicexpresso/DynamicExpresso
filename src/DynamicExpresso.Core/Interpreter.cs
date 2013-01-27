@@ -35,6 +35,13 @@ namespace DynamicExpresso
             return this;
         }
 
+        public Interpreter Using(Type type, string typeName)
+        {
+            _settings.KnownTypes.Add(typeName, type);
+
+            return this;
+        }
+
         public Function Parse(string expressionText, params FunctionParam[] parameters)
         {
             var arguments = (from p in parameters

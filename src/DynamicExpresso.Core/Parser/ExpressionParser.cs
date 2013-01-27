@@ -584,6 +584,14 @@ namespace DynamicExpresso
             NextToken();
             Expression e = ParsePipelineInit();
             ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrOperatorExpected);
+
+            var constExp = e as ConstantExpression;
+            if (constExp != null && constExp.Value is Type)
+            {
+                NextToken();
+                e = Expression.Convert(ParsePipelineInit(), (Type)constExp.Value);
+            }
+
             NextToken();
             return e;
         }
@@ -727,27 +735,38 @@ namespace DynamicExpresso
                 type = typeof(Nullable<>).MakeGenericType(type);
                 NextToken();
             }
-            if (token.id == TokenId.OpenParen)
+
+            //if (token.id == TokenId.OpenParen)
+            //{
+            //    return ParseTypeConstructor(type, errorPos);
+            //}
+
+            if (token.id == TokenId.CloseParen)
             {
-                Expression[] args = ParseArgumentList();
-                MethodBase method;
-                switch (FindBestMethod(type.GetConstructors(), args, out method))
-                {
-                    case 0:
-                        if (args.Length == 1)
-                            return GenerateConversion(args[0], type, errorPos);
-                        throw ParseError(errorPos, ErrorMessages.NoMatchingConstructor, GetTypeName(type));
-                    case 1:
-                        return Expression.New((ConstructorInfo)method, args);
-                    default:
-                        throw ParseError(errorPos, ErrorMessages.AmbiguousConstructorInvocation, GetTypeName(type));
-                }
+                return Expression.Constant(type);
             }
 
             ValidateToken(TokenId.Dot, ErrorMessages.DotOrOpenParenExpected);
             NextToken();
             return ParseMemberAccess(type, null);
         }
+
+        //private Expression ParseTypeConstructor(Type type, int errorPos)
+        //{
+        //    Expression[] args = ParseArgumentList();
+        //    MethodBase method;
+        //    switch (FindBestMethod(type.GetConstructors(), args, out method))
+        //    {
+        //        case 0:
+        //            if (args.Length == 1)
+        //                return GenerateConversion(args[0], type, errorPos);
+        //            throw ParseError(errorPos, ErrorMessages.NoMatchingConstructor, GetTypeName(type));
+        //        case 1:
+        //            return Expression.New((ConstructorInfo)method, args);
+        //        default:
+        //            throw ParseError(errorPos, ErrorMessages.AmbiguousConstructorInvocation, GetTypeName(type));
+        //    }
+        //}
 
         Expression GenerateConversion(Expression expr, Type type, int errorPos)
         {

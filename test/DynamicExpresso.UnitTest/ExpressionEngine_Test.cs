@@ -209,6 +209,9 @@ namespace DynamicExpresso.UnitTest
             target.SetVariable("x", x);
 
             Assert.AreEqual((int)x, target.Eval("(int)x"));
+            Assert.AreEqual(typeof(int), target.Parse("(int)x").ReturnType);
+            Assert.AreEqual(typeof(object), target.Parse("(object)x").ReturnType);
+            Assert.AreEqual((double)84 + 9 * 8, target.Eval("(double)84 + 9 *8"));
         }
 
         [TestMethod]
@@ -539,6 +542,15 @@ namespace DynamicExpresso.UnitTest
 
         [TestMethod]
         [ExpectedException(typeof(ParseException))]
+        public void Constructor_invocation_without_new_is_not_supported()
+        {
+            var target = new Interpreter();
+
+            target.Parse("DateTime(2010, 5, 23)");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ParseException))]
         public void Unknown_New_Type_Is_Not_Supported()
         {
             var target = new Interpreter();
@@ -555,6 +567,25 @@ namespace DynamicExpresso.UnitTest
 
             Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
             Assert.AreEqual(MyTestService.MyStaticMethod(), target.Eval("MyTestService.MyStaticMethod()"));
+        }
+
+        [TestMethod]
+        public void Type_Constructor()
+        {
+            var target = new Interpreter()
+                            .Using(typeof(MyDataContract));
+
+            Assert.AreEqual(new MyDataContract("davide").Name, target.Eval("new MyDataContract(\"davide\").Name"));
+            Assert.AreEqual(new MyDataContract(44, 88).Name, target.Eval("new MyDataContract(44 , 88).Name"));
+        }
+
+        [TestMethod]
+        public void Type_Alias()
+        {
+            var target = new Interpreter()
+                            .Using(typeof(MyDataContract), "DC");
+
+            Assert.AreEqual(typeof(MyDataContract), target.Parse("new DC(\"davide\")").ReturnType);
         }
 
         [TestMethod]
@@ -660,6 +691,21 @@ namespace DynamicExpresso.UnitTest
         {
             get { return DateTime.Today.AddDays(i); }
         }
+    }
+
+    public class MyDataContract
+    {
+        public MyDataContract(string name)
+        {
+            Name = name;
+        }
+
+        public MyDataContract(int x, int y)
+        {
+            Name = string.Format("{0} - {1}", x, y);
+        }
+
+        public string Name { get; set; }
     }
 
     public class MyTestClass<T>

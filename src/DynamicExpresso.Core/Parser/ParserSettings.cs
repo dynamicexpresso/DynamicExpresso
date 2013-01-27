@@ -72,6 +72,7 @@ namespace DynamicExpresso
         {
             foreach (Type type in predefinedTypes)
                 knownTypes.Add(type.Name, type);
+            knownTypes.Add("object", typeof(object));
             knownTypes.Add("string", typeof(string));
             knownTypes.Add("char", typeof(char));
             knownTypes.Add("bool", typeof(bool));
