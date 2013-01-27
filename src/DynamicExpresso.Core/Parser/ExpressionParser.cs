@@ -216,10 +216,15 @@ namespace DynamicExpresso
 
         public Expression Parse()
         {
-            Expression expr = ParseConditional();
+            Expression expr = ParsePipelineInit();
 
             ValidateToken(TokenId.End, ErrorMessages.SyntaxError);
             return expr;
+        }
+
+        Expression ParsePipelineInit()
+        {
+            return ParseConditional();
         }
 
         // ?: operator
@@ -230,10 +235,10 @@ namespace DynamicExpresso
             if (token.id == TokenId.Question)
             {
                 NextToken();
-                Expression expr1 = ParseConditional();
+                Expression expr1 = ParsePipelineInit();
                 ValidateToken(TokenId.Colon, ErrorMessages.ColonExpected);
                 NextToken();
-                Expression expr2 = ParseConditional();
+                Expression expr2 = ParsePipelineInit();
                 expr = GenerateConditional(expr, expr1, expr2, errorPos);
             }
             return expr;
@@ -578,7 +583,7 @@ namespace DynamicExpresso
         {
             ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
             NextToken();
-            Expression e = ParseConditional();
+            Expression e = ParsePipelineInit();
             ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrOperatorExpected);
             NextToken();
             return e;
@@ -596,7 +601,7 @@ namespace DynamicExpresso
             Type knownType;
             if (_settings.KnownTypes.TryGetValue(token.text, out knownType))
             {
-                return ParseTypeAccess(knownType);
+                return ParseTypeKeyword(knownType);
             }
 
             Expression keywordExpression;
@@ -712,7 +717,7 @@ namespace DynamicExpresso
             return Expression.Invoke(delegateExp, args);
         }
 
-        Expression ParseTypeAccess(Type type)
+        Expression ParseTypeKeyword(Type type)
         {
             int errorPos = token.pos;
             NextToken();
@@ -739,6 +744,7 @@ namespace DynamicExpresso
                         throw ParseError(errorPos, ErrorMessages.AmbiguousConstructorInvocation, GetTypeName(type));
                 }
             }
+
             ValidateToken(TokenId.Dot, ErrorMessages.DotOrOpenParenExpected);
             NextToken();
             return ParseMemberAccess(type, null);
@@ -886,7 +892,7 @@ namespace DynamicExpresso
             List<Expression> argList = new List<Expression>();
             while (true)
             {
-                argList.Add(ParseConditional());
+                argList.Add(ParsePipelineInit());
                 if (token.id != TokenId.Comma) break;
                 NextToken();
             }

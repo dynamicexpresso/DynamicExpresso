@@ -200,7 +200,6 @@ namespace DynamicExpresso.UnitTest
             Assert.AreEqual(Convert.ToInt16("23"), target.Eval("Convert.ToInt16(\"23\")"));
         }
 
-        [Ignore]
         [TestMethod]
         public void Cast()
         {
