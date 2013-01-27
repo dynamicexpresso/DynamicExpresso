@@ -138,42 +138,42 @@ namespace DynamicExpresso
             void F(bool? x);
         }
 
-        interface IEnumerableSignatures
-        {
-            void Where(bool predicate);
-            void Any();
-            void Any(bool predicate);
-            void All(bool predicate);
-            void Count();
-            void Count(bool predicate);
-            void Min(object selector);
-            void Max(object selector);
-            void Sum(int selector);
-            void Sum(int? selector);
-            void Sum(long selector);
-            void Sum(long? selector);
-            void Sum(float selector);
-            void Sum(float? selector);
-            void Sum(double selector);
-            void Sum(double? selector);
-            void Sum(decimal selector);
-            void Sum(decimal? selector);
-            void Average(int selector);
-            void Average(int? selector);
-            void Average(long selector);
-            void Average(long? selector);
-            void Average(float selector);
-            void Average(float? selector);
-            void Average(double selector);
-            void Average(double? selector);
-            void Average(decimal selector);
-            void Average(decimal? selector);
-        }
+        //interface IEnumerableSignatures
+        //{
+        //    void Where(bool predicate);
+        //    void Any();
+        //    void Any(bool predicate);
+        //    void All(bool predicate);
+        //    void Count();
+        //    void Count(bool predicate);
+        //    void Min(object selector);
+        //    void Max(object selector);
+        //    void Sum(int selector);
+        //    void Sum(int? selector);
+        //    void Sum(long selector);
+        //    void Sum(long? selector);
+        //    void Sum(float selector);
+        //    void Sum(float? selector);
+        //    void Sum(double selector);
+        //    void Sum(double? selector);
+        //    void Sum(decimal selector);
+        //    void Sum(decimal? selector);
+        //    void Average(int selector);
+        //    void Average(int? selector);
+        //    void Average(long selector);
+        //    void Average(long? selector);
+        //    void Average(float selector);
+        //    void Average(float? selector);
+        //    void Average(double selector);
+        //    void Average(double? selector);
+        //    void Average(decimal selector);
+        //    void Average(decimal? selector);
+        //}
 
         ParserSettings _settings;
 
         Dictionary<string, Expression> _parameters;
-        Dictionary<Expression, string> _literals;
+        //Dictionary<Expression, string> _literals;
 
         //ParameterExpression it;
 
@@ -188,7 +188,7 @@ namespace DynamicExpresso
             _settings = settings;
 
             _parameters = new Dictionary<string, Expression>();
-            _literals = new Dictionary<Expression, string>();
+            //_literals = new Dictionary<Expression, string>();
 
             ProcessParameters(parameters);
 
@@ -570,7 +570,7 @@ namespace DynamicExpresso
         Expression CreateLiteral(object value, string text)
         {
             ConstantExpression expr = Expression.Constant(value);
-            _literals.Add(expr, text);
+            //_literals.Add(expr, text);
             return expr;
         }
 
@@ -1182,32 +1182,32 @@ namespace DynamicExpresso
                     if (!type.IsValueType || IsNullableType(type))
                         return Expression.Constant(null, type);
                 }
-                else
-                {
-                    string text;
-                    if (_literals.TryGetValue(ce, out text))
-                    {
-                        Type target = GetNonNullableType(type);
-                        Object value = null;
-                        switch (Type.GetTypeCode(ce.Type))
-                        {
-                            case TypeCode.Int32:
-                            case TypeCode.UInt32:
-                            case TypeCode.Int64:
-                            case TypeCode.UInt64:
-                                value = ParseNumber(text, target);
-                                break;
-                            case TypeCode.Double:
-                                if (target == typeof(decimal)) value = ParseNumber(text, target);
-                                break;
-                            case TypeCode.String:
-                                value = ParseEnum(text, target);
-                                break;
-                        }
-                        if (value != null)
-                            return Expression.Constant(value, type);
-                    }
-                }
+                //else
+                //{
+                //    string text;
+                //    if (_literals.TryGetValue(ce, out text))
+                //    {
+                //        Type target = GetNonNullableType(type);
+                //        Object value = null;
+                //        switch (Type.GetTypeCode(ce.Type))
+                //        {
+                //            case TypeCode.Int32:
+                //            case TypeCode.UInt32:
+                //            case TypeCode.Int64:
+                //            case TypeCode.UInt64:
+                //                value = ParseNumber(text, target);
+                //                break;
+                //            case TypeCode.Double:
+                //                if (target == typeof(decimal)) value = ParseNumber(text, target);
+                //                break;
+                //            case TypeCode.String:
+                //                value = ParseEnum(text, target);
+                //                break;
+                //        }
+                //        if (value != null)
+                //            return Expression.Constant(value, type);
+                //    }
+                //}
             }
             if (IsCompatibleWith(expr.Type, type))
             {
