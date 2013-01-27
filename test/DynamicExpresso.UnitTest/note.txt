@@ -1,0 +1,7 @@
+﻿Missing tests
+--------------
+- exception during parse or eval
+- throw
+- is operator
+- performance test (memory/cpu/threads/handles)
+- difference between externals and keywords of the ParserSettings?

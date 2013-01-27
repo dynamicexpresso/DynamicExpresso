@@ -19,6 +19,8 @@ namespace DynamicExpresso
         public const string InvalidRealLiteral = "Invalid real literal '{0}'";
         public const string UnknownIdentifier = "Unknown identifier '{0}'";
         public const string NoItInScope = "No 'it' is in scope";
+        public const string TypeofRequiresAType = "The 'typeof' keyword requires a type as an argument";
+        public const string TypeofRequiresOneArg = "The 'typeof' keyword requires 1 argument";
         public const string IifRequiresThreeArgs = "The 'iif' function requires three arguments";
         public const string FirstExprMustBeBool = "The first expression must be of type 'Boolean'";
         public const string BothTypesConvertToOther = "Both of the types '{0}' and '{1}' convert to the other";

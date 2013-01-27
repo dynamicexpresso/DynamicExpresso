@@ -53,7 +53,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ExpressionEngine_Test.cs" />
+    <Compile Include="TypesTest.cs" />
+    <Compile Include="LiteralsTest.cs" />
+    <Compile Include="OtherTests.cs" />
+    <Compile Include="ConstructorTest.cs" />
+    <Compile Include="OperatorsTest.cs" />
+    <Compile Include="StaticTest.cs" />
+    <Compile Include="ParametersTest.cs" />
+    <Compile Include="VariablesTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
@@ -63,6 +70,9 @@
       <Project>{c6b7c0d2-b84a-4307-9c61-d95613db564d}</Project>
       <Name>DynamicExpresso.Core</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="note.txt" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

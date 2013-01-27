@@ -13,5 +13,6 @@ namespace DynamicExpresso
 
         public const string keywordIt = "it";
         public const string keywordNew = "new";
+        public const string keywordTypeof = "typeof";
     }
 }

@@ -604,6 +604,8 @@ namespace DynamicExpresso
             //    return ParseIt();
             if (token.text == ParserConstants.keywordNew)
                 return ParseNew();
+            if (token.text == ParserConstants.keywordTypeof)
+                return ParseTypeof();
 
             Type knownType;
             if (_settings.KnownTypes.TryGetValue(token.text, out knownType))
@@ -654,6 +656,20 @@ namespace DynamicExpresso
         //        throw ParseError(errorPos, ErrorMessages.IifRequiresThreeArgs);
         //    return GenerateConditional(args[0], args[1], args[2], errorPos);
         //}
+
+        Expression ParseTypeof()
+        {
+            int errorPos = token.pos;
+            NextToken();
+            Expression[] args = ParseArgumentList();
+            if (args.Length != 1)
+                throw ParseError(errorPos, ErrorMessages.TypeofRequiresOneArg);
+            var constExp = args[0] as ConstantExpression;
+            if (!(constExp.Type is Type))
+                throw ParseError(errorPos, ErrorMessages.TypeofRequiresAType);
+
+            return constExp;
+        }
 
         Expression GenerateConditional(Expression test, Expression expr1, Expression expr2, int errorPos)
         {
