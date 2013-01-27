@@ -384,12 +384,12 @@ namespace DynamicExpresso
             return left;
         }
 
-        // *, /, %, mod operators
+        // *, /, % operators
         Expression ParseMultiplicative()
         {
             Expression left = ParseUnary();
             while (token.id == TokenId.Asterisk || token.id == TokenId.Slash ||
-                token.id == TokenId.Percent || TokenIdentifierIs("mod"))
+                token.id == TokenId.Percent)
             {
                 Token op = token;
                 NextToken();
@@ -404,7 +404,6 @@ namespace DynamicExpresso
                         left = Expression.Divide(left, right);
                         break;
                     case TokenId.Percent:
-                    case TokenId.Identifier:
                         left = Expression.Modulo(left, right);
                         break;
                 }
