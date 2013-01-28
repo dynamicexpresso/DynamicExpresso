@@ -192,7 +192,7 @@ namespace DynamicExpresso
 
             ProcessParameters(parameters);
 
-            text = expression;
+            text = expression ?? string.Empty;
             textLen = text.Length;
             SetTextPos(0);
             NextToken();
@@ -518,6 +518,8 @@ namespace DynamicExpresso
                     return ParseRealLiteral();
                 case TokenId.OpenParen:
                     return ParseParenExpression();
+                case TokenId.End:
+                    return Expression.Empty();
                 default:
                     throw ParseError(ErrorMessages.ExpressionExpected);
             }
@@ -881,13 +883,14 @@ namespace DynamicExpresso
                     throw ParseError(errorPos, ErrorMessages.NoApplicableMethod, id, GetTypeName(type));
                 case 1:
                     MethodInfo method = (MethodInfo)mb;
+
                     //if (!IsPredefinedType(method.DeclaringType))
                     //    throw ParseError(errorPos, Res.MethodsAreInaccessible, GetTypeName(method.DeclaringType));
 
-                    if (method.ReturnType == typeof(void))
-                    {
-                        throw ParseError(errorPos, ErrorMessages.MethodIsVoid, id, GetTypeName(method.DeclaringType));
-                    }
+                    //if (method.ReturnType == typeof(void))
+                    //{
+                    //    throw ParseError(errorPos, ErrorMessages.MethodIsVoid, id, GetTypeName(method.DeclaringType));
+                    //}
 
                     return Expression.Call(instance, method, args);
                 default:

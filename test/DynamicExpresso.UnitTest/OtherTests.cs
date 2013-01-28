@@ -16,6 +16,21 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
+        public void Empty_Null_Withespace_Expression()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual(null, target.Eval(""));
+            Assert.AreEqual(typeof(void), target.Parse("").ReturnType);
+
+            Assert.AreEqual(null, target.Eval(null));
+            Assert.AreEqual(typeof(void), target.Parse(null).ReturnType);
+
+            Assert.AreEqual(null, target.Eval("  \t\t\r\n  \t   "));
+            Assert.AreEqual(typeof(void), target.Parse("  \t\t\r\n  \t   ").ReturnType);
+        }
+
+        [TestMethod]
         public void Cast()
         {
             var target = new Interpreter();
@@ -78,6 +93,20 @@ namespace DynamicExpresso.UnitTest
             Assert.AreEqual(x.APROPERTY, target.Eval("x.APROPERTY", parameters));
             Assert.AreEqual(x.AField, target.Eval("x.AField", parameters));
             Assert.AreEqual(x.AFIELD, target.Eval("x.AFIELD", parameters));
+        }
+
+        [TestMethod]
+        public void Void_Method()
+        {
+            var service = new MyTestService();
+            var target = new Interpreter()
+                            .SetVariable("service", service);
+
+            Assert.AreEqual(0, service.VoidMethodCalled);
+            target.Eval("service.VoidMethod()");
+            Assert.AreEqual(1, service.VoidMethodCalled);
+
+            Assert.AreEqual(typeof(void), target.Parse("service.VoidMethod()").ReturnType);
         }
 
         [TestMethod]
@@ -145,6 +174,31 @@ namespace DynamicExpresso.UnitTest
             Assert.AreEqual(x.AProperty * (4 + 65) / x.AProperty, target.Eval("x.AProperty * (4 + 65) / x.AProperty", parameters));
 
             Assert.AreEqual(Convert.ToString(x.AProperty * (4 + 65) / x.AProperty), target.Eval("Convert.ToString(x.AProperty * (4 + 65) / x.AProperty)", parameters));
+        }
+
+        [TestMethod]
+        public void Parse_An_Expression_And_Invoke_It_With_Different_Parameters()
+        {
+            var service = new MyTestService();
+
+            var target = new Interpreter()
+                                .SetVariable("service", service);
+
+            var func = target.Parse("x > 4 ? service.VoidMethod() : service.VoidMethod2()", 
+                                    new FunctionParam("x", typeof(int)));
+
+            Assert.AreEqual(typeof(void), func.ReturnType);
+
+            Assert.AreEqual(0, service.VoidMethodCalled);
+            Assert.AreEqual(0, service.VoidMethod2Called);
+
+            func.Invoke(new FunctionParam("x", 5));
+            Assert.AreEqual(1, service.VoidMethodCalled);
+            Assert.AreEqual(0, service.VoidMethod2Called);
+
+            func.Invoke(new FunctionParam("x", 2));
+            Assert.AreEqual(1, service.VoidMethodCalled);
+            Assert.AreEqual(1, service.VoidMethod2Called);
         }
 
         [TestMethod]
@@ -269,9 +323,18 @@ namespace DynamicExpresso.UnitTest
                 return "HELLO";
             }
 
-            public string CallMethod(string param1, int param2, DateTime param3)
+            public int VoidMethodCalled { get; set; }
+            public void VoidMethod()
             {
-                return string.Format("{0} {1} {2}", param1, param2, param3);
+                System.Diagnostics.Debug.WriteLine("VoidMethod called");
+                VoidMethodCalled++;
+            }
+
+            public int VoidMethod2Called { get; set; }
+            public void VoidMethod2()
+            {
+                System.Diagnostics.Debug.WriteLine("VoidMethod2 called");
+                VoidMethod2Called++;
             }
 
             public string MethodWithNullableParam(string param1, int? param2)
