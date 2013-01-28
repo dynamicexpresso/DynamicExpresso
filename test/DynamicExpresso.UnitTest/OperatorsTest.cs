@@ -37,6 +37,36 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
+        public void Is_Operator()
+        {
+            object a = "string value";
+            object b = 64;
+            var target = new Interpreter()
+                                .SetVariable("a", a, typeof(object))
+                                .SetVariable("b", b, typeof(object));
+
+            Assert.AreEqual(a is string, target.Eval("a is string"));
+            Assert.AreEqual(typeof(bool), target.Parse("a is string").ReturnType);
+            Assert.AreEqual(b is string, target.Eval("b is string"));
+            Assert.AreEqual(b is int, target.Eval("b is int"));
+        }
+
+        [TestMethod]
+        public void As_Operator()
+        {
+            object a = "string value";
+            object b = 64;
+            var target = new Interpreter()
+                                .SetVariable("a", a, typeof(object))
+                                .SetVariable("b", b, typeof(object));
+
+            Assert.AreEqual(a as string, target.Eval("a as string"));
+            Assert.AreEqual(typeof(string), target.Parse("a as string").ReturnType);
+            Assert.AreEqual(b as string, target.Eval("b as string"));
+            Assert.AreEqual(typeof(string), target.Parse("b as string").ReturnType);
+        }
+
+        [TestMethod]
         public void Type_Operators()
         {
             var target = new Interpreter();

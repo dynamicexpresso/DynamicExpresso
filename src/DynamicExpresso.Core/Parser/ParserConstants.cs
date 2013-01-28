@@ -11,7 +11,8 @@ namespace DynamicExpresso
     {
         public static readonly Expression nullLiteral = Expression.Constant(null);
 
-        public const string keywordIt = "it";
+        public const string keywordAs = "as";
+        public const string keywordIs = "is";
         public const string keywordNew = "new";
         public const string keywordTypeof = "typeof";
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq.Expressions;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -171,8 +172,50 @@ namespace DynamicExpresso.UnitTest
             target.Parse("unkkeyword");
         }
 
+        [ExpectedException(typeof(InvalidOperationException))]
         [TestMethod]
-        public void Should_be_possible_to_execute_the_same_function_multiple_times()
+        public void SystemExceptions_are_preserved_using_delegate_variable()
+        {
+            var target = new Interpreter();
+
+            Func<string> testException = new Func<string>(() =>
+            {
+                throw new InvalidOperationException("Test");
+            });
+
+            target.SetVariable("testException", testException);
+
+            target.Eval("testException()");
+        }
+
+        [ExpectedException(typeof(MyException))]
+        [TestMethod]
+        public void CustomExceptions_WithoutSerializationConstructor_are_preserved()
+        {
+            var target = new Interpreter();
+
+            Func<string> testException = new Func<string>(() =>
+            {
+                throw new MyException("Test");
+            });
+
+            target.SetVariable("testException", testException);
+
+            target.Eval("testException()");
+        }
+
+        [ExpectedException(typeof(NotImplementedException))]
+        [TestMethod]
+        public void SystemExceptions_are_preserved_using_method_invocation()
+        {
+            var target = new Interpreter();
+            target.SetVariable("a", new MyTestService());
+
+            target.Eval("a.ThrowException()");
+        }
+
+        [TestMethod]
+        public void Execute_the_same_function_multiple_times()
         {
             var target = new Interpreter();
 
@@ -191,6 +234,10 @@ namespace DynamicExpresso.UnitTest
                                                                 new FunctionParam("y", 3.0)));
         }
 
+        public class MyException : Exception
+        {
+            public MyException(string message) : base(message) { }
+        }
 
         class MyTestService
         {
@@ -205,6 +252,11 @@ namespace DynamicExpresso.UnitTest
             public int APROPERTY
             {
                 get { return 887; }
+            }
+
+            public string ThrowException()
+            {
+                throw new NotImplementedException("AppException");
             }
 
             public string HelloWorld()

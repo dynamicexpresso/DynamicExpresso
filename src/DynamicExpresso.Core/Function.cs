@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace DynamicExpresso
@@ -50,7 +51,20 @@ namespace DynamicExpresso
 
         public object Invoke(params object[] args)
         {
-            return _lambdaExpression.Compile().DynamicInvoke(args);
+            try
+            {
+                return _lambdaExpression.Compile().DynamicInvoke(args);
+            }
+            catch (TargetInvocationException exc)
+            {
+                if (exc.InnerException != null)
+                {
+                    exc.InnerException.PreserveStackTrace();
+                    throw exc.InnerException;
+                }
+                else
+                    throw;
+            }
         }
 
         public override string ToString()

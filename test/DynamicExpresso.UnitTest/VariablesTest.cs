@@ -14,6 +14,29 @@ namespace DynamicExpresso.UnitTest
                             .SetVariable("myk", 23);
 
             Assert.AreEqual(23, target.Eval("myk"));
+            Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
+        }
+
+        [TestMethod]
+        public void Null_Variables()
+        {
+            var target = new Interpreter()
+                            .SetVariable("myk", null);
+
+            Assert.AreEqual(null, target.Eval("myk"));
+            Assert.AreEqual(true, target.Eval("myk == null"));
+            Assert.AreEqual(typeof(object), target.Parse("myk").ReturnType);
+        }
+
+        [TestMethod]
+        public void Null_Variables_With_Type_Specified()
+        {
+            var target = new Interpreter()
+                            .SetVariable("myk", null, typeof(string));
+
+            Assert.AreEqual(null, target.Eval("myk"));
+            Assert.AreEqual(true, target.Eval("myk == null"));
+            Assert.AreEqual(typeof(string), target.Parse("myk").ReturnType);
         }
 
         [TestMethod]

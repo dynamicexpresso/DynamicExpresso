@@ -224,6 +224,9 @@ namespace DynamicExpresso
 
         Expression ParsePipelineInit()
         {
+            // The following methods respect the operator precedence as defined in
+            // http://msdn.microsoft.com/en-us/library/aa691323(v=vs.71).aspx
+
             return ParseConditional();
         }
 
@@ -277,7 +280,7 @@ namespace DynamicExpresso
         // ==, !=, >, >=, <, <= operators
         Expression ParseComparison()
         {
-            Expression left = ParseAdditive();
+            Expression left = ParseTypeTesting();
             while (token.id == TokenId.DoubleEqual ||token.id == TokenId.ExclamationEqual  ||
                 token.id == TokenId.GreaterThan || token.id == TokenId.GreaterThanEqual ||
                 token.id == TokenId.LessThan || token.id == TokenId.LessThanEqual)
@@ -350,6 +353,35 @@ namespace DynamicExpresso
                         break;
                 }
             }
+            return left;
+        }
+
+        // is, as operators
+        Expression ParseTypeTesting()
+        {
+            Expression left = ParseAdditive();
+            while (token.text == ParserConstants.keywordIs
+                || token.text == ParserConstants.keywordAs)
+            {
+                var typeOperator = token.text;
+                
+                Token op = token;
+                NextToken();
+
+                Type knownType;
+                if (!_settings.KnownTypes.TryGetValue(token.text, out knownType))
+                    throw ParseError(op.pos, ErrorMessages.TypeIdentifierExpected);
+
+                if (typeOperator == ParserConstants.keywordIs)
+                    left = Expression.TypeIs(left, knownType);
+                else if (typeOperator == ParserConstants.keywordAs)
+                    left = Expression.TypeAs(left, knownType);
+                else
+                    throw ParseError(ErrorMessages.SyntaxError);
+
+                NextToken();
+            }
+
             return left;
         }
 

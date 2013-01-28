@@ -58,5 +58,6 @@ namespace DynamicExpresso
         public const string OpenBracketExpected = "'[' expected";
         public const string CloseBracketOrCommaExpected = "']' or ',' expected";
         public const string IdentifierExpected = "Identifier expected";
+        public const string TypeIdentifierExpected = "Type identifier expected";
     }
 }

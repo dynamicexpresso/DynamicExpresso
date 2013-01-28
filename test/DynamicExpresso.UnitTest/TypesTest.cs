@@ -13,7 +13,7 @@ namespace DynamicExpresso.UnitTest
         {
             var target = new Interpreter();
 
-            Dictionary<string, Type> predefinedTypes = new Dictionary<string, Type>{
+            var predefinedTypes = new Dictionary<string, Type>{
                     {"Object", typeof(Object)},
                     {"object", typeof(Object)},
                     {"Boolean", typeof(Boolean)},

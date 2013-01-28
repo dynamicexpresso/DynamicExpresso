@@ -10,19 +10,31 @@ namespace DynamicExpresso
     {
         ParserSettings _settings = new ParserSettings();
 
-        public Interpreter()
-        {
-        }
-
         public Interpreter SetVariable(string name, object value)
         {
-            _settings.Keywords.Add(name, Expression.Constant(value));
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException("name");
 
-            return this;
+            return SetExpression(name, Expression.Constant(value));
+        }
+
+        public Interpreter SetVariable(string name, object value, Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException("name");
+
+            return SetExpression(name, Expression.Constant(value, type));
         }
 
         public Interpreter SetExpression(string name, Expression expression)
         {
+            if (expression == null)
+                throw new ArgumentNullException("expression");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException("name");
+
             _settings.Keywords.Add(name, expression);
 
             return this;
@@ -30,13 +42,19 @@ namespace DynamicExpresso
 
         public Interpreter Using(Type type)
         {
-            _settings.KnownTypes.Add(type.Name, type);
+            if (type == null)
+                throw new ArgumentNullException("type");
 
-            return this;
+            return Using(type, type.Name);
         }
 
         public Interpreter Using(Type type, string typeName)
         {
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (string.IsNullOrWhiteSpace(typeName))
+                throw new ArgumentNullException("typeName");
+
             _settings.KnownTypes.Add(typeName, type);
 
             return this;
