@@ -1,7 +1,4 @@
 ﻿Missing tests
 --------------
-- empty/null expression
-- void expression
 - throw
-- performance test (memory/cpu/threads/handles)
-- difference between externals and keywords of the ParserSettings?
+- performance test (memory/cpu/threads/handles)?

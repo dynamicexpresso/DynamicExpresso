@@ -1,5 +1,5 @@
 ﻿
-Dynamic Expresso (v. 0.1)
+Dynamic Expresso (v. 0.3 Alpha)
 ----------------
 
 Dynamic Expresso is a expression interpreter for simple C# statements. 
@@ -9,7 +9,34 @@ It doesn't generate assembly but it creates dynamic expression/delegate on the f
 Using Dynamic Expresso developers can create scriptable applications and execute .NET code without compilation. 
 Statements are written using a subset of C# language specifications.
 
-TODO Some examples of supported expressions:
+Here an example of what you can do:
+
+	var interpreter = new Interpreter();
+	var result = interpreter.Eval("8 / 2 + 2");
+
+or another more complex scenario:
+
+	var service = new ServiceExample();
+    var interpreter = new Interpreter()
+                        .SetVariable("service", service);
+	
+	string expression = "x > 4 ? service.SomeMethod() : service.AnotherMethod()";
+    var myExpr = interpreter.Parse(expression, 
+                            new FunctionParam("x", typeof(int)));
+
+    myExpr.Invoke(new FunctionParam("x", 5));
+
+Features
+========
+
+TODO
+
+- Supported operators and constructors
+- Unit tests
+- Performance
+- Small footprint
+- Easy to use
+- 100 % managed code
 
 
 Quick start
@@ -24,28 +51,25 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 Usages and examples
 ===================
 
-TODO ContinuousPackager
-TODO Counter Catch (filter counters and transform values)
-TODO xrc (page declaration)
-TODO ZenoSetup (for setup commands)
-TODO Application console (for diagnostic or advanced features) (desktop/web)
-TODO Linq dynamic where / filter api
+TODO
 
-Configurations
-==============
-
-
-Features
-========
-
-- Supported operators and constructors
-- Unit tests
-- Performance
-- Small footprint
-- Easy to use
-- 100 % managed code
+- ContinuousPackager
+- Counter Catch (filter counters and transform values)
+- xrc (page declaration)
+- ZenoSetup (for setup commands)
+- Application console (for diagnostic or advanced features) (desktop/web)
+- Linq dynamic where / filter api
 
 
+Extensibility
+=============
+
+TODO (variables, keywords, types)
+
+Performance consideration
+=============
+
+TODO Performance, multithreading
 
 History
 =======
@@ -67,8 +91,9 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- When Roslyn will be available this project can probably directly use the Roslyn compiler/interpreter.
 - Mono.CSharp - C# Compiler Service and Runtime Evaulator - http://docs.go-mono.com/index.aspx?link=N%3AMono.CSharp
 - C sharp Eval http://kamimucode.com/Home.aspx/C-sharp-Eval/1
-	- Very interesting but a little complex and no more updated
+	- Interesting but a little complex and no more updated
 - CSharp Eval http://csharp-eval.com/
+- C# Expression Evaluator http://csharpeval.codeplex.com/
 - Jint - Javascript interpreter for .NET - http://jint.codeplex.com/
 - Jurassic - Javascript compiler for .NET - http://jurassic.codeplex.com/
 - Javascrpt.net - javascript V8 engine - http://javascriptdotnet.codeplex.com/
