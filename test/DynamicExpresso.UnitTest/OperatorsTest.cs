@@ -7,16 +7,33 @@ namespace DynamicExpresso.UnitTest
     public class OperatorsTest
     {
         [TestMethod]
-        public void Numeric_Operators()
+        public void Multiplicative_Operators()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual(2 * 4, target.Eval("2 * 4"));
+            Assert.AreEqual(8 / 2, target.Eval("8 / 2"));
+            Assert.AreEqual(7 % 3, target.Eval("7 % 3"));
+        }
+
+        [TestMethod]
+        public void Additive_Operators()
         {
             var target = new Interpreter();
 
             Assert.AreEqual(45 + 5, target.Eval("45 + 5"));
             Assert.AreEqual(45 - 5, target.Eval("45 - 5"));
             Assert.AreEqual(1.0 - 0.5, target.Eval("1.0 - 0.5"));
-            Assert.AreEqual(2 * 4, target.Eval("2 * 4"));
-            Assert.AreEqual(8 / 2, target.Eval("8 / 2"));
-            Assert.AreEqual(7 % 3, target.Eval("7 % 3"));
+        }
+
+        [TestMethod]
+        public void Unary_Operators()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual(-45, target.Eval("-45"));
+            Assert.AreEqual(5, target.Eval("+5"));
+            Assert.AreEqual(false, target.Eval("!true"));
         }
 
         [TestMethod]
@@ -90,6 +107,9 @@ namespace DynamicExpresso.UnitTest
 
             Assert.AreEqual(8 / (2 + 2), target.Eval("8 / (2 + 2)"));
             Assert.AreEqual(58 / (2 * (8 + 2)), target.Eval(" 58 / (2 * (8 + 2))"));
+
+            Assert.AreEqual(-(8 / (2 + 2)), target.Eval("-(8 / (2 + 2))"));
+            Assert.AreEqual(+(8 / (2 + 2)), target.Eval("+(8 / (2 + 2))"));
         }
 
         [TestMethod]

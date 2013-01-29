@@ -19,7 +19,7 @@ namespace DynamicExpresso
     internal class ExpressionParser
     {
         const NumberStyles ParseLiteralNumberStyle = NumberStyles.AllowLeadingSign;
-        const NumberStyles ParseLiteralUnsignedNumberStyle = NumberStyles.None;
+        const NumberStyles ParseLiteralUnsignedNumberStyle = NumberStyles.AllowLeadingSign;
         const NumberStyles ParseLiteralDecimalNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
         static CultureInfo ParseCulture = CultureInfo.InvariantCulture;
 
@@ -443,19 +443,28 @@ namespace DynamicExpresso
             return left;
         }
 
-        // -, ! unary operators
+        // +,-, ! unary operators
         Expression ParseUnary()
         {
-            if (token.id == TokenId.Minus || token.id == TokenId.Exclamation)
+            if (token.id == TokenId.Minus || token.id == TokenId.Exclamation || token.id == TokenId.Plus)
             {
                 Token op = token;
                 NextToken();
-                if (op.id == TokenId.Minus && (token.id == TokenId.IntegerLiteral ||
-                    token.id == TokenId.RealLiteral))
+                if (token.id == TokenId.IntegerLiteral ||
+                    token.id == TokenId.RealLiteral)
                 {
-                    token.text = "-" + token.text;
-                    token.pos = op.pos;
-                    return ParsePrimary();
+                    if (op.id == TokenId.Minus)
+                    {
+                        token.text = "-" + token.text;
+                        token.pos = op.pos;
+                        return ParsePrimary();
+                    }
+                    else if (op.id == TokenId.Plus)
+                    {
+                        token.text = "+" + token.text;
+                        token.pos = op.pos;
+                        return ParsePrimary();
+                    }
                 }
                 Expression expr = ParseUnary();
                 if (op.id == TokenId.Minus)
@@ -463,7 +472,11 @@ namespace DynamicExpresso
                     CheckAndPromoteOperand(typeof(INegationSignatures), op.text, ref expr, op.pos);
                     expr = Expression.Negate(expr);
                 }
-                else
+                else if (op.id == TokenId.Plus)
+                {
+
+                }
+                else if (op.id == TokenId.Exclamation)
                 {
                     CheckAndPromoteOperand(typeof(INotSignatures), op.text, ref expr, op.pos);
                     expr = Expression.Not(expr);

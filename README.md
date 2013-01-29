@@ -1,9 +1,9 @@
 ﻿
-Dynamic Expresso (v. 0.3 Alpha)
+Dynamic Expresso (v. 0.4 Alpha)
 ----------------
 
-Dynamic Expresso is a expression interpreter for simple C# statements. 
-Dynamic Expresso embeds it's own parsing logic, and really interprets the statements by converting it to .NET delegates that can be invoked. 
+Dynamic Expresso is an expression interpreter for simple C# statements.
+Dynamic Expresso embeds it's own parsing logic, and really interprets the statements by converting it to .NET LambdaExpression that can be invoked as any standard delegate.
 It doesn't generate assembly but it creates dynamic expression/delegate on the fly. 
 
 Using Dynamic Expresso developers can create scriptable applications and execute .NET code without compilation. 
@@ -26,19 +26,6 @@ or another more complex scenario:
 
     myExpr.Invoke(new FunctionParam("x", 5));
 
-Features
-========
-
-TODO
-
-- Supported operators and constructors
-- Unit tests
-- Performance
-- Small footprint
-- Easy to use
-- 100 % managed code
-
-
 Quick start
 ===========
 
@@ -47,6 +34,50 @@ Dynamic Expresso is available on [NuGet]. You can install the package using:
 	PM> Install-Package DynamicExpresso.Core
 
 Source code and symbols (.pdb files) for debugging are available on [Symbol Source].
+
+
+Features
+=============
+
+- Expressions can be written using a subset of C# syntax (see Syntax section for more information)
+- Full suite of unit tests
+- Good performance compared to other similar projects
+- Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
+- Easy to use and deploy, it is all contained in a single assembly without other external dependencies
+- 100 % managed code written in C# 4.0
+- Open source (MIT license)
+
+### Return value
+
+You can parse and execute void expression (without a return value) or you can return any valid .NET type. 
+The built-in parser can understand the return type of any given expression so you can check if the expression returns what you expect.
+
+### Variables
+
+Variables can be used inside your expressions using the `SetVariable` method:
+
+	var target = new Interpreter()
+                    .SetVariable("myVar", 23);
+
+    Assert.AreEqual(23, target.Eval("myVar"));
+
+Variables can be primitive types or custom complex types (classes, structures, delegates, arrays, collections, ...).
+
+Custom functions can be passed by using delegate variables:
+
+	Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
+	var target = new Interpreter()
+				.SetVariable("pow", pow);
+
+	Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
+
+### Parameters
+
+TODO
+
+### Custom types
+
+TODO
 
 Usages and examples
 ===================
@@ -60,21 +91,101 @@ TODO
 - Application console (for diagnostic or advanced features) (desktop/web)
 - Linq dynamic where / filter api
 
+Syntax and operators
+====================
 
-Extensibility
-=============
+All statments can be written using a subset of the C# syntax.
 
-TODO (variables, keywords, types)
+### Operators
 
-Performance consideration
+<table>
+	<thead>
+		<tr>
+			<th>Category</th><th>Operators</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Primary</td><td><code>x.y  f(x)  a[x]  new  typeof</code></td>
+		</tr>
+		<tr>
+			<td>Unary</td><td><code>+  -  !  (T)x</code></td>
+		</tr>
+		<tr>
+			<td>Multiplicative</td><td><code>*  /  %</code></td>
+		</tr>
+		<tr>
+			<td>Additive</td><td><code>+  -</code></td>
+		</tr>
+		<tr>
+			<td>Relational and type testing</td><td><code>&lt;  &gt;  &lt;=  &gt;=  is  as</code></td>
+		</tr>
+		<tr>
+			<td>Equality</td><td><code>==  !=</code></td>
+		</tr>
+		<tr>
+			<td>Conditional AND</td><td><code>&&</code></td>
+		</tr>
+		<tr>
+			<td>Conditional OR</td><td><code>||</code></td>
+		</tr>
+		<tr>
+			<td>Conditional</td><td><code>?:</code></td>
+		</tr>
+	</tbody>
+</table>
+
+### Literals
+
+<table>
+	<thead>
+		<tr>
+			<th>Category</th><th>Operators</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Constants</td><td><code>true  false  null</code></td>
+		</tr>
+		<tr>
+			<td>Numeric</td><td><code>f  m</code></td>
+		</tr>
+		<tr>
+			<td>String/char</td><td><code>""  ''</code></td>
+		</tr>
+	</tbody>
+</table>
+
+
+### Predefined types
+
+	Object  Boolean  Char  String  SByte  Byte  Int16  UInt16  Int32  
+	UInt32  Int64  UInt64  Single  Double  Decimal  DateTime  TimeSpan
+	Guid  Math Convert
+
+Performance
 =============
 
 TODO Performance, multithreading
 
+Security
+=============
+
+TODO security
+
+Help and support
+================
+
+If you need help you can try one of the following:
+
+- [FAQ](https://github.com/davideicardi/DynamicExpresso/wiki/FAQ) wiki page
+- Post your questions on [stackoverflow.com](http://stackoverflow.com/questions/tagged/dynamic-expresso) using `dynamic-expresso` tag
+- github [official repository](https://github.com/davideicardi/DynamicExpresso)
+
 History
 =======
 
-This project is based on two past works:
+This project is based on two old works:
 - "Converting String expressions to Funcs with FunctionFactory by Matthew Abbott" (http://www.fidelitydesign.net/?p=333) 
 - DynamicQuery - Dynamic LINQ - Visual Studio 2008 sample:
 	- http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx 
