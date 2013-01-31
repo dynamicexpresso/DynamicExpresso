@@ -20,7 +20,7 @@ namespace DynamicExpresso.UnitTest
         {
             var target = new Interpreter();
 
-            target.Using(typeof(Uri));
+            target.Reference(typeof(Uri));
 
             Assert.AreEqual(new Uri("http://www.google.com"), target.Eval("new Uri(\"http://www.google.com\")"));
         }

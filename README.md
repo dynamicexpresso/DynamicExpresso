@@ -3,7 +3,7 @@ Dynamic Expresso (v. 0.4 Alpha)
 ----------------
 
 Dynamic Expresso is an expression interpreter for simple C# statements.
-Dynamic Expresso embeds it's own parsing logic, and really interprets the statements by converting it to .NET LambdaExpression that can be invoked as any standard delegate.
+Dynamic Expresso embeds it's own parsing logic, and really interprets C# statements by converting it to .NET LambdaExpression that can be invoked as any standard delegate.
 It doesn't generate assembly but it creates dynamic expression/delegate on the fly. 
 
 Using Dynamic Expresso developers can create scriptable applications and execute .NET code without compilation. 
@@ -54,7 +54,7 @@ The built-in parser can understand the return type of any given expression so yo
 
 ### Variables
 
-Variables can be used inside your expressions using the `SetVariable` method:
+Variables can be used inside your expressions using the `Interpreter.SetVariable` method:
 
 	var target = new Interpreter()
                     .SetVariable("myVar", 23);
@@ -63,38 +63,70 @@ Variables can be used inside your expressions using the `SetVariable` method:
 
 Variables can be primitive types or custom complex types (classes, structures, delegates, arrays, collections, ...).
 
-Custom functions can be passed by using delegate variables:
+Custom functions can be passed with delegate variables using `Interpreter.SetFunction` method:
 
 	Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
 	var target = new Interpreter()
-				.SetVariable("pow", pow);
+				.SetFunction("pow", pow);
 
 	Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
 
+Custom [Expression](http://msdn.microsoft.com/en-us/library/system.linq.expressions.expression.aspx) can be passed by using `Interpreter.SetExpression` method.
+
 ### Parameters
 
-TODO
+Parsed expressions can accept a variable number of parameters:
 
-### Custom types
+	var interpreter = new Interpreter();
 
-TODO
+	var parameters = new[] {
+					new FunctionParam("x", 23),
+					new FunctionParam("y", 7)
+					};
 
-Usages and examples
-===================
+	Assert.AreEqual(30, interpreter.Eval("x + y", parameters));
 
-TODO
+Parameters can be primitive value types or custom complex types. You can parse an expression once and invoke it multiple times with different values:
 
-- ContinuousPackager
-- Counter Catch (filter counters and transform values)
-- xrc (page declaration)
-- ZenoSetup (for setup commands)
-- Application console (for diagnostic or advanced features) (desktop/web)
-- Linq dynamic where / filter api
+    var target = new Interpreter();
+
+    var parameters = new[] {
+                    new FunctionParam("x", typeof(int)),
+                    new FunctionParam("y", typeof(int))
+                    };
+
+    var myFunc = target.Parse("x + y", parameters);
+
+    Assert.AreEqual(30, myFunc.Invoke(23, 7));
+    Assert.AreEqual(30, myFunc.Invoke(32, -2));
+
+### Built-in types and custom types
+
+Currently the predefined types available in any expression are:
+
+	Object object 
+	Boolean bool 
+	Char char
+	String string
+	SByte Byte byte
+	Int16 UInt16 Int32 int UInt32 Int64 long UInt64 
+	Single Double double Decimal decimal 
+	DateTime TimeSpan
+	Guid
+	Math Convert
+
+You can easily reference any custom .NET type by using `Interpreter.Reference` method:
+
+	var target = new Interpreter()
+					.Reference(typeof(Uri));
+
+	Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
+	Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
 
 Syntax and operators
 ====================
 
-All statments can be written using a subset of the C# syntax.
+All statments can be written using a subset of the C# syntax. Here a list of the supported operators:
 
 ### Operators
 
@@ -156,12 +188,16 @@ All statments can be written using a subset of the C# syntax.
 	</tbody>
 </table>
 
+	
+Usages and examples
+===================
 
-### Predefined types
+### Counter Catch (filter counters and transform values)
 
-	Object  Boolean  Char  String  SByte  Byte  Int16  UInt16  Int32  
-	UInt32  Int64  UInt64  Single  Double  Decimal  DateTime  TimeSpan
-	Guid  Math Convert
+### Application console (for diagnostic or advanced features) (desktop/web)
+
+### Linq dynamic where / filter api
+
 
 Performance
 =============
@@ -228,3 +264,4 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 
 [MIT License]: http://opensource.org/licenses/mit-license.php
 [NuGet]: https://nuget.org/packages/DynamicExpresso.Core
+[Symbol Source]: http://www.symbolsource.org

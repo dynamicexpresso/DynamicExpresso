@@ -65,8 +65,8 @@ namespace DynamicExpresso.UnitTest
         public void Static_Properties_And_Methods_Of_Custom_Types()
         {
             var target = new Interpreter()
-                            .Using(typeof(Uri))
-                            .Using(typeof(MyTestService));
+                            .Reference(typeof(Uri))
+                            .Reference(typeof(MyTestService));
 
             Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
             Assert.AreEqual(MyTestService.MyStaticMethod(), target.Eval("MyTestService.MyStaticMethod()"));
@@ -76,7 +76,7 @@ namespace DynamicExpresso.UnitTest
         public void Type_Related_Static_Methods()
         {
             var target = new Interpreter()
-                            .Using(typeof(Type));
+                            .Reference(typeof(Type));
 
             Assert.AreEqual(Type.GetType("System.Globalization.CultureInfo"), target.Eval("Type.GetType(\"System.Globalization.CultureInfo\")"));
             Assert.AreEqual(DateTime.Now.GetType(), target.Eval("DateTime.Now.GetType()"));

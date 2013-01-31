@@ -52,16 +52,18 @@ namespace DynamicExpresso.UnitTest
         [TestMethod]
         public void Custom_Types()
         {
-            var target = new Interpreter().Using(typeof(Uri));
+            var target = new Interpreter()
+                            .Reference(typeof(Uri));
 
             Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
+            Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
         }
 
         [TestMethod]
         public void Custom_Type_Constructor()
         {
             var target = new Interpreter()
-                            .Using(typeof(MyDataContract));
+                            .Reference(typeof(MyDataContract));
 
             Assert.AreEqual(new MyDataContract("davide").Name, target.Eval("new MyDataContract(\"davide\").Name"));
             Assert.AreEqual(new MyDataContract(44, 88).Name, target.Eval("new MyDataContract(44 , 88).Name"));
@@ -72,7 +74,7 @@ namespace DynamicExpresso.UnitTest
         public void Generic_Types()
         {
             var target = new Interpreter()
-                            .Using(typeof(MyTestClass<>));
+                            .Reference(typeof(MyTestClass<>));
 
             Assert.AreEqual(new MyTestClass<string>("davide").ToString(), target.Eval("new MyTestClass<string>(\"davide\").ToString()"));
             Assert.AreEqual(new MyTestClass<int>(44).ToString(), target.Eval("new MyTestClass<int>(44).ToString()"));
@@ -82,7 +84,7 @@ namespace DynamicExpresso.UnitTest
         public void Custom_Type_Alias()
         {
             var target = new Interpreter()
-                            .Using(typeof(MyDataContract), "DC");
+                            .Reference(typeof(MyDataContract), "DC");
 
             Assert.AreEqual(typeof(MyDataContract), target.Parse("new DC(\"davide\")").ReturnType);
         }
@@ -91,7 +93,7 @@ namespace DynamicExpresso.UnitTest
         public void Custom_Enum()
         {
             var target = new Interpreter()
-                            .Using(typeof(CalendarAlgorithmType));
+                            .Reference(typeof(CalendarAlgorithmType));
 
             Assert.AreEqual(CalendarAlgorithmType.LunisolarCalendar, target.Eval("CalendarAlgorithmType.LunisolarCalendar"));
             Assert.AreEqual(CalendarAlgorithmType.SolarCalendar, target.Eval("CalendarAlgorithmType.SolarCalendar"));

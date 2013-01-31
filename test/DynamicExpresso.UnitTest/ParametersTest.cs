@@ -8,6 +8,35 @@ namespace DynamicExpresso.UnitTest
     public class ParametersTest
     {
         [TestMethod]
+        public void Basic_parameters()
+        {
+            var target = new Interpreter();
+
+            var parameters = new[] {
+                            new FunctionParam("x", 23),
+                            new FunctionParam("y", 7)
+                            };
+
+            Assert.AreEqual(30, target.Eval("x + y", parameters));
+        }
+
+        [TestMethod]
+        public void Different_parameters_values()
+        {
+            var target = new Interpreter();
+
+            var parameters = new[] {
+                            new FunctionParam("x", typeof(int)),
+                            new FunctionParam("y", typeof(int))
+                            };
+
+            var myFunc = target.Parse("x + y", parameters);
+
+            Assert.AreEqual(30, myFunc.Invoke(23, 7));
+            Assert.AreEqual(30, myFunc.Invoke(32, -2));
+        }
+
+        [TestMethod]
         public void Primitive_parameters()
         {
             var target = new Interpreter();

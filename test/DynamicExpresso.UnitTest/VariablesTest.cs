@@ -18,6 +18,21 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
+        public void Variables_can_be_overwritten()
+        {
+            var target = new Interpreter()
+                            .SetVariable("myk", 23);
+
+            Assert.AreEqual(23, target.Eval("myk"));
+
+            target.SetVariable("myk", 3489);
+
+            Assert.AreEqual(3489, target.Eval("myk"));
+
+            Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
+        }
+
+        [TestMethod]
         public void Null_Variables()
         {
             var target = new Interpreter()
@@ -54,7 +69,7 @@ namespace DynamicExpresso.UnitTest
         {
             Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
             var target = new Interpreter()
-                        .SetVariable("pow", pow);
+                        .SetFunction("pow", pow);
 
             Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
         }
