@@ -1,0 +1,84 @@
+﻿@{
+    Layout = null;
+
+    string assemblyVersion = typeof(DynamicExpresso.Interpreter).Assembly.GetName().Version.ToString();
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+
+    <title>Try Dynamic Expresso</title>
+    <meta name="description" content="A simple shell for trying Dynamic Expresso in your browser." />
+    <meta name="keywords" content="dynamic expresso" />
+
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap.min.css")" type="text/css">
+    <link rel="stylesheet" href="@Url.Content("~/Content/webshell.css")" type="text/css">
+</head>
+<body>
+
+    <header class="jumbotron subhead" id="overview">
+        <div class="container">
+            <h1>Dynamic Expresso Web Shell</h1>
+            <p class="lead">
+                <a href="https://github.com/davideicardi/DynamicExpresso">Dynamic Expresso</a> is an expression interpreter for simple C# statements.
+                <br />
+                Try it now directly in your browser.
+            </p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div id="terminal">
+                <p>Dynamic Expresso version: @assemblyVersion</p>
+                <p>type "help" for help</p>
+
+            </div>
+        </div>
+
+        <div class="row">
+            <p>
+                Here some expressions that you can try:
+            </p>
+            <ul>
+                <li><code>DateTime.Now</code></li>
+                <li><code>DateTime.Now.AddDays(30)</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="@Url.Content("~/Scripts/jquery-1.9.0.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Scripts/webshell.js")"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var deHandler = new DynamicExpressoHandler({ interpreterUrl: "@Url.Action("Eval", "Interpreter")" });
+            var terminal = new ReadLine({
+                htmlForInput: DefaultInputHtml,
+                handler: deHandler,
+                scoper: null
+            });
+        });
+    </script>
+
+    <footer>
+
+        <div class="container">
+            <div class="row">
+                CREDITS
+                <p>
+                    <small>
+                    shell javascript code is based on the mongulator project (<a href="https://github.com/banker/mongulator">https://github.com/banker/mongulator</a>)<br />
+                Copyright (c) 2009 Kyle Banker
+                    </small>
+                </p>
+            </div>
+        </div>
+
+    </footer>
+
+</body>
+</html>

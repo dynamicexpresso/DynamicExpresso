@@ -1,0 +1,64 @@
+
+#terminal {
+  width: 960px;
+  margin:50px auto 50px auto;
+  border: 1px solid black;
+  height: 400px;
+  background: black;
+  overflow: scroll;
+}
+
+#terminal div.line {
+  width: 940px;
+  margin-bottom: 5px;
+}
+
+#terminal input {
+  width: 875px;
+  margin: 1px 0 1px 10px;
+  border: none;
+  display: inline;
+  padding: 2px;
+  background: black;
+  color: #FFFFFF;
+  font-size: 18px;
+  font-family: Consolas, Monaco, monospace;
+
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  -webkit-transition: none;
+}
+
+#terminal input[disabled]{
+cursor: default;
+}
+
+#terminal p, #terminal pre {
+  margin: 2px;
+  color: #FFFFFF;
+  font-size: 18px;
+  font-family: Consolas, Monaco, monospace;
+}
+
+#terminal p.error {
+    color: #FF3300;
+}
+
+#terminal a {
+  color: #6495ED;
+}
+
+#terminal span.prompt {
+  color: #FFFFFF;
+  font-size: 16px;
+  margin-left: 2px;
+}
+
+header {
+    border-bottom: 1px solid #CCCCCC;
+}
+
+footer {
+    border-top: 1px solid #CCCCCC;
+}

@@ -26,6 +26,11 @@ or another more complex scenario:
 
     myExpr.Invoke(new FunctionParam("x", 5));
 
+Live demo
+=========
+
+Try Dynamic Expresso in this interactive live demo directly in your browser: [http://dynamic-expresso.azurewebsites.net/](http://dynamic-expresso.azurewebsites.net/)
+
 Quick start
 ===========
 
