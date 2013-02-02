@@ -53,6 +53,11 @@ ReadLine.prototype = {
 
     initialize: function () {
         this.addInputLine();
+
+        var inputElement = this.lineClass + '.active';
+        this.terminal.click(function () {
+            $(inputElement).focus();
+        });
     },
 
     // Enter a new input line with proper behavior.
@@ -136,7 +141,7 @@ ReadLine.prototype = {
         if (!response.success)
             pClass += " error";
 
-        var $newP = $("<p class='" + pClass + "'></p>")
+        var $newP = $("<pre class='" + pClass + "'></pre>")
         $newP.text(response.result);
 
         this.activeLine.parent().append($newP);

@@ -7,7 +7,7 @@ Dynamic Expresso embeds it's own parsing logic, and really interprets C# stateme
 It doesn't generate assembly but it creates dynamic expression/delegate on the fly. 
 
 Using Dynamic Expresso developers can create scriptable applications and execute .NET code without compilation. 
-Statements are written using a subset of C# language specifications.
+Statements are written using a subset of C# language specifications. Global variables or parameters can be injected and used inside expressions.
 
 ![dynamic expresso workflow](https://raw.github.com/davideicardi/DynamicExpresso/master/docs/workflow.png "dynamic expresso workflow")
 
@@ -47,6 +47,7 @@ Features
 =============
 
 - Expressions can be written using a subset of C# syntax (see Syntax section for more information)
+- Support for variables and parameters
 - Full suite of unit tests
 - Good performance compared to other similar projects
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
@@ -231,9 +232,9 @@ This is the preferred way to parse an expression that you known at compile time 
 Performance and multithreading
 ==============================
 
-The `Interpreter` class can be used my multiple thread but without modify it.
+The `Interpreter` class can be used by multiple threads but without modify it.
 In essence only `Parse` and `Eval` methods are thread safe. Other methods (`SetVariable`, `Reference`, ...) must be called in an initialization phase.
-`Lambda` and `Parameter` classes are completely thread sage.
+`Lambda` and `Parameter` classes are completely thread safe.
 
 If you need to run the same expression multiple times with different parameters I suggest to parse it one time and then invoke the parsed expression multiple times.
 

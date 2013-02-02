@@ -10,7 +10,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Try Dynamic Expresso</title>
+    <title>Web Shell - Dynamic Expresso</title>
     <meta name="description" content="A simple shell for trying Dynamic Expresso in your browser." />
     <meta name="keywords" content="dynamic expresso" />
 
@@ -20,7 +20,7 @@
 </head>
 <body>
 
-    <header class="jumbotron subhead" id="overview">
+    <header>
         <div class="container">
             <h1>Dynamic Expresso Web Shell</h1>
             <p class="lead">
@@ -41,15 +41,42 @@
         </div>
 
         <div class="row">
-            <p>
-                Here some expressions that you can try:
-            </p>
-            <ul>
-                <li><code>DateTime.Now</code></li>
-                <li><code>DateTime.Now.AddDays(30)</code></li>
-                <li><code>string.Format("Hello world! My name is {0}.", "R2-D2")</code></li>
-            </ul>
+            <p>In this example all the results are serialized using json to be always human readable.</p>
         </div>
+
+        <div class="row">
+            <div class="span6">
+                <div class="">
+                    <h3>Commands examples</h3>
+                    <p>
+                        Here some expressions that you can try:
+                    </p>
+                    <ul>
+                        <li><code>DateTime.Now</code></li>
+                        <li><code>DateTime.Now.AddDays(30)</code></li>
+                        <li><code>string.Format("Hello world! My name is {0}.", "R2-D2")</code></li>
+                        <li><code>Commands.Count</code></li>
+                        <li><code>Commands.Clear()</code></li>
+                        <li><code>Commands.GetLastCommands()</code></li>
+                    </ul>
+
+                    <small>The <code>Commands</code> variable is just for demostration purpose.</small>
+                </div>
+            </div>
+
+            <div class="span6">
+                <div class="">
+                    <h3>credits</h3>
+                    <p>
+                        <small>
+                        shell javascript code is based on the mongulator project (<a href="https://github.com/banker/mongulator">https://github.com/banker/mongulator</a>)<br />
+                    Copyright (c) 2009 Kyle Banker
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script type="text/javascript" src="@Url.Content("~/Scripts/jquery-1.9.0.min.js")"></script>
@@ -65,22 +92,6 @@
             });
         });
     </script>
-
-    <footer>
-
-        <div class="container">
-            <div class="row">
-                CREDITS
-                <p>
-                    <small>
-                    shell javascript code is based on the mongulator project (<a href="https://github.com/banker/mongulator">https://github.com/banker/mongulator</a>)<br />
-                Copyright (c) 2009 Kyle Banker
-                    </small>
-                </p>
-            </div>
-        </div>
-
-    </footer>
 
 </body>
 </html>

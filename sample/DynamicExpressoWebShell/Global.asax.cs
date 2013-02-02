@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DynamicExpressoWebShell.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -18,6 +19,8 @@ namespace DynamicExpressoWebShell
 
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
+
+            WebShell.Init();
         }
     }
 }

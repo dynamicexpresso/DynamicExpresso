@@ -1,4 +1,6 @@
 
+
+
 #terminal {
   border: 1px solid #CCCCCC;
   height: 400px;
@@ -18,7 +20,7 @@
   padding: 2px;
   background: black;
   color: #FFFFFF;
-  font-size: 18px;
+  font-size: 16px;
   font-family: Consolas, Monaco, monospace;
 
   -webkit-box-shadow: none;
@@ -41,8 +43,10 @@ cursor: default;
 
 #terminal p, #terminal pre {
   margin: 2px;
+  padding:0;
   color: #FFFFFF;
-  font-size: 18px;
+  font-size: 16px;
+  background: black;
   font-family: Consolas, Monaco, monospace;
 }
 
@@ -56,14 +60,14 @@ cursor: default;
 
 #terminal span.prompt {
   color: #FFFFFF;
-  font-size: 16px;
+  font-size: 14px;
   margin-left: 2px;
 }
 
 header {
-    border-bottom: 1px solid #CCCCCC;
 }
 
 footer {
+    margin-top: 10px;
     border-top: 1px solid #CCCCCC;
 }

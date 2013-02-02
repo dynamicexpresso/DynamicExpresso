@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DynamicExpressoWebShell.Services;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -14,16 +16,14 @@ namespace DynamicExpressoWebShell.Controllers
         {
             try
             {
-                if (expression != null && expression.Length > 200)
-                    throw new Exception("Live demo doesn't support expression with more than 200 characters.");
+                var result = WebShell.Current.Eval(expression);
 
-                var interpreter = new DynamicExpresso.Interpreter();
-                var result = interpreter.Eval(expression);
+                //if (result == null)
+                //    return Json(new { success = true, result = "<null>" });
 
-                if (result == null)
-                    return Json(new { success = true, result = "<null>" });
+                string prettifyOutput = JsonConvert.SerializeObject(result, Formatting.Indented);
 
-                return Json(new { success = true, result = result.ToString() });
+                return Json(new { success = true, result = prettifyOutput });
             }
             catch (Exception ex)
             {
