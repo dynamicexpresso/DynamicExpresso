@@ -8,13 +8,14 @@
 
 <html>
 <head>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Try Dynamic Expresso</title>
     <meta name="description" content="A simple shell for trying Dynamic Expresso in your browser." />
     <meta name="keywords" content="dynamic expresso" />
 
     <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap.min.css")" type="text/css">
+    <link rel="stylesheet" href="@Url.Content("~/Content/bootstrap-responsive.min.css")" type="text/css">
     <link rel="stylesheet" href="@Url.Content("~/Content/webshell.css")" type="text/css">
 </head>
 <body>
@@ -34,7 +35,7 @@
         <div class="row">
             <div id="terminal">
                 <p>Dynamic Expresso version: @assemblyVersion</p>
-                <p>type "help" for help</p>
+                @*<p>type "help" for help</p>*@
 
             </div>
         </div>
@@ -46,6 +47,7 @@
             <ul>
                 <li><code>DateTime.Now</code></li>
                 <li><code>DateTime.Now.AddDays(30)</code></li>
+                <li><code>string.Format("Hello world! My name is {0}.", "R2-D2")</code></li>
             </ul>
         </div>
     </div>

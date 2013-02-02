@@ -5,9 +5,12 @@ using System.Text;
 
 namespace DynamicExpresso
 {
-    public class FunctionParam
+    /// <summary>
+    /// An expression parameter. This class is thread safe.
+    /// </summary>
+    public class Parameter
     {
-        public FunctionParam(string name, object value)
+        public Parameter(string name, object value)
         {
             if (value == null)
                 throw new ArgumentNullException("value");
@@ -17,7 +20,7 @@ namespace DynamicExpresso
             Value = value;
         }
 
-        public FunctionParam(string name, Type type, object value = null)
+        public Parameter(string name, Type type, object value = null)
         {
             Name = name;
             Type = type;

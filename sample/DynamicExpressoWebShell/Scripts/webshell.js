@@ -135,7 +135,11 @@ ReadLine.prototype = {
         var pClass = "response";
         if (!response.success)
             pClass += " error";
-        this.activeLine.parent().append("<p class='" + pClass + "'>" + response.result + "</p>");
+
+        var $newP = $("<p class='" + pClass + "'></p>")
+        $newP.text(response.result);
+
+        this.activeLine.parent().append($newP);
     }
 };
 

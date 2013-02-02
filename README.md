@@ -1,35 +1,37 @@
 ﻿
-Dynamic Expresso (v. 0.4 Alpha)
+Dynamic Expresso (Beta version)
 ----------------
 
 Dynamic Expresso is an expression interpreter for simple C# statements.
-Dynamic Expresso embeds it's own parsing logic, and really interprets C# statements by converting it to .NET LambdaExpression that can be invoked as any standard delegate.
+Dynamic Expresso embeds it's own parsing logic, and really interprets C# statements by converting it to .NET delegate that can be invoked as any standard delegate.
 It doesn't generate assembly but it creates dynamic expression/delegate on the fly. 
 
 Using Dynamic Expresso developers can create scriptable applications and execute .NET code without compilation. 
 Statements are written using a subset of C# language specifications.
+
+![dynamic expresso workflow](https://raw.github.com/davideicardi/DynamicExpresso/master/docs/workflow.png "dynamic expresso workflow")
 
 Here an example of what you can do:
 
 	var interpreter = new Interpreter();
 	var result = interpreter.Eval("8 / 2 + 2");
 
-or another more complex scenario:
+or
 
-	var service = new ServiceExample();
     var interpreter = new Interpreter()
-                        .SetVariable("service", service);
+                    .SetVariable("service", new ServiceExample());
 	
 	string expression = "x > 4 ? service.SomeMethod() : service.AnotherMethod()";
-    var myExpr = interpreter.Parse(expression, 
-                            new FunctionParam("x", typeof(int)));
 
-    myExpr.Invoke(new FunctionParam("x", 5));
+    Lambda parsedExpression = interpreter.Parse(expression, 
+                            new Parameter("x", typeof(int)));
+
+    parsedExpression.Invoke(5);
 
 Live demo
 =========
 
-Try Dynamic Expresso in this interactive live demo directly in your browser: [http://dynamic-expresso.azurewebsites.net/](http://dynamic-expresso.azurewebsites.net/)
+Dynamic Expresso live demo: [http://dynamic-expresso.azurewebsites.net/](http://dynamic-expresso.azurewebsites.net/)
 
 Quick start
 ===========
@@ -85,8 +87,8 @@ Parsed expressions can accept a variable number of parameters:
 	var interpreter = new Interpreter();
 
 	var parameters = new[] {
-					new FunctionParam("x", 23),
-					new FunctionParam("y", 7)
+					new Parameter("x", 23),
+					new Parameter("y", 7)
 					};
 
 	Assert.AreEqual(30, interpreter.Eval("x + y", parameters));
@@ -96,8 +98,8 @@ Parameters can be primitive value types or custom complex types. You can parse a
     var target = new Interpreter();
 
     var parameters = new[] {
-                    new FunctionParam("x", typeof(int)),
-                    new FunctionParam("y", typeof(int))
+                    new Parameter("x", typeof(int)),
+                    new Parameter("y", typeof(int))
                     };
 
     var myFunc = target.Parse("x + y", parameters);
@@ -193,26 +195,84 @@ All statments can be written using a subset of the C# syntax. Here a list of the
 	</tbody>
 </table>
 
-	
-Usages and examples
-===================
+### Generate dynamic delegates
 
-### Counter Catch (filter counters and transform values)
+You can use the `Interpreter.Parse<TDelegate>` method to directly parse an expression into a .NET delegate type that can be normally invoked. 
+In the example below I generate a `Func<Customer, bool>` delegate that can be used in a LINQ where expression.
 
-### Application console (for diagnostic or advanced features) (desktop/web)
+	class Customer
+	{
+		public string Name { get; set; }
+		public int Age { get; set; }
+		public char Gender { get; set; }
+	}
 
-### Linq dynamic where / filter api
+	[TestMethod]
+	public void Linq_Where()
+	{
+		var customers = new List<Customer> { 
+								new Customer() { Name = "David", Age = 31, Gender = 'M' },
+								new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
+								new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
+								new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
+								new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
+								};
 
+		string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
 
-Performance
-=============
+		var interpreter = new Interpreter();
+		Func<Customer, bool> dynamicWhere = interpreter.Parse<Func<Customer, bool>>(whereExpression, "customer");
 
-TODO Performance, multithreading
+		Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
+	}
+
+This is the preferred way to parse an expression that you known at compile time what parameters can accept and what value must return.
+
+Performance and multithreading
+==============================
+
+The `Interpreter` class can be used my multiple thread but without modify it.
+In essence only `Parse` and `Eval` methods are thread safe. Other methods (`SetVariable`, `Reference`, ...) must be called in an initialization phase.
+`Lambda` and `Parameter` classes are completely thread sage.
+
+If you need to run the same expression multiple times with different parameters I suggest to parse it one time and then invoke the parsed expression multiple times.
 
 Security
 =============
 
-TODO security
+If you allow an end user to write expression you must consider some security implications.
+
+Parsed expressions can access only the .NET types that you have referenced using the `Interpreter.Reference` method or types that you pass as a variable or parameter. 
+You must pay attention of what types you expose.
+In any case generated delegates are executed as any other delegate and standard security .NET rules can be applied (for more info see [Security in the .NET Framework](http://msdn.microsoft.com/en-us/library/fkytk30f.aspx)). 
+
+	
+Usage scenarios
+===================
+
+Here are some possible usage scenarios of Dynamic Expresso:
+
+- Programmable applications
+
+	I have used Dynamic Expresso to allow an user to interact with a console like interface.
+	See live demo: [http://dynamic-expresso.azurewebsites.net/](http://dynamic-expresso.azurewebsites.net/) or source code on [github](https://github.com/davideicardi/DynamicExpresso/tree/master/sample/DynamicExpressoWebShell)
+
+- Allow the user to inject customizable rules and logic without recompiling
+
+	In a tool used to collect Performance Counter data I have used Dynamic Expresso to filter and transform the output data. 
+	In this way the user can insert custom filter or transform logic. For more information see [Counter Catch](https://github.com/davideicardi/CounterCatch).
+
+- Evaluate dynamic functions or commands
+- LINQ dynamic query
+
+Future roadmap
+===========
+
+- Allow to reference types using full name (support namespace and Using method)
+- Extend the Web Shell project to allow its use in an external application
+- Support `throw` operator
+- Support generic type declaration
+- Best error messages
 
 Help and support
 ================
@@ -223,7 +283,7 @@ If you need help you can try one of the following:
 - Post your questions on [stackoverflow.com](http://stackoverflow.com/questions/tagged/dynamic-expresso) using `dynamic-expresso` tag
 - github [official repository](https://github.com/davideicardi/DynamicExpresso)
 
-History
+Credits
 =======
 
 This project is based on two old works:

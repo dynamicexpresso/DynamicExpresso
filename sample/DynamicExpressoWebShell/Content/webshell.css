@@ -1,20 +1,17 @@
 
 #terminal {
-  width: 960px;
-  margin:50px auto 50px auto;
-  border: 1px solid black;
+  border: 1px solid #CCCCCC;
   height: 400px;
   background: black;
   overflow: scroll;
 }
 
 #terminal div.line {
-  width: 940px;
   margin-bottom: 5px;
 }
 
 #terminal input {
-  width: 875px;
+  width: 90%;
   margin: 1px 0 1px 10px;
   border: none;
   display: inline;
@@ -25,6 +22,14 @@
   font-family: Consolas, Monaco, monospace;
 
   -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
+  -webkit-transition: none;
+}
+
+#terminal input:focus {
+  border: none;
+    -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
   -webkit-transition: none;

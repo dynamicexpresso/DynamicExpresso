@@ -50,9 +50,9 @@
     <Compile Include="Parser\ParseException.cs" />
     <Compile Include="Parser\ExpressionParser.cs" />
     <Compile Include="Parser\ErrorMessages.cs" />
-    <Compile Include="Function.cs" />
+    <Compile Include="Lambda.cs" />
     <Compile Include="Interpreter.cs" />
-    <Compile Include="FunctionParam.cs" />
+    <Compile Include="Parameter.cs" />
     <Compile Include="Parser\ParserConstants.cs" />
     <Compile Include="Parser\ParserSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -131,6 +131,26 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
+        public void Can_compare_parameters_of_different_compatible_types()
+        {
+            var target = new Interpreter();
+
+            double x1 = 5;
+            Assert.AreEqual(true, target.Eval("x > 3", new Parameter("x", x1)));
+            double x2 = 1;
+            Assert.AreEqual(false, target.Eval("x > 3", new Parameter("x", x2)));
+            decimal x3 = 5;
+            Assert.AreEqual(true, target.Eval("x > 3", new Parameter("x", x3)));
+            decimal x4 = 1;
+            Assert.AreEqual(false, target.Eval("x > 3", new Parameter("x", x4)));
+            int x5 = 1;
+            double y1 = 10;
+            Assert.AreEqual(true, target.Eval("x < y", new Parameter("x", x5), new Parameter("y", y1)));
+            double x6 = 0;
+            Assert.AreEqual(true, target.Eval("x == 0", new Parameter("x", x6)));
+        }
+
+        [TestMethod]
         public void Logical_Operators()
         {
             var target = new Interpreter();

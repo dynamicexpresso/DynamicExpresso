@@ -13,8 +13,8 @@ namespace DynamicExpresso.UnitTest
             var target = new Interpreter();
 
             var parameters = new[] {
-                            new FunctionParam("x", 23),
-                            new FunctionParam("y", 7)
+                            new Parameter("x", 23),
+                            new Parameter("y", 7)
                             };
 
             Assert.AreEqual(30, target.Eval("x + y", parameters));
@@ -26,8 +26,8 @@ namespace DynamicExpresso.UnitTest
             var target = new Interpreter();
 
             var parameters = new[] {
-                            new FunctionParam("x", typeof(int)),
-                            new FunctionParam("y", typeof(int))
+                            new Parameter("x", typeof(int)),
+                            new Parameter("y", typeof(int))
                             };
 
             var myFunc = target.Parse("x + y", parameters);
@@ -44,8 +44,8 @@ namespace DynamicExpresso.UnitTest
             double x = 2;
             string y = "param y";
             var parameters = new[] {
-                            new FunctionParam("x", x.GetType(), x),
-                            new FunctionParam("y", y.GetType(), y)
+                            new Parameter("x", x.GetType(), x),
+                            new Parameter("y", y.GetType(), y)
                             };
 
             Assert.AreEqual(x, target.Eval("x", parameters));
@@ -63,8 +63,8 @@ namespace DynamicExpresso.UnitTest
             double x = 2;
             string X = "param y";
             var parameters = new[] {
-                            new FunctionParam("x", x.GetType(), x),
-                            new FunctionParam("X", X.GetType(), X)
+                            new Parameter("x", x.GetType(), x),
+                            new Parameter("X", X.GetType(), X)
                             };
 
             Assert.AreEqual(x, target.Eval("x", parameters));
@@ -80,9 +80,9 @@ namespace DynamicExpresso.UnitTest
             var y = new Uri("http://www.google.com");
             var z = CultureInfo.GetCultureInfo("en-US");
             var parameters = new[] {
-                            new FunctionParam("x", x.GetType(), x),
-                            new FunctionParam("y", y.GetType(), y),
-                            new FunctionParam("z", z.GetType(), z)
+                            new Parameter("x", x.GetType(), x),
+                            new Parameter("y", y.GetType(), y),
+                            new Parameter("z", z.GetType(), z)
                             };
 
             Assert.AreEqual(x, target.Eval("x", parameters));
@@ -100,10 +100,10 @@ namespace DynamicExpresso.UnitTest
             var z = 5;
             var w = DateTime.Today;
             var parameters = new[] {
-                            new FunctionParam("x", x.GetType(), x),
-                            new FunctionParam("y", y.GetType(), y),
-                            new FunctionParam("z", z.GetType(), z),
-                            new FunctionParam("w", w.GetType(), w)
+                            new Parameter("x", x.GetType(), x),
+                            new Parameter("y", y.GetType(), y),
+                            new Parameter("z", z.GetType(), z),
+                            new Parameter("w", w.GetType(), w)
                             };
 
             Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()", parameters));
@@ -123,8 +123,8 @@ namespace DynamicExpresso.UnitTest
             y = null;
 
             var parameters = new[] {
-                            new FunctionParam("x", typeof(int?), x),
-                            new FunctionParam("y", typeof(int?), y)
+                            new Parameter("x", typeof(int?), x),
+                            new Parameter("y", typeof(int?), y)
                             };
 
             Assert.AreEqual(x, target.Eval("x", parameters));
@@ -142,8 +142,8 @@ namespace DynamicExpresso.UnitTest
             MyDelegate myDelegate = (x) => x.Length;
 
             var parameters = new[] {
-                            new FunctionParam("pow", pow.GetType(), pow),
-                            new FunctionParam("myDelegate", myDelegate.GetType(), myDelegate)
+                            new Parameter("pow", pow.GetType(), pow),
+                            new Parameter("myDelegate", myDelegate.GetType(), myDelegate)
                             };
 
             Assert.AreEqual(9.0, target.Eval("pow(3, 2)", parameters));

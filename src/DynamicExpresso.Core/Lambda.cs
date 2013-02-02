@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -7,16 +7,21 @@ using System.Text;
 
 namespace DynamicExpresso
 {
-    public class Function
+    /// <summary>
+    /// Represents a lambda expression that can be invoked. This class is thread safe.
+    /// </summary>
+    public class Lambda
     {
         readonly LambdaExpression _lambdaExpression;
+        readonly Delegate _delegate;
 
-        public Function(LambdaExpression lambdaExpression)
+        public Lambda(LambdaExpression lambdaExpression)
         {
             if (lambdaExpression == null)
                 throw new ArgumentNullException("lambdaExpression");
 
             _lambdaExpression = lambdaExpression;
+            _delegate = _lambdaExpression.Compile();
         }
 
         public LambdaExpression LambdaExpression
@@ -29,17 +34,17 @@ namespace DynamicExpresso
             get { return _lambdaExpression.ReturnType; }
         }
 
-        public FunctionParam[] Parameters
+        public Parameter[] Parameters
         {
             get
             {
                 return _lambdaExpression.Parameters
-                        .Select(p => new FunctionParam(p.Name, p.Type))
+                        .Select(p => new Parameter(p.Name, p.Type))
                         .ToArray();
             }
         }
 
-        public object Invoke(params FunctionParam[] parameters)
+        public object Invoke(params Parameter[] parameters)
         {
             var args = (from dp in _lambdaExpression.Parameters
                        join rp in parameters
@@ -53,7 +58,7 @@ namespace DynamicExpresso
         {
             try
             {
-                return _lambdaExpression.Compile().DynamicInvoke(args);
+                return _delegate.DynamicInvoke(args);
             }
             catch (TargetInvocationException exc)
             {

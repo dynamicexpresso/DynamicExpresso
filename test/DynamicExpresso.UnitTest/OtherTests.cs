@@ -1,6 +1,8 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Collections.Generic;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -84,7 +86,7 @@ namespace DynamicExpresso.UnitTest
 
             var x = new MyTestService();
             var parameters = new[] {
-                            new FunctionParam("x", x.GetType(), x)
+                            new Parameter("x", x.GetType(), x)
                             };
 
             Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()", parameters));
@@ -119,10 +121,10 @@ namespace DynamicExpresso.UnitTest
             var z = 5;
             int? w = null;
             var parameters = new[] {
-                            new FunctionParam("x", x.GetType(), x),
-                            new FunctionParam("y", y.GetType(), y),
-                            new FunctionParam("z", z.GetType(), z),
-                            new FunctionParam("w", typeof(int?), w)
+                            new Parameter("x", x.GetType(), x),
+                            new Parameter("y", y.GetType(), y),
+                            new Parameter("z", z.GetType(), z),
+                            new Parameter("w", typeof(int?), w)
                             };
 
             Assert.AreEqual(x.MethodWithNullableParam(y, z), target.Eval("x.MethodWithNullableParam(y, z)", parameters));
@@ -141,10 +143,10 @@ namespace DynamicExpresso.UnitTest
             double z = 5;
             int? w = null;
             var parameters = new[] {
-                            new FunctionParam("x", x.GetType(), x),
-                            new FunctionParam("y", y.GetType(), y),
-                            new FunctionParam("z", z.GetType(), z),
-                            new FunctionParam("w", typeof(int?), w)
+                            new Parameter("x", x.GetType(), x),
+                            new Parameter("y", y.GetType(), y),
+                            new Parameter("z", z.GetType(), z),
+                            new Parameter("w", typeof(int?), w)
                             };
 
             Assert.AreEqual(x.MethodWithGenericParam(x), target.Eval("x.MethodWithGenericParam(x)", parameters));
@@ -166,8 +168,8 @@ namespace DynamicExpresso.UnitTest
             var x = new MyTestService();
             var y = 5;
             var parameters = new[] {
-                            new FunctionParam("x", x.GetType(), x),
-                            new FunctionParam("y", y.GetType(), y),
+                            new Parameter("x", x.GetType(), x),
+                            new Parameter("y", y.GetType(), y),
                             };
 
             Assert.AreEqual(x.AProperty > y && x.HelloWorld().Length == 10, target.Eval("x.AProperty      >\t y && \r\n x.HelloWorld().Length == 10", parameters));
@@ -185,18 +187,18 @@ namespace DynamicExpresso.UnitTest
                                 .SetVariable("service", service);
 
             var func = target.Parse("x > 4 ? service.VoidMethod() : service.VoidMethod2()", 
-                                    new FunctionParam("x", typeof(int)));
+                                    new Parameter("x", typeof(int)));
 
             Assert.AreEqual(typeof(void), func.ReturnType);
 
             Assert.AreEqual(0, service.VoidMethodCalled);
             Assert.AreEqual(0, service.VoidMethod2Called);
 
-            func.Invoke(new FunctionParam("x", 5));
+            func.Invoke(new Parameter("x", 5));
             Assert.AreEqual(1, service.VoidMethodCalled);
             Assert.AreEqual(0, service.VoidMethod2Called);
 
-            func.Invoke(new FunctionParam("x", 2));
+            func.Invoke(new Parameter("x", 2));
             Assert.AreEqual(1, service.VoidMethodCalled);
             Assert.AreEqual(1, service.VoidMethod2Called);
         }
@@ -209,8 +211,8 @@ namespace DynamicExpresso.UnitTest
             var x = new MyTestService();
             var y = 5;
             var parameters = new[] {
-                            new FunctionParam("x", x.GetType(), x),
-                            new FunctionParam("y", y.GetType(), y),
+                            new Parameter("x", x.GetType(), x),
+                            new Parameter("y", y.GetType(), y),
                             };
 
             Assert.AreEqual(typeof(bool), target.Parse("x.AProperty > y && x.HelloWorld().Length == 10", parameters).ReturnType);
@@ -274,18 +276,18 @@ namespace DynamicExpresso.UnitTest
             var target = new Interpreter();
 
             var functionX = target.Parse("Math.Pow(x, y) + 5",
-                                new FunctionParam("x", typeof(double)),
-                                new FunctionParam("y", typeof(double)));
+                                new Parameter("x", typeof(double)),
+                                new Parameter("y", typeof(double)));
 
             Assert.AreEqual(Math.Pow(15, 12) + 5, functionX.Invoke(15, 12));
             Assert.AreEqual(Math.Pow(5, 1) + 5, functionX.Invoke(5, 1));
             Assert.AreEqual(Math.Pow(11, 8) + 5, functionX.Invoke(11, 8));
-            Assert.AreEqual(Math.Pow(3, 4) + 5, functionX.Invoke(new FunctionParam("x", 3.0),
-                                                                new FunctionParam("y", 4.0)));
-            Assert.AreEqual(Math.Pow(9, 2) + 5, functionX.Invoke(new FunctionParam("x", 9.0),
-                                                                new FunctionParam("y", 2.0)));
-            Assert.AreEqual(Math.Pow(1, 3) + 5, functionX.Invoke(new FunctionParam("x", 1.0),
-                                                                new FunctionParam("y", 3.0)));
+            Assert.AreEqual(Math.Pow(3, 4) + 5, functionX.Invoke(new Parameter("x", 3.0),
+                                                                new Parameter("y", 4.0)));
+            Assert.AreEqual(Math.Pow(9, 2) + 5, functionX.Invoke(new Parameter("x", 9.0),
+                                                                new Parameter("y", 2.0)));
+            Assert.AreEqual(Math.Pow(1, 3) + 5, functionX.Invoke(new Parameter("x", 1.0),
+                                                                new Parameter("y", 3.0)));
         }
 
         public class MyException : Exception
@@ -363,5 +365,32 @@ namespace DynamicExpresso.UnitTest
             }
         }
 
+
+
+        class Customer
+        {
+            public string Name { get; set; }
+            public int Age { get; set; }
+            public char Gender { get; set; }
+        }
+
+        [TestMethod]
+        public void Linq_Where()
+        {
+            var customers = new List<Customer> { 
+                                    new Customer() { Name = "David", Age = 31, Gender = 'M' },
+                                    new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
+                                    new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
+                                    new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
+                                    new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
+                                    };
+
+            string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
+
+            var interpreter = new Interpreter();
+            Func<Customer, bool> dynamicWhere = interpreter.Parse<Func<Customer, bool>>(whereExpression, "customer");
+
+            Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
+        }
     }
 }
