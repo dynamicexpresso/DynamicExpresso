@@ -1,6 +1,6 @@
 ﻿
 Dynamic Expresso (Beta version)
-----------------
+===============================
 
 Dynamic Expresso is an expression interpreter for simple C# statements.
 Dynamic Expresso embeds it's own parsing logic, and really interprets C# statements by converting it to .NET delegate that can be invoked as any standard delegate.
@@ -28,13 +28,11 @@ or
 
     parsedExpression.Invoke(5);
 
-Live demo
-=========
+## Live demo
 
 Dynamic Expresso live demo: [http://dynamic-expresso.azurewebsites.net/](http://dynamic-expresso.azurewebsites.net/)
 
-Quick start
-===========
+## Quick start
 
 Dynamic Expresso is available on [NuGet]. You can install the package using:
 
@@ -43,8 +41,7 @@ Dynamic Expresso is available on [NuGet]. You can install the package using:
 Source code and symbols (.pdb files) for debugging are available on [Symbol Source].
 
 
-Features
-=============
+## Features
 
 - Expressions can be written using a subset of C# syntax (see Syntax section for more information)
 - Support for variables and parameters
@@ -131,8 +128,7 @@ You can easily reference any custom .NET type by using `Interpreter.Reference` m
 	Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
 	Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
 
-Syntax and operators
-====================
+## Syntax and operators
 
 All statments can be written using a subset of the C# syntax. Here a list of the supported operators:
 
@@ -229,8 +225,7 @@ In the example below I generate a `Func<Customer, bool>` delegate that can be us
 
 This is the preferred way to parse an expression that you known at compile time what parameters can accept and what value must return.
 
-Performance and multithreading
-==============================
+## Performance and multithreading
 
 The `Interpreter` class can be used by multiple threads but without modify it.
 In essence only `Parse` and `Eval` methods are thread safe. Other methods (`SetVariable`, `Reference`, ...) must be called in an initialization phase.
@@ -238,8 +233,7 @@ In essence only `Parse` and `Eval` methods are thread safe. Other methods (`SetV
 
 If you need to run the same expression multiple times with different parameters I suggest to parse it one time and then invoke the parsed expression multiple times.
 
-Security
-=============
+## Security
 
 If you allow an end user to write expression you must consider some security implications.
 
@@ -248,8 +242,7 @@ You must pay attention of what types you expose.
 In any case generated delegates are executed as any other delegate and standard security .NET rules can be applied (for more info see [Security in the .NET Framework](http://msdn.microsoft.com/en-us/library/fkytk30f.aspx)). 
 
 	
-Usage scenarios
-===================
+## Usage scenarios
 
 Here are some possible usage scenarios of Dynamic Expresso:
 
@@ -266,8 +259,7 @@ Here are some possible usage scenarios of Dynamic Expresso:
 - Evaluate dynamic functions or commands
 - LINQ dynamic query
 
-Future roadmap
-===========
+## Future roadmap
 
 - Allow to reference types using full name (support namespace and Using method)
 - Extend the Web Shell project to allow its use in an external application
@@ -275,8 +267,7 @@ Future roadmap
 - Support generic type declaration
 - Best error messages
 
-Help and support
-================
+## Help and support
 
 If you need help you can try one of the following:
 
@@ -284,8 +275,7 @@ If you need help you can try one of the following:
 - Post your questions on [stackoverflow.com](http://stackoverflow.com/questions/tagged/dynamic-expresso) using `dynamic-expresso` tag
 - github [official repository](https://github.com/davideicardi/DynamicExpresso)
 
-Credits
-=======
+## Credits
 
 This project is based on two old works:
 - "Converting String expressions to Funcs with FunctionFactory by Matthew Abbott" (http://www.fidelitydesign.net/?p=333) 
@@ -294,8 +284,7 @@ This project is based on two old works:
 	- http://weblogs.asp.net/scottgu/archive/2008/01/07/dynamic-linq-part-1-using-the-linq-dynamic-query-library.aspx
 
 
-Other resources or similar projects
-===================================
+## Other resources or similar projects
 
 Below you can find a list of some similar projects that I have evaluated or that can be interesting to study. 
 For one reason or another none of these projects exactly fit my needs so I decided to write my own interpreter.
@@ -315,8 +304,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - paxScript.NET http://eco148-88394.innterhost.net/paxscriptnet/
 
 
-License
-=======
+## License
 
 *[MIT License]* 
 
