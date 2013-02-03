@@ -55,8 +55,11 @@ ReadLine.prototype = {
         this.addInputLine();
 
         var inputElement = this.lineClass + '.active';
-        this.terminal.click(function () {
-            $(inputElement).focus();
+        var $terminal = this.terminal;
+        this.terminal.click(function (event) {
+            var $target = $(event.target);
+            if ($target.is($terminal))
+                $(inputElement).focus();
         });
     },
 

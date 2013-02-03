@@ -50,7 +50,7 @@ cursor: default;
   font-family: Consolas, Monaco, monospace;
 }
 
-#terminal p.error {
+#terminal p.error, #terminal pre.error {
     color: #FF3300;
 }
 

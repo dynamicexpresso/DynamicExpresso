@@ -13,14 +13,14 @@ namespace DynamicExpressoWebShell.Services
         {
             Expression = exp;
             Time = DateTime.UtcNow;
-            UserHostAddress = HttpContext.Current.Request.UserHostAddress;
-            UserAgent = HttpContext.Current.Request.Browser.Browser;
+            //UserHostAddress = HttpContext.Current.Request.UserHostAddress;
+            //UserAgent = HttpContext.Current.Request.Browser.Browser;
         }
 
         public string Expression { get; private set; }
         public DateTime Time { get; private set; }
-        public string UserHostAddress { get; private set; }
-        public string UserAgent { get; private set; }
+        //public string UserHostAddress { get; private set; }
+        //public string UserAgent { get; private set; }
     }
 
     public class CommandsHistory

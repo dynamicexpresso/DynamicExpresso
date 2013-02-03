@@ -41,7 +41,11 @@
         </div>
 
         <div class="row">
-            <p>In this example all the results are serialized using json to be always human readable.</p>
+            <p>
+                Dynamic Expresso understands a subset of C# syntax (numeric and string operators, comparison operators, typeof, new, primitive types, Math and Convert classes, ...). 
+                It supports single statement expression only. See <a href="https://github.com/davideicardi/DynamicExpresso">documentation</a> for more information.<br />
+                In this example all the results are serialized using json to be more human readable.
+            </p>
         </div>
 
         <div class="row">
@@ -52,15 +56,19 @@
                         Here some expressions that you can try:
                     </p>
                     <ul>
-                        <li><code>DateTime.Now</code></li>
+                        <li><code>5 + 2 * 8 / (80 + 9.9)</code></li>
+                        <li><code>"Hello" + " " + "world!"</code></li>
                         <li><code>DateTime.Now.AddDays(30)</code></li>
-                        <li><code>string.Format("Hello world! My name is {0}.", "R2-D2")</code></li>
+                        <li><code>new DateTime(2020, 2, 13)</code></li>
+                        <li><code>string.Format("My name is {0}. Today is {1}", "R2-D2", DateTime.Now.ToShortDateString())</code></li>
                         <li><code>Commands.Count</code></li>
                         <li><code>Commands.Clear()</code></li>
                         <li><code>Commands.GetLastCommands()</code></li>
                     </ul>
 
-                    <small>The <code>Commands</code> variable is just for demostration purpose.</small>
+                    <p>
+                        The <code>Commands</code> variable is just for demostration purpose.
+                    </p>
                 </div>
             </div>
 
