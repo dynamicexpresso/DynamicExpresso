@@ -128,6 +128,41 @@ You can easily reference any custom .NET type by using `Interpreter.Reference` m
 	Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
 	Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
 
+
+### Generate dynamic delegates
+
+You can use the `Interpreter.Parse<TDelegate>` method to directly parse an expression into a .NET delegate type that can be normally invoked. 
+In the example below I generate a `Func<Customer, bool>` delegate that can be used in a LINQ where expression.
+
+	class Customer
+	{
+		public string Name { get; set; }
+		public int Age { get; set; }
+		public char Gender { get; set; }
+	}
+
+	[TestMethod]
+	public void Linq_Where()
+	{
+		var customers = new List<Customer> { 
+								new Customer() { Name = "David", Age = 31, Gender = 'M' },
+								new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
+								new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
+								new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
+								new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
+								};
+
+		string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
+
+		var interpreter = new Interpreter();
+		Func<Customer, bool> dynamicWhere = interpreter.Parse<Func<Customer, bool>>(whereExpression, "customer");
+
+		Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
+	}
+
+This is the preferred way to parse an expression that you known at compile time what parameters can accept and what value must return.
+
+
 ## Syntax and operators
 
 All statments can be written using a subset of the C# syntax. Here a list of the supported operators:
@@ -191,39 +226,6 @@ All statments can be written using a subset of the C# syntax. Here a list of the
 		</tr>
 	</tbody>
 </table>
-
-### Generate dynamic delegates
-
-You can use the `Interpreter.Parse<TDelegate>` method to directly parse an expression into a .NET delegate type that can be normally invoked. 
-In the example below I generate a `Func<Customer, bool>` delegate that can be used in a LINQ where expression.
-
-	class Customer
-	{
-		public string Name { get; set; }
-		public int Age { get; set; }
-		public char Gender { get; set; }
-	}
-
-	[TestMethod]
-	public void Linq_Where()
-	{
-		var customers = new List<Customer> { 
-								new Customer() { Name = "David", Age = 31, Gender = 'M' },
-								new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
-								new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
-								new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
-								new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
-								};
-
-		string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
-
-		var interpreter = new Interpreter();
-		Func<Customer, bool> dynamicWhere = interpreter.Parse<Func<Customer, bool>>(whereExpression, "customer");
-
-		Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
-	}
-
-This is the preferred way to parse an expression that you known at compile time what parameters can accept and what value must return.
 
 ## Performance and multithreading
 
