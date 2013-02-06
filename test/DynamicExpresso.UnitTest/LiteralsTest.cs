@@ -30,6 +30,123 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
+        public void Single_quote_inside_a_string()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual("l'aquila", target.Eval("\"l'aquila\""));
+        }
+
+        [TestMethod]
+        public void Non_Ascii_Chars()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual("汉语/漢語", target.Eval("\"汉语/漢語\""));
+            Assert.AreEqual('汉', target.Eval("'汉'"));
+
+            for (char c = char.MinValue; c < char.MaxValue; c++)
+            {
+                if (c != '\"' && c != '\\')
+                    Assert.AreEqual(new string(c, 1), target.Eval(string.Format("\"{0}\"", c)), string.Format("Failed to parse string literals \"{0}\".", c));
+                if (c != '\'' && c != '\\')
+                    Assert.AreEqual(c, target.Eval(string.Format("'{0}'", c)), string.Format("Failed to parse char literals '{0}'.", c));
+            }
+        }
+
+        [TestMethod]
+        public void Escape_chars_in_char()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual('\'', target.Eval("'\\''"));
+            Assert.AreEqual('\"', target.Eval("'\\\"'"));
+            Assert.AreEqual('\\', target.Eval("'\\\\'"));
+            Assert.AreEqual('\0', target.Eval("'\\0'"));
+            Assert.AreEqual('\a', target.Eval("'\\a'"));
+            Assert.AreEqual('\b', target.Eval("'\\b'"));
+            Assert.AreEqual('\f', target.Eval("'\\f'"));
+            Assert.AreEqual('\n', target.Eval("'\\n'"));
+            Assert.AreEqual('\r', target.Eval("'\\r'"));
+            Assert.AreEqual('\t', target.Eval("'\\t'"));
+            Assert.AreEqual('\v', target.Eval("'\\v'"));
+        }
+
+        [TestMethod]
+        public void Escape_chars_in_string()
+        {
+            var target = new Interpreter();
+
+            Assert.AreEqual("\'", target.Eval("\"\\'\""));
+            Assert.AreEqual("\"", target.Eval("\"\\\"\""));
+            Assert.AreEqual("\\", target.Eval("\"\\\\\""));
+            Assert.AreEqual("\0", target.Eval("\"\\0\""));
+            Assert.AreEqual("\a", target.Eval("\"\\a\""));
+            Assert.AreEqual("\b", target.Eval("\"\\b\""));
+            Assert.AreEqual("\f", target.Eval("\"\\f\""));
+            Assert.AreEqual("\n", target.Eval("\"\\n\""));
+            Assert.AreEqual("\r", target.Eval("\"\\r\""));
+            Assert.AreEqual("\t", target.Eval("\"\\t\""));
+            Assert.AreEqual("\v", target.Eval("\"\\v\""));
+
+            Assert.AreEqual("L\'aquila\r\n\tè\tbella.", target.Eval("\"L\\'aquila\\r\\n\\tè\\tbella.\""));
+        }
+
+        [ExpectedException(typeof(ParseException))]
+        [TestMethod]
+        public void Invalid_Escape_char()
+        {
+            var target = new Interpreter();
+
+            target.Eval("'\\'");
+        }
+
+        [ExpectedException(typeof(ParseException))]
+        [TestMethod]
+        public void Invalid_Escape_string()
+        {
+            var target = new Interpreter();
+
+            target.Eval("\"\\\"");
+        }
+
+        [ExpectedException(typeof(ParseException))]
+        [TestMethod]
+        public void Character_Literal_Must_be_closed()
+        {
+            var target = new Interpreter();
+
+            target.Eval("'1");
+        }
+
+        [ExpectedException(typeof(ParseException))]
+        [TestMethod]
+        public void String_Literal_Must_be_closed()
+        {
+            var target = new Interpreter();
+
+            target.Eval("\"1");
+        }
+
+        [ExpectedException(typeof(ParseException))]
+        [TestMethod]
+        public void Character_Literal_Must_one_char_maximum()
+        {
+            var target = new Interpreter();
+
+            target.Eval("'12'");
+        }
+
+        [ExpectedException(typeof(ParseException))]
+        [TestMethod]
+        public void Character_Literal_Must_one_char_minimum()
+        {
+            var target = new Interpreter();
+
+            target.Eval("''");
+        }
+
+        [TestMethod]
         public void Should_Understand_ReturnType_Of_Literlars()
         {
             var target = new Interpreter();

@@ -17,6 +17,7 @@ namespace DynamicExpresso
         public const string InvalidCharacterLiteral = "Character literal must contain exactly one character";
         public const string InvalidIntegerLiteral = "Invalid integer literal '{0}'";
         public const string InvalidRealLiteral = "Invalid real literal '{0}'";
+        public const string InvalidEscapeSequence = "Invalid character escape sequence";
         public const string UnknownIdentifier = "Unknown identifier '{0}'";
         public const string NoItInScope = "No 'it' is in scope";
         public const string TypeofRequiresAType = "The 'typeof' keyword requires a type as an argument";

@@ -21,7 +21,7 @@ or
     var interpreter = new Interpreter()
                     .SetVariable("service", new ServiceExample());
 	
-	string expression = "x > 4 ? service.SomeMethod() : service.AnotherMethod()";
+	string expression = "x > 4 ? service.OneMethod() : service.AnotherMethod()";
 
     Lambda parsedExpression = interpreter.Parse(expression, 
                             new Parameter("x", typeof(int)));
@@ -226,6 +226,20 @@ All statments can be written using a subset of the C# syntax. Here a list of the
 		</tr>
 	</tbody>
 </table>
+
+The following character escape sequences are supported inside string or char literals:
+
+- `\'` - single quote, needed for character literals
+- `\"` - double quote, needed for string literals
+- `\\` - backslash
+- `\0` - Unicode character 0
+- `\a` - Alert (character 7)
+- `\b` - Backspace (character 8)
+- `\f` - Form feed (character 12)
+- `\n` - New line (character 10)
+- `\r` - Carriage return (character 13)
+- `\t` - Horizontal tab (character 9)
+- `\v` - Vertical quote (character 11)
 
 ## Performance and multithreading
 

@@ -35,6 +35,7 @@ namespace DynamicExpresso
             Unknown,
             End,
             Identifier,
+            CharLiteral,
             StringLiteral,
             IntegerLiteral,
             RealLiteral,
@@ -523,6 +524,8 @@ namespace DynamicExpresso
             {
                 case TokenId.Identifier:
                     return ParseIdentifier();
+                case TokenId.CharLiteral:
+                    return ParseCharLiteral();
                 case TokenId.StringLiteral:
                     return ParseStringLiteral();
                 case TokenId.IntegerLiteral:
@@ -538,28 +541,91 @@ namespace DynamicExpresso
             }
         }
 
+        Expression ParseCharLiteral()
+        {
+            ValidateToken(TokenId.CharLiteral);
+            string s = token.text.Substring(1, token.text.Length - 2);
+
+            s = EvalEscapeStringLiteral(s);
+
+            if (s.Length != 1)
+                throw ParseError(ErrorMessages.InvalidCharacterLiteral);
+
+            NextToken();
+            return CreateLiteral(s[0], s);
+        }
+
         Expression ParseStringLiteral()
         {
             ValidateToken(TokenId.StringLiteral);
-            char quote = token.text[0];
             string s = token.text.Substring(1, token.text.Length - 2);
-            int start = 0;
-            while (true)
-            {
-                int i = s.IndexOf(quote, start);
-                if (i < 0) break;
-                s = s.Remove(i, 1);
-                start = i + 1;
-            }
-            if (quote == '\'')
-            {
-                if (s.Length != 1)
-                    throw ParseError(ErrorMessages.InvalidCharacterLiteral);
-                NextToken();
-                return CreateLiteral(s[0], s);
-            }
+
+            s = EvalEscapeStringLiteral(s);
+
+            //int start = 0;
+            //while (true)
+            //{
+            //    int i = s.IndexOf(quote, start);
+            //    if (i < 0)
+            //        break;
+            //    s = s.Remove(i, 1);
+            //    start = i + 1;
+            //}
+
             NextToken();
             return CreateLiteral(s, s);
+        }
+
+        string EvalEscapeStringLiteral(string source)
+        {
+            var builder = new StringBuilder();
+
+            for (int i = 0; i < source.Length; i++)
+            {
+                var c = source[i];
+                if (c == '\\')
+                {
+                    if ((i + 1) == source.Length)
+                        throw ParseError(ErrorMessages.InvalidEscapeSequence);
+
+                    builder.Append(EvalEscapeChar(source[++i]));
+                }
+                else
+                    builder.Append(c);
+            }
+
+            return builder.ToString();
+        }
+
+        char EvalEscapeChar(char source)
+        {
+            switch (source)
+            {
+                case '\'':
+                    return '\'';
+                case '"':
+                    return '"';
+                case '\\':
+                    return '\\';
+                case '0':
+                    return '\0';
+                case 'a':
+                    return '\a';
+                case 'b':
+                    return '\b';
+                case 'f':
+                    return '\f';
+                case 'n':
+                    return '\n';
+                case 'r':
+                    return '\r';
+                case 't':
+                    return '\t';
+                case 'v':
+                    return '\v';
+                default:
+                    throw ParseError(ErrorMessages.InvalidEscapeSequence);
+            }
         }
 
         Expression ParseIntegerLiteral()
@@ -1758,17 +1824,40 @@ namespace DynamicExpresso
                     }
                     break;
                 case '"':
-                case '\'':
-                    char quote = ch;
-                    do
+                    NextChar();
+                    bool isEscapeS = false;
+                    bool isEndS = false;
+                    while (textPos < textLen && !isEndS)
                     {
+                        isEscapeS = ch == '\\' && !isEscapeS;
                         NextChar();
-                        while (textPos < textLen && ch != quote) NextChar();
-                        if (textPos == textLen)
-                            throw ParseError(textPos, ErrorMessages.UnterminatedStringLiteral);
-                        NextChar();
-                    } while (ch == quote);
+                        isEndS = (ch == '\"' && !isEscapeS);
+                    }
+
+                    if (textPos == textLen)
+                        throw ParseError(textPos, ErrorMessages.UnterminatedStringLiteral);
+
+                    NextChar();
+
                     t = TokenId.StringLiteral;
+                    break;
+                case '\'':
+                    NextChar();
+                    bool isEscapeC = false;
+                    bool isEndC = false;
+                    while (textPos < textLen && !isEndC)
+                    {
+                        isEscapeC = ch == '\\' && !isEscapeC;
+                        NextChar();
+                        isEndC = (ch == '\'' && !isEscapeC);
+                    }
+
+                    if (textPos == textLen)
+                        throw ParseError(textPos, ErrorMessages.UnterminatedStringLiteral);
+
+                    NextChar();
+
+                    t = TokenId.CharLiteral;
                     break;
                 default:
                     if (Char.IsLetter(ch) || ch == '@' || ch == '_')
