@@ -69,17 +69,6 @@ namespace DynamicExpresso.UnitTest
             Assert.AreEqual(new MyDataContract(44, 88).Name, target.Eval("new MyDataContract(44 , 88).Name"));
         }
 
-        [Ignore]
-        [TestMethod]
-        public void Generic_Types()
-        {
-            var target = new Interpreter()
-                            .Reference(typeof(MyTestClass<>));
-
-            Assert.AreEqual(new MyTestClass<string>("davide").ToString(), target.Eval("new MyTestClass<string>(\"davide\").ToString()"));
-            Assert.AreEqual(new MyTestClass<int>(44).ToString(), target.Eval("new MyTestClass<int>(44).ToString()"));
-        }
-
         [TestMethod]
         public void Custom_Type_Alias()
         {

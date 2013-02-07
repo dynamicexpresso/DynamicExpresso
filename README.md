@@ -279,8 +279,8 @@ Here are some possible usage scenarios of Dynamic Expresso:
 
 - Allow to reference types using full name (support namespace and Using method)
 - Extend the Web Shell project to allow its use in an external application
-- Support `throw` operator
-- Support generic type declaration
+- `throw` operator
+- Generic type declaration
 - Best error messages
 
 ## Help and support
@@ -308,6 +308,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - Roslyn Project - Compiler as a service - http://msdn.microsoft.com/en-us/vstudio/roslyn.aspx
 	- When Roslyn will be available this project can probably directly use the Roslyn compiler/interpreter.
 - Mono.CSharp - C# Compiler Service and Runtime Evaulator - http://docs.go-mono.com/index.aspx?link=N%3AMono.CSharp
+- NCalc - Mathematical Expressions Evaluator for .NET - http://ncalc.codeplex.com/
 - C sharp Eval http://kamimucode.com/Home.aspx/C-sharp-Eval/1
 	- Interesting but a little complex and no more updated
 - CSharp Eval http://csharp-eval.com/
@@ -319,6 +320,16 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - IronJS, IronRuby, IronPython
 - paxScript.NET http://eco148-88394.innterhost.net/paxscriptnet/
 
+
+## Release notes
+
+- 0.7
+
+	Support for escape sequences inside string or character literals (es. `\t`)
+
+- 0.6
+
+	First official beta release
 
 ## License
 

@@ -3,10 +3,10 @@
 - throw
 - performance test (memory/cpu/threads/handles)?
 
-Usages and examples
-===================
 
-TODO
+
+Usages and examples
+--------------
 
 - ContinuousPackager
 - Counter Catch (filter counters and transform values)
