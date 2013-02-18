@@ -44,6 +44,11 @@ namespace DynamicExpresso
             }
         }
 
+        public object Invoke()
+        {
+            return Invoke(new object[0]);
+        }
+
         public object Invoke(params Parameter[] parameters)
         {
             var args = (from dp in _lambdaExpression.Parameters

@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Globalization;
+using System.Reflection;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -21,7 +22,66 @@ namespace DynamicExpresso.UnitTest
         }
 
         [TestMethod]
-        public void Different_parameters_values()
+        public void Expression_Without_Parameters()
+        {
+            var target = new Interpreter();
+
+            var parameters = new Parameter[0];
+
+            var exp = target.Parse("10+5", parameters);
+
+            Assert.AreEqual(15, exp.Invoke());
+        }
+
+        [ExpectedException(typeof(TargetParameterCountException))]
+        [TestMethod]
+        public void Parameters_Mismatch()
+        {
+            var target = new Interpreter();
+
+            var parameters = new[] {
+                            new Parameter("x", 23),
+                            new Parameter("y", 7)
+                            };
+
+            var exp = target.Parse("x + y", parameters);
+
+            var parametersMismatch = new[] {
+                            new Parameter("x", 546)
+                            };
+
+            Assert.AreEqual(30, exp.Invoke(parametersMismatch));
+        }
+
+        [TestMethod]
+        public void Different_parameters_values_With_Parameters()
+        {
+            var target = new Interpreter();
+
+            var parameters = new[] {
+                            new Parameter("x", typeof(int)),
+                            new Parameter("y", typeof(int))
+                            };
+
+            var myFunc = target.Parse("x + y", parameters);
+
+            var parameters1 = new[] {
+                            new Parameter("x", 25),
+                            new Parameter("y", 5)
+                            };
+
+            Assert.AreEqual(30, myFunc.Invoke(parameters1));
+
+            var parameters2 = new[] {
+                            new Parameter("x", 60),
+                            new Parameter("y", -2)
+                            };
+
+            Assert.AreEqual(58, myFunc.Invoke(parameters2));
+        }
+
+        [TestMethod]
+        public void Different_parameters_values_With_Args()
         {
             var target = new Interpreter();
 
