@@ -323,11 +323,15 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
-- 0.7
+- 0.8.0
+
+	Small api improvements (Invoke() without parameters)
+
+- 0.7.0
 
 	Support for escape sequences inside string or character literals (es. `\t`)
 
-- 0.6
+- 0.6.0
 
 	First official beta release
 
