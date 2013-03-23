@@ -160,3 +160,13 @@ pip-log.txt
 
 # Mac crap
 .DS_Store
+
+#Resharper
+_ReSharper*
+
+#Stylecop
+StyleCop.Cache
+
+#Other
+*.vsmdi
+*.InstallLog
