@@ -7,13 +7,13 @@ using System.Text;
 
 namespace DynamicExpresso
 {
-    internal static class ParserConstants
-    {
-        public static readonly Expression nullLiteral = Expression.Constant(null);
+	internal static class ParserConstants
+	{
+		public static readonly Expression nullLiteral = Expression.Constant(null);
 
-        public const string keywordAs = "as";
-        public const string keywordIs = "is";
-        public const string keywordNew = "new";
-        public const string keywordTypeof = "typeof";
-    }
+		public const string keywordAs = "as";
+		public const string keywordIs = "is";
+		public const string keywordNew = "new";
+		public const string keywordTypeof = "typeof";
+	}
 }
