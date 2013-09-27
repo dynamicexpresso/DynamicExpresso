@@ -277,11 +277,15 @@ Here are some possible usage scenarios of Dynamic Expresso:
 
 ## Future roadmap
 
-- Allow to reference types using full name (support namespace and Using method)
-- Extend the Web Shell project to allow its use in an external application
+- Ability to call a method extension
+- IEnumerable/list/array support
+- Reference an entire namespace (like a `using` statement), assembly reference
 - `throw` operator
+- Ability to invoke generic methods
 - Generic type declaration
+- Lambda support (that can be used also to call LINQ method)
 - Best error messages
+- Extend the Web Shell project to allow its use in an external application
 
 ## Help and support
 
