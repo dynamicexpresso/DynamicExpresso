@@ -1,5 +1,5 @@
 ﻿
-Dynamic Expresso (Beta version)
+Dynamic Expresso (RC version)
 ===============================
 
 Dynamic Expresso is an expression interpreter for simple C# statements.
@@ -326,6 +326,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 
 ## Release notes
+
+- 0.8.1
+	
+	FIX: API hangs on bad formula ([#1](https://github.com/davideicardi/DynamicExpresso/issues/1))
 
 - 0.8.0
 
