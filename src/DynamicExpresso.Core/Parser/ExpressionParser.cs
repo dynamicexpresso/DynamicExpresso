@@ -505,10 +505,12 @@ namespace DynamicExpresso
 				else if (token.id == TokenId.OpenParen)
 				{
 					LambdaExpression lambda = expr as LambdaExpression;
-					if (lambda != null) return ParseLambdaInvocation(lambda, tokenPos);
-
-					if (typeof(Delegate).IsAssignableFrom(expr.Type))
+					if (lambda != null) 
+                        return ParseLambdaInvocation(lambda, tokenPos);
+                    else if (typeof(Delegate).IsAssignableFrom(expr.Type))
 						expr = ParseDelegateInvocation(expr, tokenPos);
+                    else
+                        throw ParseError(tokenPos, ErrorMessages.InvalidMethodCall, GetTypeName(expr.Type));
 				}
 				else
 				{
