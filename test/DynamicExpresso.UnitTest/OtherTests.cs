@@ -33,20 +33,6 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Cast()
-		{
-			var target = new Interpreter();
-
-			var x = 51.5;
-			target.SetVariable("x", x);
-
-			Assert.AreEqual((int)x, target.Eval("(int)x"));
-			Assert.AreEqual(typeof(int), target.Parse("(int)x").ReturnType);
-			Assert.AreEqual(typeof(object), target.Parse("(object)x").ReturnType);
-			Assert.AreEqual((double)84 + 9 * 8, target.Eval("(double)84 + 9 *8"));
-		}
-
-		[TestMethod]
 		public void Indexer()
 		{
 			var target = new Interpreter();

@@ -280,7 +280,7 @@ Here are some possible usage scenarios of Dynamic Expresso:
 - Allow the user to inject customizable rules and logic without recompiling
 
 	In a tool used to collect Performance Counter data I have used Dynamic Expresso to filter and transform the output data. 
-	In this way the user can insert custom filter or transform logic. For more information see [Counter Catch](https://github.com/davideicardi/CounterCatch).
+	In this way the user can insert custom filter or transform logic. For an example see [Counter Catch](https://github.com/davideicardi/CounterCatch).
 
 - Evaluate dynamic functions or commands
 - LINQ dynamic query

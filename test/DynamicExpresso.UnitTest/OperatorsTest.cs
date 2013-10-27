@@ -37,6 +37,20 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		public void Unary_Cast_Operator()
+		{
+			var target = new Interpreter();
+
+			var x = 51.5;
+			target.SetVariable("x", x);
+
+			Assert.AreEqual((int)x, target.Eval("(int)x"));
+			Assert.AreEqual(typeof(int), target.Parse("(int)x").ReturnType);
+			Assert.AreEqual(typeof(object), target.Parse("(object)x").ReturnType);
+			Assert.AreEqual((double)84 + 9 * 8, target.Eval("(double)84 + 9 *8"));
+		}
+
+		[TestMethod]
 		public void Numeric_Operators_Priority()
 		{
 			var target = new Interpreter();
