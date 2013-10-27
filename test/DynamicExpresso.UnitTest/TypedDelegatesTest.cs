@@ -8,6 +8,16 @@ namespace DynamicExpresso.UnitTest
 	public class TypedDelegatesTest
 	{
 		[TestMethod]
+		public void Parse_To_a_Delegate()
+		{
+			var target = new Interpreter();
+
+			var lambda = target.Parse<Func<double, double, double>>("Math.Pow(x, y) + 5", "x", "y");
+
+			Assert.AreEqual(Math.Pow(10, 2) + 5, lambda(10, 2));
+		}
+
+		[TestMethod]
 		public void Parse_To_a_Delegate_With_No_Parameters()
 		{
 			var target = new Interpreter();
@@ -76,7 +86,7 @@ namespace DynamicExpresso.UnitTest
 
 		delegate int MyCustomDelegate(int x, string y);
 
-		[ExpectedException(typeof(ArgumentException))]
+		[ExpectedException(typeof(ParseException))]
 		[TestMethod]
 		public void Return_Type_Mismatch_Cause_An_Exception()
 		{

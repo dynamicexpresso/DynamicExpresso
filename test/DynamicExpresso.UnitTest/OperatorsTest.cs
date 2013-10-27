@@ -185,5 +185,32 @@ namespace DynamicExpresso.UnitTest
 
 			target.Parse("5 <> 4");
 		}
+
+        [TestMethod]
+        public void Implicit_conversion_operator_for_lambda()
+        {
+            var target = new Interpreter()
+                .SetVariable("x", new TypeWithImplicitConversion(10));
+
+            var func = target.Parse<Func<int>>("x");
+            int val = func();
+
+            Assert.AreEqual(10, val);
+        }
+
+        struct TypeWithImplicitConversion
+        {
+            private int _value;
+
+            public TypeWithImplicitConversion(byte value)
+            {
+                this._value = value;
+            }
+
+            public static implicit operator int(TypeWithImplicitConversion d)
+            {
+                return d._value;
+            }
+        }
 	}
 }

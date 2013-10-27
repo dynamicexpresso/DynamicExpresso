@@ -172,6 +172,7 @@ namespace DynamicExpresso
 		//}
 
 		ParserSettings _settings;
+		Type _expressionType;
 
 		Dictionary<string, Expression> _parameters;
 		//Dictionary<Expression, string> _literals;
@@ -184,9 +185,10 @@ namespace DynamicExpresso
 		char ch;
 		Token token;
 
-		public ExpressionParser(string expression, ParameterExpression[] parameters, ParserSettings settings)
+		public ExpressionParser(string expression, Type expressionType, ParameterExpression[] parameters, ParserSettings settings)
 		{
 			_settings = settings;
+			_expressionType = expressionType;
 
 			_parameters = new Dictionary<string, Expression>();
 			//_literals = new Dictionary<Expression, string>();
@@ -199,6 +201,14 @@ namespace DynamicExpresso
 			NextToken();
 		}
 
+		public Expression Parse()
+		{
+			Expression expr = ParseExpressionSegment(_expressionType);
+
+			ValidateToken(TokenId.End, ErrorMessages.SyntaxError);
+			return expr;
+		}
+
 		void AddParameter(string name, Expression value)
 		{
 			if (_parameters.ContainsKey(name))
@@ -209,21 +219,31 @@ namespace DynamicExpresso
 		void ProcessParameters(IEnumerable<ParameterExpression> parameters)
 		{
 			foreach (ParameterExpression pe in parameters)
+			{
 				if (!String.IsNullOrEmpty(pe.Name))
+				{
 					AddParameter(pe.Name, pe);
+				}
+			}
+
 			//if (parameters.Count() == 1 && String.IsNullOrEmpty(parameters.First().Name))
 			//    it = parameters.First();
 		}
 
-		public Expression Parse()
+		Expression ParseExpressionSegment(Type returnType)
 		{
-			Expression expr = ParsePipelineInit();
+			int errorPos = token.pos;
+			var expression = ParseExpressionSegment();
 
-			ValidateToken(TokenId.End, ErrorMessages.SyntaxError);
-			return expr;
+			if (returnType != typeof(void))
+			{
+				return GenerateConversion(expression, returnType, errorPos);
+			}
+
+			return expression;
 		}
 
-		Expression ParsePipelineInit()
+		Expression ParseExpressionSegment()
 		{
 			// The following methods respect the operator precedence as defined in
 			// http://msdn.microsoft.com/en-us/library/aa691323(v=vs.71).aspx
@@ -239,10 +259,10 @@ namespace DynamicExpresso
 			if (token.id == TokenId.Question)
 			{
 				NextToken();
-				Expression expr1 = ParsePipelineInit();
+				Expression expr1 = ParseExpressionSegment();
 				ValidateToken(TokenId.Colon, ErrorMessages.ColonExpected);
 				NextToken();
-				Expression expr2 = ParsePipelineInit();
+				Expression expr2 = ParseExpressionSegment();
 				expr = GenerateConditional(expr, expr1, expr2, errorPos);
 			}
 			return expr;
@@ -505,12 +525,12 @@ namespace DynamicExpresso
 				else if (token.id == TokenId.OpenParen)
 				{
 					LambdaExpression lambda = expr as LambdaExpression;
-					if (lambda != null) 
-                        return ParseLambdaInvocation(lambda, tokenPos);
-                    else if (typeof(Delegate).IsAssignableFrom(expr.Type))
+					if (lambda != null)
+						return ParseLambdaInvocation(lambda, tokenPos);
+					else if (typeof(Delegate).IsAssignableFrom(expr.Type))
 						expr = ParseDelegateInvocation(expr, tokenPos);
-                    else
-                        throw ParseError(tokenPos, ErrorMessages.InvalidMethodCall, GetTypeName(expr.Type));
+					else
+						throw ParseError(tokenPos, ErrorMessages.InvalidMethodCall, GetTypeName(expr.Type));
 				}
 				else
 				{
@@ -697,14 +717,14 @@ namespace DynamicExpresso
 		{
 			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
 			NextToken();
-			Expression e = ParsePipelineInit();
+			Expression e = ParseExpressionSegment();
 			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrOperatorExpected);
 
 			var constExp = e as ConstantExpression;
 			if (constExp != null && constExp.Value is Type)
 			{
 				NextToken();
-				e = Expression.Convert(ParsePipelineInit(), (Type)constExp.Value);
+				e = Expression.Convert(ParseExpressionSegment(), (Type)constExp.Value);
 			}
 
 			NextToken();
@@ -902,21 +922,36 @@ namespace DynamicExpresso
 		Expression GenerateConversion(Expression expr, Type type, int errorPos)
 		{
 			Type exprType = expr.Type;
-			if (exprType == type) return expr;
-			if (exprType.IsValueType && type.IsValueType)
+			if (exprType == type)
 			{
-				if ((IsNullableType(exprType) || IsNullableType(type)) &&
-						GetNonNullableType(exprType) == GetNonNullableType(type))
-					return Expression.Convert(expr, type);
-				if ((IsNumericType(exprType) || IsEnumType(exprType)) &&
-						(IsNumericType(type)) || IsEnumType(type))
-					return Expression.ConvertChecked(expr, type);
+				return expr;
 			}
-			if (exprType.IsAssignableFrom(type) || type.IsAssignableFrom(exprType) ||
-					exprType.IsInterface || type.IsInterface)
-				return Expression.Convert(expr, type);
-			throw ParseError(errorPos, ErrorMessages.CannotConvertValue,
-					GetTypeName(exprType), GetTypeName(type));
+
+			//if (exprType.IsValueType && type.IsValueType)
+			//{
+			//	if ((IsNullableType(exprType) || IsNullableType(type)) &&
+			//			GetNonNullableType(exprType) == GetNonNullableType(type))
+			//		return Expression.Convert(expr, type);
+			//	if ((IsNumericType(exprType) || IsEnumType(exprType)) &&
+			//			(IsNumericType(type)) || IsEnumType(type))
+			//		return Expression.ConvertChecked(expr, type);
+			//}
+
+			//if (exprType.IsAssignableFrom(type) || type.IsAssignableFrom(exprType) ||
+			//				exprType.IsInterface || type.IsInterface)
+			//{
+			//	return Expression.Convert(expr, type);
+			//}
+
+			try
+			{
+				return Expression.ConvertChecked(expr, type);
+			}
+			catch (InvalidOperationException)
+			{
+				throw ParseError(errorPos, ErrorMessages.CannotConvertValue,
+						GetTypeName(exprType), GetTypeName(type));
+			}
 		}
 
 		Expression ParseMemberAccess(Type type, Expression instance)
@@ -1042,7 +1077,7 @@ namespace DynamicExpresso
 			List<Expression> argList = new List<Expression>();
 			while (true)
 			{
-				argList.Add(ParsePipelineInit());
+				argList.Add(ParseExpressionSegment());
 				if (token.id != TokenId.Comma) break;
 				NextToken();
 			}

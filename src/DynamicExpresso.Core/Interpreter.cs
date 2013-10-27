@@ -114,9 +114,23 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Lambda Parse(string expressionText, params Parameter[] parameters)
 		{
+			return Parse(expressionText, typeof(void), parameters);
+		}
+
+		/// <summary>
+		/// Parse a text expression and returns a Lambda class that can be used to invoke it.
+		/// If the expression cannot be converted to the type specified in the expressionType parameter
+		/// an exception is throw.
+		/// </summary>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="expressionType">The expected return type. Use void or object type if there isn't an expected return type.</param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public Lambda Parse(string expressionText, Type expressionType, params Parameter[] parameters)
+		{
 			var arguments = GetParameters(parameters);
 
-			var expression = ParseExpression(expressionText, arguments);
+			var expression = ParseExpression(expressionText, expressionType, arguments);
 
 			var lambdaExp = Expression.Lambda(expression, arguments);
 
@@ -132,11 +146,11 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public TDelegate Parse<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			var arguments = GetDelegateParameters(typeof(TDelegate), parametersNames);
+			var delegateInfo = GetDelegateInfo(typeof(TDelegate), parametersNames);
 
-			var expression = ParseExpression(expressionText, arguments);
+			var expression = ParseExpression(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
 
-			var lambdaExp = Expression.Lambda<TDelegate>(expression, arguments);
+			var lambdaExp = Expression.Lambda<TDelegate>(expression, delegateInfo.Parameters);
 
 			return lambdaExp.Compile();
 		}
@@ -149,12 +163,35 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public object Eval(string expressionText, params Parameter[] parameters)
 		{
-			return Parse(expressionText, parameters).Invoke(parameters);
+			return Eval(expressionText, typeof(void), parameters);
 		}
 
-		Expression ParseExpression(string expressionText, params ParameterExpression[] parameters)
+		/// <summary>
+		/// Parse and invoke the specified expression.
+		/// </summary>
+		/// <param name="expressionText"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public T Eval<T>(string expressionText, params Parameter[] parameters)
 		{
-			var parser = new ExpressionParser(expressionText, parameters, _settings);
+			return (T)Eval(expressionText, typeof(T), parameters);
+		}
+
+		/// <summary>
+		/// Parse and invoke the specified expression.
+		/// </summary>
+		/// <param name="expressionText"></param>
+		/// <param name="expressionType">The return type of the expression. Use void or object if you don't know the expected return type.</param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public object Eval(string expressionText, Type expressionType, params Parameter[] parameters)
+		{
+			return Parse(expressionText, expressionType, parameters).Invoke(parameters);
+		}
+
+		Expression ParseExpression(string expressionText, Type expressionType, params ParameterExpression[] parameters)
+		{
+			var parser = new ExpressionParser(expressionText, expressionType, parameters, _settings);
 
 			return parser.Parse();
 		}
@@ -166,7 +203,7 @@ namespace DynamicExpresso
 			return arguments;
 		}
 
-		static ParameterExpression[] GetDelegateParameters(Type delegateType, string[] parametersNames)
+		static DelegateInfo GetDelegateInfo(Type delegateType, string[] parametersNames)
 		{
 			MethodInfo method = delegateType.GetMethod("Invoke");
 			if (method == null)
@@ -188,7 +225,17 @@ namespace DynamicExpresso
 				parameters[i] = Expression.Parameter(paramType, paramName);
 			}
 
-			return parameters;
+			return new DelegateInfo()
+			{
+				Parameters = parameters,
+				ReturnType = method.ReturnType
+			};
+		}
+
+		class DelegateInfo
+		{
+			public Type ReturnType { get; set; }
+			public ParameterExpression[] Parameters { get; set; }
 		}
 	}
 }

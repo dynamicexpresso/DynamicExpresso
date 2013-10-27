@@ -1,6 +1,6 @@
 ﻿
-Dynamic Expresso (RC version)
-===============================
+Dynamic Expresso
+================
 
 Dynamic Expresso is an expression interpreter for simple C# statements.
 Dynamic Expresso embeds its own parsing logic, and really interprets C# statements by converting it to .NET delegates that can be invoked as any standard delegate.
@@ -45,6 +45,7 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 
 - Expressions can be written using a subset of C# syntax (see Syntax section for more information)
 - Support for variables and parameters
+- Can generate .NET delegate from expressions
 - Full suite of unit tests
 - Good performance compared to other similar projects
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
@@ -55,7 +56,16 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 ### Return value
 
 You can parse and execute void expression (without a return value) or you can return any valid .NET type. 
-The built-in parser can understand the return type of any given expression so you can check if the expression returns what you expect.
+When parsing an expression you can specify the expected expression return type. For example you can write:
+
+	var target = new Interpreter();
+
+	double result = target.Eval<double>("Math.Pow(x, y) + 5",
+											new Parameter("x", typeof(double), 10),
+											new Parameter("y", typeof(double), 2));
+
+
+The built-in parser can also understand the return type of any given expression so you can check if the expression returns what you expect.
 
 ### Variables
 
@@ -64,7 +74,7 @@ Variables can be used inside your expressions using the `Interpreter.SetVariable
 	var target = new Interpreter()
                     .SetVariable("myVar", 23);
 
-    Assert.AreEqual(23, target.Eval("myVar"));
+  Assert.AreEqual(23, target.Eval("myVar"));
 
 Variables can be primitive types or custom complex types (classes, structures, delegates, arrays, collections, ...).
 
@@ -277,15 +287,7 @@ Here are some possible usage scenarios of Dynamic Expresso:
 
 ## Future roadmap
 
-- Ability to call a method extension
-- IEnumerable/list/array support
-- Reference an entire namespace (like a `using` statement), assembly reference
-- `throw` operator
-- Ability to invoke generic methods
-- Generic type declaration
-- Lambda support (that can be used also to call LINQ method)
-- Best error messages
-- Extend the Web Shell project to allow its use in an external application
+See [github open issues and milestones](https://github.com/davideicardi/DynamicExpresso/issues).
 
 ## Help and support
 
@@ -326,6 +328,13 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 
 ## Release notes
+
+- 0.9 (in progress)
+	
+	- Expression return type is automatically converted if needed ([#9](https://github.com/davideicardi/DynamicExpresso/issues/9))
+	- Eval typed expression ([#8](https://github.com/davideicardi/DynamicExpresso/issues/8))
+	- Implicit conversion support ([#7](https://github.com/davideicardi/DynamicExpresso/issues/7))
+	- Nullable types support ([#5](https://github.com/davideicardi/DynamicExpresso/issues/5))
 
 - 0.8.1
 	

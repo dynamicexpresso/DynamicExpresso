@@ -54,6 +54,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CollectionHelperTests.cs" />
+    <Compile Include="ExpressionTypeTest.cs" />
     <Compile Include="InvalidExpressionTest.cs" />
     <Compile Include="TypedDelegatesTest.cs" />
     <Compile Include="TypesTest.cs" />
