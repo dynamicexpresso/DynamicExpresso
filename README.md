@@ -175,7 +175,7 @@ This is the preferred way to parse an expression that you known at compile time 
 
 ## Syntax and operators
 
-All statments can be written using a subset of the C# syntax. Here a list of the supported operators:
+Statements can be written using a subset of the C# syntax. Here you can find a list of the supported expressions: 
 
 ### Operators
 
@@ -250,6 +250,22 @@ The following character escape sequences are supported inside string or char lit
 - `\r` - Carriage return (character 13)
 - `\t` - Horizontal tab (character 9)
 - `\v` - Vertical quote (character 11)
+
+### Type's members invocation
+
+Any standard .NET method, field, property or constructor can be invoked.
+
+	var x = new MyTestService();
+	var target = new Interpreter().SetVariable("x", x);
+
+	Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()"));
+	Assert.AreEqual(x.AProperty, target.Eval("x.AProperty"));
+	Assert.AreEqual(x.AField, target.Eval("x.AField"));
+
+	var target = new Interpreter();
+	Assert.AreEqual(new DateTime(2015, 1, 24), target.Eval("new DateTime(2015, 1, 24)"));
+
+Also indexer and static members can be invoked.
 
 ## Performance and multithreading
 
