@@ -324,7 +324,8 @@ namespace DynamicExpresso
 						}
 						else
 						{
-							throw IncompatibleOperandsError(op.text, left, right, op.pos);
+							throw ParseError(op.pos, ErrorMessages.IncompatibleOperands,
+								op.text, GetTypeName(left.Type), GetTypeName(right.Type));
 						}
 					}
 				}
@@ -343,7 +344,8 @@ namespace DynamicExpresso
 						}
 						else
 						{
-							throw IncompatibleOperandsError(op.text, left, right, op.pos);
+							throw ParseError(op.pos, ErrorMessages.IncompatibleOperands,
+								op.text, GetTypeName(left.Type), GetTypeName(right.Type));
 						}
 					}
 				}
@@ -855,24 +857,33 @@ namespace DynamicExpresso
 
 		Expression ParseLambdaInvocation(LambdaExpression lambda, int errorPos)
 		{
-			//int errorPos = token.pos;
-			//NextToken();
 			Expression[] args = ParseArgumentList();
-			MethodBase method;
-			if (FindMethod(lambda.Type, "Invoke", false, args, out method) != 1)
+
+			if (!PrepareDelegateInvoke(lambda.Type, args))
 				throw ParseError(errorPos, ErrorMessages.ArgsIncompatibleWithLambda);
+
 			return Expression.Invoke(lambda, args);
 		}
 
 		Expression ParseDelegateInvocation(Expression delegateExp, int errorPos)
 		{
-			//int errorPos = token.pos;
-			//NextToken();
 			Expression[] args = ParseArgumentList();
-			MethodBase method;
-			if (FindMethod(delegateExp.Type, "Invoke", false, args, out method) != 1)
-				throw ParseError(errorPos, ErrorMessages.ArgsIncompatibleWithLambda);
+
+			if (!PrepareDelegateInvoke(delegateExp.Type, args))
+				throw ParseError(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
+
 			return Expression.Invoke(delegateExp, args);
+		}
+
+		bool PrepareDelegateInvoke(Type type, Expression[] args)
+		{
+			var applicableMethods = FindMethods(type, "Invoke", false, args);
+			if (applicableMethods.Length != 1)
+				return false;
+
+			SetArgumentsFromMethod(applicableMethods[0], args);
+
+			return true;
 		}
 
 		Expression ParseTypeKeyword(Type type)
@@ -978,40 +989,58 @@ namespace DynamicExpresso
 
 		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string id)
 		{
-			//if (instance != null && type != typeof(string))
-			//{
-			//    Type enumerableType = FindGenericType(typeof(IEnumerable<>), type);
-			//    if (enumerableType != null)
-			//    {
-			//        Type elementType = enumerableType.GetGenericArguments()[0];
-			//        return ParseAggregate(instance, elementType, id, errorPos);
-			//    }
-			//}
 			Expression[] args = ParseArgumentList();
 
-			//Type[] argsType = args.Select(p => p.Type).ToArray();
-			//return Expression.Call(instance, id, argsType, args);
+			var methodInvocationExpression = ParseNormalMethodInvocation(type, instance, errorPos, id, args);
 
-			MethodBase mb;
-			switch (FindMethod(type, id, instance == null, args, out mb))
+			if (methodInvocationExpression == null && instance != null)
 			{
-				case 0:
-					throw ParseError(errorPos, ErrorMessages.NoApplicableMethod, id, GetTypeName(type));
-				case 1:
-					MethodInfo method = (MethodInfo)mb;
-
-					//if (!IsPredefinedType(method.DeclaringType))
-					//    throw ParseError(errorPos, Res.MethodsAreInaccessible, GetTypeName(method.DeclaringType));
-
-					//if (method.ReturnType == typeof(void))
-					//{
-					//    throw ParseError(errorPos, ErrorMessages.MethodIsVoid, id, GetTypeName(method.DeclaringType));
-					//}
-
-					return Expression.Call(instance, method, args);
-				default:
-					throw ParseError(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, GetTypeName(type));
+				methodInvocationExpression = ParseExtensionMethodInvocation(type, instance, errorPos, id, args);
 			}
+
+			if (methodInvocationExpression != null)
+				return methodInvocationExpression;
+
+			throw ParseError(errorPos, ErrorMessages.NoApplicableMethod, id, GetTypeName(type));
+		}
+
+		private Expression ParseExtensionMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
+		{
+			var extensionMethodsArguments = new Expression[args.Length + 1];
+			extensionMethodsArguments[0] = instance;
+			args.CopyTo(extensionMethodsArguments, 1);
+
+			var extensionMethods = FindExtensionMethods(type, id, extensionMethodsArguments);
+			if (extensionMethods.Length > 1)
+				throw ParseError(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, GetTypeName(type));
+
+			if (extensionMethods.Length == 1)
+			{
+				var method = extensionMethods[0];
+
+				SetArgumentsFromMethod(method, extensionMethodsArguments);
+
+				return Expression.Call((MethodInfo)method.MethodBase, extensionMethodsArguments);
+			}
+
+			return null;
+		}
+
+		private Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
+		{
+			var applicableMethods = FindMethods(type, id, instance == null, args);
+			if (applicableMethods.Length > 1)
+				throw ParseError(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, GetTypeName(type));
+
+			if (applicableMethods.Length == 1)
+			{
+				var method = applicableMethods[0];
+
+				SetArgumentsFromMethod(method, args);
+				return Expression.Call(instance, (MethodInfo)method.MethodBase, args);
+			}
+
+			return null;
 		}
 
 		static Type FindGenericType(Type generic, Type type)
@@ -1103,18 +1132,22 @@ namespace DynamicExpresso
 			}
 			else
 			{
-				MethodBase mb;
-				switch (FindIndexer(expr.Type, args, out mb))
+				var applicableMethods = FindIndexer(expr.Type, args);
+				if (applicableMethods.Length == 0)
 				{
-					case 0:
-						throw ParseError(errorPos, ErrorMessages.NoApplicableIndexer,
-								GetTypeName(expr.Type));
-					case 1:
-						return Expression.Call(expr, (MethodInfo)mb, args);
-					default:
-						throw ParseError(errorPos, ErrorMessages.AmbiguousIndexerInvocation,
-								GetTypeName(expr.Type));
+					throw ParseError(errorPos, ErrorMessages.NoApplicableIndexer,
+							GetTypeName(expr.Type));
 				}
+
+				if (applicableMethods.Length > 1)
+				{
+					throw ParseError(errorPos, ErrorMessages.AmbiguousIndexerInvocation,
+							GetTypeName(expr.Type));
+				}
+
+				var method = applicableMethods[0];
+				SetArgumentsFromMethod(method, args);
+				return Expression.Call(expr, (MethodInfo)method.MethodBase, args);
 			}
 		}
 
@@ -1185,8 +1218,7 @@ namespace DynamicExpresso
 		void CheckAndPromoteOperand(Type signatures, string opName, ref Expression expr, int errorPos)
 		{
 			Expression[] args = new Expression[] { expr };
-			MethodBase method;
-			if (FindMethod(signatures, "F", false, args, out method) != 1)
+			if (!PrepareOperandArguments(signatures, args))
 				throw ParseError(errorPos, ErrorMessages.IncompatibleOperand,
 						opName, GetTypeName(args[0].Type));
 			expr = args[0];
@@ -1195,17 +1227,22 @@ namespace DynamicExpresso
 		void CheckAndPromoteOperands(Type signatures, string opName, ref Expression left, ref Expression right, int errorPos)
 		{
 			Expression[] args = new Expression[] { left, right };
-			MethodBase method;
-			if (FindMethod(signatures, "F", false, args, out method) != 1)
-				throw IncompatibleOperandsError(opName, left, right, errorPos);
+			if (!PrepareOperandArguments(signatures, args))
+				throw ParseError(errorPos, ErrorMessages.IncompatibleOperands,
+					opName, GetTypeName(left.Type), GetTypeName(right.Type));
 			left = args[0];
 			right = args[1];
 		}
 
-		Exception IncompatibleOperandsError(string opName, Expression left, Expression right, int pos)
+		bool PrepareOperandArguments(Type signatures, Expression[] args)
 		{
-			return ParseError(pos, ErrorMessages.IncompatibleOperands,
-					opName, GetTypeName(left.Type), GetTypeName(right.Type));
+			var applicableMethods = FindMethods(signatures, "F", false, args);
+			if (applicableMethods.Length != 1)
+				return false;
+
+			SetArgumentsFromMethod(applicableMethods[0], args);
+
+			return true;
 		}
 
 		MemberInfo FindPropertyOrField(Type type, string memberName, bool staticAccess)
@@ -1221,22 +1258,31 @@ namespace DynamicExpresso
 			return null;
 		}
 
-		int FindMethod(Type type, string methodName, bool staticAccess, Expression[] args, out MethodBase method)
+		MethodData[] FindMethods(Type type, string methodName, bool staticAccess, Expression[] args)
 		{
 			BindingFlags flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
 					(staticAccess ? BindingFlags.Static : BindingFlags.Instance);
 			foreach (Type t in SelfAndBaseTypes(type))
 			{
 				MemberInfo[] members = t.FindMembers(MemberTypes.Method, flags, Type.FilterName, methodName);
-				int count = FindBestMethod(members.Cast<MethodBase>(), args, out method);
-				if (count != 0)
-					return count;
+				var applicableMethods = FindBestMethod(members.Cast<MethodBase>(), args);
+
+				if (applicableMethods.Length > 0)
+					return applicableMethods;
 			}
-			method = null;
-			return 0;
+
+			return new MethodData[0];
 		}
 
-		int FindIndexer(Type type, Expression[] args, out MethodBase method)
+		MethodData[] FindExtensionMethods(Type type, string methodName, Expression[] args)
+		{
+			var matchMethods = _settings.ExtensionMethods.Where(p => p.Name == methodName);
+
+			return FindBestMethod(matchMethods.Cast<MethodBase>(), args);
+		}
+
+
+		MethodData[] FindIndexer(Type type, Expression[] args)
 		{
 			foreach (Type t in SelfAndBaseTypes(type))
 			{
@@ -1247,12 +1293,14 @@ namespace DynamicExpresso
 							OfType<PropertyInfo>().
 							Select(p => (MethodBase)p.GetGetMethod()).
 							Where(m => m != null);
-					int count = FindBestMethod(methods, args, out method);
-					if (count != 0) return count;
+
+					var applicableMethods = FindBestMethod(methods, args);
+					if (applicableMethods.Length > 0)
+						return applicableMethods;
 				}
 			}
-			method = null;
-			return 0;
+
+			return new MethodData[0];
 		}
 
 		static IEnumerable<Type> SelfAndBaseTypes(Type type)
@@ -1291,7 +1339,7 @@ namespace DynamicExpresso
 			public Expression[] Args;
 		}
 
-		int FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args, out MethodBase method)
+		MethodData[] FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
 		{
 			MethodData[] applicable = methods.
 					Select(m => new MethodData { MethodBase = m, Parameters = m.GetParameters() }).
@@ -1303,17 +1351,16 @@ namespace DynamicExpresso
 						Where(m => applicable.All(n => m == n || IsBetterThan(args, m, n))).
 						ToArray();
 			}
-			if (applicable.Length == 1)
+
+			return applicable;
+		}
+
+		void SetArgumentsFromMethod(MethodData method, Expression[] args)
+		{
+			for (int i = 0; i < args.Length; i++)
 			{
-				MethodData md = applicable[0];
-				for (int i = 0; i < args.Length; i++) args[i] = md.Args[i];
-				method = md.MethodBase;
+				args[i] = method.Args[i];
 			}
-			else
-			{
-				method = null;
-			}
-			return applicable.Length;
 		}
 
 		bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
@@ -1348,18 +1395,39 @@ namespace DynamicExpresso
 					method.MethodBase is MethodInfo)
 			{
 				var methodInfo = ((MethodInfo)method.MethodBase);
-				var genericArgsType = new Type[methodInfo.GetGenericArguments().Length];
-				int genericArgsTypeIndex = 0;
-				for (int i = 0; i < method.Args.Length; i++)
-				{
-					if (method.Parameters[i].ParameterType.IsGenericParameter)
-						genericArgsType[genericArgsTypeIndex++] = method.Args[i].Type;
-				}
 
-				method.MethodBase = methodInfo.MakeGenericMethod(genericArgsType);
+				var genericArgsType = ExtractActualGenericArguments(
+									method.Parameters.Select(p => p.ParameterType).ToArray(),
+									method.Args.Select(p => p.Type).ToArray());
+
+				method.MethodBase = methodInfo.MakeGenericMethod(genericArgsType.ToArray());
 			}
 
 			return true;
+		}
+
+		List<Type> ExtractActualGenericArguments(Type[] requestedParameters, Type[] actualParameters)
+		{
+			var extractedGenericTypes = new List<Type>();
+
+			for (int i = 0; i < requestedParameters.Length; i++)
+			{
+				var requestedType = requestedParameters[i];
+				var actualType = actualParameters[i];
+
+				if (requestedType.IsGenericParameter)
+				{
+					extractedGenericTypes.Add(actualType);
+				}
+				else if (requestedType.ContainsGenericParameters)
+				{
+					var innerGenericTypes = ExtractActualGenericArguments(requestedType.GetGenericArguments(), actualType.GetGenericArguments());
+
+					extractedGenericTypes.AddRange(innerGenericTypes);
+				}
+			}
+
+			return extractedGenericTypes;
 		}
 
 		Expression PromoteExpression(Expression expr, Type type, bool exact)
@@ -1373,38 +1441,24 @@ namespace DynamicExpresso
 					if (!type.IsValueType || IsNullableType(type))
 						return Expression.Constant(null, type);
 				}
-				//else
-				//{
-				//    string text;
-				//    if (_literals.TryGetValue(ce, out text))
-				//    {
-				//        Type target = GetNonNullableType(type);
-				//        Object value = null;
-				//        switch (Type.GetTypeCode(ce.Type))
-				//        {
-				//            case TypeCode.Int32:
-				//            case TypeCode.UInt32:
-				//            case TypeCode.Int64:
-				//            case TypeCode.UInt64:
-				//                value = ParseNumber(text, target);
-				//                break;
-				//            case TypeCode.Double:
-				//                if (target == typeof(decimal)) value = ParseNumber(text, target);
-				//                break;
-				//            case TypeCode.String:
-				//                value = ParseEnum(text, target);
-				//                break;
-				//        }
-				//        if (value != null)
-				//            return Expression.Constant(value, type);
-				//    }
-				//}
 			}
+
+			if (type.IsGenericType)
+			{
+				var genericType = FindAssignableGenericType(expr.Type, type.GetGenericTypeDefinition());
+				if (genericType != null)
+					return Expression.Convert(expr, genericType);
+			}
+
 			if (IsCompatibleWith(expr.Type, type))
 			{
-				if (type.IsValueType || exact) return Expression.Convert(expr, type);
+				if (type.IsValueType || exact)
+				{
+					return Expression.Convert(expr, type);
+				}
 				return expr;
 			}
+
 			return null;
 		}
 
@@ -1474,8 +1528,15 @@ namespace DynamicExpresso
 
 		static bool IsCompatibleWith(Type source, Type target)
 		{
-			if (source == target) return true;
-			if (!target.IsValueType) return target.IsAssignableFrom(source);
+			if (source == target)
+			{
+				return true;
+			}
+
+			if (!target.IsValueType)
+			{
+				return target.IsAssignableFrom(source);
+			}
 			Type st = GetNonNullableType(source);
 			Type tt = GetNonNullableType(target);
 			if (st != source && tt == target) return false;
@@ -1594,6 +1655,30 @@ namespace DynamicExpresso
 					break;
 			}
 			return false;
+		}
+
+		// from http://stackoverflow.com/a/1075059/209727
+		static Type FindAssignableGenericType(Type givenType, Type genericTypeDefinition)
+		{
+			var interfaceTypes = givenType.GetInterfaces();
+
+			foreach (var it in interfaceTypes)
+			{
+				if (it.IsGenericType && it.GetGenericTypeDefinition() == genericTypeDefinition)
+				{
+					return it;
+				}
+			}
+
+			if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericTypeDefinition)
+			{
+				return givenType;
+			}
+
+			Type baseType = givenType.BaseType;
+			if (baseType == null) return null;
+
+			return FindAssignableGenericType(baseType, genericTypeDefinition);
 		}
 
 		static bool IsBetterThan(Expression[] args, MethodData m1, MethodData m2)

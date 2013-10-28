@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace DynamicExpresso
@@ -38,6 +39,8 @@ namespace DynamicExpresso
 
 		Dictionary<string, Type> knownTypes;
 
+		List<MethodInfo> _extensionMethods;
+
 		public IDictionary<string, Type> KnownTypes
 		{
 			get { return knownTypes; }
@@ -50,12 +53,17 @@ namespace DynamicExpresso
 		{
 			get { return keywords; }
 		}
+		public IList<MethodInfo> ExtensionMethods
+		{
+			get { return _extensionMethods; }
+		}
 
 		public ParserSettings()
 		{
 			keywords = new Dictionary<string, Expression>();
 			externals = new Dictionary<string, object>();
 			knownTypes = new Dictionary<string, Type>();
+			_extensionMethods = new List<MethodInfo>();
 
 			FillKnownTypes();
 			FillKeywords();
@@ -71,7 +79,10 @@ namespace DynamicExpresso
 		void FillKnownTypes()
 		{
 			foreach (Type type in predefinedTypes)
+			{
 				knownTypes.Add(type.Name, type);
+			}
+
 			knownTypes.Add("object", typeof(object));
 			knownTypes.Add("string", typeof(string));
 			knownTypes.Add("char", typeof(char));

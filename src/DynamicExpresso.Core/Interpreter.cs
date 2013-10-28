@@ -77,6 +77,7 @@ namespace DynamicExpresso
 
 		/// <summary>
 		/// Allow the specified type to be used inside an expression. The type will be available using its name.
+		/// If the type contains method extensions methods they will be available inside expressions.
 		/// </summary>
 		/// <param name="type"></param>
 		/// <returns></returns>
@@ -90,6 +91,7 @@ namespace DynamicExpresso
 
 		/// <summary>
 		/// Allow the specified type to be used inside an expression by using a custom alias.
+		/// If the type contains method extensions methods they will be available inside expressions.
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="typeName">Public name that can be used in the expression.</param>
@@ -102,6 +104,10 @@ namespace DynamicExpresso
 				throw new ArgumentNullException("typeName");
 
 			_settings.KnownTypes.Add(typeName, type);
+
+			var extensions = GetExtensionMethods(type);
+			foreach (var e in extensions)
+				_settings.ExtensionMethods.Add(e);
 
 			return this;
 		}
@@ -230,6 +236,20 @@ namespace DynamicExpresso
 				Parameters = parameters,
 				ReturnType = method.ReturnType
 			};
+		}
+
+		IEnumerable<MethodInfo> GetExtensionMethods(Type type)
+		{
+			if (type.IsSealed && !type.IsGenericType && !type.IsNested)
+			{
+				var query = from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+										where method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)
+										select method;
+
+				return query;
+			}
+
+			return new MethodInfo[0];
 		}
 
 		class DelegateInfo
