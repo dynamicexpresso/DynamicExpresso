@@ -46,6 +46,7 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 - Expressions can be written using a subset of C# syntax (see Syntax section for more information)
 - Support for variables and parameters
 - Can generate .NET delegate from expressions
+- Support for generic and extension methods
 - Full suite of unit tests
 - Good performance compared to other similar projects
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
@@ -265,7 +266,13 @@ Any standard .NET method, field, property or constructor can be invoked.
 	var target = new Interpreter();
 	Assert.AreEqual(new DateTime(2015, 1, 24), target.Eval("new DateTime(2015, 1, 24)"));
 
-Also indexer and static members can be invoked.
+Also indexer static members and method extensions can be used.
+
+	var x = new int[] { 10, 30, 4 };
+	var target = new Interpreter()
+													.Reference(typeof(System.Linq.Enumerable))
+													.SetVariable("x", x);
+	Assert.AreEqual(x.Count(), target.Eval("x.Count()"));
 
 ## Performance and multithreading
 
@@ -351,6 +358,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- Eval typed expression ([#8](https://github.com/davideicardi/DynamicExpresso/issues/8))
 	- Implicit conversion support ([#7](https://github.com/davideicardi/DynamicExpresso/issues/7))
 	- Nullable types support ([#5](https://github.com/davideicardi/DynamicExpresso/issues/5))
+	- Extension methods support ([#2](https://github.com/davideicardi/DynamicExpresso/issues/2))
 
 - 0.8.1
 	
