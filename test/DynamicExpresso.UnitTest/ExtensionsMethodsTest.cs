@@ -70,18 +70,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.GenericMixedParamHello(), target.Eval("x.GenericMixedParamHello()"));
 		}
 
-		[TestMethod]
-		public void Invoke_enumerable_extensions()
-		{
-			var x = new int[] { 10, 30, 4 };
-
-			var target = new Interpreter()
-									.Reference(typeof(System.Linq.Enumerable))
-									.SetVariable("x", x);
-
-			Assert.AreEqual(x.Count(), target.Eval("x.Count()"));
-		}
-
 		public class MyClass
 		{
 		}

@@ -1354,7 +1354,7 @@ namespace DynamicExpresso
 			if (applicable.Length > 1)
 			{
 				applicable = applicable.
-						Where(m => applicable.All(n => m == n || IsBetterThan(args, m, n))).
+						Where(m => applicable.All(n => m == n || MethodHasPriority(args, m, n))).
 						ToArray();
 			}
 
@@ -1733,11 +1733,11 @@ namespace DynamicExpresso
 			return FindAssignableGenericType(baseType, genericTypeDefinition);
 		}
 
-		static bool IsBetterThan(Expression[] args, MethodData m1, MethodData m2)
+		static bool MethodHasPriority(Expression[] args, MethodData method, MethodData otherMethod)
 		{
-			if (m1.HasParamsArray == false && m2.HasParamsArray)
+			if (method.HasParamsArray == false && otherMethod.HasParamsArray)
 				return true;
-			if (m1.HasParamsArray && m2.HasParamsArray == false)
+			if (method.HasParamsArray && otherMethod.HasParamsArray == false)
 				return false;
 
 			//if (m1.Parameters.Length > m2.Parameters.Length)
@@ -1749,8 +1749,8 @@ namespace DynamicExpresso
 			for (int i = 0; i < args.Length; i++)
 			{
 				int c = CompareConversions(args[i].Type,
-						m1.Parameters[i].ParameterType,
-						m2.Parameters[i].ParameterType);
+						method.Parameters[i].ParameterType,
+						otherMethod.Parameters[i].ParameterType);
 				if (c < 0) return false;
 				if (c > 0) better = true;
 			}
@@ -1765,12 +1765,20 @@ namespace DynamicExpresso
 			if (t1 == t2) return 0;
 			if (s == t1) return 1;
 			if (s == t2) return -1;
-			bool t1t2 = IsCompatibleWith(t1, t2);
-			bool t2t1 = IsCompatibleWith(t2, t1);
-			if (t1t2 && !t2t1) return 1;
-			if (t2t1 && !t1t2) return -1;
+
+			bool assignableT1 = t1.IsAssignableFrom(s);
+			bool assignableT2 = t2.IsAssignableFrom(s);
+			if (assignableT1 && !assignableT2) return 1;
+			if (assignableT2 && !assignableT1) return -1;
+
+			bool compatibleT1t2 = IsCompatibleWith(t1, t2);
+			bool compatibleT2t1 = IsCompatibleWith(t2, t1);
+			if (compatibleT1t2 && !compatibleT2t1) return 1;
+			if (compatibleT2t1 && !compatibleT1t2) return -1;
+
 			if (IsSignedIntegralType(t1) && IsUnsignedIntegralType(t2)) return 1;
 			if (IsSignedIntegralType(t2) && IsUnsignedIntegralType(t1)) return -1;
+
 			return 0;
 		}
 

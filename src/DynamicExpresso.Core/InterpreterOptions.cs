@@ -18,7 +18,7 @@ namespace DynamicExpresso
 		/// </summary>
 		SystemKeywords = 2,
 		/// <summary>
-		/// Load common types like 'System.Math', 'System.Convert'
+		/// Load common types like 'System.Math', 'System.Convert', 'System.Linq.Enumerable'
 		/// </summary>
 		CommonTypes = 4,
 

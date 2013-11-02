@@ -126,11 +126,16 @@ namespace DynamicExpresso
 			if (string.IsNullOrWhiteSpace(typeName))
 				throw new ArgumentNullException("typeName");
 
-			_settings.KnownTypes.Add(typeName, type);
+			_settings.KnownTypes[typeName] = type;
 
 			var extensions = GetExtensionMethods(type);
-			foreach (var e in extensions)
-				_settings.ExtensionMethods.Add(e);
+			foreach (var extensionMethod in extensions)
+			{
+				if (!_settings.ExtensionMethods.Contains(extensionMethod))
+				{
+					_settings.ExtensionMethods.Add(extensionMethod);
+				}
+			}
 
 			return this;
 		}
@@ -283,9 +288,9 @@ namespace DynamicExpresso
 
 		void FillSystemKeywords()
 		{
-			_settings.Keywords.Add("true", Expression.Constant(true));
-			_settings.Keywords.Add("false", Expression.Constant(false));
-			_settings.Keywords.Add("null", ParserConstants.nullLiteral);
+			SetExpression("true", Expression.Constant(true));
+			SetExpression("false", Expression.Constant(false));
+			SetExpression("null", ParserConstants.nullLiteral);
 		}
 
 		static Type[] PrimitiveTypes = {
@@ -313,30 +318,31 @@ namespace DynamicExpresso
 		{
 			foreach (Type type in PrimitiveTypes)
 			{
-				_settings.KnownTypes.Add(type.Name, type);
+				Reference(type);
 			}
 
-			_settings.KnownTypes.Add("object", typeof(object));
-			_settings.KnownTypes.Add("string", typeof(string));
-			_settings.KnownTypes.Add("char", typeof(char));
-			_settings.KnownTypes.Add("bool", typeof(bool));
-			_settings.KnownTypes.Add("byte", typeof(byte));
-			_settings.KnownTypes.Add("int", typeof(int));
-			_settings.KnownTypes.Add("long", typeof(long));
-			_settings.KnownTypes.Add("double", typeof(double));
-			_settings.KnownTypes.Add("decimal", typeof(decimal));
+			Reference(typeof(object), "object");
+			Reference(typeof(string), "string");
+			Reference(typeof(char), "char");
+			Reference(typeof(bool), "bool");
+			Reference(typeof(byte), "byte");
+			Reference(typeof(int), "int");
+			Reference(typeof(long), "long");
+			Reference(typeof(double), "double");
+			Reference(typeof(decimal), "decimal");
 		}
 
 		static Type[] CommonTypes = {
             typeof(Math),
-            typeof(Convert)
+            typeof(Convert),
+            typeof(System.Linq.Enumerable),
         };
 
 		void FillCommonTypes()
 		{
 			foreach (Type type in CommonTypes)
 			{
-				_settings.KnownTypes.Add(type.Name, type);
+				Reference(type);
 			}
 		}
 	}

@@ -54,6 +54,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CollectionHelperTests.cs" />
+    <Compile Include="EnumerableTest.cs" />
     <Compile Include="ExtensionsMethodsTest.cs" />
     <Compile Include="MemberInvocationTest.cs" />
     <Compile Include="ExpressionTypeTest.cs" />

@@ -69,6 +69,20 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		public void Reference_the_same_type_multiple_times_doesn_t_have_effect()
+		{
+			var target = new Interpreter()
+											.Reference(typeof(string))
+											.Reference(typeof(string))
+											.Reference(typeof(Uri))
+											.Reference(typeof(Uri))
+											.Reference(typeof(Uri));
+
+			Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
+			Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
+		}
+
+		[TestMethod]
 		public void Custom_Type_Constructor()
 		{
 			var target = new Interpreter()

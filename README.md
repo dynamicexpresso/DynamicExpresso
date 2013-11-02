@@ -368,7 +368,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
-- 0.9 (in progress)
+- 0.9.0
 	
 	- Expression return type is automatically converted if needed ([#9](https://github.com/davideicardi/DynamicExpresso/issues/9))
 	- Eval typed expression ([#8](https://github.com/davideicardi/DynamicExpresso/issues/8))
@@ -377,6 +377,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- Extension methods support ([#2](https://github.com/davideicardi/DynamicExpresso/issues/2))
 	- Allow to specify a default interpreter's configuration ([#12](https://github.com/davideicardi/DynamicExpresso/issues/12))
 	- Params array support ([#6](https://github.com/davideicardi/DynamicExpresso/issues/6))
+	- Enumerable extensions support ([#3](https://github.com/davideicardi/DynamicExpresso/issues/3))
 
 - 0.8.1
 	
