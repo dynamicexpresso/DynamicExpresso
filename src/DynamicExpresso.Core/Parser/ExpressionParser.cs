@@ -859,7 +859,7 @@ namespace DynamicExpresso
 		{
 			Expression[] args = ParseArgumentList();
 
-			if (!PrepareDelegateInvoke(lambda.Type, args))
+			if (!PrepareDelegateInvoke(lambda.Type, ref args))
 				throw ParseError(errorPos, ErrorMessages.ArgsIncompatibleWithLambda);
 
 			return Expression.Invoke(lambda, args);
@@ -869,19 +869,19 @@ namespace DynamicExpresso
 		{
 			Expression[] args = ParseArgumentList();
 
-			if (!PrepareDelegateInvoke(delegateExp.Type, args))
+			if (!PrepareDelegateInvoke(delegateExp.Type, ref args))
 				throw ParseError(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
 
 			return Expression.Invoke(delegateExp, args);
 		}
 
-		bool PrepareDelegateInvoke(Type type, Expression[] args)
+		bool PrepareDelegateInvoke(Type type, ref Expression[] args)
 		{
 			var applicableMethods = FindMethods(type, "Invoke", false, args);
 			if (applicableMethods.Length != 1)
 				return false;
 
-			SetArgumentsFromMethod(applicableMethods[0], args);
+			args = applicableMethods[0].PromotedParameters;
 
 			return true;
 		}
@@ -1018,7 +1018,7 @@ namespace DynamicExpresso
 			{
 				var method = extensionMethods[0];
 
-				SetArgumentsFromMethod(method, extensionMethodsArguments);
+				extensionMethodsArguments = method.PromotedParameters;
 
 				return Expression.Call((MethodInfo)method.MethodBase, extensionMethodsArguments);
 			}
@@ -1036,8 +1036,7 @@ namespace DynamicExpresso
 			{
 				var method = applicableMethods[0];
 
-				SetArgumentsFromMethod(method, args);
-				return Expression.Call(instance, (MethodInfo)method.MethodBase, args);
+				return Expression.Call(instance, (MethodInfo)method.MethodBase, method.PromotedParameters);
 			}
 
 			return null;
@@ -1146,8 +1145,8 @@ namespace DynamicExpresso
 				}
 
 				var method = applicableMethods[0];
-				SetArgumentsFromMethod(method, args);
-				return Expression.Call(expr, (MethodInfo)method.MethodBase, args);
+
+				return Expression.Call(expr, (MethodInfo)method.MethodBase, method.PromotedParameters);
 			}
 		}
 
@@ -1218,7 +1217,7 @@ namespace DynamicExpresso
 		void CheckAndPromoteOperand(Type signatures, string opName, ref Expression expr, int errorPos)
 		{
 			Expression[] args = new Expression[] { expr };
-			if (!PrepareOperandArguments(signatures, args))
+			if (!PrepareOperandArguments(signatures, ref args))
 				throw ParseError(errorPos, ErrorMessages.IncompatibleOperand,
 						opName, GetTypeName(args[0].Type));
 			expr = args[0];
@@ -1227,20 +1226,20 @@ namespace DynamicExpresso
 		void CheckAndPromoteOperands(Type signatures, string opName, ref Expression left, ref Expression right, int errorPos)
 		{
 			Expression[] args = new Expression[] { left, right };
-			if (!PrepareOperandArguments(signatures, args))
+			if (!PrepareOperandArguments(signatures, ref args))
 				throw ParseError(errorPos, ErrorMessages.IncompatibleOperands,
 					opName, GetTypeName(left.Type), GetTypeName(right.Type));
 			left = args[0];
 			right = args[1];
 		}
 
-		bool PrepareOperandArguments(Type signatures, Expression[] args)
+		bool PrepareOperandArguments(Type signatures, ref Expression[] args)
 		{
 			var applicableMethods = FindMethods(signatures, "F", false, args);
 			if (applicableMethods.Length != 1)
 				return false;
 
-			SetArgumentsFromMethod(applicableMethods[0], args);
+			args = applicableMethods[0].PromotedParameters;
 
 			return true;
 		}
@@ -1260,6 +1259,12 @@ namespace DynamicExpresso
 
 		MethodData[] FindMethods(Type type, string methodName, bool staticAccess, Expression[] args)
 		{
+			//var exactMethod = type.GetMethod(methodName, args.Select(p => p.Type).ToArray());
+			//if (exactMethod != null)
+			//{
+			//	return new MethodData[] { new MethodData(){ MethodBase = exactMethod, Parameters = exactMethod.GetParameters(), PromotedParameters = args} };
+			//}
+
 			BindingFlags flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
 					(staticAccess ? BindingFlags.Static : BindingFlags.Instance);
 			foreach (Type t in SelfAndBaseTypes(type))
@@ -1336,7 +1341,8 @@ namespace DynamicExpresso
 		{
 			public MethodBase MethodBase;
 			public ParameterInfo[] Parameters;
-			public Expression[] Args;
+			public Expression[] PromotedParameters;
+			public bool HasParamsArray;
 		}
 
 		MethodData[] FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
@@ -1355,41 +1361,87 @@ namespace DynamicExpresso
 			return applicable;
 		}
 
-		void SetArgumentsFromMethod(MethodData method, Expression[] args)
-		{
-			for (int i = 0; i < args.Length; i++)
-			{
-				args[i] = method.Args[i];
-			}
-		}
-
 		bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
 		{
-			if (method.Parameters.Length != args.Length)
+			if (method.Parameters.Length > args.Length)
 				return false;
 
-			Expression[] promotedArgs = new Expression[args.Length];
-			for (int i = 0; i < args.Length; i++)
-			{
-				ParameterInfo pi = method.Parameters[i];
-				if (pi.IsOut)
-					return false;
+			List<Expression> promotedArgs = new List<Expression>();
+			int declaredWorkingParameters = 0;
 
-				Expression promoted;
-				if (pi.ParameterType.IsGenericParameter)
+			Type paramsArrayTypeFound = null;
+			List<Expression> paramsArrayPromotedArgument = null;
+
+			foreach (var currentArgument in args)
+			{
+				Type parameterType;
+
+				if (paramsArrayTypeFound != null)
 				{
-					promoted = args[i];
+					parameterType = paramsArrayTypeFound;
 				}
 				else
 				{
-					promoted = PromoteExpression(args[i], pi.ParameterType, true);
-					if (promoted == null)
+					if (declaredWorkingParameters >= method.Parameters.Length)
+					{ 
 						return false;
+					}
+
+					var parameterDeclaration = method.Parameters[declaredWorkingParameters];
+					if (parameterDeclaration.IsOut)
+					{
+						return false;
+					}
+
+					parameterType = parameterDeclaration.ParameterType;
+
+					if (parameterDeclaration.IsDefined(typeof(ParamArrayAttribute), false))
+					{
+						paramsArrayTypeFound = parameterType;
+					}
+
+					declaredWorkingParameters++;
 				}
 
-				promotedArgs[i] = promoted;
+				if (paramsArrayPromotedArgument == null)
+				{
+					if (parameterType.IsGenericParameter)
+					{
+						promotedArgs.Add(currentArgument);
+						continue;
+					}
+					else
+					{
+						var promoted = PromoteExpression(currentArgument, parameterType, true);
+						if (promoted != null)
+						{
+							promotedArgs.Add(promoted);
+							continue;
+						}
+					}
+				}
+
+				if (paramsArrayTypeFound != null)
+				{
+					var promoted = PromoteExpression(currentArgument, paramsArrayTypeFound.GetElementType(), true);
+					if (promoted != null)
+					{
+						paramsArrayPromotedArgument = paramsArrayPromotedArgument ?? new List<Expression>();
+						paramsArrayPromotedArgument.Add(promoted);
+						continue;
+					}
+				}
+
+				return false;
 			}
-			method.Args = promotedArgs;
+
+			if (paramsArrayPromotedArgument != null)
+			{
+				method.HasParamsArray = true;
+				promotedArgs.Add(Expression.NewArrayInit(paramsArrayTypeFound.GetElementType(), paramsArrayPromotedArgument));
+			}
+
+			method.PromotedParameters = promotedArgs.ToArray();
 
 			if (method.MethodBase.IsGenericMethodDefinition &&
 					method.MethodBase is MethodInfo)
@@ -1398,7 +1450,7 @@ namespace DynamicExpresso
 
 				var genericArgsType = ExtractActualGenericArguments(
 									method.Parameters.Select(p => p.ParameterType).ToArray(),
-									method.Args.Select(p => p.Type).ToArray());
+									method.PromotedParameters.Select(p => p.Type).ToArray());
 
 				method.MethodBase = methodInfo.MakeGenericMethod(genericArgsType.ToArray());
 			}
@@ -1683,6 +1735,16 @@ namespace DynamicExpresso
 
 		static bool IsBetterThan(Expression[] args, MethodData m1, MethodData m2)
 		{
+			if (m1.HasParamsArray == false && m2.HasParamsArray)
+				return true;
+			if (m1.HasParamsArray && m2.HasParamsArray == false)
+				return false;
+
+			//if (m1.Parameters.Length > m2.Parameters.Length)
+			//	return true;
+			//else if (m1.Parameters.Length < m2.Parameters.Length)
+			//	return false;
+
 			bool better = false;
 			for (int i = 0; i < args.Length; i++)
 			{

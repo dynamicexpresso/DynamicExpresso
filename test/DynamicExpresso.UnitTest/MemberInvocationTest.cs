@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DynamicExpresso.UnitTest
@@ -76,9 +77,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("service", service);
 
-			Assert.AreEqual(0, service.VoidMethodCalled);
+			Assert.AreEqual(0, service.VoidMethodCalls);
 			target.Eval("service.VoidMethod()");
-			Assert.AreEqual(1, service.VoidMethodCalled);
+			Assert.AreEqual(1, service.VoidMethodCalls);
 
 			Assert.AreEqual(typeof(void), target.Parse("service.VoidMethod()").ReturnType);
 		}
@@ -132,6 +133,45 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.MethodWithGenericParam(y, w), target.Eval("x.MethodWithGenericParam(y, w)", parameters));
 		}
 
+		[TestMethod]
+		public void Method_with_params_array()
+		{
+			var target = new Interpreter();
+
+			var x = new MyTestService();
+
+			target.SetVariable("x", x);
+
+			Assert.AreEqual(0, x.MethodWithParamsArrayCalls);
+
+			Assert.AreEqual(x.MethodWithParamsArray(DateTime.Now, 2, 1, 34), target.Eval("x.MethodWithParamsArray(DateTime.Now, 2, 1, 34)"));
+			Assert.AreEqual(2, x.MethodWithParamsArrayCalls);
+
+			var myParamArray = new int[] { 2, 1, 34 };
+			target.SetVariable("myParamArray", myParamArray);
+
+			Assert.AreEqual(x.MethodWithParamsArray(DateTime.Now, myParamArray), target.Eval("x.MethodWithParamsArray(DateTime.Now, myParamArray)"));
+			Assert.AreEqual(4, x.MethodWithParamsArrayCalls);
+		}
+
+		[TestMethod]
+		public void ParamsArray_methods_are_not_called_when_there_is_an_exact_method_match()
+		{
+			var target = new Interpreter();
+
+			var x = new MyTestService();
+
+			target.SetVariable("x", x);
+
+			target.Eval("x.AmbiguousMethod(DateTime.Now, 2, 3)");
+			Assert.AreEqual(1, x.AmbiguousMethod_NormalCalls);
+			Assert.AreEqual(0, x.AmbiguousMethod_ParamsArrayCalls);
+
+			target.Eval("x.AmbiguousMethod(DateTime.Now, 2, 3, 4)");
+			Assert.AreEqual(1, x.AmbiguousMethod_NormalCalls);
+			Assert.AreEqual(1, x.AmbiguousMethod_ParamsArrayCalls);
+		}
+
 		class MyTestService
 		{
 			public DateTime AField = DateTime.Now;
@@ -157,11 +197,11 @@ namespace DynamicExpresso.UnitTest
 				return "HELLO";
 			}
 
-			public int VoidMethodCalled { get; set; }
+			public int VoidMethodCalls { get; set; }
 			public void VoidMethod()
 			{
 				System.Diagnostics.Debug.WriteLine("VoidMethod called");
-				VoidMethodCalled++;
+				VoidMethodCalls++;
 			}
 
 			public string MethodWithNullableParam(string param1, int? param2)
@@ -182,6 +222,25 @@ namespace DynamicExpresso.UnitTest
 			public DateTime this[int i]
 			{
 				get { return DateTime.Today.AddDays(i); }
+			}
+
+			public int MethodWithParamsArrayCalls { get; set; }
+			public int MethodWithParamsArray(DateTime fixedParam, params int[] paramsArray)
+			{
+				MethodWithParamsArrayCalls++;
+
+				return paramsArray.Sum();
+			}
+
+			public int AmbiguousMethod_ParamsArrayCalls { get; set; }
+			public void AmbiguousMethod(DateTime fixedParam, params int[] paramsArray)
+			{
+				AmbiguousMethod_ParamsArrayCalls++;
+			}
+			public int AmbiguousMethod_NormalCalls { get; set; }
+			public void AmbiguousMethod(DateTime fixedParam, int p1, int p2)
+			{
+				AmbiguousMethod_NormalCalls++;
 			}
 		}
 

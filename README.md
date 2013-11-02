@@ -46,9 +46,9 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 - Expressions can be written using a subset of C# syntax (see Syntax section for more information)
 - Support for variables and parameters
 - Can generate .NET delegate from expressions
-- Support for generic and extension methods
 - Full suite of unit tests
 - Good performance compared to other similar projects
+- Partial support for generic, params array and extension methods
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
 - Easy to use and deploy, it is all contained in a single assembly without other external dependencies
 - 100 % managed code written in C# 4.0
@@ -266,13 +266,29 @@ Any standard .NET method, field, property or constructor can be invoked.
 	var target = new Interpreter();
 	Assert.AreEqual(new DateTime(2015, 1, 24), target.Eval("new DateTime(2015, 1, 24)"));
 
-Also indexer static members and method extensions can be used.
+Dynamic Expresso also supports:
+
+- Extension methods
 
 	var x = new int[] { 10, 30, 4 };
 	var target = new Interpreter()
 													.Reference(typeof(System.Linq.Enumerable))
 													.SetVariable("x", x);
 	Assert.AreEqual(x.Count(), target.Eval("x.Count()"));
+
+- Indexer methods (like array[0])
+- Generics, only partially supported (only implicit, you cannot invoke an explicit generic method)
+- Params array (see C# `params` keyword)
+
+## Limitations
+
+Not every C# syntaxes are supported. Here some examples of NOT supported features:
+
+- Multiline expressions
+- for/foreach/while/do operators
+- Array/list/dictionary initialization
+- Explicit generic invocation (like `method<type>(arg)`) 
+- Lambda/delegate declaration (delegate and lamda are only supported as variables or parameters or as a return type of the expression)
 
 ## Performance and multithreading
 
@@ -360,6 +376,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- Nullable types support ([#5](https://github.com/davideicardi/DynamicExpresso/issues/5))
 	- Extension methods support ([#2](https://github.com/davideicardi/DynamicExpresso/issues/2))
 	- Allow to specify a default interpreter's configuration ([#12](https://github.com/davideicardi/DynamicExpresso/issues/12))
+	- Params array support ([#6](https://github.com/davideicardi/DynamicExpresso/issues/6))
 
 - 0.8.1
 	
