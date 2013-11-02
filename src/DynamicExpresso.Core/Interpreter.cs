@@ -15,6 +15,29 @@ namespace DynamicExpresso
 	{
 		ParserSettings _settings = new ParserSettings();
 
+		public Interpreter()
+			: this(InterpreterOptions.Default)
+		{
+		}
+
+		public Interpreter(InterpreterOptions options)
+		{
+			if ((options & InterpreterOptions.SystemKeywords) == InterpreterOptions.SystemKeywords)
+			{
+				FillSystemKeywords();
+			}
+
+			if ((options & InterpreterOptions.PrimitiveTypes) == InterpreterOptions.PrimitiveTypes)
+			{
+				FillPrimitiveTypes();
+			}
+
+			if ((options & InterpreterOptions.CommonTypes) == InterpreterOptions.CommonTypes)
+			{
+				FillCommonTypes();
+			}
+		}
+
 		/// <summary>
 		/// Allow the specified function delegate to be called from a parsed expression.
 		/// </summary>
@@ -256,6 +279,65 @@ namespace DynamicExpresso
 		{
 			public Type ReturnType { get; set; }
 			public ParameterExpression[] Parameters { get; set; }
+		}
+
+		void FillSystemKeywords()
+		{
+			_settings.Keywords.Add("true", Expression.Constant(true));
+			_settings.Keywords.Add("false", Expression.Constant(false));
+			_settings.Keywords.Add("null", ParserConstants.nullLiteral);
+		}
+
+		static Type[] PrimitiveTypes = {
+            typeof(Object),
+            typeof(Boolean),
+            typeof(Char),
+            typeof(String),
+            typeof(SByte),
+            typeof(Byte),
+            typeof(Int16),
+            typeof(UInt16),
+            typeof(Int32),
+            typeof(UInt32),
+            typeof(Int64),
+            typeof(UInt64),
+            typeof(Single),
+            typeof(Double),
+            typeof(Decimal),
+            typeof(DateTime),
+            typeof(TimeSpan),
+            typeof(Guid)
+        };
+
+		void FillPrimitiveTypes()
+		{
+			foreach (Type type in PrimitiveTypes)
+			{
+				_settings.KnownTypes.Add(type.Name, type);
+			}
+
+			_settings.KnownTypes.Add("object", typeof(object));
+			_settings.KnownTypes.Add("string", typeof(string));
+			_settings.KnownTypes.Add("char", typeof(char));
+			_settings.KnownTypes.Add("bool", typeof(bool));
+			_settings.KnownTypes.Add("byte", typeof(byte));
+			_settings.KnownTypes.Add("int", typeof(int));
+			_settings.KnownTypes.Add("long", typeof(long));
+			_settings.KnownTypes.Add("double", typeof(double));
+			_settings.KnownTypes.Add("decimal", typeof(decimal));
+		}
+
+		static Type[] CommonTypes = {
+            typeof(Math),
+            typeof(Convert)
+        };
+
+		void FillCommonTypes()
+		{
+			foreach (Type type in CommonTypes)
+			{
+				_settings.KnownTypes.Add(type.Name, type);
+			}
 		}
 	}
 }

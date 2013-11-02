@@ -50,6 +50,15 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		[ExpectedException(typeof(ParseException))]
+		public void Load_interpreter_without_any_configuration()
+		{
+			var target = new Interpreter(InterpreterOptions.None);
+
+			target.Eval("typeof(string)");
+		}
+
+		[TestMethod]
 		public void Custom_Types()
 		{
 			var target = new Interpreter()
