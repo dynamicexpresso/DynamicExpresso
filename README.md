@@ -359,6 +359,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- Implicit conversion support ([#7](https://github.com/davideicardi/DynamicExpresso/issues/7))
 	- Nullable types support ([#5](https://github.com/davideicardi/DynamicExpresso/issues/5))
 	- Extension methods support ([#2](https://github.com/davideicardi/DynamicExpresso/issues/2))
+	- Allow to specify a default interpreter's configuration ([#12](https://github.com/davideicardi/DynamicExpresso/issues/12))
 
 - 0.8.1
 	
