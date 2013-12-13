@@ -85,6 +85,60 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		public void ToString_Method_on_a_custom_type()
+		{
+			var service = new MyTestService();
+			var target = new Interpreter()
+											.SetVariable("service", service);
+
+			Assert.AreEqual("DynamicExpresso.UnitTest.MemberInvocationTest+MyTestService", target.Eval("service.ToString()"));
+		}
+
+		[TestMethod]
+		public void ToString_Method_on_a_custom_interface_type()
+		{
+			MyTestInterface service = new MyTestInterfaceImp();
+			var target = new Interpreter()
+											.SetVariable("service", service, typeof(MyTestInterface));
+
+			Assert.AreEqual("DynamicExpresso.UnitTest.MemberInvocationTest+MyTestInterfaceImp", target.Eval("service.ToString()"));
+		}
+
+		[TestMethod]
+		public void ToString_Method_on_a_primitive_type()
+		{
+			var target = new Interpreter();
+			Assert.AreEqual("3", target.Eval("(3).ToString()"));
+		}
+
+		[TestMethod]
+		public void GetType_Method_on_a_custom_type()
+		{
+			var service = new MyTestService();
+			var target = new Interpreter()
+											.SetVariable("service", service);
+
+			Assert.AreEqual(typeof(MyTestService), target.Eval("service.GetType()"));
+		}
+
+		[TestMethod]
+		public void GetType_Method_on_a_custom_interface_type()
+		{
+			MyTestInterface service = new MyTestInterfaceImp();
+			var target = new Interpreter()
+											.SetVariable("service", service, typeof(MyTestInterface));
+
+			Assert.AreEqual(typeof(MyTestInterfaceImp), target.Eval("service.GetType()"));
+		}
+
+		[TestMethod]
+		public void GetType_Method_on_a_primitive_type()
+		{
+			var target = new Interpreter();
+			Assert.AreEqual((3).GetType(), target.Eval("(3).GetType()"));
+		}
+
+		[TestMethod]
 		public void Method_with_nullable_param()
 		{
 			var target = new Interpreter();
@@ -170,6 +224,14 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("x.AmbiguousMethod(DateTime.Now, 2, 3, 4)");
 			Assert.AreEqual(1, x.AmbiguousMethod_NormalCalls);
 			Assert.AreEqual(1, x.AmbiguousMethod_ParamsArrayCalls);
+		}
+
+		interface MyTestInterface
+		{
+		}
+		class MyTestInterfaceImp : MyTestInterface
+		{
+
 		}
 
 		class MyTestService

@@ -368,6 +368,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
+- 0.9.1
+
+	FIX: Invoke object methods on interface types ([#13](https://github.com/davideicardi/DynamicExpresso/issues/13))
+
 - 0.9.0
 	
 	- Expression return type is automatically converted if needed ([#9](https://github.com/davideicardi/DynamicExpresso/issues/9))

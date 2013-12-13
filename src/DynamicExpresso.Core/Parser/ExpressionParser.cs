@@ -1314,6 +1314,9 @@ namespace DynamicExpresso
 			{
 				List<Type> types = new List<Type>();
 				AddInterface(types, type);
+
+				types.Add(typeof(object));
+
 				return types;
 			}
 			return SelfAndBaseClasses(type);
@@ -1333,7 +1336,10 @@ namespace DynamicExpresso
 			if (!types.Contains(type))
 			{
 				types.Add(type);
-				foreach (Type t in type.GetInterfaces()) AddInterface(types, t);
+				foreach (Type t in type.GetInterfaces())
+				{
+					AddInterface(types, t);
+				}
 			}
 		}
 
