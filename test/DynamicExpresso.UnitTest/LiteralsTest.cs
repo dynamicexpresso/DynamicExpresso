@@ -15,7 +15,6 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual("ciao", target.Eval("\"ciao\""));
 			Assert.AreEqual('c', target.Eval("'c'"));
-			Assert.IsNull(target.Eval("null"));
 			Assert.IsTrue((bool)target.Eval("true"));
 			Assert.IsFalse((bool)target.Eval("false"));
 
@@ -27,6 +26,37 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual((45.8f).GetType(), target.Eval("45.8f").GetType());
 			Assert.AreEqual(45.232M, target.Eval("45.232M"));
 			Assert.AreEqual((45.232M).GetType(), target.Eval("45.232M").GetType());
+		}
+
+		[TestMethod]
+		public void Long_strings()
+		{
+			var target = new Interpreter();
+			Assert.AreEqual("Project not selected to build for this solution configuration", target.Eval("\"Project not selected to build for this solution configuration\""));
+		}
+
+		[TestMethod]
+		public void Null_Keyword()
+		{
+			var target = new Interpreter();
+			Assert.IsNull(target.Eval("null"));
+		}
+
+		[TestMethod]
+		public void Empty_String()
+		{
+			var target = new Interpreter();
+			Assert.AreEqual(string.Empty, target.Eval("\"\""));
+		}
+
+		[TestMethod]
+		public void Whitespace_String()
+		{
+			var target = new Interpreter();
+			Assert.AreEqual(" ", target.Eval("\" \""));
+			Assert.AreEqual(" \t ", target.Eval("\" \t \""));
+			Assert.AreEqual("   ", target.Eval("\"   \""));
+			Assert.AreEqual(" \r\n", target.Eval("\" \r\n\""));
 		}
 
 		[TestMethod]
@@ -152,6 +182,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			Assert.AreEqual(typeof(string), target.Parse("\"some string\"").ReturnType);
+			Assert.AreEqual(typeof(string), target.Parse("\"\"").ReturnType);
 			Assert.AreEqual(typeof(int), target.Parse("234").ReturnType);
 			Assert.AreEqual(typeof(object), target.Parse("null").ReturnType);
 		}
@@ -159,17 +190,21 @@ namespace DynamicExpresso.UnitTest
 		[TestMethod]
 		public void Literals_WithUS_Culture()
 		{
+			var originalCulture = Thread.CurrentThread.CurrentCulture;
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
 			var target = new Interpreter();
 			Assert.AreEqual(45.5, target.Eval("45.5"));
+			Thread.CurrentThread.CurrentCulture = originalCulture;
 		}
 
 		[TestMethod]
 		public void Literals_WithIT_Culture()
 		{
+			var originalCulture = Thread.CurrentThread.CurrentCulture;
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("it-IT");
 			var target = new Interpreter();
 			Assert.AreEqual(45.5, target.Eval("45.5"));
+			Thread.CurrentThread.CurrentCulture = originalCulture;
 		}
 
 	}

@@ -44,6 +44,24 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		public void String_format_with_type_conversion()
+		{
+			var target = new Interpreter();
+
+			Assert.AreEqual(string.Format("ciao {0}, today is {1}", "mondo", DateTime.Today),
+											target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today)"));
+		}
+
+		[TestMethod]
+		public void String_format_with_empty_string()
+		{
+			var target = new Interpreter();
+
+			Assert.AreEqual(string.Format("ciao {0}", ""),
+											target.Eval("string.Format(\"ciao {0}\", \"\")"));
+		}
+
+		[TestMethod]
 		public void String_format_With_Object_Params()
 		{
 			var target = new Interpreter();

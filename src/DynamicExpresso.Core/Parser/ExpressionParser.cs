@@ -2024,7 +2024,7 @@ namespace DynamicExpresso
 				case '"':
 					NextChar();
 					bool isEscapeS = false;
-					bool isEndS = false;
+					bool isEndS = ch == '\"';
 					while (textPos < textLen && !isEndS)
 					{
 						isEscapeS = ch == '\\' && !isEscapeS;
