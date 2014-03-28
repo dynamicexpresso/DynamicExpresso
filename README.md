@@ -368,6 +368,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
+- 0.10.0
+
+	- Added support for case insensitive expressions. See `InterpreterOptions` enum.
+
 - 0.9.2
 
 	FIX: Support for empty string literals ([#17](https://github.com/davideicardi/DynamicExpresso/issues/17))

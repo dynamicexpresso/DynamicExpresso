@@ -116,7 +116,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Parameters_Are_Case_Sensitive()
+		public void Parameters_by_default_Are_Case_Sensitive()
 		{
 			var target = new Interpreter();
 
@@ -129,6 +129,20 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(x, target.Eval("x", parameters));
 			Assert.AreEqual(X, target.Eval("X", parameters));
+		}
+
+		[TestMethod]
+		public void Parameters_can_be_Case_insensitive()
+		{
+			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
+
+			double x = 2;
+			var parameters = new[] {
+                            new Parameter("x", x.GetType(), x)
+                            };
+
+			Assert.AreEqual(x, target.Eval("x", parameters));
+			Assert.AreEqual(x, target.Eval("X", parameters));
 		}
 
 		[TestMethod]

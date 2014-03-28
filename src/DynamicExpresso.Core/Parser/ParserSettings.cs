@@ -35,11 +35,28 @@ namespace DynamicExpresso
 			get { return _extensionMethods; }
 		}
 
-		public ParserSettings()
+		public bool CaseInsensitive
 		{
-			keywords = new Dictionary<string, Expression>();
+			get;
+			private set;
+		}
+
+		public IEqualityComparer<string> SettingsKeyComparer
+		{
+			get;
+			private set;
+		}
+
+		public ParserSettings(bool caseInsensitive)
+		{
+			CaseInsensitive = caseInsensitive;
+
+			SettingsKeyComparer = CaseInsensitive ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
+
+			keywords = new Dictionary<string, Expression>(SettingsKeyComparer);
 			externals = new Dictionary<string, object>();
-			knownTypes = new Dictionary<string, Type>();
+			knownTypes = new Dictionary<string, Type>(SettingsKeyComparer);
+
 			_extensionMethods = new List<MethodInfo>();
 		}
 	}

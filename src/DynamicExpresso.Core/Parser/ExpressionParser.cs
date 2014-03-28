@@ -185,13 +185,19 @@ namespace DynamicExpresso
 		char ch;
 		Token token;
 
+		BindingFlags _bindingCase;
+		MemberFilter _memberFilterCase;
+
 		public ExpressionParser(string expression, Type expressionType, ParameterExpression[] parameters, ParserSettings settings)
 		{
 			_settings = settings;
 			_expressionType = expressionType;
 
-			_parameters = new Dictionary<string, Expression>();
+			_parameters = new Dictionary<string, Expression>(settings.SettingsKeyComparer);
 			//_literals = new Dictionary<Expression, string>();
+
+			_bindingCase = settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
+			_memberFilterCase = settings.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
 
 			ProcessParameters(parameters);
 
@@ -1247,10 +1253,10 @@ namespace DynamicExpresso
 		MemberInfo FindPropertyOrField(Type type, string memberName, bool staticAccess)
 		{
 			BindingFlags flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
-					(staticAccess ? BindingFlags.Static : BindingFlags.Instance);
+					(staticAccess ? BindingFlags.Static : BindingFlags.Instance) | _bindingCase;
 			foreach (Type t in SelfAndBaseTypes(type))
 			{
-				MemberInfo[] members = t.FindMembers(MemberTypes.Property | MemberTypes.Field, flags, Type.FilterName, memberName);
+				MemberInfo[] members = t.FindMembers(MemberTypes.Property | MemberTypes.Field, flags, _memberFilterCase, memberName);
 				if (members.Length != 0)
 					return members[0];
 			}
@@ -1266,10 +1272,10 @@ namespace DynamicExpresso
 			//}
 
 			BindingFlags flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
-					(staticAccess ? BindingFlags.Static : BindingFlags.Instance);
+					(staticAccess ? BindingFlags.Static : BindingFlags.Instance) | _bindingCase;
 			foreach (Type t in SelfAndBaseTypes(type))
 			{
-				MemberInfo[] members = t.FindMembers(MemberTypes.Method, flags, Type.FilterName, methodName);
+				MemberInfo[] members = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, methodName);
 				var applicableMethods = FindBestMethod(members.Cast<MethodBase>(), args);
 
 				if (applicableMethods.Length > 0)
@@ -1572,17 +1578,17 @@ namespace DynamicExpresso
 			return null;
 		}
 
-		static object ParseEnum(string name, Type type)
-		{
-			if (type.IsEnum)
-			{
-				MemberInfo[] memberInfos = type.FindMembers(MemberTypes.Field,
-						BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Static,
-						Type.FilterNameIgnoreCase, name);
-				if (memberInfos.Length != 0) return ((FieldInfo)memberInfos[0]).GetValue(null);
-			}
-			return null;
-		}
+		//static object ParseEnum(string name, Type type)
+		//{
+		//	if (type.IsEnum)
+		//	{
+		//		MemberInfo[] memberInfos = type.FindMembers(MemberTypes.Field,
+		//				BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Static,
+		//				Type.FilterNameIgnoreCase, name);
+		//		if (memberInfos.Length != 0) return ((FieldInfo)memberInfos[0]).GetValue(null);
+		//	}
+		//	return null;
+		//}
 
 		static bool IsCompatibleWith(Type source, Type target)
 		{

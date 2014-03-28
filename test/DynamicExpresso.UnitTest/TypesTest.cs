@@ -83,6 +83,19 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		public void References_can_be_case_insensitive()
+		{
+			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
+											.Reference(typeof(string))
+											.Reference(typeof(Uri));
+
+			Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
+			Assert.AreEqual(typeof(Uri), target.Eval("typeof(uri)"));
+			Assert.AreEqual(typeof(Uri), target.Eval("typeof(URI)"));
+			Assert.AreEqual(string.Empty, target.Eval("STRING.Empty"));
+		}
+
+		[TestMethod]
 		public void Custom_Type_Constructor()
 		{
 			var target = new Interpreter()
@@ -109,6 +122,22 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(CalendarAlgorithmType.LunisolarCalendar, target.Eval("CalendarAlgorithmType.LunisolarCalendar"));
 			Assert.AreEqual(CalendarAlgorithmType.SolarCalendar, target.Eval("CalendarAlgorithmType.SolarCalendar"));
+		}
+
+		[TestMethod]
+		public void Enum_are_case_sensitive_by_default()
+		{
+			var target = new Interpreter()
+											.Reference(typeof(EnumCaseSensitive));
+
+			Assert.AreEqual(EnumCaseSensitive.Test, target.Eval("EnumCaseSensitive.Test"));
+			Assert.AreEqual(EnumCaseSensitive.TEST, target.Eval("EnumCaseSensitive.TEST"));
+		}
+
+		public enum EnumCaseSensitive
+		{
+			Test = 1,
+			TEST = 2
 		}
 
 		class MyDataContract

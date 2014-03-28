@@ -18,6 +18,27 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		public void Variables_by_default_are_case_sensitive()
+		{
+			var target = new Interpreter()
+											.SetVariable("x", 23)
+											.SetVariable("X", 50);
+
+			Assert.AreEqual(23, target.Eval("x"));
+			Assert.AreEqual(50, target.Eval("X"));
+		}
+
+		[TestMethod]
+		public void Variables_can_be_case_insensitive()
+		{
+			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
+											.SetVariable("x", 23);
+
+			Assert.AreEqual(23, target.Eval("x"));
+			Assert.AreEqual(23, target.Eval("X"));
+		}
+
+		[TestMethod]
 		public void Variables_can_be_overwritten()
 		{
 			var target = new Interpreter()
@@ -26,6 +47,21 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(23, target.Eval("myk"));
 
 			target.SetVariable("myk", 3489);
+
+			Assert.AreEqual(3489, target.Eval("myk"));
+
+			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
+		}
+
+		[TestMethod]
+		public void Variables_can_be_overwritten_in_a_case_insensitive_setting()
+		{
+			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
+											.SetVariable("myk", 23);
+
+			Assert.AreEqual(23, target.Eval("myk"));
+
+			target.SetVariable("MYK", 3489);
 
 			Assert.AreEqual(3489, target.Eval("myk"));
 

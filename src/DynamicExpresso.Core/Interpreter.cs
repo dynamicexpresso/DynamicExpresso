@@ -13,7 +13,7 @@ namespace DynamicExpresso
 	/// </summary>
 	public class Interpreter
 	{
-		ParserSettings _settings = new ParserSettings();
+		readonly ParserSettings _settings;
 
 		public Interpreter()
 			: this(InterpreterOptions.Default)
@@ -22,6 +22,10 @@ namespace DynamicExpresso
 
 		public Interpreter(InterpreterOptions options)
 		{
+			var caseInsensitive = options.HasFlag(InterpreterOptions.CaseInsensitive);
+
+			_settings = new ParserSettings(caseInsensitive);
+
 			if ((options & InterpreterOptions.SystemKeywords) == InterpreterOptions.SystemKeywords)
 			{
 				FillSystemKeywords();

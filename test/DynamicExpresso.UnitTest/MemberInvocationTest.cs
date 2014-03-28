@@ -71,7 +71,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Methods_Fields_And_Properties_Are_Case_Sensitive()
+		public void Methods_Fields_And_Properties_By_Default_Are_Case_Sensitive()
 		{
 			var target = new Interpreter();
 
@@ -86,6 +86,24 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.APROPERTY, target.Eval("x.APROPERTY", parameters));
 			Assert.AreEqual(x.AField, target.Eval("x.AField", parameters));
 			Assert.AreEqual(x.AFIELD, target.Eval("x.AFIELD", parameters));
+		}
+
+		[TestMethod]
+		public void Methods_Fields_And_Properties_Can_Be_Case_Insensitive()
+		{
+			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
+
+			var x = new MyTestServiceCaseInsensitive();
+			var parameters = new[] {
+                            new Parameter("x", x.GetType(), x)
+                            };
+
+			Assert.AreEqual(x.AMethod(), target.Eval("x.AMethod()", parameters));
+			Assert.AreEqual(x.AMethod(), target.Eval("x.AMETHOD()", parameters));
+			Assert.AreEqual(x.AProperty, target.Eval("x.AProperty", parameters));
+			Assert.AreEqual(x.AProperty, target.Eval("x.APROPERTY", parameters));
+			Assert.AreEqual(x.AField, target.Eval("x.AField", parameters));
+			Assert.AreEqual(x.AField, target.Eval("x.AFIELD", parameters));
 		}
 
 		[TestMethod]
@@ -324,5 +342,19 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
+		class MyTestServiceCaseInsensitive
+		{
+			public DateTime AField = DateTime.Now;
+
+			public int AProperty
+			{
+				get { return 769; }
+			}
+
+			public string AMethod()
+			{
+				return "Ciao mondo";
+			}
+		}
 	}
 }
