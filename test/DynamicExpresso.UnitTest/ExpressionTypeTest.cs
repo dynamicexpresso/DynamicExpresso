@@ -18,7 +18,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void If_expression_type_doesn_t_match_a_conversion_is_performed()
+		public void If_expression_type_doesn_t_match_a_conversion_is_performed_when_possible()
 		{
 			var target = new Interpreter();
 			var expressionType = typeof(double);

@@ -49,6 +49,7 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 - Full suite of unit tests
 - Good performance compared to other similar projects
 - Partial support for generic, params array and extension methods
+- Case insensitive expressions (default is case sensitive)
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
 - Easy to use and deploy, it is all contained in a single assembly without other external dependencies
 - 100 % managed code written in C# 4.0
@@ -280,6 +281,21 @@ Dynamic Expresso also supports:
 - Generics, only partially supported (only implicit, you cannot invoke an explicit generic method)
 - Params array (see C# `params` keyword)
 
+### Case sensitive/insensitive
+
+By default all expressions are considered case sensitive (`VARX` is different than `varx`, as in C#).
+There is an option to use a case insensitive parser. For example:
+
+	var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
+
+	double x = 2;
+	var parameters = new[] {
+											new Parameter("x", x.GetType(), x)
+											};
+
+	Assert.AreEqual(x, target.Eval("x", parameters));
+	Assert.AreEqual(x, target.Eval("X", parameters));
+
 ## Limitations
 
 Not every C# syntaxes are supported. Here some examples of NOT supported features:
@@ -289,6 +305,11 @@ Not every C# syntaxes are supported. Here some examples of NOT supported feature
 - Array/list/dictionary initialization
 - Explicit generic invocation (like `method<type>(arg)`) 
 - Lambda/delegate declaration (delegate and lamda are only supported as variables or parameters or as a return type of the expression)
+
+## Analyzing an expression
+
+To check if a given expression is valid or not you can use the `Interpreter.Analyze` method. 
+This is useful when you want to provide a feedback for a user that has written an expression.
 
 ## Performance and multithreading
 
@@ -312,15 +333,7 @@ In any case generated delegates are executed as any other delegate and standard 
 Here are some possible usage scenarios of Dynamic Expresso:
 
 - Programmable applications
-
-	I have used Dynamic Expresso to allow an user to interact with a console like interface.
-	See live demo: [http://dynamic-expresso.azurewebsites.net/](http://dynamic-expresso.azurewebsites.net/) or source code on [github](https://github.com/davideicardi/DynamicExpresso/tree/master/sample/DynamicExpressoWebShell)
-
 - Allow the user to inject customizable rules and logic without recompiling
-
-	In a tool used to collect Performance Counter data I have used Dynamic Expresso to filter and transform the output data. 
-	In this way the user can insert custom filter or transform logic. For an example see [Counter Catch](https://github.com/davideicardi/CounterCatch).
-
 - Evaluate dynamic functions or commands
 - LINQ dynamic query
 
@@ -367,6 +380,11 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 
 ## Release notes
+
+- 0.11.0
+	
+	- Improved exception when there is an unknown identifier. 
+	- Added Analyze method to check if an expression is valid. See `Interpreter.Analyze`.
 
 - 0.10.0
 

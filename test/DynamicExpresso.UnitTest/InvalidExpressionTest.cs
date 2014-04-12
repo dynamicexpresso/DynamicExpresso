@@ -7,42 +7,42 @@ using System.Collections.Generic;
 namespace DynamicExpresso.UnitTest
 {
 	[TestClass]
-    public class InvalidExpressionTest
+	public class InvalidExpressionTest
 	{
 		[TestMethod]
-        [ExpectedException(typeof(ParseException))]
-        public void Not_existing_variable()
+		[ExpectedException(typeof(UnknownIdentifierException))]
+		public void Not_existing_variable()
 		{
 			var target = new Interpreter();
 
 			target.Eval("not_existing");
 		}
 
-        [TestMethod]
-        [ExpectedException(typeof(ParseException))]
-        public void Not_existing_function()
-        {
-            var target = new Interpreter();
+		[TestMethod]
+		[ExpectedException(typeof(UnknownIdentifierException))]
+		public void Not_existing_function()
+		{
+			var target = new Interpreter();
 
-            target.Eval("pippo()");
-        }
+			target.Eval("pippo()");
+		}
 
-        [TestMethod]
-        [ExpectedException(typeof(ParseException))]
-        public void Not_valid_function()
-        {
-            var target = new Interpreter();
+		[TestMethod]
+		[ExpectedException(typeof(ParseException))]
+		public void Not_valid_function()
+		{
+			var target = new Interpreter();
 
-            target.Eval("2()");
-        }
+			target.Eval("2()");
+		}
 
-        [TestMethod]
-        [ExpectedException(typeof(ParseException))]
-        public void Not_valid_expression()
-        {
-            var target = new Interpreter();
+		[TestMethod]
+		[ExpectedException(typeof(UnknownIdentifierException))]
+		public void Not_valid_expression()
+		{
+			var target = new Interpreter();
 
-            target.Eval("'5' + 3 /(asda");
-        }
+			target.Eval("'5' + 3 /(asda");
+		}
 	}
 }

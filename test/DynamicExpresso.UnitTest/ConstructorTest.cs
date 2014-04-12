@@ -44,7 +44,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ParseException))]
+		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Unknown_New_Type_Is_Not_Supported()
 		{
 			var target = new Interpreter();

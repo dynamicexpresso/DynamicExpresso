@@ -166,7 +166,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Lambda Parse(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
-			var arguments = GetParameters(parameters);
+			var arguments = CreateExpressionParameters(parameters);
 
 			var expression = ParseExpression(expressionText, expressionType, arguments);
 
@@ -227,6 +227,25 @@ namespace DynamicExpresso
 			return Parse(expressionText, expressionType, parameters).Invoke(parameters);
 		}
 
+		public ExpressionAnalysis Analyze(string expressionText, Type expressionType, params Parameter[] parameters)
+		{
+			var arguments = CreateExpressionParameters(parameters);
+
+			var unknownIdentifiers = new List<string>();
+			var parser = new ExpressionParser(expressionText, expressionType, arguments, _settings);
+
+			try
+			{
+				var parseResult = parser.Parse();
+
+				return ExpressionAnalysis.Valid(parseResult.Type);
+			}
+			catch (ParseException ex)
+			{
+				return ExpressionAnalysis.Invalid(ex);
+			}
+		}
+
 		Expression ParseExpression(string expressionText, Type expressionType, params ParameterExpression[] parameters)
 		{
 			var parser = new ExpressionParser(expressionText, expressionType, parameters, _settings);
@@ -234,7 +253,7 @@ namespace DynamicExpresso
 			return parser.Parse();
 		}
 
-		static ParameterExpression[] GetParameters(Parameter[] parameters)
+		static ParameterExpression[] CreateExpressionParameters(Parameter[] parameters)
 		{
 			var arguments = (from p in parameters
 											 select ParameterExpression.Parameter(p.Type, p.Name)).ToArray();

@@ -50,8 +50,8 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ParseException))]
-		public void Load_interpreter_without_any_configuration()
+		[ExpectedException(typeof(UnknownIdentifierException))]
+		public void Load_interpreter_without_any_configuration_doesn_t_recognize_types()
 		{
 			var target = new Interpreter(InterpreterOptions.None);
 

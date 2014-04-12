@@ -92,7 +92,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(ParseException))]
+		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Unknown_Keyword_Is_Not_Supported()
 		{
 			var target = new Interpreter();

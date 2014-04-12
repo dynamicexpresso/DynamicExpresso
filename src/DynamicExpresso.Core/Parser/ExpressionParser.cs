@@ -779,7 +779,7 @@ namespace DynamicExpresso
 			//if (it != null) 
 			//    return ParseMemberAccess(null, it);
 
-			throw ParseError(ErrorMessages.UnknownIdentifier, token.text);
+			throw new UnknownIdentifierException(token.text, token.pos);
 		}
 
 		//Expression ParseIt()
@@ -849,7 +849,8 @@ namespace DynamicExpresso
 
 			Type newType;
 			if (!_settings.KnownTypes.TryGetValue(token.text, out newType))
-				throw ParseError(token.pos, ErrorMessages.UnknownIdentifier, token.text);
+				throw new UnknownIdentifierException(token.text, token.pos);
+				//throw ParseError(token.pos, ErrorMessages.UnknownIdentifier, token.text);
 
 			NextToken();
 			var args = ParseArgumentList();
@@ -1007,7 +1008,7 @@ namespace DynamicExpresso
 			if (methodInvocationExpression != null)
 				return methodInvocationExpression;
 
-			throw ParseError(errorPos, ErrorMessages.NoApplicableMethod, id, GetTypeName(type));
+			throw new NoApplicableMethodException(id, GetTypeName(type), errorPos);
 		}
 
 		private Expression ParseExtensionMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)

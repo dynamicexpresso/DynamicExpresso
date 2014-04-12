@@ -49,8 +49,11 @@
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="ExceptionExtension.cs" />
+    <Compile Include="Exceptions\NoApplicableMethodException.cs" />
+    <Compile Include="Exceptions\UnknownIdentifierException.cs" />
+    <Compile Include="ExpressionAnalysis.cs" />
     <Compile Include="InterpreterOptions.cs" />
-    <Compile Include="Parser\ParseException.cs" />
+    <Compile Include="Exceptions\ParseException.cs" />
     <Compile Include="Parser\ExpressionParser.cs" />
     <Compile Include="Parser\ErrorMessages.cs" />
     <Compile Include="Lambda.cs" />
