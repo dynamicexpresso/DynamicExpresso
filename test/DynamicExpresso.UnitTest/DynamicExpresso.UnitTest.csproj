@@ -35,6 +35,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -55,6 +56,7 @@
   <ItemGroup>
     <Compile Include="CollectionHelperTests.cs" />
     <Compile Include="AnalysisTest.cs" />
+    <Compile Include="DynamicTest.cs" />
     <Compile Include="EnumerableTest.cs" />
     <Compile Include="ExtensionsMethodsTest.cs" />
     <Compile Include="MemberInvocationTest.cs" />

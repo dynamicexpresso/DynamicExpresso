@@ -982,36 +982,41 @@ namespace DynamicExpresso
 			{
 				return ParseMethodInvocation(type, instance, errorPos, id);
 			}
-			else
+
+			return GeneratePropertyOrFieldExpression(type, instance, errorPos, id);
+		}
+
+		Expression GeneratePropertyOrFieldExpression(Type type, Expression instance, int errorPos, string propertyOrFieldName)
+		{
+			MemberInfo member = FindPropertyOrField(type, propertyOrFieldName, instance == null);
+			if (member != null)
 			{
-				MemberInfo member = FindPropertyOrField(type, id, instance == null);
-				if (member == null)
-					throw ParseError(errorPos, ErrorMessages.UnknownPropertyOrField,
-							id, GetTypeName(type));
 				return member is PropertyInfo ?
 						Expression.Property(instance, (PropertyInfo)member) :
 						Expression.Field(instance, (FieldInfo)member);
 			}
+
+			throw ParseError(errorPos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(type));
 		}
 
-		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string id)
+		Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName)
 		{
 			Expression[] args = ParseArgumentList();
 
-			var methodInvocationExpression = ParseNormalMethodInvocation(type, instance, errorPos, id, args);
+			var methodInvocationExpression = ParseNormalMethodInvocation(type, instance, errorPos, methodName, args);
 
 			if (methodInvocationExpression == null && instance != null)
 			{
-				methodInvocationExpression = ParseExtensionMethodInvocation(type, instance, errorPos, id, args);
+				methodInvocationExpression = ParseExtensionMethodInvocation(type, instance, errorPos, methodName, args);
 			}
 
 			if (methodInvocationExpression != null)
 				return methodInvocationExpression;
 
-			throw new NoApplicableMethodException(id, GetTypeName(type), errorPos);
+			throw new NoApplicableMethodException(methodName, GetTypeName(type), errorPos);
 		}
 
-		private Expression ParseExtensionMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
+		Expression ParseExtensionMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
 		{
 			var extensionMethodsArguments = new Expression[args.Length + 1];
 			extensionMethodsArguments[0] = instance;
@@ -1033,7 +1038,7 @@ namespace DynamicExpresso
 			return null;
 		}
 
-		private Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
+		Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
 		{
 			var applicableMethods = FindMethods(type, id, instance == null, args);
 			if (applicableMethods.Length > 1)
@@ -1161,6 +1166,11 @@ namespace DynamicExpresso
 		{
 			return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 		}
+
+		//static bool IsDynamicType(Type type)
+		//{
+		//	return typeof(IDynamicMetaObjectProvider).IsAssignableFrom(type);
+		//}
 
 		static Type GetNonNullableType(Type type)
 		{
