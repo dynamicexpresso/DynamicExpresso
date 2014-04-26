@@ -92,57 +92,6 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		[ExpectedException(typeof(UnknownIdentifierException))]
-		public void Unknown_Keyword_Is_Not_Supported()
-		{
-			var target = new Interpreter();
-
-			target.Parse("unkkeyword");
-		}
-
-		[ExpectedException(typeof(InvalidOperationException))]
-		[TestMethod]
-		public void SystemExceptions_are_preserved_using_delegate_variable()
-		{
-			var target = new Interpreter();
-
-			Func<string> testException = new Func<string>(() =>
-			{
-				throw new InvalidOperationException("Test");
-			});
-
-			target.SetVariable("testException", testException);
-
-			target.Eval("testException()");
-		}
-
-		[ExpectedException(typeof(MyException))]
-		[TestMethod]
-		public void CustomExceptions_WithoutSerializationConstructor_are_preserved()
-		{
-			var target = new Interpreter();
-
-			Func<string> testException = new Func<string>(() =>
-			{
-				throw new MyException("Test");
-			});
-
-			target.SetVariable("testException", testException);
-
-			target.Eval("testException()");
-		}
-
-		[ExpectedException(typeof(NotImplementedException))]
-		[TestMethod]
-		public void SystemExceptions_are_preserved_using_method_invocation()
-		{
-			var target = new Interpreter();
-			target.SetVariable("a", new MyTestService());
-
-			target.Eval("a.ThrowException()");
-		}
-
-		[TestMethod]
 		public void Execute_the_same_function_multiple_times()
 		{
 			var target = new Interpreter();
@@ -162,9 +111,23 @@ namespace DynamicExpresso.UnitTest
 																													new Parameter("y", 3.0)));
 		}
 
-		public class MyException : Exception
+		[TestMethod]
+		public void Linq_Where()
 		{
-			public MyException(string message) : base(message) { }
+			var customers = new List<Customer> { 
+                                    new Customer() { Name = "David", Age = 31, Gender = 'M' },
+                                    new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
+                                    new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
+                                    new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
+                                    new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
+                                    };
+
+			string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
+
+			var interpreter = new Interpreter();
+			Func<Customer, bool> dynamicWhere = interpreter.Parse<Func<Customer, bool>>(whereExpression, "customer");
+
+			Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
 		}
 
 		class MyTestService
@@ -180,11 +143,6 @@ namespace DynamicExpresso.UnitTest
 			public int APROPERTY
 			{
 				get { return 887; }
-			}
-
-			public string ThrowException()
-			{
-				throw new NotImplementedException("AppException");
 			}
 
 			public string HelloWorld()
@@ -217,25 +175,6 @@ namespace DynamicExpresso.UnitTest
 			public string Name { get; set; }
 			public int Age { get; set; }
 			public char Gender { get; set; }
-		}
-
-		[TestMethod]
-		public void Linq_Where()
-		{
-			var customers = new List<Customer> { 
-                                    new Customer() { Name = "David", Age = 31, Gender = 'M' },
-                                    new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
-                                    new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
-                                    new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
-                                    new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
-                                    };
-
-			string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
-
-			var interpreter = new Interpreter();
-			Func<Customer, bool> dynamicWhere = interpreter.Parse<Func<Customer, bool>>(whereExpression, "customer");
-
-			Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
 		}
 	}
 }

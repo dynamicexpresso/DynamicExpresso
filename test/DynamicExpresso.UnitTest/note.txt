@@ -1,16 +1,4 @@
 ﻿Missing tests
 --------------
-- throw
 - performance test (memory/cpu/threads/handles)?
 
-
-
-Usages and examples
---------------
-
-- ContinuousPackager
-- Counter Catch (filter counters and transform values)
-- xrc (page declaration)
-- ZenoSetup (for setup commands)
-- Application console (for diagnostic or advanced features) (desktop/web)
-- Linq dynamic where / filter api

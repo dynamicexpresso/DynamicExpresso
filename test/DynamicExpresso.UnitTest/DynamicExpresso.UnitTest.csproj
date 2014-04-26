@@ -58,6 +58,7 @@
     <Compile Include="AnalysisTest.cs" />
     <Compile Include="DynamicTest.cs" />
     <Compile Include="EnumerableTest.cs" />
+    <Compile Include="ExceptionTest.cs" />
     <Compile Include="ExtensionsMethodsTest.cs" />
     <Compile Include="MemberInvocationTest.cs" />
     <Compile Include="ExpressionTypeTest.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="StaticTest.cs" />
     <Compile Include="ParametersTest.cs" />
     <Compile Include="VariablesTest.cs" />
+    <Compile Include="WorkingContextTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
