@@ -61,6 +61,7 @@
     <Compile Include="Parameter.cs" />
     <Compile Include="Parser\ParserConstants.cs" />
     <Compile Include="Parser\ParserSettings.cs" />
+    <Compile Include="Parser\ParseSignatures.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -64,113 +64,6 @@ namespace DynamicExpresso
 			DoubleBar
 		}
 
-		interface ILogicalSignatures
-		{
-			void F(bool x, bool y);
-			void F(bool? x, bool? y);
-		}
-
-		interface IArithmeticSignatures
-		{
-			void F(int x, int y);
-			void F(uint x, uint y);
-			void F(long x, long y);
-			void F(ulong x, ulong y);
-			void F(float x, float y);
-			void F(double x, double y);
-			void F(decimal x, decimal y);
-			void F(int? x, int? y);
-			void F(uint? x, uint? y);
-			void F(long? x, long? y);
-			void F(ulong? x, ulong? y);
-			void F(float? x, float? y);
-			void F(double? x, double? y);
-			void F(decimal? x, decimal? y);
-		}
-
-		interface IRelationalSignatures : IArithmeticSignatures
-		{
-			void F(string x, string y);
-			void F(char x, char y);
-			void F(DateTime x, DateTime y);
-			void F(TimeSpan x, TimeSpan y);
-			void F(char? x, char? y);
-			void F(DateTime? x, DateTime? y);
-			void F(TimeSpan? x, TimeSpan? y);
-		}
-
-		interface IEqualitySignatures : IRelationalSignatures
-		{
-			void F(bool x, bool y);
-			void F(bool? x, bool? y);
-		}
-
-		interface IAddSignatures : IArithmeticSignatures
-		{
-			void F(DateTime x, TimeSpan y);
-			void F(TimeSpan x, TimeSpan y);
-			void F(DateTime? x, TimeSpan? y);
-			void F(TimeSpan? x, TimeSpan? y);
-		}
-
-		interface ISubtractSignatures : IAddSignatures
-		{
-			void F(DateTime x, DateTime y);
-			void F(DateTime? x, DateTime? y);
-		}
-
-		interface INegationSignatures
-		{
-			void F(int x);
-			void F(long x);
-			void F(float x);
-			void F(double x);
-			void F(decimal x);
-			void F(int? x);
-			void F(long? x);
-			void F(float? x);
-			void F(double? x);
-			void F(decimal? x);
-		}
-
-		interface INotSignatures
-		{
-			void F(bool x);
-			void F(bool? x);
-		}
-
-		//interface IEnumerableSignatures
-		//{
-		//    void Where(bool predicate);
-		//    void Any();
-		//    void Any(bool predicate);
-		//    void All(bool predicate);
-		//    void Count();
-		//    void Count(bool predicate);
-		//    void Min(object selector);
-		//    void Max(object selector);
-		//    void Sum(int selector);
-		//    void Sum(int? selector);
-		//    void Sum(long selector);
-		//    void Sum(long? selector);
-		//    void Sum(float selector);
-		//    void Sum(float? selector);
-		//    void Sum(double selector);
-		//    void Sum(double? selector);
-		//    void Sum(decimal selector);
-		//    void Sum(decimal? selector);
-		//    void Average(int selector);
-		//    void Average(int? selector);
-		//    void Average(long selector);
-		//    void Average(long? selector);
-		//    void Average(float selector);
-		//    void Average(float? selector);
-		//    void Average(double selector);
-		//    void Average(double? selector);
-		//    void Average(decimal selector);
-		//    void Average(decimal? selector);
-		//}
-
 		ParserSettings _settings;
 		Type _expressionType;
 
@@ -283,7 +176,7 @@ namespace DynamicExpresso
 				Token op = token;
 				NextToken();
 				Expression right = ParseLogicalAnd();
-				CheckAndPromoteOperands(typeof(ILogicalSignatures), op.text, ref left, ref right, op.pos);
+				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), op.text, ref left, ref right, op.pos);
 				left = Expression.OrElse(left, right);
 			}
 			return left;
@@ -298,7 +191,7 @@ namespace DynamicExpresso
 				Token op = token;
 				NextToken();
 				Expression right = ParseComparison();
-				CheckAndPromoteOperands(typeof(ILogicalSignatures), op.text, ref left, ref right, op.pos);
+				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), op.text, ref left, ref right, op.pos);
 				left = Expression.AndAlso(left, right);
 			}
 			return left;
@@ -357,7 +250,7 @@ namespace DynamicExpresso
 				}
 				else
 				{
-					CheckAndPromoteOperands(isEquality ? typeof(IEqualitySignatures) : typeof(IRelationalSignatures),
+					CheckAndPromoteOperands(isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
 							op.text, ref left, ref right, op.pos);
 				}
 				switch (op.id)
@@ -432,12 +325,12 @@ namespace DynamicExpresso
 						}
 						else
 						{
-							CheckAndPromoteOperands(typeof(IAddSignatures), op.text, ref left, ref right, op.pos);
+							CheckAndPromoteOperands(typeof(ParseSignatures.IAddSignatures), op.text, ref left, ref right, op.pos);
 							left = GenerateAdd(left, right);
 						}
 						break;
 					case TokenId.Minus:
-						CheckAndPromoteOperands(typeof(ISubtractSignatures), op.text, ref left, ref right, op.pos);
+						CheckAndPromoteOperands(typeof(ParseSignatures.ISubtractSignatures), op.text, ref left, ref right, op.pos);
 						left = GenerateSubtract(left, right);
 						break;
 				}
@@ -455,7 +348,7 @@ namespace DynamicExpresso
 				Token op = token;
 				NextToken();
 				Expression right = ParseUnary();
-				CheckAndPromoteOperands(typeof(IArithmeticSignatures), op.text, ref left, ref right, op.pos);
+				CheckAndPromoteOperands(typeof(ParseSignatures.IArithmeticSignatures), op.text, ref left, ref right, op.pos);
 				switch (op.id)
 				{
 					case TokenId.Asterisk:
@@ -498,7 +391,7 @@ namespace DynamicExpresso
 				Expression expr = ParseUnary();
 				if (op.id == TokenId.Minus)
 				{
-					CheckAndPromoteOperand(typeof(INegationSignatures), op.text, ref expr, op.pos);
+					CheckAndPromoteOperand(typeof(ParseSignatures.INegationSignatures), op.text, ref expr, op.pos);
 					expr = Expression.Negate(expr);
 				}
 				else if (op.id == TokenId.Plus)
@@ -507,7 +400,7 @@ namespace DynamicExpresso
 				}
 				else if (op.id == TokenId.Exclamation)
 				{
-					CheckAndPromoteOperand(typeof(INotSignatures), op.text, ref expr, op.pos);
+					CheckAndPromoteOperand(typeof(ParseSignatures.INotSignatures), op.text, ref expr, op.pos);
 					expr = Expression.Not(expr);
 				}
 				return expr;
@@ -743,8 +636,10 @@ namespace DynamicExpresso
 		{
 			ValidateToken(TokenId.Identifier);
 
+			// Working context implementation
 			//if (token.text == ParserConstants.keywordIt)
 			//    return ParseIt();
+
 			if (token.text == ParserConstants.keywordNew)
 				return ParseNew();
 			if (token.text == ParserConstants.keywordTypeof)
@@ -759,9 +654,6 @@ namespace DynamicExpresso
 			Expression keywordExpression;
 			if (_settings.Keywords.TryGetValue(token.text, out keywordExpression))
 			{
-				//LambdaExpression lambda = keywordExpression as LambdaExpression;
-				//if (lambda != null) return ParseLambdaInvocation(lambda);
-
 				NextToken();
 				return keywordExpression;
 			}
@@ -769,19 +661,18 @@ namespace DynamicExpresso
 			Expression parameterExpression;
 			if (_parameters.TryGetValue(token.text, out parameterExpression))
 			{
-				//LambdaExpression lambda = parameterExpression as LambdaExpression;
-				//if (lambda != null) return ParseLambdaInvocation(lambda);
-
 				NextToken();
 				return parameterExpression;
 			}
 
+			// Working context implementation
 			//if (it != null) 
 			//    return ParseMemberAccess(null, it);
 
 			throw new UnknownIdentifierException(token.text, token.pos);
 		}
 
+		// Working context implementation
 		//Expression ParseIt()
 		//{
 		//    if (it == null)
@@ -850,7 +741,6 @@ namespace DynamicExpresso
 			Type newType;
 			if (!_settings.KnownTypes.TryGetValue(token.text, out newType))
 				throw new UnknownIdentifierException(token.text, token.pos);
-				//throw ParseError(token.pos, ErrorMessages.UnknownIdentifier, token.text);
 
 			NextToken();
 			var args = ParseArgumentList();
