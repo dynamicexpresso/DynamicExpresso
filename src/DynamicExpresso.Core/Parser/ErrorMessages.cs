@@ -11,8 +11,8 @@ namespace DynamicExpresso
 {
 	internal class ErrorMessages
 	{
-		public const string DuplicateIdentifier = "The identifier '{0}' was defined more than once";
-		public const string ExpressionTypeMismatch = "Expression of type '{0}' expected";
+		//public const string DuplicateIdentifier = "The identifier '{0}' was defined more than once";
+		//public const string ExpressionTypeMismatch = "Expression of type '{0}' expected";
 		public const string ExpressionExpected = "Expression expected";
 		public const string InvalidCharacterLiteral = "Character literal must contain exactly one character";
 		public const string InvalidIntegerLiteral = "Invalid integer literal '{0}'";

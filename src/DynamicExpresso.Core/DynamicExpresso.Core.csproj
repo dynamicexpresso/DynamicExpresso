@@ -50,6 +50,7 @@
     </Compile>
     <Compile Include="ExceptionExtension.cs" />
     <Compile Include="Exceptions\NoApplicableMethodException.cs" />
+    <Compile Include="Exceptions\DuplicateParameterException.cs" />
     <Compile Include="Exceptions\UnknownIdentifierException.cs" />
     <Compile Include="ExpressionAnalysis.cs" />
     <Compile Include="InterpreterOptions.cs" />
