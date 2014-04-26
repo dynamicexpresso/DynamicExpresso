@@ -10,26 +10,33 @@ namespace DynamicExpresso
 {
 	internal class ParserSettings
 	{
-		Dictionary<string, Expression> keywords;
+		readonly Dictionary<string, Expression> _keywords;
+		readonly Dictionary<string, Type> _knownTypes;
+		readonly List<MethodInfo> _extensionMethods;
 
-		Dictionary<string, object> externals;
+		public ParserSettings(bool caseInsensitive)
+		{
+			CaseInsensitive = caseInsensitive;
 
-		Dictionary<string, Type> knownTypes;
+			SettingsKeyComparer = CaseInsensitive ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
 
-		List<MethodInfo> _extensionMethods;
+			_keywords = new Dictionary<string, Expression>(SettingsKeyComparer);
+
+			_knownTypes = new Dictionary<string, Type>(SettingsKeyComparer);
+
+			_extensionMethods = new List<MethodInfo>();
+		}
 
 		public IDictionary<string, Type> KnownTypes
 		{
-			get { return knownTypes; }
+			get { return _knownTypes; }
 		}
-		public IDictionary<string, object> Externals
-		{
-			get { return externals; }
-		}
+
 		public IDictionary<string, Expression> Keywords
 		{
-			get { return keywords; }
+			get { return _keywords; }
 		}
+
 		public IList<MethodInfo> ExtensionMethods
 		{
 			get { return _extensionMethods; }
@@ -47,17 +54,5 @@ namespace DynamicExpresso
 			private set;
 		}
 
-		public ParserSettings(bool caseInsensitive)
-		{
-			CaseInsensitive = caseInsensitive;
-
-			SettingsKeyComparer = CaseInsensitive ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
-
-			keywords = new Dictionary<string, Expression>(SettingsKeyComparer);
-			externals = new Dictionary<string, object>();
-			knownTypes = new Dictionary<string, Type>(SettingsKeyComparer);
-
-			_extensionMethods = new List<MethodInfo>();
-		}
 	}
 }
