@@ -130,6 +130,37 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
 		}
 
+		[TestMethod]
+		public void Multiple_Parentheses_Math_Expression()
+		{
+			var interpreter = new Interpreter();
+
+			Assert.AreEqual(2 + ((1 + 5) * (2 - 1)), interpreter.Eval("2 + ((1 + 5) * (2 - 1))"));
+			Assert.AreEqual(2 + ((((1 + 5))) * (((2 - 1)) + 5.5)), interpreter.Eval("2 + ((((1 + 5))) * (((2 - 1))+5.5))"));
+		}
+
+		[TestMethod]
+		public void Multiple_Parentheses_Cast_Expression()
+		{
+			var interpreter = new Interpreter();
+
+			Assert.AreEqual(((double)5).GetType().Name, interpreter.Eval("((double)5).GetType().Name"));
+		}
+
+		[TestMethod]
+		public void GitHub_Issue_19()
+		{
+			var interpreter = new Interpreter();
+			var values = new Dictionary<string, object>();
+			values.Add("key", DateTime.Now);
+			interpreter.SetVariable("values", values);
+
+			Assert.AreEqual((double)1, interpreter.Eval("(double) 1"));
+			Assert.AreEqual(((double)1), interpreter.Eval("((double) 1)"));
+			Assert.AreEqual((double)1, interpreter.Eval("(double) 1"));
+			Assert.AreEqual(((DateTime)values["key"]).Year, interpreter.Eval("((DateTime)values[\"key\"]).Year"));
+		}
+
 		class MyTestService
 		{
 			public DateTime AField = DateTime.Now;

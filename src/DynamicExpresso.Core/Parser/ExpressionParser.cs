@@ -616,18 +616,21 @@ namespace DynamicExpresso
 		{
 			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
 			NextToken();
-			Expression e = ParseExpressionSegment();
+			Expression innerParenthesesExpression = ParseExpressionSegment();
 			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrOperatorExpected);
 
-			var constExp = e as ConstantExpression;
+			var constExp = innerParenthesesExpression as ConstantExpression;
 			if (constExp != null && constExp.Value is Type)
 			{
 				NextToken();
-				e = Expression.Convert(ParseExpressionSegment(), (Type)constExp.Value);
+				var nextExpression = ParseExpressionSegment();
+
+				// cast: (constExp)nextExpression
+				return Expression.Convert(nextExpression, (Type)constExp.Value);
 			}
 
 			NextToken();
-			return e;
+			return innerParenthesesExpression;
 		}
 
 		Expression ParseIdentifier()
