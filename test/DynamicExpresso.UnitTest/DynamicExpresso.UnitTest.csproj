@@ -63,6 +63,7 @@
     <Compile Include="MemberInvocationTest.cs" />
     <Compile Include="ExpressionTypeTest.cs" />
     <Compile Include="InvalidExpressionTest.cs" />
+    <Compile Include="GithubIssues.cs" />
     <Compile Include="TypedDelegatesTest.cs" />
     <Compile Include="TypesTest.cs" />
     <Compile Include="LiteralsTest.cs" />

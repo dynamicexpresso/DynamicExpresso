@@ -72,11 +72,11 @@ namespace DynamicExpresso
 		// Working context implementation
 		//ParameterExpression it;
 
-		string text;
-		int textPos;
-		int textLen;
-		char ch;
-		Token token;
+		string _expressionText;
+		int _parsePosition;
+		int _expressionTextLength;
+		char _parseChar;
+		Token _token;
 
 		BindingFlags _bindingCase;
 		MemberFilter _memberFilterCase;
@@ -93,8 +93,8 @@ namespace DynamicExpresso
 
 			AddParameters(parameters);
 
-			text = expression ?? string.Empty;
-			textLen = text.Length;
+			_expressionText = expression ?? string.Empty;
+			_expressionTextLength = _expressionText.Length;
 			SetTextPos(0);
 			NextToken();
 		}
@@ -110,7 +110,7 @@ namespace DynamicExpresso
 		void AddParameter(string name, Expression value)
 		{
 			if (_parameters.ContainsKey(name))
-				throw new DuplicateParameterException(name, token.pos);
+				throw new DuplicateParameterException(name, _token.pos);
 
 			_parameters.Add(name, value);
 		}
@@ -125,7 +125,7 @@ namespace DynamicExpresso
 
 		Expression ParseExpressionSegment(Type returnType)
 		{
-			int errorPos = token.pos;
+			int errorPos = _token.pos;
 			var expression = ParseExpressionSegment();
 
 			if (returnType != typeof(void))
@@ -147,9 +147,9 @@ namespace DynamicExpresso
 		// ?: operator
 		Expression ParseConditional()
 		{
-			int errorPos = token.pos;
+			int errorPos = _token.pos;
 			Expression expr = ParseLogicalOr();
-			if (token.id == TokenId.Question)
+			if (_token.id == TokenId.Question)
 			{
 				NextToken();
 				Expression expr1 = ParseExpressionSegment();
@@ -165,9 +165,9 @@ namespace DynamicExpresso
 		Expression ParseLogicalOr()
 		{
 			Expression left = ParseLogicalAnd();
-			while (token.id == TokenId.DoubleBar)
+			while (_token.id == TokenId.DoubleBar)
 			{
-				Token op = token;
+				Token op = _token;
 				NextToken();
 				Expression right = ParseLogicalAnd();
 				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), op.text, ref left, ref right, op.pos);
@@ -180,9 +180,9 @@ namespace DynamicExpresso
 		Expression ParseLogicalAnd()
 		{
 			Expression left = ParseComparison();
-			while (token.id == TokenId.DoubleAmphersand)
+			while (_token.id == TokenId.DoubleAmphersand)
 			{
-				Token op = token;
+				Token op = _token;
 				NextToken();
 				Expression right = ParseComparison();
 				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), op.text, ref left, ref right, op.pos);
@@ -195,11 +195,11 @@ namespace DynamicExpresso
 		Expression ParseComparison()
 		{
 			Expression left = ParseTypeTesting();
-			while (token.id == TokenId.DoubleEqual || token.id == TokenId.ExclamationEqual ||
-					token.id == TokenId.GreaterThan || token.id == TokenId.GreaterThanEqual ||
-					token.id == TokenId.LessThan || token.id == TokenId.LessThanEqual)
+			while (_token.id == TokenId.DoubleEqual || _token.id == TokenId.ExclamationEqual ||
+					_token.id == TokenId.GreaterThan || _token.id == TokenId.GreaterThanEqual ||
+					_token.id == TokenId.LessThan || _token.id == TokenId.LessThanEqual)
 			{
-				Token op = token;
+				Token op = _token;
 				NextToken();
 				Expression right = ParseAdditive();
 				bool isEquality = op.id == TokenId.DoubleEqual || op.id == TokenId.ExclamationEqual;
@@ -276,16 +276,16 @@ namespace DynamicExpresso
 		Expression ParseTypeTesting()
 		{
 			Expression left = ParseAdditive();
-			while (token.text == ParserConstants.keywordIs
-					|| token.text == ParserConstants.keywordAs)
+			while (_token.text == ParserConstants.keywordIs
+					|| _token.text == ParserConstants.keywordAs)
 			{
-				var typeOperator = token.text;
+				var typeOperator = _token.text;
 
-				Token op = token;
+				Token op = _token;
 				NextToken();
 
 				Type knownType;
-				if (!_settings.KnownTypes.TryGetValue(token.text, out knownType))
+				if (!_settings.KnownTypes.TryGetValue(_token.text, out knownType))
 					throw CreateParseException(op.pos, ErrorMessages.TypeIdentifierExpected);
 
 				if (typeOperator == ParserConstants.keywordIs)
@@ -293,7 +293,7 @@ namespace DynamicExpresso
 				else if (typeOperator == ParserConstants.keywordAs)
 					left = Expression.TypeAs(left, knownType);
 				else
-					throw CreateParseException(token.pos, ErrorMessages.SyntaxError);
+					throw CreateParseException(_token.pos, ErrorMessages.SyntaxError);
 
 				NextToken();
 			}
@@ -305,9 +305,9 @@ namespace DynamicExpresso
 		Expression ParseAdditive()
 		{
 			Expression left = ParseMultiplicative();
-			while (token.id == TokenId.Plus || token.id == TokenId.Minus)
+			while (_token.id == TokenId.Plus || _token.id == TokenId.Minus)
 			{
-				Token op = token;
+				Token op = _token;
 				NextToken();
 				Expression right = ParseMultiplicative();
 				switch (op.id)
@@ -336,10 +336,10 @@ namespace DynamicExpresso
 		Expression ParseMultiplicative()
 		{
 			Expression left = ParseUnary();
-			while (token.id == TokenId.Asterisk || token.id == TokenId.Slash ||
-					token.id == TokenId.Percent)
+			while (_token.id == TokenId.Asterisk || _token.id == TokenId.Slash ||
+					_token.id == TokenId.Percent)
 			{
-				Token op = token;
+				Token op = _token;
 				NextToken();
 				Expression right = ParseUnary();
 				CheckAndPromoteOperands(typeof(ParseSignatures.IArithmeticSignatures), op.text, ref left, ref right, op.pos);
@@ -362,23 +362,23 @@ namespace DynamicExpresso
 		// +,-, ! unary operators
 		Expression ParseUnary()
 		{
-			if (token.id == TokenId.Minus || token.id == TokenId.Exclamation || token.id == TokenId.Plus)
+			if (_token.id == TokenId.Minus || _token.id == TokenId.Exclamation || _token.id == TokenId.Plus)
 			{
-				Token op = token;
+				Token op = _token;
 				NextToken();
-				if (token.id == TokenId.IntegerLiteral ||
-						token.id == TokenId.RealLiteral)
+				if (_token.id == TokenId.IntegerLiteral ||
+						_token.id == TokenId.RealLiteral)
 				{
 					if (op.id == TokenId.Minus)
 					{
-						token.text = "-" + token.text;
-						token.pos = op.pos;
+						_token.text = "-" + _token.text;
+						_token.pos = op.pos;
 						return ParsePrimary();
 					}
 					else if (op.id == TokenId.Plus)
 					{
-						token.text = "+" + token.text;
-						token.pos = op.pos;
+						_token.text = "+" + _token.text;
+						_token.pos = op.pos;
 						return ParsePrimary();
 					}
 				}
@@ -404,20 +404,20 @@ namespace DynamicExpresso
 
 		Expression ParsePrimary()
 		{
-			var tokenPos = token.pos;
+			var tokenPos = _token.pos;
 			Expression expr = ParsePrimaryStart();
 			while (true)
 			{
-				if (token.id == TokenId.Dot)
+				if (_token.id == TokenId.Dot)
 				{
 					NextToken();
 					expr = ParseMemberAccess(null, expr);
 				}
-				else if (token.id == TokenId.OpenBracket)
+				else if (_token.id == TokenId.OpenBracket)
 				{
 					expr = ParseElementAccess(expr);
 				}
-				else if (token.id == TokenId.OpenParen)
+				else if (_token.id == TokenId.OpenParen)
 				{
 					LambdaExpression lambda = expr as LambdaExpression;
 					if (lambda != null)
@@ -437,7 +437,7 @@ namespace DynamicExpresso
 
 		Expression ParsePrimaryStart()
 		{
-			switch (token.id)
+			switch (_token.id)
 			{
 				case TokenId.Identifier:
 					return ParseIdentifier();
@@ -454,19 +454,19 @@ namespace DynamicExpresso
 				case TokenId.End:
 					return Expression.Empty();
 				default:
-					throw CreateParseException(token.pos, ErrorMessages.ExpressionExpected);
+					throw CreateParseException(_token.pos, ErrorMessages.ExpressionExpected);
 			}
 		}
 
 		Expression ParseCharLiteral()
 		{
 			ValidateToken(TokenId.CharLiteral);
-			string s = token.text.Substring(1, token.text.Length - 2);
+			string s = _token.text.Substring(1, _token.text.Length - 2);
 
 			s = EvalEscapeStringLiteral(s);
 
 			if (s.Length != 1)
-				throw CreateParseException(token.pos, ErrorMessages.InvalidCharacterLiteral);
+				throw CreateParseException(_token.pos, ErrorMessages.InvalidCharacterLiteral);
 
 			NextToken();
 			return CreateLiteral(s[0], s);
@@ -475,7 +475,7 @@ namespace DynamicExpresso
 		Expression ParseStringLiteral()
 		{
 			ValidateToken(TokenId.StringLiteral);
-			string s = token.text.Substring(1, token.text.Length - 2);
+			string s = _token.text.Substring(1, _token.text.Length - 2);
 
 			s = EvalEscapeStringLiteral(s);
 
@@ -503,7 +503,7 @@ namespace DynamicExpresso
 				if (c == '\\')
 				{
 					if ((i + 1) == source.Length)
-						throw CreateParseException(token.pos, ErrorMessages.InvalidEscapeSequence);
+						throw CreateParseException(_token.pos, ErrorMessages.InvalidEscapeSequence);
 
 					builder.Append(EvalEscapeChar(source[++i]));
 				}
@@ -541,33 +541,42 @@ namespace DynamicExpresso
 				case 'v':
 					return '\v';
 				default:
-					throw CreateParseException(token.pos, ErrorMessages.InvalidEscapeSequence);
+					throw CreateParseException(_token.pos, ErrorMessages.InvalidEscapeSequence);
 			}
 		}
 
 		Expression ParseIntegerLiteral()
 		{
 			ValidateToken(TokenId.IntegerLiteral);
-			string text = token.text;
+			string text = _token.text;
 			if (text[0] != '-')
 			{
 				ulong value;
 				if (!UInt64.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out value))
-					throw CreateParseException(token.pos, ErrorMessages.InvalidIntegerLiteral, text);
+					throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
+
 				NextToken();
-				if (value <= (ulong)Int32.MaxValue) return CreateLiteral((int)value, text);
-				if (value <= (ulong)UInt32.MaxValue) return CreateLiteral((uint)value, text);
-				if (value <= (ulong)Int64.MaxValue) return CreateLiteral((long)value, text);
+
+				if (value <= (ulong)Int32.MaxValue) 
+					return CreateLiteral((int)value, text);
+				if (value <= (ulong)UInt32.MaxValue) 
+					return CreateLiteral((uint)value, text);
+				if (value <= (ulong)Int64.MaxValue) 
+					return CreateLiteral((long)value, text);
+
 				return CreateLiteral(value, text);
 			}
 			else
 			{
 				long value;
 				if (!Int64.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out value))
-					throw CreateParseException(token.pos, ErrorMessages.InvalidIntegerLiteral, text);
+					throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
+
 				NextToken();
+
 				if (value >= Int32.MinValue && value <= Int32.MaxValue)
 					return CreateLiteral((int)value, text);
+
 				return CreateLiteral(value, text);
 			}
 		}
@@ -575,7 +584,7 @@ namespace DynamicExpresso
 		Expression ParseRealLiteral()
 		{
 			ValidateToken(TokenId.RealLiteral);
-			string text = token.text;
+			string text = _token.text;
 			object value = null;
 			char last = text[text.Length - 1];
 			if (last == 'F' || last == 'f')
@@ -598,7 +607,7 @@ namespace DynamicExpresso
 			}
 
 			if (value == null)
-				throw CreateParseException(token.pos, ErrorMessages.InvalidRealLiteral, text);
+				throw CreateParseException(_token.pos, ErrorMessages.InvalidRealLiteral, text);
 			
 			NextToken();
 
@@ -641,26 +650,26 @@ namespace DynamicExpresso
 			//if (token.text == ParserConstants.keywordIt)
 			//    return ParseIt();
 
-			if (token.text == ParserConstants.keywordNew)
+			if (_token.text == ParserConstants.keywordNew)
 				return ParseNew();
-			if (token.text == ParserConstants.keywordTypeof)
+			if (_token.text == ParserConstants.keywordTypeof)
 				return ParseTypeof();
 
 			Type knownType;
-			if (_settings.KnownTypes.TryGetValue(token.text, out knownType))
+			if (_settings.KnownTypes.TryGetValue(_token.text, out knownType))
 			{
 				return ParseTypeKeyword(knownType);
 			}
 
 			Expression keywordExpression;
-			if (_settings.Keywords.TryGetValue(token.text, out keywordExpression))
+			if (_settings.Keywords.TryGetValue(_token.text, out keywordExpression))
 			{
 				NextToken();
 				return keywordExpression;
 			}
 
 			Expression parameterExpression;
-			if (_parameters.TryGetValue(token.text, out parameterExpression))
+			if (_parameters.TryGetValue(_token.text, out parameterExpression))
 			{
 				NextToken();
 				return parameterExpression;
@@ -670,7 +679,7 @@ namespace DynamicExpresso
 			//if (it != null) 
 			//    return ParseMemberAccess(null, it);
 
-			throw new UnknownIdentifierException(token.text, token.pos);
+			throw new UnknownIdentifierException(_token.text, _token.pos);
 		}
 
 		// Working context implementation
@@ -694,7 +703,7 @@ namespace DynamicExpresso
 
 		Expression ParseTypeof()
 		{
-			int errorPos = token.pos;
+			int errorPos = _token.pos;
 			NextToken();
 			Expression[] args = ParseArgumentList();
 			if (args.Length != 1)
@@ -740,15 +749,15 @@ namespace DynamicExpresso
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
 
 			Type newType;
-			if (!_settings.KnownTypes.TryGetValue(token.text, out newType))
-				throw new UnknownIdentifierException(token.text, token.pos);
+			if (!_settings.KnownTypes.TryGetValue(_token.text, out newType))
+				throw new UnknownIdentifierException(_token.text, _token.pos);
 
 			NextToken();
 			var args = ParseArgumentList();
 
 			var constructor = newType.GetConstructor(args.Select(p => p.Type).ToArray());
 			if (constructor == null)
-				throw CreateParseException(token.pos, ErrorMessages.NoApplicableConstructor, newType);
+				throw CreateParseException(_token.pos, ErrorMessages.NoApplicableConstructor, newType);
 
 			return Expression.MemberInit(Expression.New(constructor, args));
 		}
@@ -786,9 +795,9 @@ namespace DynamicExpresso
 
 		Expression ParseTypeKeyword(Type type)
 		{
-			int errorPos = token.pos;
+			int errorPos = _token.pos;
 			NextToken();
-			if (token.id == TokenId.Question)
+			if (_token.id == TokenId.Question)
 			{
 				if (!type.IsValueType || IsNullableType(type))
 					throw CreateParseException(errorPos, ErrorMessages.TypeHasNoNullableForm, GetTypeName(type));
@@ -801,7 +810,7 @@ namespace DynamicExpresso
 			//    return ParseTypeConstructor(type, errorPos);
 			//}
 
-			if (token.id == TokenId.CloseParen)
+			if (_token.id == TokenId.CloseParen)
 			{
 				return Expression.Constant(type);
 			}
@@ -866,10 +875,10 @@ namespace DynamicExpresso
 		Expression ParseMemberAccess(Type type, Expression instance)
 		{
 			if (instance != null) type = instance.Type;
-			int errorPos = token.pos;
+			int errorPos = _token.pos;
 			string id = GetIdentifier();
 			NextToken();
-			if (token.id == TokenId.OpenParen)
+			if (_token.id == TokenId.OpenParen)
 			{
 				return ParseMethodInvocation(type, instance, errorPos, id);
 			}
@@ -997,7 +1006,7 @@ namespace DynamicExpresso
 		{
 			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
 			NextToken();
-			Expression[] args = token.id != TokenId.CloseParen ? ParseArguments() : new Expression[0];
+			Expression[] args = _token.id != TokenId.CloseParen ? ParseArguments() : new Expression[0];
 			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
 			NextToken();
 			return args;
@@ -1009,7 +1018,7 @@ namespace DynamicExpresso
 			while (true)
 			{
 				argList.Add(ParseExpressionSegment());
-				if (token.id != TokenId.Comma) break;
+				if (_token.id != TokenId.Comma) break;
 				NextToken();
 			}
 			return argList.ToArray();
@@ -1017,7 +1026,7 @@ namespace DynamicExpresso
 
 		Expression ParseElementAccess(Expression expr)
 		{
-			int errorPos = token.pos;
+			int errorPos = _token.pos;
 			ValidateToken(TokenId.OpenBracket, ErrorMessages.OpenParenExpected);
 			NextToken();
 			Expression[] args = ParseArguments();
@@ -1788,26 +1797,30 @@ namespace DynamicExpresso
 
 		void SetTextPos(int pos)
 		{
-			textPos = pos;
-			ch = textPos < textLen ? text[textPos] : '\0';
+			_parsePosition = pos;
+			_parseChar = _parsePosition < _expressionTextLength ? _expressionText[_parsePosition] : '\0';
 		}
 
 		void NextChar()
 		{
-			if (textPos < textLen) textPos++;
-			ch = textPos < textLen ? text[textPos] : '\0';
+			if (_parsePosition < _expressionTextLength) 
+				_parsePosition++;
+
+			_parseChar = _parsePosition < _expressionTextLength ? _expressionText[_parsePosition] : '\0';
 		}
 
 		void NextToken()
 		{
-			while (Char.IsWhiteSpace(ch)) NextChar();
+			while (Char.IsWhiteSpace(_parseChar)) 
+				NextChar();
+
 			TokenId t;
-			int tokenPos = textPos;
-			switch (ch)
+			int tokenPos = _parsePosition;
+			switch (_parseChar)
 			{
 				case '!':
 					NextChar();
-					if (ch == '=')
+					if (_parseChar == '=')
 					{
 						NextChar();
 						t = TokenId.ExclamationEqual;
@@ -1823,14 +1836,14 @@ namespace DynamicExpresso
 					break;
 				case '&':
 					NextChar();
-					if (ch == '&')
+					if (_parseChar == '&')
 					{
 						NextChar();
 						t = TokenId.DoubleAmphersand;
 					}
 					else
 					{
-						throw CreateParseException(textPos, ErrorMessages.InvalidCharacter, ch);
+						throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
 					}
 					break;
 				case '(':
@@ -1871,7 +1884,7 @@ namespace DynamicExpresso
 					break;
 				case '<':
 					NextChar();
-					if (ch == '=')
+					if (_parseChar == '=')
 					{
 						NextChar();
 						t = TokenId.LessThanEqual;
@@ -1883,19 +1896,19 @@ namespace DynamicExpresso
 					break;
 				case '=':
 					NextChar();
-					if (ch == '=')
+					if (_parseChar == '=')
 					{
 						NextChar();
 						t = TokenId.DoubleEqual;
 					}
 					else
 					{
-						throw CreateParseException(textPos, ErrorMessages.InvalidCharacter, ch);
+						throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
 					}
 					break;
 				case '>':
 					NextChar();
-					if (ch == '=')
+					if (_parseChar == '=')
 					{
 						NextChar();
 						t = TokenId.GreaterThanEqual;
@@ -1919,7 +1932,7 @@ namespace DynamicExpresso
 					break;
 				case '|':
 					NextChar();
-					if (ch == '|')
+					if (_parseChar == '|')
 					{
 						NextChar();
 						t = TokenId.DoubleBar;
@@ -1932,16 +1945,16 @@ namespace DynamicExpresso
 				case '"':
 					NextChar();
 					bool isEscapeS = false;
-					bool isEndS = ch == '\"';
-					while (textPos < textLen && !isEndS)
+					bool isEndS = _parseChar == '\"';
+					while (_parsePosition < _expressionTextLength && !isEndS)
 					{
-						isEscapeS = ch == '\\' && !isEscapeS;
+						isEscapeS = _parseChar == '\\' && !isEscapeS;
 						NextChar();
-						isEndS = (ch == '\"' && !isEscapeS);
+						isEndS = (_parseChar == '\"' && !isEscapeS);
 					}
 
-					if (textPos == textLen)
-						throw CreateParseException(textPos, ErrorMessages.UnterminatedStringLiteral);
+					if (_parsePosition == _expressionTextLength)
+						throw CreateParseException(_parsePosition, ErrorMessages.UnterminatedStringLiteral);
 
 					NextChar();
 
@@ -1951,83 +1964,92 @@ namespace DynamicExpresso
 					NextChar();
 					bool isEscapeC = false;
 					bool isEndC = false;
-					while (textPos < textLen && !isEndC)
+					while (_parsePosition < _expressionTextLength && !isEndC)
 					{
-						isEscapeC = ch == '\\' && !isEscapeC;
+						isEscapeC = _parseChar == '\\' && !isEscapeC;
 						NextChar();
-						isEndC = (ch == '\'' && !isEscapeC);
+						isEndC = (_parseChar == '\'' && !isEscapeC);
 					}
 
-					if (textPos == textLen)
-						throw CreateParseException(textPos, ErrorMessages.UnterminatedStringLiteral);
+					if (_parsePosition == _expressionTextLength)
+						throw CreateParseException(_parsePosition, ErrorMessages.UnterminatedStringLiteral);
 
 					NextChar();
 
 					t = TokenId.CharLiteral;
 					break;
 				default:
-					if (Char.IsLetter(ch) || ch == '@' || ch == '_')
+
+					if (Char.IsLetter(_parseChar) || _parseChar == '@' || _parseChar == '_')
 					{
 						do
 						{
 							NextChar();
-						} while (Char.IsLetterOrDigit(ch) || ch == '_');
+						} while (Char.IsLetterOrDigit(_parseChar) || _parseChar == '_');
 						t = TokenId.Identifier;
 						break;
 					}
-					if (Char.IsDigit(ch))
+
+					if (Char.IsDigit(_parseChar))
 					{
 						t = TokenId.IntegerLiteral;
 						do
 						{
 							NextChar();
-						} while (Char.IsDigit(ch));
-						if (ch == '.')
+						} while (Char.IsDigit(_parseChar));
+
+						if (_parseChar == '.')
+						{
+							NextChar();
+							//if (Char.IsDigit(_parseChar))
+							//{
+								t = TokenId.RealLiteral;
+								do
+								{
+									NextChar();
+								} while (Char.IsDigit(_parseChar));
+							//}
+							//else
+							//	break;
+						}
+
+						if (_parseChar == 'E' || _parseChar == 'e')
 						{
 							t = TokenId.RealLiteral;
 							NextChar();
+							if (_parseChar == '+' || _parseChar == '-') 
+								NextChar();
 							ValidateDigit();
 							do
 							{
 								NextChar();
-							} while (Char.IsDigit(ch));
+							} while (Char.IsDigit(_parseChar));
 						}
-						if (ch == 'E' || ch == 'e')
-						{
-							t = TokenId.RealLiteral;
-							NextChar();
-							if (ch == '+' || ch == '-') NextChar();
-							ValidateDigit();
-							do
-							{
-								NextChar();
-							} while (Char.IsDigit(ch));
-						}
-						if (ch == 'F' || ch == 'f' || ch == 'M' || ch == 'm')
+						if (_parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm')
 							NextChar();
 						break;
 					}
-					if (textPos == textLen)
+					if (_parsePosition == _expressionTextLength)
 					{
 						t = TokenId.End;
 						break;
 					}
-					throw CreateParseException(textPos, ErrorMessages.InvalidCharacter, ch);
+					throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
 			}
-			token.id = t;
-			token.text = text.Substring(tokenPos, textPos - tokenPos);
-			token.pos = tokenPos;
+			_token.id = t;
+			_token.text = _expressionText.Substring(tokenPos, _parsePosition - tokenPos);
+			_token.pos = tokenPos;
 		}
 
 		bool TokenIdentifierIs(string id)
 		{
-			return token.id == TokenId.Identifier && String.Equals(id, token.text, StringComparison.OrdinalIgnoreCase);
+			return _token.id == TokenId.Identifier && String.Equals(id, _token.text, StringComparison.OrdinalIgnoreCase);
 		}
 
 		string GetIdentifier()
 		{
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
-			string id = token.text;
+			string id = _token.text;
 			if (id.Length > 1 && id[0] == '@') 
 				id = id.Substring(1);
 			return id;
@@ -2035,20 +2057,20 @@ namespace DynamicExpresso
 
 		void ValidateDigit()
 		{
-			if (!char.IsDigit(ch))
-				throw CreateParseException(textPos, ErrorMessages.DigitExpected);
+			if (!char.IsDigit(_parseChar))
+				throw CreateParseException(_parsePosition, ErrorMessages.DigitExpected);
 		}
 
 		void ValidateToken(TokenId t, string errorMessage)
 		{
-			if (token.id != t)
-				throw CreateParseException(token.pos, errorMessage);
+			if (_token.id != t)
+				throw CreateParseException(_token.pos, errorMessage);
 		}
 
 		void ValidateToken(TokenId t)
 		{
-			if (token.id != t)
-				throw CreateParseException(token.pos, ErrorMessages.SyntaxError);
+			if (_token.id != t)
+				throw CreateParseException(_token.pos, ErrorMessages.SyntaxError);
 		}
 
 		Exception CreateParseException(int pos, string format, params object[] args)

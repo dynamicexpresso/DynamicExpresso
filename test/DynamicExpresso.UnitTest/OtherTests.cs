@@ -147,20 +147,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(((double)5).GetType().Name, interpreter.Eval("((double)5).GetType().Name"));
 		}
 
-		[TestMethod]
-		public void GitHub_Issue_19()
-		{
-			var interpreter = new Interpreter();
-			var values = new Dictionary<string, object>();
-			values.Add("key", DateTime.Now);
-			interpreter.SetVariable("values", values);
-
-			Assert.AreEqual((double)1, interpreter.Eval("(double) 1"));
-			Assert.AreEqual(((double)1), interpreter.Eval("((double) 1)"));
-			Assert.AreEqual((double)1, interpreter.Eval("(double) 1"));
-			Assert.AreEqual(((DateTime)values["key"]).Year, interpreter.Eval("((DateTime)values[\"key\"]).Year"));
-		}
-
 		class MyTestService
 		{
 			public DateTime AField = DateTime.Now;
