@@ -9,23 +9,78 @@ namespace DynamicExpresso.UnitTest
 	public class LiteralsTest
 	{
 		[TestMethod]
-		public void Literals()
+		public void Alphabetic_Literals()
 		{
 			var target = new Interpreter();
 
 			Assert.AreEqual("ciao", target.Eval("\"ciao\""));
 			Assert.AreEqual('c', target.Eval("'c'"));
+		}
+
+		[TestMethod]
+		public void True_False_Literals()
+		{
+			var target = new Interpreter();
+
 			Assert.IsTrue((bool)target.Eval("true"));
 			Assert.IsFalse((bool)target.Eval("false"));
+		}
 
+		[TestMethod]
+		public void Numeric_Literals()
+		{
+			var target = new Interpreter();
+
+			Assert.AreEqual(0, target.Eval("0"));
+			Assert.AreEqual(0.0, target.Eval("0.0"));
 			Assert.AreEqual(45, target.Eval("45"));
+			Assert.AreEqual(-565, target.Eval("-565"));
 			Assert.AreEqual(23423423423434, target.Eval("23423423423434"));
 			Assert.AreEqual(45.5, target.Eval("45.5"));
-			Assert.AreEqual((45.5).GetType(), target.Eval("45.5").GetType());
+			Assert.AreEqual(-0.5, target.Eval("-0.5"));
 			Assert.AreEqual(45.8f, target.Eval("45.8f"));
-			Assert.AreEqual((45.8f).GetType(), target.Eval("45.8f").GetType());
+			Assert.AreEqual(45.8F, target.Eval("45.8F"));
 			Assert.AreEqual(45.232M, target.Eval("45.232M"));
-			Assert.AreEqual((45.232M).GetType(), target.Eval("45.232M").GetType());
+			Assert.AreEqual(45.232m, target.Eval("45.232m"));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ParseException))]
+		public void Invalid_Numeric_Literals_multiple_dots()
+		{
+			var target = new Interpreter();
+
+			target.Eval("45.5.456");
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ParseException))]
+		public void Invalid_Numeric_Literals_wrong_suffix_x()
+		{
+			var target = new Interpreter();
+
+			target.Eval("45.5x");
+		}
+
+		[TestMethod]
+		public void Calling_System_Method_On_Literals()
+		{
+			var target = new Interpreter();
+
+			Assert.AreEqual("ciao".GetType(), target.Eval("\"ciao\".GetType()"));
+			Assert.AreEqual('c'.GetType(), target.Eval("'c'.GetType()"));
+			Assert.AreEqual(true.GetType(), target.Eval("true.GetType()"));
+			Assert.AreEqual(false.GetType(), target.Eval("false.GetType()"));
+
+			Assert.AreEqual(45.GetType(), target.Eval("45.GetType()"));
+			Assert.AreEqual(23423423423434.GetType(), target.Eval("23423423423434.GetType()"));
+			Assert.AreEqual(45.5.GetType(), target.Eval("45.5.GetType()"));
+			Assert.AreEqual(45.8f.GetType(), target.Eval("45.8f.GetType()"));
+			Assert.AreEqual(45.232M.GetType(), target.Eval("45.232M.GetType()"));
+
+			// Note: in C# I cannot compile "-565.GetType()" , I need to add parentheses
+			Assert.AreEqual((-565).GetType(), target.Eval("-565.GetType()"));
+			Assert.AreEqual((-0.5).GetType(), target.Eval("-0.5.GetType()"));
 		}
 
 		[TestMethod]
@@ -177,18 +232,28 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Should_Understand_ReturnType_Of_Literlars()
+		public void Should_Understand_ReturnType_Of_Literals()
 		{
 			var target = new Interpreter();
 
 			Assert.AreEqual(typeof(string), target.Parse("\"some string\"").ReturnType);
 			Assert.AreEqual(typeof(string), target.Parse("\"\"").ReturnType);
 			Assert.AreEqual(typeof(int), target.Parse("234").ReturnType);
+			Assert.AreEqual(typeof(double), target.Parse("234.54").ReturnType);
+			Assert.AreEqual(typeof(float), target.Parse("4.5f").ReturnType);
+			Assert.AreEqual(typeof(float), target.Parse("4.5F").ReturnType);
+			Assert.AreEqual(typeof(decimal), target.Parse("234.48m").ReturnType);
+			Assert.AreEqual(typeof(decimal), target.Parse("234.48M").ReturnType);
 			Assert.AreEqual(typeof(object), target.Parse("null").ReturnType);
+
+			Assert.AreEqual((45.5).GetType(), target.Eval("45.5").GetType());
+			Assert.AreEqual((45.8f).GetType(), target.Eval("45.8f").GetType());
+			Assert.AreEqual((45.232M).GetType(), target.Eval("45.232M").GetType());
+
 		}
 
 		[TestMethod]
-		public void Literals_WithUS_Culture()
+		public void Thread_Culture_WithUS_Culture_is_ignored_for_literals()
 		{
 			var originalCulture = Thread.CurrentThread.CurrentCulture;
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
@@ -198,7 +263,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Literals_WithIT_Culture()
+		public void Thread_Culture_WithIT_Culture_is_ignored_for_literals()
 		{
 			var originalCulture = Thread.CurrentThread.CurrentCulture;
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("it-IT");

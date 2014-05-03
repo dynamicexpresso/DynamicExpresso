@@ -9,7 +9,6 @@ namespace DynamicExpresso.UnitTest
 	[TestClass]
 	public class GithubIssues
 	{
-		[Ignore]
 		[TestMethod]
 		public void GitHub_Issue_19()
 		{

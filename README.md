@@ -381,6 +381,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
+- 0.11.2
+	
+	- FIX: Calling method on integer literals (like: `5.ToString()` ) ([#20](https://github.com/davideicardi/DynamicExpresso/issues/20))
+
 - 0.11.1
 
 	- FIX: Parsing of expression with cast fails ([#19](https://github.com/davideicardi/DynamicExpresso/issues/19))

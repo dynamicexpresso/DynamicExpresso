@@ -1809,6 +1809,11 @@ namespace DynamicExpresso
 			_parseChar = _parsePosition < _expressionTextLength ? _expressionText[_parsePosition] : '\0';
 		}
 
+		void PreviousChar()
+		{
+			SetTextPos(_parsePosition - 1);
+		}
+
 		void NextToken()
 		{
 			while (Char.IsWhiteSpace(_parseChar)) 
@@ -2001,16 +2006,19 @@ namespace DynamicExpresso
 						if (_parseChar == '.')
 						{
 							NextChar();
-							//if (Char.IsDigit(_parseChar))
-							//{
+							if (Char.IsDigit(_parseChar))
+							{
 								t = TokenId.RealLiteral;
 								do
 								{
 									NextChar();
 								} while (Char.IsDigit(_parseChar));
-							//}
-							//else
-							//	break;
+							}
+							else
+							{
+								PreviousChar();
+								break;
+							}
 						}
 
 						if (_parseChar == 'E' || _parseChar == 'e')
