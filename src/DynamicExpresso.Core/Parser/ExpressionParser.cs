@@ -342,7 +342,9 @@ namespace DynamicExpresso
 				Token op = _token;
 				NextToken();
 				Expression right = ParseUnary();
+
 				CheckAndPromoteOperands(typeof(ParseSignatures.IArithmeticSignatures), op.text, ref left, ref right, op.pos);
+
 				switch (op.id)
 				{
 					case TokenId.Asterisk:
@@ -1134,31 +1136,29 @@ namespace DynamicExpresso
 		void CheckAndPromoteOperand(Type signatures, string opName, ref Expression expr, int errorPos)
 		{
 			Expression[] args = new Expression[] { expr };
-			if (!PrepareOperandArguments(signatures, ref args))
-				throw CreateParseException(errorPos, ErrorMessages.IncompatibleOperand,
-						opName, GetTypeName(args[0].Type));
+
+			args = PrepareOperandArguments(signatures, args);
+
 			expr = args[0];
 		}
 
 		void CheckAndPromoteOperands(Type signatures, string opName, ref Expression left, ref Expression right, int errorPos)
 		{
 			Expression[] args = new Expression[] { left, right };
-			if (!PrepareOperandArguments(signatures, ref args))
-				throw CreateParseException(errorPos, ErrorMessages.IncompatibleOperands,
-					opName, GetTypeName(left.Type), GetTypeName(right.Type));
+
+			args = PrepareOperandArguments(signatures, args);
+
 			left = args[0];
 			right = args[1];
 		}
 
-		bool PrepareOperandArguments(Type signatures, ref Expression[] args)
+		Expression[] PrepareOperandArguments(Type signatures, Expression[] args)
 		{
 			var applicableMethods = FindMethods(signatures, "F", false, args);
-			if (applicableMethods.Length != 1)
-				return false;
+			if (applicableMethods.Length == 1)
+				return applicableMethods[0].PromotedParameters;
 
-			args = applicableMethods[0].PromotedParameters;
-
-			return true;
+			return args;
 		}
 
 		MemberInfo FindPropertyOrField(Type type, string memberName, bool staticAccess)

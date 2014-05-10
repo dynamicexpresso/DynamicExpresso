@@ -7,5 +7,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("C# expression interpreter/evaluator. See https://github.com/davideicardi/DynamicExpresso.")]
 [assembly: AssemblyCopyright("Copyright © Davide Icardi 2014")]
 [assembly: ComVisible(false)]
-[assembly: AssemblyVersion("0.11.2.0")]
+[assembly: AssemblyVersion("0.11.3.0")]
 

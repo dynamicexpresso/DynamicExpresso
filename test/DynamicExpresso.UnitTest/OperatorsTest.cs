@@ -200,31 +200,153 @@ namespace DynamicExpresso.UnitTest
 			target.Parse("5 <> 4");
 		}
 
-        [TestMethod]
-        public void Implicit_conversion_operator_for_lambda()
-        {
-            var target = new Interpreter()
-                .SetVariable("x", new TypeWithImplicitConversion(10));
+		[TestMethod]
+		public void Implicit_conversion_operator_for_lambda()
+		{
+			var target = new Interpreter()
+					.SetVariable("x", new TypeWithImplicitConversion(10));
 
-            var func = target.Parse<Func<int>>("x");
-            int val = func();
+			var func = target.Parse<Func<int>>("x");
+			int val = func();
 
-            Assert.AreEqual(10, val);
-        }
+			Assert.AreEqual(10, val);
+		}
 
-        struct TypeWithImplicitConversion
-        {
-            private int _value;
+		struct TypeWithImplicitConversion
+		{
+			private int _value;
 
-            public TypeWithImplicitConversion(byte value)
-            {
-                this._value = value;
-            }
+			public TypeWithImplicitConversion(byte value)
+			{
+				this._value = value;
+			}
 
-            public static implicit operator int(TypeWithImplicitConversion d)
-            {
-                return d._value;
-            }
-        }
+			public static implicit operator int(TypeWithImplicitConversion d)
+			{
+				return d._value;
+			}
+		}
+
+		[TestMethod]
+		public void Can_use_overloaded_binary_operators()
+		{
+			var target = new Interpreter();
+
+			var x = new TypeWithOverloadedBinaryOperators(3);
+			target.SetVariable("x", x);
+
+			string y = "5";
+			Assert.IsFalse(x == y);
+			Assert.IsFalse(target.Eval<bool>("x == y", new Parameter("y", y)));
+
+			y = "3";
+			Assert.IsTrue(x == y);
+			Assert.IsTrue(target.Eval<bool>("x == y", new Parameter("y", y)));
+
+			Assert.IsFalse(target.Eval<bool>("x == \"4\""));
+			Assert.IsTrue(target.Eval<bool>("x == \"3\""));
+
+			Assert.IsTrue(!x == "-3");
+			Assert.IsTrue(target.Eval<bool>("!x == \"-3\""));
+
+			var z = new TypeWithOverloadedBinaryOperators(10);
+			Assert.IsTrue((x + z) == "13");
+			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
+		}
+
+		struct TypeWithOverloadedBinaryOperators
+		{
+			private int _value;
+
+			public TypeWithOverloadedBinaryOperators(int value)
+			{
+				_value = value;
+			}
+
+			public static bool operator ==(TypeWithOverloadedBinaryOperators instance, string value)
+			{
+				return instance._value.ToString().Equals(value);
+			}
+
+			public static bool operator !=(TypeWithOverloadedBinaryOperators instance, string value)
+			{
+				return !instance._value.ToString().Equals(value);
+			}
+
+			public static TypeWithOverloadedBinaryOperators operator +(TypeWithOverloadedBinaryOperators left, TypeWithOverloadedBinaryOperators right)
+			{
+				return new TypeWithOverloadedBinaryOperators(left._value + right._value);
+			}
+
+			public static TypeWithOverloadedBinaryOperators operator !(TypeWithOverloadedBinaryOperators instance)
+			{
+				return new TypeWithOverloadedBinaryOperators(-instance._value);
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (obj == null)
+					return false;
+				if (obj is TypeWithOverloadedBinaryOperators)
+				{
+					return this._value.Equals(((TypeWithOverloadedBinaryOperators)obj)._value);
+				}
+				return base.Equals(obj);
+			}
+
+			public override int GetHashCode()
+			{
+				return _value.GetHashCode();
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void Throw_an_exception_if_a_custom_type_doesnt_define_equal_operator()
+		{
+			var target = new Interpreter();
+
+			var x = new TypeWithoutOverloadedBinaryOperators(3);
+			target.SetVariable("x", x);
+
+			string y = "5";
+			target.Parse("x == y", new Parameter("y", y));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void Throw_an_exception_if_a_custom_type_doesnt_define_plus_operator()
+		{
+			var target = new Interpreter();
+
+			var x = new TypeWithoutOverloadedBinaryOperators(3);
+			target.SetVariable("x", x);
+
+			int y = 5;
+			target.Parse("x + y", new Parameter("y", y));
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(InvalidOperationException))]
+		public void Throw_an_exception_if_a_custom_type_doesnt_define_not_operator()
+		{
+			var target = new Interpreter();
+
+			var x = new TypeWithoutOverloadedBinaryOperators(3);
+			target.SetVariable("x", x);
+
+			target.Parse("!x");
+		}
+
+		struct TypeWithoutOverloadedBinaryOperators
+		{
+			private int _value;
+
+			public TypeWithoutOverloadedBinaryOperators(int value)
+			{
+				_value = value;
+			}
+		}
+
 	}
 }
