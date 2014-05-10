@@ -228,7 +228,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Can_use_overloaded_binary_operators()
+		public void Can_use_overloaded_operators()
 		{
 			var target = new Interpreter();
 
