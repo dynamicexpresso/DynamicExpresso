@@ -228,11 +228,11 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Can_use_overloaded_operators()
+		public void Can_use_overloaded_operators_on_struct()
 		{
 			var target = new Interpreter();
 
-			var x = new TypeWithOverloadedBinaryOperators(3);
+			var x = new StructWithOverloadedBinaryOperators(3);
 			target.SetVariable("x", x);
 
 			string y = "5";
@@ -249,47 +249,120 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsTrue(!x == "-3");
 			Assert.IsTrue(target.Eval<bool>("!x == \"-3\""));
 
-			var z = new TypeWithOverloadedBinaryOperators(10);
+			var z = new StructWithOverloadedBinaryOperators(10);
 			Assert.IsTrue((x + z) == "13");
 			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
 		}
 
-		struct TypeWithOverloadedBinaryOperators
+		struct StructWithOverloadedBinaryOperators
 		{
 			private int _value;
 
-			public TypeWithOverloadedBinaryOperators(int value)
+			public StructWithOverloadedBinaryOperators(int value)
 			{
 				_value = value;
 			}
 
-			public static bool operator ==(TypeWithOverloadedBinaryOperators instance, string value)
+			public static bool operator ==(StructWithOverloadedBinaryOperators instance, string value)
 			{
 				return instance._value.ToString().Equals(value);
 			}
 
-			public static bool operator !=(TypeWithOverloadedBinaryOperators instance, string value)
+			public static bool operator !=(StructWithOverloadedBinaryOperators instance, string value)
 			{
 				return !instance._value.ToString().Equals(value);
 			}
 
-			public static TypeWithOverloadedBinaryOperators operator +(TypeWithOverloadedBinaryOperators left, TypeWithOverloadedBinaryOperators right)
+			public static StructWithOverloadedBinaryOperators operator +(StructWithOverloadedBinaryOperators left, StructWithOverloadedBinaryOperators right)
 			{
-				return new TypeWithOverloadedBinaryOperators(left._value + right._value);
+				return new StructWithOverloadedBinaryOperators(left._value + right._value);
 			}
 
-			public static TypeWithOverloadedBinaryOperators operator !(TypeWithOverloadedBinaryOperators instance)
+			public static StructWithOverloadedBinaryOperators operator !(StructWithOverloadedBinaryOperators instance)
 			{
-				return new TypeWithOverloadedBinaryOperators(-instance._value);
+				return new StructWithOverloadedBinaryOperators(-instance._value);
 			}
 
 			public override bool Equals(object obj)
 			{
 				if (obj == null)
 					return false;
-				if (obj is TypeWithOverloadedBinaryOperators)
+				if (obj is StructWithOverloadedBinaryOperators)
 				{
-					return this._value.Equals(((TypeWithOverloadedBinaryOperators)obj)._value);
+					return this._value.Equals(((StructWithOverloadedBinaryOperators)obj)._value);
+				}
+				return base.Equals(obj);
+			}
+
+			public override int GetHashCode()
+			{
+				return _value.GetHashCode();
+			}
+		}
+
+		[TestMethod]
+		public void Can_use_overloaded_operators_on_class()
+		{
+			var target = new Interpreter();
+
+			var x = new ClassWithOverloadedBinaryOperators(3);
+			target.SetVariable("x", x);
+
+			string y = "5";
+			Assert.IsFalse(x == y);
+			Assert.IsFalse(target.Eval<bool>("x == y", new Parameter("y", y)));
+
+			y = "3";
+			Assert.IsTrue(x == y);
+			Assert.IsTrue(target.Eval<bool>("x == y", new Parameter("y", y)));
+
+			Assert.IsFalse(target.Eval<bool>("x == \"4\""));
+			Assert.IsTrue(target.Eval<bool>("x == \"3\""));
+
+			Assert.IsTrue(!x == "-3");
+			Assert.IsTrue(target.Eval<bool>("!x == \"-3\""));
+
+			var z = new ClassWithOverloadedBinaryOperators(10);
+			Assert.IsTrue((x + z) == "13");
+			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
+		}
+
+		struct ClassWithOverloadedBinaryOperators
+		{
+			private int _value;
+
+			public ClassWithOverloadedBinaryOperators(int value)
+			{
+				_value = value;
+			}
+
+			public static bool operator ==(ClassWithOverloadedBinaryOperators instance, string value)
+			{
+				return instance._value.ToString().Equals(value);
+			}
+
+			public static bool operator !=(ClassWithOverloadedBinaryOperators instance, string value)
+			{
+				return !instance._value.ToString().Equals(value);
+			}
+
+			public static ClassWithOverloadedBinaryOperators operator +(ClassWithOverloadedBinaryOperators left, ClassWithOverloadedBinaryOperators right)
+			{
+				return new ClassWithOverloadedBinaryOperators(left._value + right._value);
+			}
+
+			public static ClassWithOverloadedBinaryOperators operator !(ClassWithOverloadedBinaryOperators instance)
+			{
+				return new ClassWithOverloadedBinaryOperators(-instance._value);
+			}
+
+			public override bool Equals(object obj)
+			{
+				if (obj == null)
+					return false;
+				if (obj is ClassWithOverloadedBinaryOperators)
+				{
+					return this._value.Equals(((ClassWithOverloadedBinaryOperators)obj)._value);
 				}
 				return base.Equals(obj);
 			}
