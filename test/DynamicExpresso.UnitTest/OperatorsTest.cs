@@ -145,7 +145,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Can_compare_parameters_of_different_compatible_types()
+		public void Can_compare_numeric_parameters_of_different_compatible_types()
 		{
 			var target = new Interpreter();
 
@@ -162,6 +162,20 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(true, target.Eval("x < y", new Parameter("x", x5), new Parameter("y", y1)));
 			double x6 = 0;
 			Assert.AreEqual(true, target.Eval("x == 0", new Parameter("x", x6)));
+		}
+
+		[TestMethod]
+		public void Can_compare_enum_parameters()
+		{
+			var target = new Interpreter();
+
+			InterpreterOptions x = InterpreterOptions.CaseInsensitive;
+			InterpreterOptions y = InterpreterOptions.CaseInsensitive;
+
+			Assert.AreEqual(x == y, target.Eval("x == y", new Parameter("x", x), new Parameter("y", y)));
+
+			y = InterpreterOptions.CommonTypes;
+			Assert.AreEqual(x != y, target.Eval("x != y", new Parameter("x", x), new Parameter("y", y)));
 		}
 
 		[TestMethod]
@@ -327,7 +341,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
 		}
 
-		struct ClassWithOverloadedBinaryOperators
+		class ClassWithOverloadedBinaryOperators
 		{
 			private int _value;
 

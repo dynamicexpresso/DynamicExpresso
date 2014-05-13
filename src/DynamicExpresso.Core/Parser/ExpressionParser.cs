@@ -203,50 +203,55 @@ namespace DynamicExpresso
 				NextToken();
 				Expression right = ParseAdditive();
 				bool isEquality = op.id == TokenId.DoubleEqual || op.id == TokenId.ExclamationEqual;
-				if (isEquality && !left.Type.IsValueType && !right.Type.IsValueType)
-				{
-					if (left.Type != right.Type)
-					{
-						if (left.Type.IsAssignableFrom(right.Type))
-						{
-							right = Expression.Convert(right, left.Type);
-						}
-						else if (right.Type.IsAssignableFrom(left.Type))
-						{
-							left = Expression.Convert(left, right.Type);
-						}
-						else
-						{
-							throw CreateParseException(op.pos, ErrorMessages.IncompatibleOperands,
-								op.text, GetTypeName(left.Type), GetTypeName(right.Type));
-						}
-					}
-				}
-				else if (IsEnumType(left.Type) || IsEnumType(right.Type))
-				{
-					if (left.Type != right.Type)
-					{
-						Expression e;
-						if ((e = PromoteExpression(right, left.Type, true)) != null)
-						{
-							right = e;
-						}
-						else if ((e = PromoteExpression(left, right.Type, true)) != null)
-						{
-							left = e;
-						}
-						else
-						{
-							throw CreateParseException(op.pos, ErrorMessages.IncompatibleOperands,
-								op.text, GetTypeName(left.Type), GetTypeName(right.Type));
-						}
-					}
-				}
-				else
-				{
-					CheckAndPromoteOperands(isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
-							op.text, ref left, ref right, op.pos);
-				}
+
+				//if (isEquality && !left.Type.IsValueType && !right.Type.IsValueType)
+				//{
+				//	if (left.Type != right.Type)
+				//	{
+				//		if (left.Type.IsAssignableFrom(right.Type))
+				//		{
+				//			right = Expression.Convert(right, left.Type);
+				//		}
+				//		else if (right.Type.IsAssignableFrom(left.Type))
+				//		{
+				//			left = Expression.Convert(left, right.Type);
+				//		}
+				//		else
+				//		{
+				//			throw CreateParseException(op.pos, ErrorMessages.IncompatibleOperands,
+				//				op.text, GetTypeName(left.Type), GetTypeName(right.Type));
+				//		}
+				//	}
+				//}
+				//else if (IsEnumType(left.Type) || IsEnumType(right.Type))
+				//{
+				//	if (left.Type != right.Type)
+				//	{
+				//		Expression e;
+				//		if ((e = PromoteExpression(right, left.Type, true)) != null)
+				//		{
+				//			right = e;
+				//		}
+				//		else if ((e = PromoteExpression(left, right.Type, true)) != null)
+				//		{
+				//			left = e;
+				//		}
+				//		else
+				//		{
+				//			throw CreateParseException(op.pos, ErrorMessages.IncompatibleOperands,
+				//				op.text, GetTypeName(left.Type), GetTypeName(right.Type));
+				//		}
+				//	}
+				//}
+				//else
+				//{
+				//	CheckAndPromoteOperands(isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
+				//			op.text, ref left, ref right, op.pos);
+				//}
+
+				CheckAndPromoteOperands(isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
+					op.text, ref left, ref right, op.pos);
+
 				switch (op.id)
 				{
 					case TokenId.DoubleEqual:

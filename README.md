@@ -381,6 +381,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
+- 0.11.4
+
+	- FIX: Custom binary operators not supported, again! ([#21](https://github.com/davideicardi/DynamicExpresso/issues/21))
+
 - 0.11.3
 
 	- FIX: Custom binary operators not supported ([#21](https://github.com/davideicardi/DynamicExpresso/issues/21))
