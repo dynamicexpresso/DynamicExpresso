@@ -367,7 +367,8 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- When Roslyn will be available this project can probably directly use the Roslyn compiler/interpreter.
 - Mono.CSharp - C# Compiler Service and Runtime Evaulator - http://docs.go-mono.com/index.aspx?link=N%3AMono.CSharp
 - NCalc - Mathematical Expressions Evaluator for .NET - http://ncalc.codeplex.com/
-- C sharp Eval http://kamimucode.com/Home.aspx/C-sharp-Eval/1
+- C sharp Eval 
+        - Used to be at http://kamimucode.com/Home.aspx/C-sharp-Eval/1, is now on GitHub as DavidWynne/CSharpEval
 	- Interesting but a little complex and no more updated
 - CSharp Eval http://csharp-eval.com/
 - C# Expression Evaluator http://csharpeval.codeplex.com/
