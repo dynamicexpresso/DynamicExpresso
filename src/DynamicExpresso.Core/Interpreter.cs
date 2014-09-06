@@ -269,22 +269,25 @@ namespace DynamicExpresso
 			return Parse(expressionText, expressionType, parameters).Invoke(parameters);
 		}
 
-		public ExpressionAnalysis Analyze(string expressionText, Type expressionType, params Parameter[] parameters)
+		/// <summary>
+		/// Provide a way to run the parser without throwing an exception in case of error. 
+		/// A ParserResult class is always returned with Lambda object in case of success or the Exception object in case of errors.
+		/// </summary>
+		/// <param name="expressionText"></param>
+		/// <param name="expressionType"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public ParserResult TryParse(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
-			var arguments = CreateExpressionParameters(parameters);
-
-			var unknownIdentifiers = new List<string>();
-			var parser = new ExpressionParser(expressionText, expressionType, arguments, _settings);
-
 			try
 			{
-				var parseResult = parser.Parse();
+				var lambda = Parse(expressionText, expressionType, parameters);
 
-				return ExpressionAnalysis.Valid(parseResult.Type);
+				return ParserResult.Valid(lambda);
 			}
 			catch (ParseException ex)
 			{
-				return ExpressionAnalysis.Invalid(ex);
+				return ParserResult.Invalid(ex);
 			}
 		}
 

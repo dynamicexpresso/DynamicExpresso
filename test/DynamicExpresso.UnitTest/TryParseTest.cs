@@ -7,31 +7,31 @@ using System.Collections;
 namespace DynamicExpresso.UnitTest
 {
 	[TestClass]
-	public class AnalysisTest
+	public class TryParseTest
 	{
 		[TestMethod]
-		public void Analyze_a_valid_expression()
+		public void TryParse_a_valid_expression()
 		{
 			var target = new Interpreter()
 									.SetVariable("x", 10.0);
 
-			var analysis = target.Analyze("x + y * Math.Pow(x, 2)", typeof(void), new Parameter("y", 5.0));
+			var analysis = target.TryParse("x + y * Math.Pow(x, 2)", typeof(void), new Parameter("y", 5.0));
 
 			Assert.IsTrue(analysis.Success);
 			Assert.IsNull(analysis.Exception);
-			Assert.AreEqual(typeof(double), analysis.ReturnType);
+			Assert.AreEqual(typeof(double), analysis.Lambda.ReturnType);
 		}
 
 		[TestMethod]
-		public void Analyze_an_invalid_expression_unknown_identifier_x()
+		public void TryParse_an_invalid_expression_unknown_identifier_x()
 		{
 			var target = new Interpreter();
 
-			var analysis = target.Analyze("x + y * Math.Pow(x, 2)", typeof(void));
+			var analysis = target.TryParse("x + y * Math.Pow(x, 2)", typeof(void));
 
 			Assert.IsFalse(analysis.Success);
 			Assert.AreEqual("Unknown identifier 'x' (at index 0).", analysis.Exception.Message);
-			Assert.IsNull(analysis.ReturnType);
+			Assert.IsNull(analysis.Lambda);
 			Assert.IsInstanceOfType(analysis.Exception, typeof(UnknownIdentifierException));
 			var exception = (UnknownIdentifierException)analysis.Exception;
 			Assert.AreEqual("x", exception.Identifier);
@@ -39,15 +39,15 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Analyze_an_invalid_expression_unknown_identifier_y()
+		public void TryParse_an_invalid_expression_unknown_identifier_y()
 		{
 			var target = new Interpreter()
 									.SetVariable("x", 10.0);
 
-			var analysis = target.Analyze("x + y * Math.Pow(x, 2)", typeof(void));
+			var analysis = target.TryParse("x + y * Math.Pow(x, 2)", typeof(void));
 
 			Assert.IsFalse(analysis.Success);
-			Assert.IsNull(analysis.ReturnType);
+			Assert.IsNull(analysis.Lambda);
 			Assert.IsInstanceOfType(analysis.Exception, typeof(UnknownIdentifierException));
 			var exception = (UnknownIdentifierException)analysis.Exception;
 			Assert.AreEqual("y", exception.Identifier);
@@ -55,15 +55,15 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Analyze_an_invalid_expression_unknown_method()
+		public void TryParse_an_invalid_expression_unknown_method()
 		{
 			var target = new Interpreter()
 									.SetVariable("x", 10.0);
 
-			var analysis = target.Analyze("Math.NotExistingMethod(x, 2)", typeof(void));
+			var analysis = target.TryParse("Math.NotExistingMethod(x, 2)", typeof(void));
 
 			Assert.IsFalse(analysis.Success);
-			Assert.IsNull(analysis.ReturnType);
+			Assert.IsNull(analysis.Lambda);
 			Assert.IsInstanceOfType(analysis.Exception, typeof(NoApplicableMethodException));
 			var exception = (NoApplicableMethodException)analysis.Exception;
 			Assert.AreEqual("NotExistingMethod", exception.MethodName);

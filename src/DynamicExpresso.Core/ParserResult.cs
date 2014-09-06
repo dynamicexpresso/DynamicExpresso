@@ -5,21 +5,21 @@ using System.Text;
 
 namespace DynamicExpresso
 {
-	public class ExpressionAnalysis
+	public class ParserResult
 	{
-		public static ExpressionAnalysis Valid(Type returnType)
+		public static ParserResult Valid(Lambda lambda)
 		{
-			return new ExpressionAnalysis
+			return new ParserResult
 			{
 				Success = true,
-				ReturnType = returnType,
+				Lambda = lambda,
 				Exception = null
 			};
 		}
 
-		public static ExpressionAnalysis Invalid(ParseException exception)
+		public static ParserResult Invalid(ParseException exception)
 		{
-			return new ExpressionAnalysis
+			return new ParserResult
 			{
 				Success = false,
 				Exception = exception
@@ -27,7 +27,7 @@ namespace DynamicExpresso
 		}
 
 		public bool Success { get; private set; }
-		public Type ReturnType { get; private set; }
+		public Lambda Lambda { get; private set; }
 		public ParseException Exception { get; private set; }
 	}
 }

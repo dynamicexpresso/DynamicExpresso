@@ -58,7 +58,7 @@
     <Compile Include="IdentifiersPropertyTest.cs" />
     <Compile Include="KnownTypesPropertyTest.cs" />
     <Compile Include="CollectionHelperTests.cs" />
-    <Compile Include="AnalysisTest.cs" />
+    <Compile Include="TryParseTest.cs" />
     <Compile Include="DynamicTest.cs" />
     <Compile Include="EnumerableTest.cs" />
     <Compile Include="ExceptionTest.cs" />
