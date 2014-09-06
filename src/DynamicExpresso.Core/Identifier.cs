@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 
 namespace DynamicExpresso
 {
@@ -9,6 +10,12 @@ namespace DynamicExpresso
 
 		public Identifier(string name, Expression expression)
 		{
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException("name");
+
+			if (expression == null)
+				throw new ArgumentNullException("expression");
+
 			Expression = expression;
 			Name = name;
 		}

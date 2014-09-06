@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DynamicExpresso.Reflection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -9,12 +10,13 @@ namespace DynamicExpresso
 {
 	/// <summary>
 	/// Class used to parse and compile a text expression into an Expression or a Delegate that can be invoked. Expression are written using a subset of C# syntax.
-	/// Only Parse and Eval methods are thread safe.
+	/// Only get properties, Parse and Eval methods are thread safe.
 	/// </summary>
 	public class Interpreter
 	{
 		readonly ParserSettings _settings;
 
+		#region Constructors
 		/// <summary>
 		/// Create a new Interpreter using InterpreterOptions.Default.
 		/// </summary>
@@ -35,20 +37,23 @@ namespace DynamicExpresso
 
 			if ((options & InterpreterOptions.SystemKeywords) == InterpreterOptions.SystemKeywords)
 			{
-				FillSystemKeywords();
+				SetIdentifiers(LanguageConstants.Literals);
 			}
 
 			if ((options & InterpreterOptions.PrimitiveTypes) == InterpreterOptions.PrimitiveTypes)
 			{
-				FillPrimitiveTypes();
+				Reference(LanguageConstants.PrimitiveTypes);
+				Reference(LanguageConstants.CSharpPrimitiveTypes);
 			}
 
 			if ((options & InterpreterOptions.CommonTypes) == InterpreterOptions.CommonTypes)
 			{
-				FillCommonTypes();
+				Reference(LanguageConstants.CommonTypes);
 			}
 		}
+		#endregion
 
+		#region Properties
 		public bool CaseInsensitive
 		{
 			get
@@ -60,12 +65,12 @@ namespace DynamicExpresso
 		/// <summary>
 		/// Get a list of registeres types. Add types by using the Reference method.
 		/// </summary>
-		public IEnumerable<KnownType> KnownTypes
+		public IEnumerable<ReferenceType> KnownTypes
 		{
 			get
 			{
 				return _settings.KnownTypes
-					.Select(p => new KnownType(p.Key, p.Value))
+					.Select(p => new ReferenceType(p.Key, p.Value))
 					.ToList();
 			}
 		}
@@ -82,7 +87,9 @@ namespace DynamicExpresso
 					.ToList();
 			}
 		}
+		#endregion
 
+		#region Register identifiers
 		/// <summary>
 		/// Allow the specified function delegate to be called from a parsed expression.
 		/// </summary>
@@ -134,16 +141,41 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetExpression(string name, Expression expression)
 		{
-			if (expression == null)
-				throw new ArgumentNullException("expression");
-			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException("name");
+			return SetIdentifier(new Identifier(name, expression));
+		}
 
-			_settings.Identifiers[name] = expression;
+		/// <summary>
+		/// Allow the specified list of identifiers to be used in a parsed expression.
+		/// Basically add the specified expressions as a known identifier.
+		/// </summary>
+		/// <param name="identifiers"></param>
+		/// <returns></returns>
+		public Interpreter SetIdentifiers(IEnumerable<Identifier> identifiers)
+		{
+			foreach (var i in identifiers)
+				SetIdentifier(i);
 
 			return this;
 		}
 
+		/// <summary>
+		/// Allow the specified identifier to be used in a parsed expression.
+		/// Basically add the specified expression as a known identifier.
+		/// </summary>
+		/// <param name="identifier"></param>
+		/// <returns></returns>
+		public Interpreter SetIdentifier(Identifier identifier)
+		{
+			if (identifier == null)
+				throw new ArgumentNullException("identifier");
+
+			_settings.Identifiers[identifier.Name] = identifier.Expression;
+
+			return this;
+		}
+		#endregion
+
+		#region Register referenced types
 		/// <summary>
 		/// Allow the specified type to be used inside an expression. The type will be available using its name.
 		/// If the type contains method extensions methods they will be available inside expressions.
@@ -159,22 +191,48 @@ namespace DynamicExpresso
 		}
 
 		/// <summary>
+		/// Allow the specified type to be used inside an expression.
+		/// See Reference(Type, string) method.
+		/// </summary>
+		/// <param name="types"></param>
+		/// <returns></returns>
+		public Interpreter Reference(IEnumerable<ReferenceType> types)
+		{
+			if (types == null)
+				throw new ArgumentNullException("types");
+
+			foreach (var t in types)
+				Reference(t);
+
+			return this;
+		}
+
+		/// <summary>
 		/// Allow the specified type to be used inside an expression by using a custom alias.
 		/// If the type contains extensions methods they will be available inside expressions.
 		/// </summary>
 		/// <param name="type"></param>
-		/// <param name="typeName">Public name that can be used in the expression.</param>
+		/// <param name="typeName">Public name that must be used in the expression.</param>
 		/// <returns></returns>
 		public Interpreter Reference(Type type, string typeName)
 		{
+			return Reference(new ReferenceType(typeName, type));
+		}
+
+		/// <summary>
+		/// Allow the specified type to be used inside an expression by using a custom alias.
+		/// If the type contains extensions methods they will be available inside expressions.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public Interpreter Reference(ReferenceType type)
+		{
 			if (type == null)
 				throw new ArgumentNullException("type");
-			if (string.IsNullOrWhiteSpace(typeName))
-				throw new ArgumentNullException("typeName");
 
-			_settings.KnownTypes[typeName] = type;
+			_settings.KnownTypes[type.Name] = type.Type;
 
-			var extensions = GetExtensionMethods(type);
+			var extensions = ReflectionExtensions.GetExtensionMethods(type.Type);
 			foreach (var extensionMethod in extensions)
 			{
 				if (!_settings.ExtensionMethods.Contains(extensionMethod))
@@ -185,7 +243,9 @@ namespace DynamicExpresso
 
 			return this;
 		}
+		#endregion
 
+		#region Parse
 		/// <summary>
 		/// Parse a text expression and returns a Lambda class that can be used to invoke it.
 		/// </summary>
@@ -226,7 +286,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public TDelegate Parse<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			var delegateInfo = GetDelegateInfo(typeof(TDelegate), parametersNames);
+			var delegateInfo = ReflectionExtensions.GetDelegateInfo(typeof(TDelegate), parametersNames);
 
 			var expression = ParseExpression(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
 
@@ -235,6 +295,30 @@ namespace DynamicExpresso
 			return lambdaExp.Compile();
 		}
 
+		/// <summary>
+		/// Provide a way to run the parser without throwing an exception in case of error. 
+		/// A ParserResult class is always returned with Lambda object in case of success or the Exception object in case of errors.
+		/// </summary>
+		/// <param name="expressionText"></param>
+		/// <param name="expressionType"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public ParserResult TryParse(string expressionText, Type expressionType, params Parameter[] parameters)
+		{
+			try
+			{
+				var lambda = Parse(expressionText, expressionType, parameters);
+
+				return ParserResult.Valid(lambda);
+			}
+			catch (ParseException ex)
+			{
+				return ParserResult.Invalid(ex);
+			}
+		}
+		#endregion
+
+		#region Eval
 		/// <summary>
 		/// Parse and invoke the specified expression.
 		/// </summary>
@@ -268,29 +352,9 @@ namespace DynamicExpresso
 		{
 			return Parse(expressionText, expressionType, parameters).Invoke(parameters);
 		}
+		#endregion
 
-		/// <summary>
-		/// Provide a way to run the parser without throwing an exception in case of error. 
-		/// A ParserResult class is always returned with Lambda object in case of success or the Exception object in case of errors.
-		/// </summary>
-		/// <param name="expressionText"></param>
-		/// <param name="expressionType"></param>
-		/// <param name="parameters"></param>
-		/// <returns></returns>
-		public ParserResult TryParse(string expressionText, Type expressionType, params Parameter[] parameters)
-		{
-			try
-			{
-				var lambda = Parse(expressionText, expressionType, parameters);
-
-				return ParserResult.Valid(lambda);
-			}
-			catch (ParseException ex)
-			{
-				return ParserResult.Invalid(ex);
-			}
-		}
-
+		#region Private methods
 		Expression ParseExpression(string expressionText, Type expressionType, params ParameterExpression[] parameters)
 		{
 			var parser = new ExpressionParser(expressionText, expressionType, parameters, _settings);
@@ -304,114 +368,6 @@ namespace DynamicExpresso
 											 select ParameterExpression.Parameter(p.Type, p.Name)).ToArray();
 			return arguments;
 		}
-
-		static DelegateInfo GetDelegateInfo(Type delegateType, string[] parametersNames)
-		{
-			MethodInfo method = delegateType.GetMethod("Invoke");
-			if (method == null)
-				throw new ArgumentException("The specified type is not a delegate");
-
-			var delegateParameters = method.GetParameters();
-			var parameters = new ParameterExpression[delegateParameters.Length];
-
-			bool useCustomNames = parametersNames != null && parametersNames.Length > 0;
-
-			if (useCustomNames && parametersNames.Length != parameters.Length)
-				throw new ArgumentException(string.Format("Provided parameters names doesn't match delegate parameters, {0} parameters expected.", parameters.Length));
-
-			for (int i = 0; i < parameters.Length; i++)
-			{
-				var paramName = useCustomNames ? parametersNames[i] : delegateParameters[i].Name;
-				var paramType = delegateParameters[i].ParameterType;
-
-				parameters[i] = Expression.Parameter(paramType, paramName);
-			}
-
-			return new DelegateInfo()
-			{
-				Parameters = parameters,
-				ReturnType = method.ReturnType
-			};
-		}
-
-		IEnumerable<MethodInfo> GetExtensionMethods(Type type)
-		{
-			if (type.IsSealed && !type.IsGenericType && !type.IsNested)
-			{
-				var query = from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-										where method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)
-										select method;
-
-				return query;
-			}
-
-			return new MethodInfo[0];
-		}
-
-		class DelegateInfo
-		{
-			public Type ReturnType { get; set; }
-			public ParameterExpression[] Parameters { get; set; }
-		}
-
-		void FillSystemKeywords()
-		{
-			SetExpression("true", Expression.Constant(true));
-			SetExpression("false", Expression.Constant(false));
-			SetExpression("null", ParserConstants.nullLiteral);
-		}
-
-		static Type[] PrimitiveTypes = {
-            typeof(Object),
-            typeof(Boolean),
-            typeof(Char),
-            typeof(String),
-            typeof(SByte),
-            typeof(Byte),
-            typeof(Int16),
-            typeof(UInt16),
-            typeof(Int32),
-            typeof(UInt32),
-            typeof(Int64),
-            typeof(UInt64),
-            typeof(Single),
-            typeof(Double),
-            typeof(Decimal),
-            typeof(DateTime),
-            typeof(TimeSpan),
-            typeof(Guid)
-        };
-
-		void FillPrimitiveTypes()
-		{
-			foreach (Type type in PrimitiveTypes)
-			{
-				Reference(type);
-			}
-
-			Reference(typeof(object), "object");
-			Reference(typeof(string), "string");
-			Reference(typeof(char), "char");
-			Reference(typeof(bool), "bool");
-			Reference(typeof(byte), "byte");
-			Reference(typeof(int), "int");
-			Reference(typeof(long), "long");
-			Reference(typeof(double), "double");
-			Reference(typeof(decimal), "decimal");
-		}
-
-		static Type[] CommonTypes = {
-            typeof(Math),
-            typeof(Convert),
-            typeof(System.Linq.Enumerable),
-        };
-
-		void FillCommonTypes()
-		{
-			foreach (Type type in CommonTypes)
-			{
-				Reference(type);
-			}
-		}
+		#endregion
 	}
 }

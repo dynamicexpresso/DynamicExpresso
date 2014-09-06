@@ -314,7 +314,7 @@ This is useful when you want to provide a feedback for a user that has written a
 ## Performance and multithreading
 
 The `Interpreter` class can be used by multiple threads but without modify it.
-In essence only `Parse` and `Eval` methods are thread safe. Other methods (`SetVariable`, `Reference`, ...) must be called in an initialization phase.
+In essence only get properties, `Parse` and `Eval` methods are thread safe. Other methods (`SetVariable`, `Reference`, ...) must be called in an initialization phase.
 `Lambda` and `Parameter` classes are completely thread safe.
 
 If you need to run the same expression multiple times with different parameters I suggest to parse it one time and then invoke the parsed expression multiple times.
@@ -383,7 +383,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - In progress
 	
 	- ADD: `CaseSensitive`, `KnownTypes`, `Identifiers` properties to understand how the `Interpreter` object was constructed.
+	- ADD: Added new methos for registering variables and types (see SetIdentifier and Reference).
+	- ADD: `LanguageConstants` class containing the most common types and identifiers used by default.
 	- CHG: Changed `Interpreter.Analyze` method to `Interpreter.TryParse` method and the corresponding return type.
+	- CHG: Internal code refactoring
 
 - 0.11.4
 

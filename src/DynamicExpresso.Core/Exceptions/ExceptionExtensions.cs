@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace DynamicExpresso
+namespace DynamicExpresso.Exceptions
 {
-	public static class ExceptionExtension
+	internal static class ExceptionExtensions
 	{
 		// NOTE: With .NET 4.5 we can probably use ExceptionDispatchInfo to preserve the stack trace.
 		// http://blogs.microsoft.co.il/blogs/sasha/archive/2011/10/19/capture-transfer-and-rethrow-exceptions-with-exceptiondispatchinfo-net-4-5.aspx
