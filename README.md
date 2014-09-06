@@ -71,7 +71,7 @@ The built-in parser can also understand the return type of any given expression 
 
 ### Variables
 
-Variables can be used inside your expressions using the `Interpreter.SetVariable` method:
+Variables can be used inside expressions with `Interpreter.SetVariable` method:
 
 	var target = new Interpreter()
                     .SetVariable("myVar", 23);
@@ -92,7 +92,7 @@ Custom [Expression](http://msdn.microsoft.com/en-us/library/system.linq.expressi
 
 ### Parameters
 
-Parsed expressions can accept a variable number of parameters:
+Parsed expressions can accept one or more parameters:
 
 	var interpreter = new Interpreter();
 
@@ -103,7 +103,7 @@ Parsed expressions can accept a variable number of parameters:
 
 	Assert.AreEqual(30, interpreter.Eval("x + y", parameters));
 
-Parameters can be primitive value types or custom complex types. You can parse an expression once and invoke it multiple times with different values:
+Parameters can be primitive types or custom types. You can parse an expression once and invoke it multiple times with different parameter values:
 
     var target = new Interpreter();
 
@@ -119,7 +119,7 @@ Parameters can be primitive value types or custom complex types. You can parse a
 
 ### Built-in types and custom types
 
-Currently the predefined types available in any expression are:
+Currently predefined types available are:
 
 	Object object 
 	Boolean bool 
@@ -132,7 +132,7 @@ Currently the predefined types available in any expression are:
 	Guid
 	Math Convert
 
-You can easily reference any custom .NET type by using `Interpreter.Reference` method:
+You can reference any other custom .NET type by using `Interpreter.Reference` method:
 
 	var target = new Interpreter()
 					.Reference(typeof(Uri));

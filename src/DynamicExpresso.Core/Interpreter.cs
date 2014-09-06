@@ -118,7 +118,7 @@ namespace DynamicExpresso
 
 		/// <summary>
 		/// Allow the specified type to be used inside an expression by using a custom alias.
-		/// If the type contains method extensions methods they will be available inside expressions.
+		/// If the type contains extensions methods they will be available inside expressions.
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="typeName">Public name that can be used in the expression.</param>
