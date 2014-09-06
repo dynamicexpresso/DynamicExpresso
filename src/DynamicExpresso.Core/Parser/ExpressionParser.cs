@@ -669,7 +669,7 @@ namespace DynamicExpresso
 			}
 
 			Expression keywordExpression;
-			if (_settings.Keywords.TryGetValue(_token.text, out keywordExpression))
+			if (_settings.Identifiers.TryGetValue(_token.text, out keywordExpression))
 			{
 				NextToken();
 				return keywordExpression;

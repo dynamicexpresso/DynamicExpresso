@@ -53,6 +53,8 @@
     <Compile Include="Exceptions\DuplicateParameterException.cs" />
     <Compile Include="Exceptions\UnknownIdentifierException.cs" />
     <Compile Include="ExpressionAnalysis.cs" />
+    <Compile Include="KnownType.cs" />
+    <Compile Include="Identifier.cs" />
     <Compile Include="InterpreterOptions.cs" />
     <Compile Include="Exceptions\ParseException.cs" />
     <Compile Include="Parser\ExpressionParser.cs" />

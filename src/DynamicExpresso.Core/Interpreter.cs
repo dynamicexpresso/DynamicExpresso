@@ -15,11 +15,18 @@ namespace DynamicExpresso
 	{
 		readonly ParserSettings _settings;
 
+		/// <summary>
+		/// Create a new Interpreter using InterpreterOptions.Default.
+		/// </summary>
 		public Interpreter()
 			: this(InterpreterOptions.Default)
 		{
 		}
 
+		/// <summary>
+		/// Create a new Interpreter using the specified options.
+		/// </summary>
+		/// <param name="options"></param>
 		public Interpreter(InterpreterOptions options)
 		{
 			var caseInsensitive = options.HasFlag(InterpreterOptions.CaseInsensitive);
@@ -39,6 +46,40 @@ namespace DynamicExpresso
 			if ((options & InterpreterOptions.CommonTypes) == InterpreterOptions.CommonTypes)
 			{
 				FillCommonTypes();
+			}
+		}
+
+		public bool CaseInsensitive
+		{
+			get
+			{
+				return _settings.CaseInsensitive;
+			}
+		}
+
+		/// <summary>
+		/// Get a list of registeres types. Add types by using the Reference method.
+		/// </summary>
+		public IEnumerable<KnownType> KnownTypes
+		{
+			get
+			{
+				return _settings.KnownTypes
+					.Select(p => new KnownType(p.Key, p.Value))
+					.ToList();
+			}
+		}
+
+		/// <summary>
+		/// Get a list of known identifiers. Add identifiers using SetVariable, SetFunction or SetExpression methods.
+		/// </summary>
+		public IEnumerable<Identifier> Identifiers
+		{
+			get
+			{
+				return _settings.Identifiers
+					.Select(p => new Identifier(p.Key, p.Value))
+					.ToList();
 			}
 		}
 
@@ -86,6 +127,7 @@ namespace DynamicExpresso
 
 		/// <summary>
 		/// Allow the specified Expression to be used in a parsed expression.
+		/// Basically add the specified expression as a known identifier.
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="expression"></param>
@@ -97,7 +139,7 @@ namespace DynamicExpresso
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException("name");
 
-			_settings.Keywords[name] = expression;
+			_settings.Identifiers[name] = expression;
 
 			return this;
 		}

@@ -380,6 +380,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
+- In progress
+	
+	- ADD: `CaseSensitive`, `KnownTypes`, `Identifiers` properties to understand how the `Interpreter` object was constructed.
+
 - 0.11.4
 
 	- FIX: Custom binary operators not supported, again! ([#21](https://github.com/davideicardi/DynamicExpresso/issues/21))
