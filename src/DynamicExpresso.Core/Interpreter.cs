@@ -1,4 +1,5 @@
-﻿using DynamicExpresso.Reflection;
+﻿using DynamicExpresso.Parser;
+using DynamicExpresso.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -357,7 +358,7 @@ namespace DynamicExpresso
 		#region Private methods
 		Expression ParseExpression(string expressionText, Type expressionType, params ParameterExpression[] parameters)
 		{
-			var parser = new ExpressionParser(expressionText, expressionType, parameters, _settings);
+			var parser = new ExpressionParser(_settings, expressionText, expressionType, parameters);
 
 			return parser.Parse();
 		}

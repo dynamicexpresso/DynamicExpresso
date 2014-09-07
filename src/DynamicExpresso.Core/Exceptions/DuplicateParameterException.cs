@@ -12,10 +12,10 @@ using System.Runtime.Serialization;
 namespace DynamicExpresso
 {
 	[Serializable]
-	public class DuplicateParameterException : ParseException
+	public class DuplicateParameterException : DynamicExpressoException
 	{
-		public DuplicateParameterException(string identifier, int position)
-			: base(string.Format("The parameter '{0}' was defined more than once", identifier), position) 
+		public DuplicateParameterException(string identifier)
+			: base(string.Format("The parameter '{0}' was defined more than once", identifier)) 
 		{
 			Identifier = identifier;
 		}

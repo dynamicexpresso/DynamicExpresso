@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 
-namespace DynamicExpresso
+namespace DynamicExpresso.Parser
 {
 	internal class ParserSettings
 	{

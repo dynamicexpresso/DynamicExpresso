@@ -52,10 +52,10 @@ namespace DynamicExpresso
 
 		public object Invoke(params Parameter[] parameters)
 		{
-			var args = (from dp in _lambdaExpression.Parameters
-									join rp in parameters
-									 on dp.Name equals rp.Name
-									select rp.Value).ToArray();
+			var args = (from declaredParameter in _lambdaExpression.Parameters
+									join actualParameter in parameters
+									 on declaredParameter.Name equals actualParameter.Name
+									select actualParameter.Value).ToArray();
 
 			return Invoke(args);
 		}

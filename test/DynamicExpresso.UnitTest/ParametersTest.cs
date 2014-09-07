@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Globalization;
 using System.Reflection;
+using System.Linq;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -187,7 +188,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Nullable_parameters()
+		public void Nullable_as_parameters()
 		{
 			var target = new Interpreter();
 
@@ -208,7 +209,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Delegates_parameters()
+		public void Delegates_as_parameters()
 		{
 			var target = new Interpreter();
 
@@ -222,6 +223,26 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(9.0, target.Eval("pow(3, 2)", parameters));
 			Assert.AreEqual(4, target.Eval("myDelegate(\"test\")", parameters));
+		}
+
+		[Ignore]
+		[TestMethod]
+		public void When_parsing_an_expression_only_the_actually_used_parameters_should_be_included_in_the_lambda()
+		{
+			var target = new Interpreter();
+
+			var parameters = new[] {
+                            new Parameter("x", 23),
+                            new Parameter("y", 7),
+                            new Parameter("z", 54),
+                            };
+
+			var lambda = target.Parse("x + y", parameters);
+
+			// parameter 'z' is not used
+			Assert.AreEqual(2, lambda.Parameters.Count());
+			Assert.AreEqual("x", lambda.Parameters[0].Name);
+			Assert.AreEqual("y", lambda.Parameters[1].Name);
 		}
 
 		class MyTestService

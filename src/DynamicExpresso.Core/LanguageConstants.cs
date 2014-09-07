@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DynamicExpresso.Parser;
+using System;
 using System.Linq.Expressions;
 
 namespace DynamicExpresso

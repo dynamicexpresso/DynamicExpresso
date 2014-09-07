@@ -12,7 +12,7 @@ using System.Runtime.Serialization;
 namespace DynamicExpresso
 {
 	[Serializable]
-	public class ParseException : Exception
+	public class ParseException : DynamicExpressoException
 	{
 		const string PARSE_EXCEPTION_FORMAT = "{0} (at index {1}).";
 

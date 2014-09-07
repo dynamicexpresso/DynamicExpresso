@@ -14,7 +14,7 @@ using System.Globalization;
 //
 // Copyright (C) Microsoft Corporation.  All rights reserved.
 
-namespace DynamicExpresso
+namespace DynamicExpresso.Parser
 {
 	internal class ExpressionParser
 	{
@@ -23,51 +23,8 @@ namespace DynamicExpresso
 		const NumberStyles ParseLiteralDecimalNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
 		static CultureInfo ParseCulture = CultureInfo.InvariantCulture;
 
-		struct Token
-		{
-			public TokenId id;
-			public string text;
-			public int pos;
-		}
-
-		enum TokenId
-		{
-			Unknown,
-			End,
-			Identifier,
-			CharLiteral,
-			StringLiteral,
-			IntegerLiteral,
-			RealLiteral,
-			Exclamation,
-			Percent,
-			OpenParen,
-			CloseParen,
-			Asterisk,
-			Plus,
-			Comma,
-			Minus,
-			Dot,
-			Slash,
-			Colon,
-			LessThan,
-			GreaterThan,
-			Question,
-			OpenBracket,
-			CloseBracket,
-			Bar,
-			ExclamationEqual,
-			DoubleAmphersand,
-			LessThanEqual,
-			DoubleEqual,
-			GreaterThanEqual,
-			DoubleBar
-		}
-
-		ParserSettings _settings;
-		Type _expressionType;
-
-		Dictionary<string, Expression> _parameters;
+		Type _expressionReturnType;
+		ParserInputs _inputs;
 
 		// Working context implementation
 		//ParameterExpression it;
@@ -81,17 +38,14 @@ namespace DynamicExpresso
 		BindingFlags _bindingCase;
 		MemberFilter _memberFilterCase;
 
-		public ExpressionParser(string expression, Type expressionType, ParameterExpression[] parameters, ParserSettings settings)
+		public ExpressionParser(ParserSettings settings, string expression, Type expressionReturnType, ParameterExpression[] parameters)
 		{
-			_settings = settings;
-			_expressionType = expressionType;
+			_inputs = new ParserInputs(settings, parameters);
 
-			_parameters = new Dictionary<string, Expression>(settings.SettingsKeyComparer);
+			_expressionReturnType = expressionReturnType;
 
 			_bindingCase = settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
 			_memberFilterCase = settings.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
-
-			AddParameters(parameters);
 
 			_expressionText = expression ?? string.Empty;
 			_expressionTextLength = _expressionText.Length;
@@ -101,26 +55,10 @@ namespace DynamicExpresso
 
 		public Expression Parse()
 		{
-			Expression expr = ParseExpressionSegment(_expressionType);
+			Expression expr = ParseExpressionSegment(_expressionReturnType);
 
 			ValidateToken(TokenId.End, ErrorMessages.SyntaxError);
 			return expr;
-		}
-
-		void AddParameter(string name, Expression value)
-		{
-			if (_parameters.ContainsKey(name))
-				throw new DuplicateParameterException(name, _token.pos);
-
-			_parameters.Add(name, value);
-		}
-
-		void AddParameters(IEnumerable<ParameterExpression> parameters)
-		{
-			foreach (ParameterExpression pe in parameters)
-			{
-				AddParameter(pe.Name, pe);
-			}
 		}
 
 		Expression ParseExpressionSegment(Type returnType)
@@ -290,7 +228,7 @@ namespace DynamicExpresso
 				NextToken();
 
 				Type knownType;
-				if (!_settings.KnownTypes.TryGetValue(_token.text, out knownType))
+				if (!_inputs.TryGetKnownType(_token.text, out knownType))
 					throw CreateParseException(op.pos, ErrorMessages.TypeIdentifierExpected);
 
 				if (typeOperator == ParserConstants.keywordIs)
@@ -663,20 +601,20 @@ namespace DynamicExpresso
 				return ParseTypeof();
 
 			Type knownType;
-			if (_settings.KnownTypes.TryGetValue(_token.text, out knownType))
+			if (_inputs.TryGetKnownType(_token.text, out knownType))
 			{
 				return ParseTypeKeyword(knownType);
 			}
 
 			Expression keywordExpression;
-			if (_settings.Identifiers.TryGetValue(_token.text, out keywordExpression))
+			if (_inputs.TryGetIdentifier(_token.text, out keywordExpression))
 			{
 				NextToken();
 				return keywordExpression;
 			}
 
 			Expression parameterExpression;
-			if (_parameters.TryGetValue(_token.text, out parameterExpression))
+			if (_inputs.TryGetParameters(_token.text, out parameterExpression))
 			{
 				NextToken();
 				return parameterExpression;
@@ -756,7 +694,7 @@ namespace DynamicExpresso
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
 
 			Type newType;
-			if (!_settings.KnownTypes.TryGetValue(_token.text, out newType))
+			if (!_inputs.TryGetKnownType(_token.text, out newType))
 				throw new UnknownIdentifierException(_token.text, _token.pos);
 
 			NextToken();
@@ -1203,11 +1141,10 @@ namespace DynamicExpresso
 
 		MethodData[] FindExtensionMethods(Type type, string methodName, Expression[] args)
 		{
-			var matchMethods = _settings.ExtensionMethods.Where(p => p.Name == methodName);
+			var matchMethods = _inputs.GetExtensionMethods(methodName);
 
 			return FindBestMethod(matchMethods.Cast<MethodBase>(), args);
 		}
-
 
 		MethodData[] FindIndexer(Type type, Expression[] args)
 		{

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace DynamicExpresso
+namespace DynamicExpresso.Parser
 {
 	internal static class ParserConstants
 	{

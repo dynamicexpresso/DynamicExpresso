@@ -48,12 +48,16 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Exceptions\DynamicExpressoException.cs" />
     <Compile Include="Exceptions\ExceptionExtensions.cs" />
     <Compile Include="Exceptions\NoApplicableMethodException.cs" />
     <Compile Include="Exceptions\DuplicateParameterException.cs" />
     <Compile Include="Exceptions\UnknownIdentifierException.cs" />
     <Compile Include="LanguageConstants.cs" />
     <Compile Include="ParserResult.cs" />
+    <Compile Include="Parser\ParserInputs.cs" />
+    <Compile Include="Parser\Token.cs" />
+    <Compile Include="Parser\TokenId.cs" />
     <Compile Include="ReferenceType.cs" />
     <Compile Include="Identifier.cs" />
     <Compile Include="InterpreterOptions.cs" />
