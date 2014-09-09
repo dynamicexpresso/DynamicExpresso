@@ -14,9 +14,9 @@ using System.Globalization;
 //
 // Copyright (C) Microsoft Corporation.  All rights reserved.
 
-namespace DynamicExpresso.Parser
+namespace DynamicExpresso.Parsing
 {
-	internal class ExpressionParser
+	internal class Parser
 	{
 		const NumberStyles ParseLiteralNumberStyle = NumberStyles.AllowLeadingSign;
 		const NumberStyles ParseLiteralUnsignedNumberStyle = NumberStyles.AllowLeadingSign;
@@ -38,7 +38,7 @@ namespace DynamicExpresso.Parser
 		BindingFlags _bindingCase;
 		MemberFilter _memberFilterCase;
 
-		public ExpressionParser(ParserSettings settings, string expression, Type expressionReturnType, ParameterExpression[] parameters)
+		public Parser(ParserSettings settings, string expression, Type expressionReturnType, ParameterExpression[] parameters)
 		{
 			_inputs = new ParserInputs(settings, parameters);
 

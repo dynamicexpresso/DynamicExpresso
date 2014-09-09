@@ -7,16 +7,16 @@ using System.Collections;
 namespace DynamicExpresso.UnitTest
 {
 	[TestClass]
-	public class KnownTypesPropertyTest
+	public class ReferencedTypesPropertyTest
 	{
 		[TestMethod]
 		public void Getting_a_list_of_known_types()
 		{
 			var target = new Interpreter();
 
-			Assert.IsTrue(target.KnownTypes.Any(p => p.Name == "string"));
-			Assert.IsTrue(target.KnownTypes.Any(p => p.Name == "int"));
-			Assert.IsTrue(target.KnownTypes.Any(p => p.Name == "Guid"));
+			Assert.IsTrue(target.ReferencedTypes.Any(p => p.Name == "string"));
+			Assert.IsTrue(target.ReferencedTypes.Any(p => p.Name == "int"));
+			Assert.IsTrue(target.ReferencedTypes.Any(p => p.Name == "Guid"));
 		}
 
 		[TestMethod]
@@ -24,7 +24,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(InterpreterOptions.None);
 
-			Assert.IsFalse(target.KnownTypes.Any());
+			Assert.IsFalse(target.ReferencedTypes.Any());
 		}
 
 		[TestMethod]
@@ -34,7 +34,7 @@ namespace DynamicExpresso.UnitTest
 
 			target.Reference(typeof(FakeClass));
 
-			Assert.IsTrue(target.KnownTypes.Any(p => p.Type == typeof(FakeClass)));
+			Assert.IsTrue(target.ReferencedTypes.Any(p => p.Type == typeof(FakeClass)));
 		}
 
 		public class FakeClass

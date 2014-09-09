@@ -1,4 +1,4 @@
-﻿using DynamicExpresso.Parser;
+﻿using DynamicExpresso.Parsing;
 using DynamicExpresso.Reflection;
 using System;
 using System.Collections.Generic;
@@ -66,7 +66,7 @@ namespace DynamicExpresso
 		/// <summary>
 		/// Get a list of registeres types. Add types by using the Reference method.
 		/// </summary>
-		public IEnumerable<ReferenceType> KnownTypes
+		public IEnumerable<ReferenceType> ReferencedTypes
 		{
 			get
 			{
@@ -253,6 +253,7 @@ namespace DynamicExpresso
 		/// <param name="expressionText">Expression statement</param>
 		/// <param name="parameters"></param>
 		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
 		public Lambda Parse(string expressionText, params Parameter[] parameters)
 		{
 			return Parse(expressionText, typeof(void), parameters);
@@ -267,6 +268,7 @@ namespace DynamicExpresso
 		/// <param name="expressionType">The expected return type. Use void or object type if there isn't an expected return type.</param>
 		/// <param name="parameters"></param>
 		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
 		public Lambda Parse(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
 			var arguments = CreateExpressionParameters(parameters);
@@ -285,6 +287,7 @@ namespace DynamicExpresso
 		/// <param name="expressionText">Expression statement</param>
 		/// <param name="parametersNames">Names of the parameters. If not specified the parameters names defined inside the delegate are used.</param>
 		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
 		public TDelegate Parse<TDelegate>(string expressionText, params string[] parametersNames)
 		{
 			var delegateInfo = ReflectionExtensions.GetDelegateInfo(typeof(TDelegate), parametersNames);
@@ -294,28 +297,6 @@ namespace DynamicExpresso
 			var lambdaExp = Expression.Lambda<TDelegate>(expression, delegateInfo.Parameters);
 
 			return lambdaExp.Compile();
-		}
-
-		/// <summary>
-		/// Provide a way to run the parser without throwing an exception in case of error. 
-		/// A ParserResult class is always returned with Lambda object in case of success or the Exception object in case of errors.
-		/// </summary>
-		/// <param name="expressionText"></param>
-		/// <param name="expressionType"></param>
-		/// <param name="parameters"></param>
-		/// <returns></returns>
-		public ParserResult TryParse(string expressionText, Type expressionType, params Parameter[] parameters)
-		{
-			try
-			{
-				var lambda = Parse(expressionText, expressionType, parameters);
-
-				return ParserResult.Valid(lambda);
-			}
-			catch (ParseException ex)
-			{
-				return ParserResult.Invalid(ex);
-			}
 		}
 		#endregion
 
@@ -358,7 +339,7 @@ namespace DynamicExpresso
 		#region Private methods
 		Expression ParseExpression(string expressionText, Type expressionType, params ParameterExpression[] parameters)
 		{
-			var parser = new ExpressionParser(_settings, expressionText, expressionType, parameters);
+			var parser = new Parser(_settings, expressionText, expressionType, parameters);
 
 			return parser.Parse();
 		}

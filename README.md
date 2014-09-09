@@ -306,10 +306,10 @@ Not every C# syntaxes are supported. Here some examples of NOT supported feature
 - Explicit generic invocation (like `method<type>(arg)`) 
 - Lambda/delegate declaration (delegate and lamda are only supported as variables or parameters or as a return type of the expression)
 
-## Analyzing an expression
+## Exceptions
 
-To check if a given expression is valid or not you can use the `Interpreter.TryParse` method. 
-This is useful when you want to provide a feedback for a user that has written an expression without catching the exception.
+If there is an error during the parsing always an exception of type `ParserExpression` is throwed. 
+`ParserExpression` has several specialization classes based on the type of error.
 
 ## Performance and multithreading
 
@@ -382,10 +382,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 - In progress
 	
-	- ADD: `CaseSensitive`, `KnownTypes`, `Identifiers` properties to understand how the `Interpreter` object was constructed.
-	- ADD: Added new methos for registering variables and types (see SetIdentifier and Reference).
-	- ADD: `LanguageConstants` class containing the most common types and identifiers used by default.
-	- CHG: Changed `Interpreter.Analyze` method to `Interpreter.TryParse` method and the corresponding return type.
+	- ADD: Added `CaseSensitive`, `ReferencedTypes`, `Identifiers` properties to understand how the `Interpreter` object was constructed.
+	- ADD: Added new methods for registering variables and types (see SetIdentifier and Reference).
+	- ADD: Added `LanguageConstants` class containing the most common types and identifiers used by default.
+	- DEL: Removed `Interpreter.Analyze` method because not very useful. To reproduce this feature just catch the exception.
 	- CHG: Internal code refactoring
 
 - 0.11.4

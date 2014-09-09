@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 
-namespace DynamicExpresso.Parser
+namespace DynamicExpresso.Parsing
 {
 	internal class ErrorMessages
 	{
