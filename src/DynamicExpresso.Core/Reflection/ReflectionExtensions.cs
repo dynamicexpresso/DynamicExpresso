@@ -9,14 +9,14 @@ namespace DynamicExpresso.Reflection
 {
 	internal static class ReflectionExtensions
 	{
-		public static DelegateInfo GetDelegateInfo(Type delegateType, string[] parametersNames)
+		public static DelegateInfo GetDelegateInfo(Type delegateType, params string[] parametersNames)
 		{
 			MethodInfo method = delegateType.GetMethod("Invoke");
 			if (method == null)
 				throw new ArgumentException("The specified type is not a delegate");
 
 			var delegateParameters = method.GetParameters();
-			var parameters = new ParameterExpression[delegateParameters.Length];
+			var parameters = new Parameter[delegateParameters.Length];
 
 			bool useCustomNames = parametersNames != null && parametersNames.Length > 0;
 
@@ -28,14 +28,10 @@ namespace DynamicExpresso.Reflection
 				var paramName = useCustomNames ? parametersNames[i] : delegateParameters[i].Name;
 				var paramType = delegateParameters[i].ParameterType;
 
-				parameters[i] = Expression.Parameter(paramType, paramName);
+				parameters[i] = new Parameter(paramName, paramType);
 			}
 
-			return new DelegateInfo()
-			{
-				Parameters = parameters,
-				ReturnType = method.ReturnType
-			};
+			return new DelegateInfo(method.ReturnType, parameters);
 		}
 
 		public static IEnumerable<MethodInfo> GetExtensionMethods(Type type)
@@ -54,8 +50,14 @@ namespace DynamicExpresso.Reflection
 
 		public class DelegateInfo
 		{
-			public Type ReturnType { get; set; }
-			public ParameterExpression[] Parameters { get; set; }
+			public DelegateInfo(Type returnType, Parameter[] parameters)
+			{
+				ReturnType = returnType;
+				Parameters = parameters;
+			}
+
+			public Type ReturnType { get; private set; }
+			public Parameter[] Parameters { get; private set; }
 		}
 	}
 }

@@ -54,7 +54,7 @@
     <Compile Include="Exceptions\DuplicateParameterException.cs" />
     <Compile Include="Exceptions\UnknownIdentifierException.cs" />
     <Compile Include="LanguageConstants.cs" />
-    <Compile Include="Parsing\ParserInputs.cs" />
+    <Compile Include="ParserArguments.cs" />
     <Compile Include="Parsing\Token.cs" />
     <Compile Include="Parsing\TokenId.cs" />
     <Compile Include="ReferenceType.cs" />

@@ -23,6 +23,34 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		public void Parameters_orders_is_not_important_for_eval()
+		{
+			var target = new Interpreter();
+
+			var parameters = new[] {
+                            new Parameter("B", "B"),
+                            new Parameter("A", "A"),
+                            };
+
+			Assert.AreEqual("AB", target.Eval("A + B", parameters));
+		}
+
+		[TestMethod]
+		public void Parameters_orders_can_be_different_between_parse_and_invoke()
+		{
+			var target = new Interpreter();
+
+			var parameters = new[] {
+                            new Parameter("A", "A"),
+                            new Parameter("B", "B"),
+                            };
+
+			var lambda = target.Parse("A + B", parameters);
+
+			Assert.AreEqual("AB", lambda.Invoke(parameters.Reverse()));
+		}
+
+		[TestMethod]
 		public void Expression_Without_Parameters()
 		{
 			var target = new Interpreter();
@@ -55,7 +83,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
-		public void Different_parameters_values_With_Parameters()
+		public void Invoke_the_lambda_using_different_parameters_values()
 		{
 			var target = new Interpreter();
 
@@ -225,7 +253,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(4, target.Eval("myDelegate(\"test\")", parameters));
 		}
 
-		[Ignore]
 		[TestMethod]
 		public void When_parsing_an_expression_only_the_actually_used_parameters_should_be_included_in_the_lambda()
 		{
@@ -241,8 +268,25 @@ namespace DynamicExpresso.UnitTest
 
 			// parameter 'z' is not used
 			Assert.AreEqual(2, lambda.Parameters.Count());
-			Assert.AreEqual("x", lambda.Parameters[0].Name);
-			Assert.AreEqual("y", lambda.Parameters[1].Name);
+			Assert.AreEqual("x", lambda.Parameters.ElementAt(0).Name);
+			Assert.AreEqual("y", lambda.Parameters.ElementAt(1).Name);
+		}
+
+		[TestMethod]
+		public void Using_the_same_parameters_multiple_times_doesnt_produce_multiple_parameters_in_the_lambda()
+		{
+			var target = new Interpreter();
+
+			var parameters = new[] {
+                            new Parameter("x", 23),
+                            new Parameter("y", 7),
+                            };
+
+			var lambda = target.Parse("x * y + x * y", parameters);
+
+			Assert.AreEqual(2, lambda.Parameters.Count());
+			Assert.AreEqual("x", lambda.Parameters.ElementAt(0).Name);
+			Assert.AreEqual("y", lambda.Parameters.ElementAt(1).Name);
 		}
 
 		[TestMethod]

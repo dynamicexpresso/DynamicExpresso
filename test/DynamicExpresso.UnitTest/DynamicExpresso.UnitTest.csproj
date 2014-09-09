@@ -55,7 +55,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CaseInsensitivePropertyTest.cs" />
-    <Compile Include="IdentifiersPropertyTest.cs" />
+    <Compile Include="IdentifiersTest.cs" />
     <Compile Include="ReferencedTypesPropertyTest.cs" />
     <Compile Include="CollectionHelperTests.cs" />
     <Compile Include="DynamicTest.cs" />

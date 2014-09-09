@@ -18,19 +18,23 @@ namespace DynamicExpresso.Parsing
 {
 	internal class Parser
 	{
+		public static Expression Parse(ParserArguments arguments)
+		{
+			return new Parser(arguments).Parse();
+		}
+
 		const NumberStyles ParseLiteralNumberStyle = NumberStyles.AllowLeadingSign;
 		const NumberStyles ParseLiteralUnsignedNumberStyle = NumberStyles.AllowLeadingSign;
 		const NumberStyles ParseLiteralDecimalNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
 		static CultureInfo ParseCulture = CultureInfo.InvariantCulture;
 
-		Type _expressionReturnType;
-		ParserInputs _inputs;
+		ParserArguments _arguments;
 
 		// Working context implementation
 		//ParameterExpression it;
 
-		string _expressionText;
 		int _parsePosition;
+		string _expressionText;
 		int _expressionTextLength;
 		char _parseChar;
 		Token _token;
@@ -38,24 +42,22 @@ namespace DynamicExpresso.Parsing
 		BindingFlags _bindingCase;
 		MemberFilter _memberFilterCase;
 
-		public Parser(ParserSettings settings, string expression, Type expressionReturnType, ParameterExpression[] parameters)
+		Parser(ParserArguments arguments)
 		{
-			_inputs = new ParserInputs(settings, parameters);
+			_arguments = arguments;
 
-			_expressionReturnType = expressionReturnType;
+			_bindingCase = arguments.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
+			_memberFilterCase = arguments.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
 
-			_bindingCase = settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
-			_memberFilterCase = settings.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
-
-			_expressionText = expression ?? string.Empty;
+			_expressionText = arguments.ExpressionText ?? string.Empty;
 			_expressionTextLength = _expressionText.Length;
 			SetTextPos(0);
 			NextToken();
 		}
 
-		public Expression Parse()
+		Expression Parse()
 		{
-			Expression expr = ParseExpressionSegment(_expressionReturnType);
+			Expression expr = ParseExpressionSegment(_arguments.ExpressionReturnType);
 
 			ValidateToken(TokenId.End, ErrorMessages.SyntaxError);
 			return expr;
@@ -228,7 +230,7 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 
 				Type knownType;
-				if (!_inputs.TryGetKnownType(_token.text, out knownType))
+				if (!_arguments.TryGetKnownType(_token.text, out knownType))
 					throw CreateParseException(op.pos, ErrorMessages.TypeIdentifierExpected);
 
 				if (typeOperator == ParserConstants.keywordIs)
@@ -601,20 +603,20 @@ namespace DynamicExpresso.Parsing
 				return ParseTypeof();
 
 			Type knownType;
-			if (_inputs.TryGetKnownType(_token.text, out knownType))
+			if (_arguments.TryGetKnownType(_token.text, out knownType))
 			{
 				return ParseTypeKeyword(knownType);
 			}
 
 			Expression keywordExpression;
-			if (_inputs.TryGetIdentifier(_token.text, out keywordExpression))
+			if (_arguments.TryGetIdentifier(_token.text, out keywordExpression))
 			{
 				NextToken();
 				return keywordExpression;
 			}
 
 			ParameterExpression parameterExpression;
-			if (_inputs.TryGetParameters(_token.text, out parameterExpression))
+			if (_arguments.TryGetParameters(_token.text, out parameterExpression))
 			{
 				NextToken();
 				return parameterExpression;
@@ -694,7 +696,7 @@ namespace DynamicExpresso.Parsing
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
 
 			Type newType;
-			if (!_inputs.TryGetKnownType(_token.text, out newType))
+			if (!_arguments.TryGetKnownType(_token.text, out newType))
 				throw new UnknownIdentifierException(_token.text, _token.pos);
 
 			NextToken();
@@ -1141,7 +1143,7 @@ namespace DynamicExpresso.Parsing
 
 		MethodData[] FindExtensionMethods(Type type, string methodName, Expression[] args)
 		{
-			var matchMethods = _inputs.GetExtensionMethods(methodName);
+			var matchMethods = _arguments.GetExtensionMethods(methodName);
 
 			return FindBestMethod(matchMethods.Cast<MethodBase>(), args);
 		}

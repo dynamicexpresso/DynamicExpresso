@@ -2,6 +2,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Globalization;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -132,6 +133,18 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(EnumCaseSensitive.Test, target.Eval("EnumCaseSensitive.Test"));
 			Assert.AreEqual(EnumCaseSensitive.TEST, target.Eval("EnumCaseSensitive.TEST"));
+		}
+
+		[TestMethod]
+		public void Getting_the_list_of_used_types()
+		{
+			var target = new Interpreter();
+
+			var lambda = target.Parse("Math.Max(a, typeof(string).Name.Length)", new Parameter("a", 1));
+
+			Assert.AreEqual(2, lambda.Types.Count());
+			Assert.AreEqual("Math", lambda.Types.ElementAt(0).Name);
+			Assert.AreEqual("string", lambda.Types.ElementAt(1).Name);
 		}
 
 		public enum EnumCaseSensitive

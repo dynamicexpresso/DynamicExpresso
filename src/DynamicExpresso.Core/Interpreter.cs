@@ -271,13 +271,7 @@ namespace DynamicExpresso
 		/// <exception cref="ParseException"></exception>
 		public Lambda Parse(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
-			var arguments = CreateExpressionParameters(parameters);
-
-			var expression = ParseExpression(expressionText, expressionType, arguments);
-
-			var lambdaExp = Expression.Lambda(expression, arguments);
-
-			return new Lambda(lambdaExp);
+			return CreateLambda(expressionText, expressionType, parameters);
 		}
 
 		/// <summary>
@@ -292,11 +286,9 @@ namespace DynamicExpresso
 		{
 			var delegateInfo = ReflectionExtensions.GetDelegateInfo(typeof(TDelegate), parametersNames);
 
-			var expression = ParseExpression(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
+			var lambda = CreateLambda(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
 
-			var lambdaExp = Expression.Lambda<TDelegate>(expression, delegateInfo.Parameters);
-
-			return lambdaExp.Compile();
+			return lambda.Compile<TDelegate>(delegateInfo.Parameters);
 		}
 		#endregion
 
@@ -337,18 +329,18 @@ namespace DynamicExpresso
 		#endregion
 
 		#region Private methods
-		Expression ParseExpression(string expressionText, Type expressionType, params ParameterExpression[] parameters)
+		Lambda CreateLambda(string expressionText, Type expressionType, Parameter[] parameters)
 		{
-			var parser = new Parser(_settings, expressionText, expressionType, parameters);
+			var arguments = new ParserArguments(expressionText, _settings)
+				{
+					ExpressionReturnType = expressionType
+				};
 
-			return parser.Parse();
-		}
+			arguments.AddParameters(parameters);
 
-		static ParameterExpression[] CreateExpressionParameters(Parameter[] parameters)
-		{
-			var arguments = (from p in parameters
-											 select ParameterExpression.Parameter(p.Type, p.Name)).ToArray();
-			return arguments;
+			var expression = Parser.Parse(arguments);
+
+			return new Lambda(expression, arguments);
 		}
 		#endregion
 	}

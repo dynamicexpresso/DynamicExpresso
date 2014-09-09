@@ -382,11 +382,13 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 - In progress
 	
-	- ADD: Added `CaseSensitive`, `ReferencedTypes`, `Identifiers` properties to understand how the `Interpreter` object was constructed.
-	- ADD: Added new methods for registering variables and types (see SetIdentifier and Reference).
-	- ADD: Added `LanguageConstants` class containing the most common types and identifiers used by default.
-	- DEL: Removed `Interpreter.Analyze` method because not very useful. To reproduce this feature just catch the exception.
-	- CHG: Internal code refactoring
+	- Added `CaseSensitive`, `ReferencedTypes`, `Identifiers` properties to understand how the `Interpreter` object was constructed.
+	- Added new methods for registering variables and types (see SetIdentifier and Reference).
+	- Added `LanguageConstants` class containing the most common types and identifiers used by default.
+	- Removed `Interpreter.Analyze` method because not very useful. To reproduce this feature just catch the exception.
+	- Extended `Lambda` class with used Types, Identifiers, and Parameters of the parsed expression. Basically you can understand what types, variables and parameters a specified expression has used.
+	- Added ability to Compile to a typed delegate directly from the Lambda.
+	- Internal code refactoring
 
 - 0.11.4
 

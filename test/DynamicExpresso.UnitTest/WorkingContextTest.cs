@@ -28,7 +28,7 @@ namespace DynamicExpresso.UnitTest
 
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("this", workingContext);
-			var firstNameExpression = interpreter.Parse("this.FirstName").LambdaExpression.Body;
+			var firstNameExpression = interpreter.Parse("this.FirstName").Expression;
 			interpreter.SetExpression("FirstName", firstNameExpression);
 
 			Assert.AreEqual(workingContext.FirstName, interpreter.Eval("FirstName"));

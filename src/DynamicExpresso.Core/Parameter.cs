@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 
 namespace DynamicExpresso
@@ -18,6 +19,8 @@ namespace DynamicExpresso
 			Name = name;
 			Type = value.GetType();
 			Value = value;
+
+			Expression = System.Linq.Expressions.Expression.Parameter(Type, name);
 		}
 
 		public Parameter(string name, Type type, object value = null)
@@ -25,10 +28,14 @@ namespace DynamicExpresso
 			Name = name;
 			Type = type;
 			Value = value;
+
+			Expression = System.Linq.Expressions.Expression.Parameter(type, name);
 		}
 
 		public string Name { get; private set; }
 		public Type Type { get; private set; }
 		public object Value { get; private set; }
+
+		public ParameterExpression Expression { get; private set; }
 	}
 }
