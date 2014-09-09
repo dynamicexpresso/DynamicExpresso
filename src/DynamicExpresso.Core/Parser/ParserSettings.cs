@@ -10,8 +10,8 @@ namespace DynamicExpresso.Parser
 {
 	internal class ParserSettings
 	{
-		readonly Dictionary<string, Expression> _identifiers;
-		readonly Dictionary<string, Type> _knownTypes;
+		readonly Dictionary<string, Identifier> _identifiers;
+		readonly Dictionary<string, ReferenceType> _knownTypes;
 		readonly List<MethodInfo> _extensionMethods;
 
 		public ParserSettings(bool caseInsensitive)
@@ -20,19 +20,19 @@ namespace DynamicExpresso.Parser
 
 			SettingsKeyComparer = CaseInsensitive ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
 
-			_identifiers = new Dictionary<string, Expression>(SettingsKeyComparer);
+			_identifiers = new Dictionary<string, Identifier>(SettingsKeyComparer);
 
-			_knownTypes = new Dictionary<string, Type>(SettingsKeyComparer);
+			_knownTypes = new Dictionary<string, ReferenceType>(SettingsKeyComparer);
 
 			_extensionMethods = new List<MethodInfo>();
 		}
 
-		public IDictionary<string, Type> KnownTypes
+		public IDictionary<string, ReferenceType> KnownTypes
 		{
 			get { return _knownTypes; }
 		}
 
-		public IDictionary<string, Expression> Identifiers
+		public IDictionary<string, Identifier> Identifiers
 		{
 			get { return _identifiers; }
 		}

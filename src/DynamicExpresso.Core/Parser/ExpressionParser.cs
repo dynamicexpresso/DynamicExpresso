@@ -613,7 +613,7 @@ namespace DynamicExpresso.Parser
 				return keywordExpression;
 			}
 
-			Expression parameterExpression;
+			ParameterExpression parameterExpression;
 			if (_inputs.TryGetParameters(_token.text, out parameterExpression))
 			{
 				NextToken();

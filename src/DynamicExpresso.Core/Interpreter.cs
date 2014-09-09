@@ -71,7 +71,7 @@ namespace DynamicExpresso
 			get
 			{
 				return _settings.KnownTypes
-					.Select(p => new ReferenceType(p.Key, p.Value))
+					.Select(p => p.Value)
 					.ToList();
 			}
 		}
@@ -84,7 +84,7 @@ namespace DynamicExpresso
 			get
 			{
 				return _settings.Identifiers
-					.Select(p => new Identifier(p.Key, p.Value))
+					.Select(p => p.Value)
 					.ToList();
 			}
 		}
@@ -170,7 +170,7 @@ namespace DynamicExpresso
 			if (identifier == null)
 				throw new ArgumentNullException("identifier");
 
-			_settings.Identifiers[identifier.Name] = identifier.Expression;
+			_settings.Identifiers[identifier.Name] = identifier;
 
 			return this;
 		}
@@ -231,7 +231,7 @@ namespace DynamicExpresso
 			if (type == null)
 				throw new ArgumentNullException("type");
 
-			_settings.KnownTypes[type.Name] = type.Type;
+			_settings.KnownTypes[type.Name] = type;
 
 			var extensions = ReflectionExtensions.GetExtensionMethods(type.Type);
 			foreach (var extensionMethod in extensions)
