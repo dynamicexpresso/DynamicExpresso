@@ -245,6 +245,20 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("y", lambda.Parameters[1].Name);
 		}
 
+		[TestMethod]
+		public void When_parsing_an_expression_to_a_delegate_the_delegate_parameters_are_respected_also_if_the_expression_doesnt_use_it()
+		{
+			var target = new Interpreter();
+
+			var myDelegate = target.Parse<TestDelegate>("x + y");
+
+			// parameter 'z' is not used but the delegate accept it in any case without problem
+			Assert.AreEqual(3, myDelegate(1, 2, 123123));
+			Assert.AreEqual(24, myDelegate(21, 3, 433123));
+		}
+
+		public delegate int TestDelegate(int x, int y, int z);
+
 		class MyTestService
 		{
 			public DateTime AField = DateTime.Now;
