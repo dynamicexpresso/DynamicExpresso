@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace DynamicExpresso
 {
@@ -16,6 +17,7 @@ namespace DynamicExpresso
 	public class Interpreter
 	{
 		readonly ParserSettings _settings;
+		static readonly Regex expressionDetectionRegex = new Regex(@"[^\.""']\b([a-zA-Z_]\w*)\b", RegexOptions.Compiled);
 
 		#region Constructors
 		/// <summary>
@@ -325,6 +327,31 @@ namespace DynamicExpresso
 		public object Eval(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
 			return Parse(expressionText, expressionType, parameters).Invoke(parameters);
+		}
+		#endregion
+
+		#region Identifiers detection
+		public IdentifiersInfo DetectIdentifiers(string expression)
+		{
+			var unknown = new List<string>();
+			var known = new List<string>();
+
+			foreach (Match match in expressionDetectionRegex.Matches(expression))
+			{
+				var identifier = match.Groups[1].Value;
+
+				if (!IsKnownIdentifier(identifier))
+				{
+					unknown.Add(identifier);
+				}
+			}
+
+			return new IdentifiersInfo(unknown, known);
+		}
+
+		bool IsKnownIdentifier(string identifier)
+		{
+			return false;
 		}
 		#endregion
 

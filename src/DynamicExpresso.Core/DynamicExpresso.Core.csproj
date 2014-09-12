@@ -53,6 +53,7 @@
     <Compile Include="Exceptions\NoApplicableMethodException.cs" />
     <Compile Include="Exceptions\DuplicateParameterException.cs" />
     <Compile Include="Exceptions\UnknownIdentifierException.cs" />
+    <Compile Include="IdentifiersInfo.cs" />
     <Compile Include="LanguageConstants.cs" />
     <Compile Include="ParserArguments.cs" />
     <Compile Include="Parsing\Token.cs" />
