@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CODE_ANALYSIS TEST_DetectIdentifiers</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>bin\Debug\DynamicExpresso.Core.XML</DocumentationFile>
@@ -48,6 +48,7 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Detector.cs" />
     <Compile Include="Exceptions\DynamicExpressoException.cs" />
     <Compile Include="Exceptions\ExceptionExtensions.cs" />
     <Compile Include="Exceptions\NoApplicableMethodException.cs" />

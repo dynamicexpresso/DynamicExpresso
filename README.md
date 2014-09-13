@@ -382,6 +382,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 - In progress
 	
+	- Added Interpreter.DetectIdentifiers method to discovery identifiers (variables, parameters, types) used in expression before parsing it. ([#23](https://github.com/davideicardi/DynamicExpresso/issues/23))
 	- Added `CaseSensitive`, `ReferencedTypes`, `Identifiers` properties to understand how the `Interpreter` object was constructed.
 	- Added new methods for registering variables and types (see SetIdentifier and Reference).
 	- Added `LanguageConstants` class containing the most common types and identifiers used by default.

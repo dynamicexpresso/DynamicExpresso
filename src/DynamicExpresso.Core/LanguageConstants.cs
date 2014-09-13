@@ -6,7 +6,7 @@ namespace DynamicExpresso
 {
 	public static class LanguageConstants
 	{
-		public static ReferenceType[] PrimitiveTypes = {
+		public static readonly ReferenceType[] PrimitiveTypes = {
             new ReferenceType(typeof(Object)),
             new ReferenceType(typeof(Boolean)),
             new ReferenceType(typeof(Char)),
@@ -30,7 +30,7 @@ namespace DynamicExpresso
 		/// <summary>
 		/// Primitive types alias (string, int, ...)
 		/// </summary>
-		public static ReferenceType[] CSharpPrimitiveTypes = {
+		public static readonly ReferenceType[] CSharpPrimitiveTypes = {
 						new ReferenceType("object", typeof(object)),
 						new ReferenceType("string", typeof(string)),
 						new ReferenceType("char", typeof(char)),
@@ -45,7 +45,7 @@ namespace DynamicExpresso
 		/// <summary>
 		/// Common .NET Types (Math, Convert, Enumerable)
 		/// </summary>
-		public static ReferenceType[] CommonTypes = {
+		public static readonly ReferenceType[] CommonTypes = {
             new ReferenceType(typeof(Math)),
             new ReferenceType(typeof(Convert)),
             new ReferenceType(typeof(System.Linq.Enumerable))
@@ -54,10 +54,12 @@ namespace DynamicExpresso
 		/// <summary>
 		/// true, false, null
 		/// </summary>
-		public static Identifier[] Literals = {
+		public static readonly Identifier[] Literals = {
 					new Identifier("true", Expression.Constant(true)),
 					new Identifier("false", Expression.Constant(false)),
-					new Identifier("null", ParserConstants.nullLiteral)
+					new Identifier("null", ParserConstants.NULL_LITERAL_EXPRESSION)
 				};
+
+		public static readonly string[] ReserverKeywords = ParserConstants.RESERVED_KEYWORDS;
 	}
 }

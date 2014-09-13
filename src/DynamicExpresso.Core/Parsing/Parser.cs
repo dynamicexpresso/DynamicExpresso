@@ -221,8 +221,8 @@ namespace DynamicExpresso.Parsing
 		Expression ParseTypeTesting()
 		{
 			Expression left = ParseAdditive();
-			while (_token.text == ParserConstants.keywordIs
-					|| _token.text == ParserConstants.keywordAs)
+			while (_token.text == ParserConstants.KEYWORD_IS
+					|| _token.text == ParserConstants.KEYWORD_AS)
 			{
 				var typeOperator = _token.text;
 
@@ -233,9 +233,9 @@ namespace DynamicExpresso.Parsing
 				if (!_arguments.TryGetKnownType(_token.text, out knownType))
 					throw CreateParseException(op.pos, ErrorMessages.TypeIdentifierExpected);
 
-				if (typeOperator == ParserConstants.keywordIs)
+				if (typeOperator == ParserConstants.KEYWORD_IS)
 					left = Expression.TypeIs(left, knownType);
-				else if (typeOperator == ParserConstants.keywordAs)
+				else if (typeOperator == ParserConstants.KEYWORD_AS)
 					left = Expression.TypeAs(left, knownType);
 				else
 					throw CreateParseException(_token.pos, ErrorMessages.SyntaxError);
@@ -597,9 +597,9 @@ namespace DynamicExpresso.Parsing
 			//if (token.text == ParserConstants.keywordIt)
 			//    return ParseIt();
 
-			if (_token.text == ParserConstants.keywordNew)
+			if (_token.text == ParserConstants.KEYWORD_NEW)
 				return ParseNew();
-			if (_token.text == ParserConstants.keywordTypeof)
+			if (_token.text == ParserConstants.KEYWORD_TYPEOF)
 				return ParseTypeof();
 
 			Type knownType;
@@ -668,8 +668,8 @@ namespace DynamicExpresso.Parsing
 				throw CreateParseException(errorPos, ErrorMessages.FirstExprMustBeBool);
 			if (expr1.Type != expr2.Type)
 			{
-				Expression expr1as2 = expr2 != ParserConstants.nullLiteral ? PromoteExpression(expr1, expr2.Type, true) : null;
-				Expression expr2as1 = expr1 != ParserConstants.nullLiteral ? PromoteExpression(expr2, expr1.Type, true) : null;
+				Expression expr1as2 = expr2 != ParserConstants.NULL_LITERAL_EXPRESSION ? PromoteExpression(expr1, expr2.Type, true) : null;
+				Expression expr2as1 = expr1 != ParserConstants.NULL_LITERAL_EXPRESSION ? PromoteExpression(expr2, expr1.Type, true) : null;
 				if (expr1as2 != null && expr2as1 == null)
 				{
 					expr1 = expr1as2;
@@ -680,8 +680,8 @@ namespace DynamicExpresso.Parsing
 				}
 				else
 				{
-					string type1 = expr1 != ParserConstants.nullLiteral ? expr1.Type.Name : "null";
-					string type2 = expr2 != ParserConstants.nullLiteral ? expr2.Type.Name : "null";
+					string type1 = expr1 != ParserConstants.NULL_LITERAL_EXPRESSION ? expr1.Type.Name : "null";
+					string type2 = expr2 != ParserConstants.NULL_LITERAL_EXPRESSION ? expr2.Type.Name : "null";
 					if (expr1as2 != null && expr2as1 != null)
 						throw CreateParseException(errorPos, ErrorMessages.BothTypesConvertToOther, type1, type2);
 					throw CreateParseException(errorPos, ErrorMessages.NeitherTypeConvertsToOther, type1, type2);
@@ -1355,7 +1355,7 @@ namespace DynamicExpresso.Parsing
 			if (expr is ConstantExpression)
 			{
 				ConstantExpression ce = (ConstantExpression)expr;
-				if (ce == ParserConstants.nullLiteral)
+				if (ce == ParserConstants.NULL_LITERAL_EXPRESSION)
 				{
 					if (!type.IsValueType || IsNullableType(type))
 						return Expression.Constant(null, type);

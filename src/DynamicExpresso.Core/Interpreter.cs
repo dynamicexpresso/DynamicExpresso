@@ -17,7 +17,6 @@ namespace DynamicExpresso
 	public class Interpreter
 	{
 		readonly ParserSettings _settings;
-		static readonly Regex expressionDetectionRegex = new Regex(@"[^\.""']\b([a-zA-Z_]\w*)\b", RegexOptions.Compiled);
 
 		#region Constructors
 		/// <summary>
@@ -330,28 +329,12 @@ namespace DynamicExpresso
 		}
 		#endregion
 
-		#region Identifiers detection
+		#region Detection
 		public IdentifiersInfo DetectIdentifiers(string expression)
 		{
-			var unknown = new List<string>();
-			var known = new List<string>();
+			var detector = new Detector(_settings);
 
-			foreach (Match match in expressionDetectionRegex.Matches(expression))
-			{
-				var identifier = match.Groups[1].Value;
-
-				if (!IsKnownIdentifier(identifier))
-				{
-					unknown.Add(identifier);
-				}
-			}
-
-			return new IdentifiersInfo(unknown, known);
-		}
-
-		bool IsKnownIdentifier(string identifier)
-		{
-			return false;
+			return detector.DetectIdentifiers(expression);
 		}
 		#endregion
 
@@ -367,8 +350,28 @@ namespace DynamicExpresso
 
 			var expression = Parser.Parse(arguments);
 
-			return new Lambda(expression, arguments);
+			var lambda = new Lambda(expression, arguments);
+
+#if TEST_DetectIdentifiers
+			AssertDetectIdentifiers(lambda);
+#endif
+
+			return lambda;
 		}
+
+#if TEST_DetectIdentifiers
+		void AssertDetectIdentifiers(Lambda lambda)
+		{
+			var info = DetectIdentifiers(lambda.ExpressionText);
+
+			if (info.Identifiers.Count() != lambda.Identifiers.Count())
+				throw new Exception("Detected identifiers doesn't match actual identifiers");
+			if (info.Types.Count() != lambda.Types.Count())
+				throw new Exception("Detected types doesn't match actual types");
+			if (info.UnknownIdentifiers.Count() != lambda.Parameters.Count())
+				throw new Exception("Detected unknown identifiers doesn't match actual parameters");
+		}
+#endif
 		#endregion
 	}
 }
