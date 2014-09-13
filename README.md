@@ -50,6 +50,7 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 - Good performance compared to other similar projects
 - Partial support for generic, params array and extension methods
 - Case insensitive expressions (default is case sensitive)
+- Ability to discover identifiers (variables, types, parameters) of a given expression
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
 - Easy to use and deploy, it is all contained in a single assembly without other external dependencies
 - 100 % managed code written in C# 4.0
@@ -296,6 +297,22 @@ There is an option to use a case insensitive parser. For example:
 	Assert.AreEqual(x, target.Eval("x", parameters));
 	Assert.AreEqual(x, target.Eval("X", parameters));
 
+## Identifiers detection
+
+Sometimes you need to check which identifiers (variables, types, parameters) are used in expression before parsing it.
+Maybe because you want to validate it or you want to ask the user to enter parameters value of a given expression.
+Because if you parse an expression without the right parameter an exception is throwed.
+
+In these cases you can use `Interpreter.DetectIdentifiers` method to obtain a list of used identifiers, both known and unknown.
+
+	var target = new Interpreter();
+
+	var detectedIdentifiers = target.DetectIdentifiers("x + y");
+
+	CollectionAssert.AreEqual(
+		new []{ "x", "y"}, 
+		detectedIdentifiers.UnknownIdentifiers.ToArray());
+
 ## Limitations
 
 Not every C# syntaxes are supported. Here some examples of NOT supported features:
@@ -308,8 +325,8 @@ Not every C# syntaxes are supported. Here some examples of NOT supported feature
 
 ## Exceptions
 
-If there is an error during the parsing always an exception of type `ParserExpression` is throwed. 
-`ParserExpression` has several specialization classes based on the type of error.
+If there is an error during the parsing always an exception of type `ParseException` is throwed. 
+`ParseException` has several specialization classes based on the type of error (UnknownIdentifierException, NoApplicableMethodException. ...).
 
 ## Performance and multithreading
 
@@ -380,7 +397,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
-- In progress
+- 1.0.0
 	
 	- Added Interpreter.DetectIdentifiers method to discovery identifiers (variables, parameters, types) used in expression before parsing it. ([#23](https://github.com/davideicardi/DynamicExpresso/issues/23))
 	- Added `CaseSensitive`, `ReferencedTypes`, `Identifiers` properties to understand how the `Interpreter` object was constructed.
