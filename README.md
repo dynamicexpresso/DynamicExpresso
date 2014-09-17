@@ -407,6 +407,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- Extended `Lambda` class with used Types, Identifiers, and Parameters of the parsed expression. Basically you can understand what types, variables and parameters a specified expression has used.
 	- Added ability to Compile to a typed delegate directly from the Lambda.
 	- Internal code refactoring
+    - Now parsed lambda only contains the actually used parameters, not all the parameters provided.
 
 - 0.11.4
 
