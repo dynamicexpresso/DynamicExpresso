@@ -145,6 +145,49 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		public void Assignment_Operator_Equal()
+		{
+			var x = new TypeWithProperty();
+
+			var target = new Interpreter()
+				.SetVariable("x", x);
+
+			// simple assignment
+			target.Eval("x.Property1 = 156");
+			Assert.AreEqual(156, x.Property1);
+
+			// assignment without space
+			target.Eval("x.Property1=156");
+			Assert.AreEqual(156, x.Property1);
+
+			// assignment with many spaces
+			target.Eval("x.Property1     =    156");
+			Assert.AreEqual(156, x.Property1);
+
+			// assignment should return the assigned value
+			var returnValue = target.Eval("x.Property1 = 81");
+			Assert.AreEqual(81, x.Property1);
+			Assert.AreEqual(x.Property1, returnValue);
+
+			// assignment can be chained
+			returnValue = target.Eval("x.Property1 = x.Property2 = 2014");
+			Assert.AreEqual(2014, x.Property1);
+			Assert.AreEqual(x.Property1, x.Property2);
+
+			// assignment can be nested with other operators
+			returnValue = target.Eval("x.Property1 = (486 + 4) * 10");
+			Assert.AreEqual(4900, x.Property1);
+			Assert.AreEqual(x.Property1, returnValue);
+
+			// right member is not modified
+			x.Property2 = 2;
+			returnValue = target.Eval("x.Property1 = x.Property2 * 10");
+			Assert.AreEqual(20, x.Property1);
+			Assert.AreEqual(2, x.Property2);
+		}
+		class TypeWithProperty { public int Property1 { get; set; } public int Property2 { get; set; } }
+
+		[TestMethod]
 		public void Can_compare_numeric_parameters_of_different_compatible_types()
 		{
 			var target = new Interpreter();
@@ -194,15 +237,6 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(10 > 3 ? "yes" : "no", target.Eval("10 > 3 ? \"yes\" : \"no\""));
 			Assert.AreEqual(10 < 3 ? "yes" : "no", target.Eval("10 < 3 ? \"yes\" : \"no\""));
-		}
-
-		[TestMethod]
-		[ExpectedException(typeof(ParseException))]
-		public void Operator_Equal_Is_Not_Supported()
-		{
-			var target = new Interpreter();
-
-			target.Parse("5 = 4");
 		}
 
 		[TestMethod]
@@ -434,6 +468,5 @@ namespace DynamicExpresso.UnitTest
 				_value = value;
 			}
 		}
-
 	}
 }

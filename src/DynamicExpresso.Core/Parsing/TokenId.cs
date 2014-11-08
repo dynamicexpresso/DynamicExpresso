@@ -36,7 +36,8 @@ namespace DynamicExpresso.Parsing
 		LessThanEqual,
 		DoubleEqual,
 		GreaterThanEqual,
-		DoubleBar
+		DoubleBar,
+		Equal
 	}
 
 }

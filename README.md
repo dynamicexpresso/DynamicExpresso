@@ -216,8 +216,13 @@ Statements can be written using a subset of the C# syntax. Here you can find a l
 		<tr>
 			<td>Conditional</td><td><code>?:</code></td>
 		</tr>
+		<tr>
+			<td>Assignment</td><td><code>=</code></td>
+		</tr>
 	</tbody>
 </table>
+
+Operators precedence is respected following [C# rules (Operator precedence and associativity)](http://msdn.microsoft.com/en-us/library/aa691323(v=vs.71).aspx).
 
 ### Literals
 
@@ -396,6 +401,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 
 ## Release notes
+
+- 1.1.0
+
+	- Added support for equal assignement operator (<code>=</code>). [#24](https://github.com/davideicardi/DynamicExpresso/issues/24)
 
 - 1.0.0
 	

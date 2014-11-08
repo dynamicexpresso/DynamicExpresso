@@ -19,6 +19,33 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[TestMethod]
+		[ExpectedException(typeof(ParseException))]
+		public void Invalid_equal_assignment_operator_left()
+		{
+			var target = new Interpreter();
+
+			target.Eval("=234");
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ArgumentException))]
+		public void Invalid_equal_assignment_operator_left_is_literal()
+		{
+			var target = new Interpreter();
+
+			target.Eval("352=234");
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(ParseException))]
+		public void Unkonwn_operator_triple_equal()
+		{
+			var target = new Interpreter();
+
+			target.Eval("352===234");
+		}
+
+		[TestMethod]
 		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Not_existing_function()
 		{

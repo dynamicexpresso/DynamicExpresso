@@ -79,9 +79,26 @@ namespace DynamicExpresso.Parsing
 		Expression ParseExpressionSegment()
 		{
 			// The following methods respect the operator precedence as defined in
+			// MSDN C# "Operator precedence and associativity"
 			// http://msdn.microsoft.com/en-us/library/aa691323(v=vs.71).aspx
 
-			return ParseConditional();
+			return ParseAssignement();
+		}
+
+		// = operator
+		Expression ParseAssignement()
+		{
+			int errorPos = _token.pos;
+			Expression left = ParseConditional();
+			if (_token.id == TokenId.Equal)
+			{
+				Token op = _token;
+				NextToken();
+				Expression right = ParseAssignement();
+				CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), op.text, ref left, ref right, op.pos);
+				left = Expression.Assign(left, right);
+			}
+			return left;
 		}
 
 		// ?: operator
@@ -1852,7 +1869,7 @@ namespace DynamicExpresso.Parsing
 					}
 					else
 					{
-						throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
+						t = TokenId.Equal;
 					}
 					break;
 				case '>':
