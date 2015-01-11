@@ -9,7 +9,7 @@ using System.Threading;
 using System.Globalization;
 
 // Code based on the Dynamic.cs file of the DynamicQuery sample by Microsoft
-// http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx 
+// http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx
 // http://weblogs.asp.net/scottgu/archive/2008/01/07/dynamic-linq-part-1-using-the-linq-dynamic-query-library.aspx
 //
 // Copyright (C) Microsoft Corporation.  All rights reserved.
@@ -88,7 +88,6 @@ namespace DynamicExpresso.Parsing
 		// = operator
 		Expression ParseAssignement()
 		{
-			int errorPos = _token.pos;
 			Expression left = ParseConditional();
 			if (_token.id == TokenId.Equal)
 			{
@@ -521,11 +520,11 @@ namespace DynamicExpresso.Parsing
 
 				NextToken();
 
-				if (value <= (ulong)Int32.MaxValue) 
+				if (value <= (ulong)Int32.MaxValue)
 					return CreateLiteral((int)value, text);
-				if (value <= (ulong)UInt32.MaxValue) 
+				if (value <= (ulong)UInt32.MaxValue)
 					return CreateLiteral((uint)value, text);
-				if (value <= (ulong)Int64.MaxValue) 
+				if (value <= (ulong)Int64.MaxValue)
 					return CreateLiteral((long)value, text);
 
 				return CreateLiteral(value, text);
@@ -572,7 +571,7 @@ namespace DynamicExpresso.Parsing
 
 			if (value == null)
 				throw CreateParseException(_token.pos, ErrorMessages.InvalidRealLiteral, text);
-			
+
 			NextToken();
 
 			return CreateLiteral(value, text);
@@ -640,7 +639,7 @@ namespace DynamicExpresso.Parsing
 			}
 
 			// Working context implementation
-			//if (it != null) 
+			//if (it != null)
 			//    return ParseMemberAccess(null, it);
 
 			throw new UnknownIdentifierException(_token.text, _token.pos);
@@ -1267,7 +1266,7 @@ namespace DynamicExpresso.Parsing
 				else
 				{
 					if (declaredWorkingParameters >= method.Parameters.Length)
-					{ 
+					{
 						return false;
 					}
 
@@ -1764,7 +1763,7 @@ namespace DynamicExpresso.Parsing
 
 		void NextChar()
 		{
-			if (_parsePosition < _expressionTextLength) 
+			if (_parsePosition < _expressionTextLength)
 				_parsePosition++;
 
 			_parseChar = _parsePosition < _expressionTextLength ? _expressionText[_parsePosition] : '\0';
@@ -1777,7 +1776,7 @@ namespace DynamicExpresso.Parsing
 
 		void NextToken()
 		{
-			while (Char.IsWhiteSpace(_parseChar)) 
+			while (Char.IsWhiteSpace(_parseChar))
 				NextChar();
 
 			TokenId t;
@@ -1986,7 +1985,7 @@ namespace DynamicExpresso.Parsing
 						{
 							t = TokenId.RealLiteral;
 							NextChar();
-							if (_parseChar == '+' || _parseChar == '-') 
+							if (_parseChar == '+' || _parseChar == '-')
 								NextChar();
 							ValidateDigit();
 							do
@@ -2019,7 +2018,7 @@ namespace DynamicExpresso.Parsing
 		{
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
 			string id = _token.text;
-			if (id.Length > 1 && id[0] == '@') 
+			if (id.Length > 1 && id[0] == '@')
 				id = id.Substring(1);
 			return id;
 		}

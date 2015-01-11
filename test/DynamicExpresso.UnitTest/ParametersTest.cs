@@ -1,15 +1,15 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Globalization;
 using System.Reflection;
 using System.Linq;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class ParametersTest
 	{
-		[TestMethod]
+		[Test]
 		public void Basic_parameters()
 		{
 			var target = new Interpreter();
@@ -22,7 +22,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(30, target.Eval("x + y", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parameters_orders_is_not_important_for_eval()
 		{
 			var target = new Interpreter();
@@ -35,7 +35,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("AB", target.Eval("A + B", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parameters_orders_can_be_different_between_parse_and_invoke()
 		{
 			var target = new Interpreter();
@@ -50,7 +50,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("AB", lambda.Invoke(parameters.Reverse()));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Expression_Without_Parameters()
 		{
 			var target = new Interpreter();
@@ -63,7 +63,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(TargetParameterCountException))]
-		[TestMethod]
+		[Test]
 		public void Parameters_Mismatch()
 		{
 			var target = new Interpreter();
@@ -82,7 +82,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(30, exp.Invoke(parametersMismatch));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Invoke_the_lambda_using_different_parameters_values()
 		{
 			var target = new Interpreter();
@@ -109,7 +109,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(58, myFunc.Invoke(parameters2));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Different_parameters_values_With_Args()
 		{
 			var target = new Interpreter();
@@ -125,7 +125,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(30, myFunc.Invoke(32, -2));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Primitive_parameters()
 		{
 			var target = new Interpreter();
@@ -144,7 +144,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(y.Length + x, target.Eval("y.Length + x", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parameters_by_default_Are_Case_Sensitive()
 		{
 			var target = new Interpreter();
@@ -160,7 +160,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(X, target.Eval("X", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parameters_can_be_Case_insensitive()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
@@ -174,7 +174,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x, target.Eval("X", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Complex_parameters()
 		{
 			var target = new Interpreter();
@@ -193,7 +193,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(z, target.Eval("z", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Methods_Fields_and_Properties_On_Parameters()
 		{
 			var target = new Interpreter();
@@ -215,7 +215,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.AField, target.Eval("x.AField", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Nullable_as_parameters()
 		{
 			var target = new Interpreter();
@@ -236,7 +236,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(y.HasValue, target.Eval("y.HasValue", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Delegates_as_parameters()
 		{
 			var target = new Interpreter();
@@ -253,7 +253,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(4, target.Eval("myDelegate(\"test\")", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void When_parsing_an_expression_only_the_actually_used_parameters_should_be_included_in_the_lambda()
 		{
 			var target = new Interpreter();
@@ -272,7 +272,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("y", lambda.Parameters.ElementAt(1).Name);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Using_the_same_parameters_multiple_times_doesnt_produce_multiple_parameters_in_the_lambda()
 		{
 			var target = new Interpreter();
@@ -289,7 +289,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("y", lambda.Parameters.ElementAt(1).Name);
 		}
 
-		[TestMethod]
+		[Test]
 		public void When_parsing_an_expression_to_a_delegate_the_delegate_parameters_are_respected_also_if_the_expression_doesnt_use_it()
 		{
 			var target = new Interpreter();

@@ -1,13 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Linq.Expressions;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class VariablesTest
 	{
-		[TestMethod]
+		[Test]
 		public void Variables()
 		{
 			var target = new Interpreter()
@@ -17,7 +17,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Variables_by_default_are_case_sensitive()
 		{
 			var target = new Interpreter()
@@ -28,7 +28,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(50, target.Eval("X"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Variables_can_be_case_insensitive()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
@@ -38,7 +38,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(23, target.Eval("X"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Variables_can_be_overwritten()
 		{
 			var target = new Interpreter()
@@ -53,7 +53,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Variables_can_be_overwritten_in_a_case_insensitive_setting()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
@@ -68,7 +68,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Null_Variables()
 		{
 			var target = new Interpreter()
@@ -79,7 +79,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(object), target.Parse("myk").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Null_Variables_With_Type_Specified()
 		{
 			var target = new Interpreter()
@@ -90,7 +90,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(string), target.Parse("myk").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Keywords_with_lambda()
 		{
 			Expression<Func<double, double, double>> pow = (x, y) => Math.Pow(x, y);
@@ -100,7 +100,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Keywords_with_delegate()
 		{
 			Func<double, double, double> pow = (x, y) => Math.Pow(x, y);

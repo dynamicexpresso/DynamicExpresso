@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,10 +7,10 @@ using System.Text;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class WorkingContextTest
 	{
-		[TestMethod]
+		[Test]
 		public void Simulate_a_working_context_using_this_keyword()
 		{
 			var workingContext = new { FirstName = "homer" };
@@ -21,7 +21,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(workingContext.FirstName, interpreter.Eval("this.FirstName"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Injection_a_property_expresion_to_simulate_a_working_context_parsing_another_property()
 		{
 			var workingContext = new { FirstName = "homer" };
@@ -34,7 +34,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(workingContext.FirstName, interpreter.Eval("FirstName"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Injection_a_property_expresion_to_simulate_a_working_context()
 		{
 			var workingContext = new { FirstName = "homer" };

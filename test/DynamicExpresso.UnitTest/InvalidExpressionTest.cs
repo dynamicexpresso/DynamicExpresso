@@ -1,15 +1,15 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class InvalidExpressionTest
 	{
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Not_existing_variable()
 		{
@@ -18,7 +18,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("not_existing");
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(ParseException))]
 		public void Invalid_equal_assignment_operator_left()
 		{
@@ -27,7 +27,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("=234");
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(ArgumentException))]
 		public void Invalid_equal_assignment_operator_left_is_literal()
 		{
@@ -36,7 +36,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("352=234");
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(ParseException))]
 		public void Unkonwn_operator_triple_equal()
 		{
@@ -45,7 +45,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("352===234");
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Not_existing_function()
 		{
@@ -54,7 +54,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("pippo()");
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(ParseException))]
 		public void Not_valid_function()
 		{
@@ -63,7 +63,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("2()");
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Not_valid_expression()
 		{
@@ -72,7 +72,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("'5' + 3 /(asda");
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void TryParse_an_invalid_expression_unknown_identifier_x()
 		{
@@ -91,7 +91,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Parse_an_invalid_expression_unknown_identifier_y()
 		{
@@ -110,7 +110,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(NoApplicableMethodException))]
 		public void Parse_an_invalid_expression_unknown_method()
 		{
@@ -131,7 +131,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(InvalidOperationException))]
-		[TestMethod]
+		[Test]
 		public void SystemExceptions_are_preserved_using_delegate_variable()
 		{
 			var target = new Interpreter();
@@ -147,7 +147,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(MyException))]
-		[TestMethod]
+		[Test]
 		public void CustomExceptions_WithoutSerializationConstructor_are_preserved()
 		{
 			var target = new Interpreter();
@@ -163,7 +163,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(NotImplementedException))]
-		[TestMethod]
+		[Test]
 		public void SystemExceptions_are_preserved_using_method_invocation()
 		{
 			var target = new Interpreter();

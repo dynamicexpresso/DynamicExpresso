@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Collections;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class CaseInsensitivePropertyTest
 	{
-		[TestMethod]
+		[Test]
 		public void CaseInsensitive_Property_Default()
 		{
 			var target = new Interpreter();
@@ -17,7 +17,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsFalse(target.CaseInsensitive);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Setting_CaseInsensitive()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);

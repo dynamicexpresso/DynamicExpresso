@@ -1,15 +1,15 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class OtherTests
 	{
-		[TestMethod]
+		[Test]
 		public void Space_Characters_Are_Ignored()
 		{
 			var target = new Interpreter();
@@ -17,7 +17,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(46, target.Eval("     45\t\t  + 1 \r  \n"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Empty_Null_Withespace_Expression()
 		{
 			var target = new Interpreter();
@@ -32,7 +32,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(void), target.Parse("  \t\t\r\n  \t   ").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Complex_expression()
 		{
 			var target = new Interpreter();
@@ -50,7 +50,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(Convert.ToString(x.AProperty * (4 + 65) / x.AProperty), target.Eval("Convert.ToString(x.AProperty * (4 + 65) / x.AProperty)", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parse_An_Expression_And_Invoke_It_With_Different_Parameters()
 		{
 			var service = new MyTestService();
@@ -75,7 +75,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(1, service.VoidMethod2Called);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Should_Understand_ReturnType_Of_expressions()
 		{
 			var target = new Interpreter();
@@ -91,7 +91,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(int), target.Parse("x.AProperty * (4 + 65) / x.AProperty", parameters).ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Execute_the_same_function_multiple_times()
 		{
 			var target = new Interpreter();
@@ -111,7 +111,7 @@ namespace DynamicExpresso.UnitTest
 																													new Parameter("y", 3.0)));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Linq_Where()
 		{
 			var customers = new List<Customer> { 
@@ -130,7 +130,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Multiple_Parentheses_Math_Expression()
 		{
 			var interpreter = new Interpreter();
@@ -139,7 +139,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(2 + ((((1 + 5))) * (((2 - 1)) + 5.5)), interpreter.Eval("2 + ((((1 + 5))) * (((2 - 1))+5.5))"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Multiple_Parentheses_Cast_Expression()
 		{
 			var interpreter = new Interpreter();

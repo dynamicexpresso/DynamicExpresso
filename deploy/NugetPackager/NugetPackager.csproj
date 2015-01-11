@@ -49,7 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\DynamicExpresso.Core\DynamicExpresso.Core.csproj">
-      <Project>{c6b7c0d2-b84a-4307-9c61-d95613db564d}</Project>
+      <Project>{C6B7C0D2-B84A-4307-9C61-D95613DB564D}</Project>
       <Name>DynamicExpresso.Core</Name>
     </ProjectReference>
   </ItemGroup>
@@ -61,7 +61,6 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-
   <!-- Call nuget pack for each nuspec file included in the project. -->
   <Target Name="AfterBuild">
     <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
@@ -77,5 +76,4 @@
     <!-- Create standard package -->
     <Exec Command="$(NugetExe) pack &quot;%(NuspecFiles.FullPath)&quot; -OutputDirectory $(OutputPath) -BasePath $(OutputPath) -Version $(NugetVersion) -Symbols" />
   </Target>
-  
 </Project>

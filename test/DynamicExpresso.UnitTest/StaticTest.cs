@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class StaticTest
 	{
-		[TestMethod]
+		[Test]
 		public void Static_Properties_of_Base_Types()
 		{
 			var target = new Interpreter();
@@ -21,7 +21,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(Guid.Empty, target.Eval("Guid.Empty"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Static_Methods_of_Base_Types()
 		{
 			var target = new Interpreter();
@@ -30,7 +30,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(DateTime.DaysInMonth(2094, 11), target.Eval("DateTime.DaysInMonth(2094, 11)"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Math_Class()
 		{
 			var target = new Interpreter();
@@ -39,7 +39,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(Math.Sin(30.234), target.Eval("Math.Sin(30.234)"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Convert_Class()
 		{
 			var target = new Interpreter();
@@ -48,7 +48,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(Convert.ToInt16("23"), target.Eval("Convert.ToInt16(\"23\")"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void CSharp_Primitive_Type_Keywords()
 		{
 			var target = new Interpreter();
@@ -61,7 +61,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(byte.MinValue, target.Eval("byte.MinValue"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Static_Properties_And_Methods_Of_Custom_Types()
 		{
 			var target = new Interpreter()
@@ -72,7 +72,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(MyTestService.MyStaticMethod(), target.Eval("MyTestService.MyStaticMethod()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Type_Related_Static_Methods()
 		{
 			var target = new Interpreter()

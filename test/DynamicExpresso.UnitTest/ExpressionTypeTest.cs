@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class ExpressionTypeTest
 	{
-		[TestMethod]
+		[Test]
 		public void If_no_expression_type_is_specified_the_return_type_is_inferred()
 		{
 			var target = new Interpreter();
@@ -17,7 +17,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(object), target.Parse("null").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void If_expression_type_doesn_t_match_a_conversion_is_performed_when_possible()
 		{
 			var target = new Interpreter();
@@ -29,7 +29,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual((double)213, lambda.Invoke());
 		}
 
-		[TestMethod]
+		[Test]
 		public void If_expression_type_doesn_t_match_a_conversion_is_performed_eventually_loosing_precision()
 		{
 			var target = new Interpreter();
@@ -41,7 +41,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual((int)213.46, lambda.Invoke());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Can_convert_a_null_expression_to_any_reference_type()
 		{
 			var target = new Interpreter();
@@ -55,7 +55,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsNull(lambda.Invoke());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Can_convert_a_null_expression_to_any_nullable_type()
 		{
 			var target = new Interpreter();
@@ -69,7 +69,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsNull(lambda.Invoke());
 		}
 
-		[TestMethod]
+		[Test]
 		public void A_nullable_type_can_be_a_value_or_null()
 		{
 			var target = new Interpreter();
@@ -83,7 +83,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(4651, lambda.Invoke());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Typed_eval()
 		{
 			var target = new Interpreter();

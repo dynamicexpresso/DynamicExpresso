@@ -1,15 +1,15 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class CollectionHelperTests
 	{
-		[TestMethod]
+		[Test]
 		public void Where()
 		{
 			var target = new Interpreter();

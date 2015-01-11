@@ -1,15 +1,15 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class GithubIssues
 	{
-		[TestMethod]
+		[Test]
 		public void GitHub_Issue_19()
 		{
 			var interpreter = new Interpreter();

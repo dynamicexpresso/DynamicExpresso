@@ -154,7 +154,7 @@ In the example below I generate a `Func<Customer, bool>` delegate that can be us
 		public char Gender { get; set; }
 	}
 
-	[TestMethod]
+	[Test]
 	public void Linq_Where()
 	{
 		var customers = new List<Customer> { 

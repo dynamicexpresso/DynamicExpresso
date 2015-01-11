@@ -1,12 +1,12 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class OperatorsTest
 	{
-		[TestMethod]
+		[Test]
 		public void Multiplicative_Operators()
 		{
 			var target = new Interpreter();
@@ -16,7 +16,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(7 % 3, target.Eval("7 % 3"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Additive_Operators()
 		{
 			var target = new Interpreter();
@@ -26,7 +26,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(1.0 - 0.5, target.Eval("1.0 - 0.5"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Unary_Operators()
 		{
 			var target = new Interpreter();
@@ -36,7 +36,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(false, target.Eval("!true"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Unary_Cast_Operator()
 		{
 			var target = new Interpreter();
@@ -50,7 +50,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual((double)84 + 9 * 8, target.Eval("(double)84 + 9 *8"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Numeric_Operators_Priority()
 		{
 			var target = new Interpreter();
@@ -59,7 +59,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(8 + 2 / 2, target.Eval("8 + 2 / 2"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Typeof_Operator()
 		{
 			var target = new Interpreter();
@@ -67,7 +67,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(string), target.Eval("typeof(string)"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Is_Operator()
 		{
 			object a = "string value";
@@ -82,7 +82,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(b is int, target.Eval("b is int"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void As_Operator()
 		{
 			object a = "string value";
@@ -97,7 +97,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(string), target.Parse("b as string").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Type_Operators()
 		{
 			var target = new Interpreter();
@@ -106,7 +106,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(string) == typeof(string), target.Eval("typeof(string) == typeof(string)"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void String_Concatenation()
 		{
 			var target = new Interpreter();
@@ -114,7 +114,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("ciao " + "mondo", target.Eval("\"ciao \" + \"mondo\""));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Numeric_Expression()
 		{
 			var target = new Interpreter();
@@ -126,7 +126,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(+(8 / (2 + 2)), target.Eval("+(8 / (2 + 2))"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Comparison_Operators()
 		{
 			var target = new Interpreter();
@@ -144,7 +144,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsFalse((bool)target.Eval("\"dav\" == \"jack\""));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Assignment_Operator_Equal()
 		{
 			var x = new TypeWithProperty();
@@ -187,7 +187,7 @@ namespace DynamicExpresso.UnitTest
 		}
 		class TypeWithProperty { public int Property1 { get; set; } public int Property2 { get; set; } }
 
-		[TestMethod]
+		[Test]
 		public void Can_compare_numeric_parameters_of_different_compatible_types()
 		{
 			var target = new Interpreter();
@@ -207,7 +207,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(true, target.Eval("x == 0", new Parameter("x", x6)));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Can_compare_enum_parameters()
 		{
 			var target = new Interpreter();
@@ -221,7 +221,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x != y, target.Eval("x != y", new Parameter("x", x), new Parameter("y", y)));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Logical_Operators()
 		{
 			var target = new Interpreter();
@@ -230,7 +230,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsFalse((bool)target.Eval("0 > 3 && 4 < 6"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void If_Operators()
 		{
 			var target = new Interpreter();
@@ -239,7 +239,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(10 < 3 ? "yes" : "no", target.Eval("10 < 3 ? \"yes\" : \"no\""));
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(ParseException))]
 		public void Operator_LessGreater_Is_Not_Supported()
 		{
@@ -248,7 +248,7 @@ namespace DynamicExpresso.UnitTest
 			target.Parse("5 <> 4");
 		}
 
-		[TestMethod]
+		[Test]
 		public void Implicit_conversion_operator_for_lambda()
 		{
 			var target = new Interpreter()
@@ -275,7 +275,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		[TestMethod]
+		[Test]
 		public void Can_use_overloaded_operators_on_struct()
 		{
 			var target = new Interpreter();
@@ -348,7 +348,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		[TestMethod]
+		[Test]
 		public void Can_use_overloaded_operators_on_class()
 		{
 			var target = new Interpreter();
@@ -421,7 +421,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(InvalidOperationException))]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_equal_operator()
 		{
@@ -434,7 +434,7 @@ namespace DynamicExpresso.UnitTest
 			target.Parse("x == y", new Parameter("y", y));
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(InvalidOperationException))]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_plus_operator()
 		{
@@ -447,7 +447,7 @@ namespace DynamicExpresso.UnitTest
 			target.Parse("x + y", new Parameter("y", y));
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(InvalidOperationException))]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_not_operator()
 		{
@@ -461,11 +461,8 @@ namespace DynamicExpresso.UnitTest
 
 		struct TypeWithoutOverloadedBinaryOperators
 		{
-			private int _value;
-
 			public TypeWithoutOverloadedBinaryOperators(int value)
 			{
-				_value = value;
 			}
 		}
 	}

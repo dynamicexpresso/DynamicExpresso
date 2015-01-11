@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Collections;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class ReferencedTypesPropertyTest
 	{
-		[TestMethod]
+		[Test]
 		public void Getting_a_list_of_known_types()
 		{
 			var target = new Interpreter();
@@ -19,7 +19,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsTrue(target.ReferencedTypes.Any(p => p.Name == "Guid"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Known_types_should_be_empty_with_InterpreterOptions_None()
 		{
 			var target = new Interpreter(InterpreterOptions.None);
@@ -27,7 +27,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsFalse(target.ReferencedTypes.Any());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Registering_custom_known_types()
 		{
 			var target = new Interpreter(InterpreterOptions.None);

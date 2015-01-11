@@ -1,13 +1,13 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Linq.Expressions;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class TypedDelegatesTest
 	{
-		[TestMethod]
+		[Test]
 		public void Parse_To_a_Delegate()
 		{
 			var target = new Interpreter();
@@ -17,7 +17,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(Math.Pow(10, 2) + 5, lambda(10, 2));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parse_To_a_Delegate_With_No_Parameters()
 		{
 			var target = new Interpreter();
@@ -27,7 +27,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(50, func());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parse_To_a_Delegate_With_One_Parameter()
 		{
 			var target = new Interpreter();
@@ -38,7 +38,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(9, func("123456879"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parse_To_a_Delegate_With_One_Parameter_With_Custom_Name()
 		{
 			var target = new Interpreter();
@@ -50,7 +50,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(9, func("123456879"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parse_To_a_Delegate_With_Two_Parameters()
 		{
 			var target = new Interpreter();
@@ -61,7 +61,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(50, func(5, 10));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parse_To_a_Delegate_With_Two_Parameters_With_Custom_Name()
 		{
 			var target = new Interpreter();
@@ -73,7 +73,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(50, func(5, 10));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Parse_To_a_Custom_Delegate()
 		{
 			var target = new Interpreter();
@@ -87,13 +87,13 @@ namespace DynamicExpresso.UnitTest
 		delegate int MyCustomDelegate(int x, string y);
 
 		[ExpectedException(typeof(ParseException))]
-		[TestMethod]
+		[Test]
 		public void Return_Type_Mismatch_Cause_An_Exception()
 		{
 			var target = new Interpreter();
 
 			// expected a double but I return a string
-			var func = target.Parse<Func<double>>("\"ciao\"");
+			target.Parse<Func<double>>("\"ciao\"");
 		}
 	}
 }

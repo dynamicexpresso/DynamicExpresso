@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Collections.Generic;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class ExtensionsMethodsTest
 	{
-		[TestMethod]
+		[Test]
 		public void Invoke_extension_method()
 		{
 			var x = new MyClass();
@@ -21,7 +21,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.HelloWorldWithParam(DateTime.Now), target.Eval("x.HelloWorldWithParam(DateTime.Now)"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Invoke_generic_extension_method()
 		{
 			var x = new MyClass();
@@ -33,7 +33,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.GenericHello(), target.Eval("x.GenericHello()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Invoke_generic_parameter_extension_method()
 		{
 			var x = new MyClass[0];
@@ -45,7 +45,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.GenericParamHello(), target.Eval("x.GenericParamHello()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Invoke_generic_with_2_parameters_and_output_extension_method()
 		{
 			var x = new Dictionary<string, MyClass>();
@@ -58,7 +58,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.GenericWith2Params(), target.Eval("x.GenericWith2Params()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Invoke_generic_mixed_parameter_extension_method()
 		{
 			var x = new Dictionary<string, MyClass>();

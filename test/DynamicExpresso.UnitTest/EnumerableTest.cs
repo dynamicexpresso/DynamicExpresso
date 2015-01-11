@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Collections;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class EnumerableTest
 	{
-		[TestMethod]
+		[Test]
 		public void Invoke_enumerable_extensions()
 		{
 			var x = new int[] { 10, 30, 4 };

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Collections;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class IdentifiersTest
 	{
-		[TestMethod]
+		[Test]
 		public void Default_identifiers_are_saved_inside_the_interpreter()
 		{
 			var target = new Interpreter();
@@ -19,7 +19,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsTrue(target.Identifiers.Any(p => p.Name == "null"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Registered_custom_identifiers_are_saved_inside_the_interpreter()
 		{
 			var target = new Interpreter();
@@ -29,7 +29,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsTrue(target.Identifiers.Any(p => p.Name == "x"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Getting_the_list_of_used_identifiers()
 		{
 			var target = new Interpreter()

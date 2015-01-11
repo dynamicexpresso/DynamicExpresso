@@ -1,14 +1,14 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Threading;
 using System.Globalization;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class LiteralsTest
 	{
-		[TestMethod]
+		[Test]
 		public void Alphabetic_Literals()
 		{
 			var target = new Interpreter();
@@ -17,7 +17,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual('c', target.Eval("'c'"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void True_False_Literals()
 		{
 			var target = new Interpreter();
@@ -26,7 +26,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsFalse((bool)target.Eval("false"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Numeric_Literals()
 		{
 			var target = new Interpreter();
@@ -44,7 +44,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(45.232m, target.Eval("45.232m"));
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(ParseException))]
 		public void Invalid_Numeric_Literals_multiple_dots()
 		{
@@ -53,7 +53,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("45.5.456");
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(ParseException))]
 		public void Invalid_Numeric_Literals_wrong_suffix_x()
 		{
@@ -62,7 +62,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("45.5x");
 		}
 
-		[TestMethod]
+		[Test]
 		public void Calling_System_Method_On_Literals()
 		{
 			var target = new Interpreter();
@@ -83,7 +83,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual((-0.5).GetType(), target.Eval("-0.5.GetType()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Long_strings()
 		{
 			var target = new Interpreter();
@@ -92,21 +92,21 @@ namespace DynamicExpresso.UnitTest
 				target.Eval("\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\""));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Null_Keyword()
 		{
 			var target = new Interpreter();
 			Assert.IsNull(target.Eval("null"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Empty_String()
 		{
 			var target = new Interpreter();
 			Assert.AreEqual(string.Empty, target.Eval("\"\""));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Whitespace_String()
 		{
 			var target = new Interpreter();
@@ -116,7 +116,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(" \r\n", target.Eval("\" \r\n\""));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Single_quote_inside_a_string()
 		{
 			var target = new Interpreter();
@@ -124,7 +124,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("l'aquila", target.Eval("\"l'aquila\""));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Non_Ascii_Chars()
 		{
 			var target = new Interpreter();
@@ -141,7 +141,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		[TestMethod]
+		[Test]
 		public void Escape_chars_in_char()
 		{
 			var target = new Interpreter();
@@ -159,7 +159,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual('\v', target.Eval("'\\v'"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Escape_chars_in_string()
 		{
 			var target = new Interpreter();
@@ -180,7 +180,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(ParseException))]
-		[TestMethod]
+		[Test]
 		public void Invalid_Escape_char()
 		{
 			var target = new Interpreter();
@@ -189,7 +189,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(ParseException))]
-		[TestMethod]
+		[Test]
 		public void Invalid_Escape_string()
 		{
 			var target = new Interpreter();
@@ -198,7 +198,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(ParseException))]
-		[TestMethod]
+		[Test]
 		public void Character_Literal_Must_be_closed()
 		{
 			var target = new Interpreter();
@@ -207,7 +207,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(ParseException))]
-		[TestMethod]
+		[Test]
 		public void String_Literal_Must_be_closed()
 		{
 			var target = new Interpreter();
@@ -216,7 +216,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(ParseException))]
-		[TestMethod]
+		[Test]
 		public void Character_Literal_Must_one_char_maximum()
 		{
 			var target = new Interpreter();
@@ -225,7 +225,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[ExpectedException(typeof(ParseException))]
-		[TestMethod]
+		[Test]
 		public void Character_Literal_Must_one_char_minimum()
 		{
 			var target = new Interpreter();
@@ -233,7 +233,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("''");
 		}
 
-		[TestMethod]
+		[Test]
 		public void Should_Understand_ReturnType_Of_Literals()
 		{
 			var target = new Interpreter();
@@ -254,7 +254,7 @@ namespace DynamicExpresso.UnitTest
 
 		}
 
-		[TestMethod]
+		[Test]
 		public void Thread_Culture_WithUS_Culture_is_ignored_for_literals()
 		{
 			var originalCulture = Thread.CurrentThread.CurrentCulture;
@@ -264,7 +264,7 @@ namespace DynamicExpresso.UnitTest
 			Thread.CurrentThread.CurrentCulture = originalCulture;
 		}
 
-		[TestMethod]
+		[Test]
 		public void Thread_Culture_WithIT_Culture_is_ignored_for_literals()
 		{
 			var originalCulture = Thread.CurrentThread.CurrentCulture;

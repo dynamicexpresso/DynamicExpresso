@@ -1,15 +1,15 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class TypesTest
 	{
-		[TestMethod]
+		[Test]
 		public void Default_Types()
 		{
 			var target = new Interpreter();
@@ -50,7 +50,7 @@ namespace DynamicExpresso.UnitTest
 				Assert.AreEqual(t.Value, target.Eval(string.Format("typeof({0})", t.Key)));
 		}
 
-		[TestMethod]
+		[Test]
 		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Load_interpreter_without_any_configuration_doesn_t_recognize_types()
 		{
@@ -59,7 +59,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("typeof(string)");
 		}
 
-		[TestMethod]
+		[Test]
 		public void Custom_Types()
 		{
 			var target = new Interpreter()
@@ -69,7 +69,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Reference_the_same_type_multiple_times_doesn_t_have_effect()
 		{
 			var target = new Interpreter()
@@ -83,7 +83,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void References_can_be_case_insensitive()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
@@ -96,7 +96,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(string.Empty, target.Eval("STRING.Empty"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Custom_Type_Constructor()
 		{
 			var target = new Interpreter()
@@ -106,7 +106,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(new MyDataContract(44, 88).Name, target.Eval("new MyDataContract(44 , 88).Name"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Custom_Type_Alias()
 		{
 			var target = new Interpreter()
@@ -115,7 +115,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(MyDataContract), target.Parse("new DC(\"davide\")").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Custom_Enum()
 		{
 			var target = new Interpreter()
@@ -125,7 +125,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(CalendarAlgorithmType.SolarCalendar, target.Eval("CalendarAlgorithmType.SolarCalendar"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Enum_are_case_sensitive_by_default()
 		{
 			var target = new Interpreter()
@@ -135,7 +135,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(EnumCaseSensitive.TEST, target.Eval("EnumCaseSensitive.TEST"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Getting_the_list_of_used_types()
 		{
 			var target = new Interpreter();

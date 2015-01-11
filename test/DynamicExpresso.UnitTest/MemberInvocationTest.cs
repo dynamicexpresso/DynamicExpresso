@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class MemberInvocationTest
 	{
-		[TestMethod]
+		[Test]
 		public void Method_Property_Field_basic_test()
 		{
 			var x = new MyTestService();
@@ -19,7 +19,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.AField, target.Eval("x.AField"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Indexer()
 		{
 			var target = new Interpreter();
@@ -34,7 +34,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(y[2].ToString(), target.Eval("y[2].ToString()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void String_format()
 		{
 			var target = new Interpreter();
@@ -43,7 +43,7 @@ namespace DynamicExpresso.UnitTest
 											target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today.ToString())"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void String_format_with_type_conversion()
 		{
 			var target = new Interpreter();
@@ -52,7 +52,7 @@ namespace DynamicExpresso.UnitTest
 											target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today)"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void String_format_with_empty_string()
 		{
 			var target = new Interpreter();
@@ -61,7 +61,7 @@ namespace DynamicExpresso.UnitTest
 											target.Eval("string.Format(\"ciao {0}\", \"\")"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void String_format_With_Object_Params()
 		{
 			var target = new Interpreter();
@@ -70,7 +70,7 @@ namespace DynamicExpresso.UnitTest
 											target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today)"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Methods_Fields_And_Properties_By_Default_Are_Case_Sensitive()
 		{
 			var target = new Interpreter();
@@ -88,7 +88,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.AFIELD, target.Eval("x.AFIELD", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Methods_Fields_And_Properties_Can_Be_Case_Insensitive()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
@@ -106,7 +106,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.AField, target.Eval("x.AFIELD", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Void_Method()
 		{
 			var service = new MyTestService();
@@ -120,7 +120,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(void), target.Parse("service.VoidMethod()").ReturnType);
 		}
 
-		[TestMethod]
+		[Test]
 		public void ToString_Method_on_a_custom_type()
 		{
 			var service = new MyTestService();
@@ -130,7 +130,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("DynamicExpresso.UnitTest.MemberInvocationTest+MyTestService", target.Eval("service.ToString()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void ToString_Method_on_a_custom_interface_type()
 		{
 			MyTestInterface service = new MyTestInterfaceImp();
@@ -140,14 +140,14 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("DynamicExpresso.UnitTest.MemberInvocationTest+MyTestInterfaceImp", target.Eval("service.ToString()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void ToString_Method_on_a_primitive_type()
 		{
 			var target = new Interpreter();
 			Assert.AreEqual("3", target.Eval("(3).ToString()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void GetType_Method_on_a_custom_type()
 		{
 			var service = new MyTestService();
@@ -157,7 +157,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(MyTestService), target.Eval("service.GetType()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void GetType_Method_on_a_custom_interface_type()
 		{
 			MyTestInterface service = new MyTestInterfaceImp();
@@ -167,14 +167,14 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(MyTestInterfaceImp), target.Eval("service.GetType()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void GetType_Method_on_a_primitive_type()
 		{
 			var target = new Interpreter();
 			Assert.AreEqual((3).GetType(), target.Eval("(3).GetType()"));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Method_with_nullable_param()
 		{
 			var target = new Interpreter();
@@ -196,7 +196,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.MethodWithNullableParam(y, null), target.Eval("x.MethodWithNullableParam(y, null)", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Method_with_generic_param()
 		{
 			var target = new Interpreter();
@@ -223,7 +223,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.MethodWithGenericParam(y, w), target.Eval("x.MethodWithGenericParam(y, w)", parameters));
 		}
 
-		[TestMethod]
+		[Test]
 		public void Method_with_params_array()
 		{
 			var target = new Interpreter();
@@ -244,7 +244,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(4, x.MethodWithParamsArrayCalls);
 		}
 
-		[TestMethod]
+		[Test]
 		public void ParamsArray_methods_are_not_called_when_there_is_an_exact_method_match()
 		{
 			var target = new Interpreter();

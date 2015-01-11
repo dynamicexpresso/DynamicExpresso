@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 using System.Collections.Generic;
 using System.Collections;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestClass]
+	[TestFixture]
 	public class DetectIdentifiersTest
 	{
-		[TestMethod]
+		[Test]
 		public void Detect_identifiers_empty()
 		{
 			var target = new Interpreter();
@@ -21,7 +21,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(0, detectedIdentifiers.Types.Count());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Detect_identifiers_null()
 		{
 			var target = new Interpreter();
@@ -33,7 +33,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(0, detectedIdentifiers.Types.Count());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Detect_unknown_identifiers()
 		{
 			var target = new Interpreter();
@@ -45,7 +45,7 @@ namespace DynamicExpresso.UnitTest
 				detectedIdentifiers.UnknownIdentifiers.ToArray());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Should_detect_various_format_of_identifiers()
 		{
 			var target = new Interpreter();
@@ -62,7 +62,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		[TestMethod]
+		[Test]
 		public void An_Unknown_Identifier_used_multiple_times_is_detected_only_once()
 		{
 			var target = new Interpreter();
@@ -74,7 +74,7 @@ namespace DynamicExpresso.UnitTest
 				detectedIdentifiers.UnknownIdentifiers.ToArray());
 		}
 
-		[TestMethod]
+		[Test]
 		public void With_case_insensitive_An_Unknown_Identifier_used_multiple_times_is_detected_only_once()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
@@ -86,7 +86,7 @@ namespace DynamicExpresso.UnitTest
 				detectedIdentifiers.UnknownIdentifiers.ToArray());
 		}
 
-		[TestMethod]
+		[Test]
 		public void A_Known_Identifier_used_multiple_times_is_detected_only_once()
 		{
 			var target = new Interpreter()
@@ -99,7 +99,7 @@ namespace DynamicExpresso.UnitTest
 				detectedIdentifiers.Identifiers.Select(p => p.Name).ToArray());
 		}
 
-		[TestMethod]
+		[Test]
 		public void With_case_insensitive_A_Known_Identifier_used_multiple_times_is_detected_only_once()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
@@ -112,7 +112,7 @@ namespace DynamicExpresso.UnitTest
 				detectedIdentifiers.Identifiers.Select(p => p.Name).ToArray());
 		}
 
-		[TestMethod]
+		[Test]
 		public void A_Known_Type_used_multiple_times_is_detected_only_once()
 		{
 			var target = new Interpreter();
@@ -124,7 +124,7 @@ namespace DynamicExpresso.UnitTest
 				detectedIdentifiers.Types.Select(p => p.Name).ToArray());
 		}
 
-		[TestMethod]
+		[Test]
 		public void With_case_insensitive_A_Known_Type_used_multiple_times_is_detected_only_once()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
@@ -136,7 +136,7 @@ namespace DynamicExpresso.UnitTest
 				detectedIdentifiers.Types.Select(p => p.Name).ToArray());
 		}
 
-		[TestMethod]
+		[Test]
 		public void Detect_known_identifiers_variables()
 		{
 			var target = new Interpreter()
@@ -150,7 +150,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("y", detectedIdentifiers.Identifiers.ElementAt(1).Name);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Detect_known_identifiers_types()
 		{
 			var target = new Interpreter();
@@ -162,7 +162,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(string), detectedIdentifiers.Types.ElementAt(0).Type);
 		}
 
-		[TestMethod]
+		[Test]
 		public void Detect_identifiers_inside_other_expressions()
 		{
 			var testCases = new[] {
