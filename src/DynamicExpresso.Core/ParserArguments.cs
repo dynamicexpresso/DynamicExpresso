@@ -12,7 +12,7 @@ namespace DynamicExpresso
 	{
 		Dictionary<string, Parameter> _declaredParameters;
 
-		HashSet<Parameter> _usedParameters = new HashSet<Parameter>();
+		List<Parameter> _usedParameters = new List<Parameter>();
 		HashSet<ReferenceType> _usedTypes = new HashSet<ReferenceType>();
 		HashSet<Identifier> _usedIdentifiers = new HashSet<Identifier>();
 
@@ -97,14 +97,26 @@ namespace DynamicExpresso
 			Parameter parameter;
 			if (_declaredParameters.TryGetValue(name, out parameter))
 			{
-				_usedParameters.Add(parameter);
-				expression = parameter.Expression;
+                AddToUsedParameters(parameter);
+                expression = parameter.Expression;
 				return true;
 			}
 
 			expression = null;
 			return false;
 		}
+
+        private void AddToUsedParameters(Parameter parameter)
+        {
+            if (!_usedParameters.Contains(parameter))
+            {
+                var parametersNamesList = _parameters.Keys.ToList();
+                _usedParameters.Add(parameter);
+                _usedParameters.Sort((p1, p2) =>
+                    (parametersNamesList.IndexOf(p1.Name) > parametersNamesList.IndexOf(p2.Name)) ? 1 : -1
+                );
+            }
+        }
 
 		public IEnumerable<MethodInfo> GetExtensionMethods(string methodName)
 		{

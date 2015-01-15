@@ -318,6 +318,21 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("y", lambda.UsedParameters.ElementAt(1).Name);
 		}
 
+        [Test]
+        public void When_lambda_is_invoked_input_parameters_must_follow_in_the_same_order_in_which_they_were_transmitted_to_the_interpreter()
+        {
+            var target = new Interpreter();
+
+            var parameters = new[]{
+                            new Parameter("x", typeof(int)),
+                            new Parameter("y", typeof(int))
+                            };
+
+            var lambda = target.Parse("y-x", parameters);
+
+            Assert.AreEqual(4, lambda.Invoke(1, 5));
+        }
+
 		[Test]
 		public void When_parsing_an_expression_to_a_delegate_the_delegate_parameters_are_respected_also_if_the_expression_doesnt_use_it()
 		{
