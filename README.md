@@ -443,6 +443,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- Added Interpreter.ParseAsExpression to generate Lambda Expression.
 	- Marked some methods as obsolete.
 	- FIX: Now you can specify parameter names with a different case when using case insensitive with delegate.
+	- FIX: Resolve bug about expected order of parameter when call Lambda.Invoke(params object[] args), thanks to Alex141
 
 - 1.1.0
 
