@@ -45,7 +45,7 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 
 - Expressions can be written using a subset of C# syntax (see Syntax section for more information)
 - Support for variables and parameters
-- Can generate .NET delegate from expressions
+- Can generate delegates or lambda expression
 - Full suite of unit tests
 - Good performance compared to other similar projects
 - Partial support for generic, params array and extension methods
@@ -144,7 +144,7 @@ You can reference any other custom .NET type by using `Interpreter.Reference` me
 
 ### Generate dynamic delegates
 
-You can use the `Interpreter.Parse<TDelegate>` method to directly parse an expression into a .NET delegate type that can be normally invoked. 
+You can use the `Interpreter.ParseAsDelegate<TDelegate>` method to directly parse an expression into a .NET delegate type that can be normally invoked. 
 In the example below I generate a `Func<Customer, bool>` delegate that can be used in a LINQ where expression.
 
 	class Customer
@@ -174,6 +174,40 @@ In the example below I generate a `Func<Customer, bool>` delegate that can be us
 	}
 
 This is the preferred way to parse an expression that you known at compile time what parameters can accept and what value must return.
+
+### Generate lambda expressions
+
+You can use the `Interpreter.ParseAsExpression<TDelegate>` 
+	method to directly parse an expression into a .NET lambda expression (`Expression<TDelegate>`). 
+
+In the example below I generate a `Expression<Func<Customer, bool>>` expression that can be used in a Queryable LINQ where expression 
+	or in any other place where an expression is required. Like Entity Framework or other similar libraries.
+
+	class Customer
+	{
+		public string Name { get; set; }
+		public int Age { get; set; }
+		public char Gender { get; set; }
+	}
+
+	[Test]
+	public void Linq_Queryable_Expression_Where()
+	{
+		IQueryable<Customer> customers = (new List<Customer> { 
+			new Customer() { Name = "David", Age = 31, Gender = 'M' },
+			new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
+			new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
+			new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
+			new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
+		}).AsQueryable();
+
+		string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
+
+		var interpreter = new Interpreter();
+		Expression<Func<Customer, bool>> expression = interpreter.ParseAsExpression<Func<Customer, bool>>(whereExpression, "customer");
+
+		Assert.AreEqual(1, customers.Where(expression).Count());
+	}
 
 
 ## Syntax and operators

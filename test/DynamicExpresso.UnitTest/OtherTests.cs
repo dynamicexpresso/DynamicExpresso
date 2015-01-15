@@ -131,6 +131,25 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Linq_Queryable_Expression_Where()
+		{
+			IQueryable<Customer> customers = (new List<Customer> { 
+				new Customer() { Name = "David", Age = 31, Gender = 'M' },
+				new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
+				new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
+				new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
+				new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
+			}).AsQueryable();
+
+			string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
+
+			var interpreter = new Interpreter();
+			Expression<Func<Customer, bool>> expression = interpreter.ParseAsExpression<Func<Customer, bool>>(whereExpression, "customer");
+
+			Assert.AreEqual(1, customers.Where(expression).Count());
+		}
+
+		[Test]
 		public void Multiple_Parentheses_Math_Expression()
 		{
 			var interpreter = new Interpreter();
