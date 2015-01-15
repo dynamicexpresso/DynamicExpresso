@@ -63,7 +63,7 @@ namespace DynamicExpresso
 
 		public object Invoke()
 		{
-			return Invoke(new object[0]);
+			return InvokeWithUsedParameters(new object[0]);
 		}
 
 		public object Invoke(params Parameter[] parameters)
@@ -79,14 +79,43 @@ namespace DynamicExpresso
 				select actualParameter.Value)
 				.ToArray();
 
-			return Invoke(args);
+			return InvokeWithUsedParameters(args);
 		}
 
+		/// <summary>
+		/// Invoke the expression with the given parameters values.
+		/// </summary>
+		/// <param name="args">Order of parameters must be the same of the parameters used during parse (DeclaredParameters).</param>
+		/// <returns></returns>
 		public object Invoke(params object[] args)
+		{
+			var parameters = new List<Parameter>();
+			var declaredParameters = DeclaredParameters.ToArray();
+
+			if (args != null)
+			{
+				if (declaredParameters.Length != args.Length)
+					throw new InvalidOperationException("Arguments count mismatch.");
+
+				for (var i = 0; i < args.Length; i++)
+				{
+					var parameter = new Parameter(
+						declaredParameters[i].Name,
+						declaredParameters[i].Type,
+						args[i]);
+
+					parameters.Add(parameter);
+				}
+			}
+
+			return Invoke(parameters);
+		}
+
+		private object InvokeWithUsedParameters(object[] orderedArgs)
 		{
 			try
 			{
-				return _delegate.DynamicInvoke(args);
+				return _delegate.DynamicInvoke(orderedArgs);
 			}
 			catch (TargetInvocationException exc)
 			{
@@ -108,7 +137,7 @@ namespace DynamicExpresso
 		/// <summary>
 		/// Generate the given delegate by compiling the lambda expression.
 		/// </summary>
-		/// <typeparam name="TDelegate">The delegate to generate. Delegate parameters must match the one defined when creating the expression.</typeparam>
+		/// <typeparam name="TDelegate">The delegate to generate. Delegate parameters must match the one defined when creating the expression, see UsedParameters.</typeparam>
 		public TDelegate Compile<TDelegate>()
 		{
 			var lambdaExpression = LambdaExpression<TDelegate>();
@@ -126,23 +155,10 @@ namespace DynamicExpresso
 		/// Generate a lambda expression.
 		/// </summary>
 		/// <returns>The lambda expression.</returns>
-		/// <typeparam name="TDelegate">The delegate to generate. Delegate parameters must match the one defined when creating the expression.</typeparam>
+		/// <typeparam name="TDelegate">The delegate to generate. Delegate parameters must match the one defined when creating the expression, see UsedParameters.</typeparam>
 		public Expression<TDelegate> LambdaExpression<TDelegate>()
 		{
 			return Expression.Lambda<TDelegate>(_expression, DeclaredParameters.Select(p => p.Expression).ToArray());
 		}
-
-		/*
-		/// <summary>
-		/// Generate a lambda expression with the given delegate and allowing to specify parameters.
-		/// </summary>
-		/// <returns>The lambda expression.</returns>
-		/// <param name="parameters">Parameters must match the one defined in the TDelegate and in the expressino parsed.</param>
-		/// <typeparam name="TDelegate">The delegate to generate.</typeparam>
-		public Expression<TDelegate> LambdaExpression<TDelegate>(IEnumerable<Parameter> parameters)
-		{
-			return Expression.Lambda<TDelegate>(_expression, parameters.Select(p => p.Expression).ToArray());
-		}
-		*/
 	}
 }
