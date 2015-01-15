@@ -18,11 +18,13 @@ namespace DynamicExpresso.Parsing
 		{
 			CaseInsensitive = caseInsensitive;
 
-			SettingsKeyComparer = CaseInsensitive ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
+			KeyComparer = CaseInsensitive ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
 
-			_identifiers = new Dictionary<string, Identifier>(SettingsKeyComparer);
+			KeyComparison = CaseInsensitive ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
 
-			_knownTypes = new Dictionary<string, ReferenceType>(SettingsKeyComparer);
+			_identifiers = new Dictionary<string, Identifier>(KeyComparer);
+
+			_knownTypes = new Dictionary<string, ReferenceType>(KeyComparer);
 
 			_extensionMethods = new List<MethodInfo>();
 		}
@@ -48,7 +50,13 @@ namespace DynamicExpresso.Parsing
 			private set;
 		}
 
-		public IEqualityComparer<string> SettingsKeyComparer
+		public StringComparison KeyComparison
+		{
+			get;
+			private set;
+		}
+
+		public IEqualityComparer<string> KeyComparer
 		{
 			get;
 			private set;

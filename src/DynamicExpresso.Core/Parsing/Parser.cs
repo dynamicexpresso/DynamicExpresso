@@ -46,8 +46,8 @@ namespace DynamicExpresso.Parsing
 		{
 			_arguments = arguments;
 
-			_bindingCase = arguments.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
-			_memberFilterCase = arguments.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
+			_bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
+			_memberFilterCase = arguments.Settings.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
 
 			_expressionText = arguments.ExpressionText ?? string.Empty;
 			_expressionTextLength = _expressionText.Length;

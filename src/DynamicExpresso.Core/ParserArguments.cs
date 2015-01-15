@@ -10,25 +10,41 @@ namespace DynamicExpresso
 {
 	internal class ParserArguments
 	{
-		ParserSettings _settings;
-		Dictionary<string, Parameter> _parameters;
+		Dictionary<string, Parameter> _declaredParameters;
 
 		HashSet<Parameter> _usedParameters = new HashSet<Parameter>();
 		HashSet<ReferenceType> _usedTypes = new HashSet<ReferenceType>();
 		HashSet<Identifier> _usedIdentifiers = new HashSet<Identifier>();
 
-		public ParserArguments(string expressionText, ParserSettings settings)
+		public ParserArguments(
+			string expressionText, 
+			ParserSettings settings, 
+			Type expressionReturnType,
+			IEnumerable<Parameter> declaredParameters
+		)
 		{
 			ExpressionText = expressionText;
-			ExpressionReturnType = typeof(void);
+			ExpressionReturnType = expressionReturnType;
 
-			_settings = settings;
-			_parameters = new Dictionary<string, Parameter>(settings.SettingsKeyComparer);
+			Settings = settings;
+			_declaredParameters = new Dictionary<string, Parameter>(settings.KeyComparer);
+			foreach (var pe in declaredParameters)
+			{
+				try
+				{
+					_declaredParameters.Add(pe.Name, pe);
+				}
+				catch (ArgumentException)
+				{
+					throw new DuplicateParameterException(pe.Name);
+				}
+			}
 		}
 
-		public bool CaseInsensitive { get { return _settings.CaseInsensitive; } }
-		public string ExpressionText { get; set; }
-		public Type ExpressionReturnType { get; set; }
+		public ParserSettings Settings { get; private set;}
+		public string ExpressionText { get; private set; }
+		public Type ExpressionReturnType { get; private set; }
+		public IEnumerable<Parameter> DeclaredParameters { get { return _declaredParameters.Values; } }
 
 		public IEnumerable<Parameter> UsedParameters
 		{
@@ -48,7 +64,7 @@ namespace DynamicExpresso
 		public bool TryGetKnownType(string name, out Type type)
 		{
 			ReferenceType reference;
-			if (_settings.KnownTypes.TryGetValue(name, out reference))
+			if (Settings.KnownTypes.TryGetValue(name, out reference))
 			{
 				_usedTypes.Add(reference);
 				type = reference.Type;
@@ -62,7 +78,7 @@ namespace DynamicExpresso
 		public bool TryGetIdentifier(string name, out Expression expression)
 		{
 			Identifier identifier;
-			if (_settings.Identifiers.TryGetValue(name, out identifier))
+			if (Settings.Identifiers.TryGetValue(name, out identifier))
 			{
 				_usedIdentifiers.Add(identifier);
 				expression = identifier.Expression;
@@ -73,10 +89,13 @@ namespace DynamicExpresso
 			return false;
 		}
 
+		/// <summary>
+		/// Get the parameter and mark is as used.
+		/// </summary>
 		public bool TryGetParameters(string name, out ParameterExpression expression)
 		{
 			Parameter parameter;
-			if (_parameters.TryGetValue(name, out parameter))
+			if (_declaredParameters.TryGetValue(name, out parameter))
 			{
 				_usedParameters.Add(parameter);
 				expression = parameter.Expression;
@@ -89,27 +108,7 @@ namespace DynamicExpresso
 
 		public IEnumerable<MethodInfo> GetExtensionMethods(string methodName)
 		{
-			return _settings.ExtensionMethods.Where(p => p.Name == methodName);
-		}
-
-		public void AddParameter(Parameter parameter)
-		{
-			try
-			{
-				_parameters.Add(parameter.Name, parameter);
-			}
-			catch (ArgumentException)
-			{
-				throw new DuplicateParameterException(parameter.Name);
-			}
-		}
-
-		public void AddParameters(IEnumerable<Parameter> parameters)
-		{
-			foreach (Parameter pe in parameters)
-			{
-				AddParameter(pe);
-			}
+			return Settings.ExtensionMethods.Where(p => p.Name == methodName);
 		}
 	}
 }

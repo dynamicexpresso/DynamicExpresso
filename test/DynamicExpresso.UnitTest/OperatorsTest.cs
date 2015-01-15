@@ -254,7 +254,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 					.SetVariable("x", new TypeWithImplicitConversion(10));
 
-			var func = target.Parse<Func<int>>("x");
+			var func = target.ParseAsDelegate<Func<int>>("x");
 			int val = func();
 
 			Assert.AreEqual(10, val);

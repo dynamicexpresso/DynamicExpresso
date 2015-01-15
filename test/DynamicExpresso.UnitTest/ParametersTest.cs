@@ -175,6 +175,30 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Parameters_cannot_be_parsed_with_one_case_and_invoked_in_another_case()
+		{
+			var target = new Interpreter();
+
+			double x = 2;
+
+			var lambda = target.Parse ("x", new Parameter ("x", x.GetType ()));
+
+			Assert.Throws<TargetParameterCountException>(() => lambda.Invoke(new Parameter("X", x)));
+		}
+
+		[Test]
+		public void Parameters_can_be_parsed_with_one_case_and_invoked_in_another_case_with_case_insensitive_option()
+		{
+			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
+
+			double x = 2;
+
+			var lambda = target.Parse ("x", new Parameter ("x", x.GetType ()));
+
+			Assert.AreEqual(x, lambda.Invoke(new Parameter("X", x)));
+		}
+
+		[Test]
 		public void Complex_parameters()
 		{
 			var target = new Interpreter();
@@ -267,9 +291,14 @@ namespace DynamicExpresso.UnitTest
 			var lambda = target.Parse("x + y", parameters);
 
 			// parameter 'z' is not used
-			Assert.AreEqual(2, lambda.Parameters.Count());
-			Assert.AreEqual("x", lambda.Parameters.ElementAt(0).Name);
-			Assert.AreEqual("y", lambda.Parameters.ElementAt(1).Name);
+			Assert.AreEqual(2, lambda.UsedParameters.Count());
+			Assert.AreEqual("x", lambda.UsedParameters.ElementAt(0).Name);
+			Assert.AreEqual("y", lambda.UsedParameters.ElementAt(1).Name);
+
+			Assert.AreEqual(3, lambda.DeclaredParameters.Count());
+			Assert.AreEqual("x", lambda.DeclaredParameters.ElementAt(0).Name);
+			Assert.AreEqual("y", lambda.DeclaredParameters.ElementAt(1).Name);
+			Assert.AreEqual("z", lambda.DeclaredParameters.ElementAt(2).Name);
 		}
 
 		[Test]
@@ -284,9 +313,9 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("x * y + x * y", parameters);
 
-			Assert.AreEqual(2, lambda.Parameters.Count());
-			Assert.AreEqual("x", lambda.Parameters.ElementAt(0).Name);
-			Assert.AreEqual("y", lambda.Parameters.ElementAt(1).Name);
+			Assert.AreEqual(2, lambda.UsedParameters.Count());
+			Assert.AreEqual("x", lambda.UsedParameters.ElementAt(0).Name);
+			Assert.AreEqual("y", lambda.UsedParameters.ElementAt(1).Name);
 		}
 
 		[Test]
@@ -294,7 +323,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var myDelegate = target.Parse<TestDelegate>("x + y");
+			var myDelegate = target.ParseAsDelegate<TestDelegate>("x + y");
 
 			// parameter 'z' is not used but the delegate accept it in any case without problem
 			Assert.AreEqual(3, myDelegate(1, 2, 123123));

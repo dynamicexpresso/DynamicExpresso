@@ -125,7 +125,7 @@ namespace DynamicExpresso.UnitTest
 			string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
 
 			var interpreter = new Interpreter();
-			Func<Customer, bool> dynamicWhere = interpreter.Parse<Func<Customer, bool>>(whereExpression, "customer");
+			Func<Customer, bool> dynamicWhere = interpreter.ParseAsDelegate<Func<Customer, bool>>(whereExpression, "customer");
 
 			Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
 		}

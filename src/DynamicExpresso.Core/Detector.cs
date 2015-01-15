@@ -24,7 +24,7 @@ namespace DynamicExpresso
 		{
 			expression = PrepareExpression(expression);
 
-			var unknownIdentifiers = new HashSet<string>(_settings.SettingsKeyComparer);
+			var unknownIdentifiers = new HashSet<string>(_settings.KeyComparer);
 			var knownIdentifiers = new HashSet<Identifier>();
 			var knownTypes = new HashSet<ReferenceType>();
 
@@ -72,7 +72,7 @@ namespace DynamicExpresso
 
 		bool IsReserverKeyword(string identifier)
 		{
-			return ParserConstants.RESERVED_KEYWORDS.Contains(identifier, _settings.SettingsKeyComparer);
+			return ParserConstants.RESERVED_KEYWORDS.Contains(identifier, _settings.KeyComparer);
 		}
 
 		bool IsKnownIdentifier(string identifier)

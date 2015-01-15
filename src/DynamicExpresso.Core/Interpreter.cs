@@ -275,6 +275,12 @@ namespace DynamicExpresso
 			return CreateLambda(expressionText, expressionType, parameters);
 		}
 
+		[Obsolete("Use ParseAsDelegate<TDelegate>(string, params string[])")]
+		public TDelegate Parse<TDelegate>(string expressionText, params string[] parametersNames)
+		{
+			return ParseAsDelegate<TDelegate> (expressionText, parametersNames);
+		}
+
 		/// <summary>
 		/// Parse a text expression and convert it into a delegate.
 		/// </summary>
@@ -283,13 +289,31 @@ namespace DynamicExpresso
 		/// <param name="parametersNames">Names of the parameters. If not specified the parameters names defined inside the delegate are used.</param>
 		/// <returns></returns>
 		/// <exception cref="ParseException"></exception>
-		public TDelegate Parse<TDelegate>(string expressionText, params string[] parametersNames)
+		public TDelegate ParseAsDelegate<TDelegate>(string expressionText, params string[] parametersNames)
+		{
+			var lambda = ParseAs<TDelegate> (expressionText, parametersNames);
+			return lambda.Compile<TDelegate>();
+		}
+
+		/// <summary>
+		/// Parse a text expression and convert it into a lambda expression.
+		/// </summary>
+		/// <typeparam name="TDelegate">Delegate to use</typeparam>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="parametersNames">Names of the parameters. If not specified the parameters names defined inside the delegate are used.</param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
+		public Expression<TDelegate> ParseAsExpression<TDelegate>(string expressionText, params string[] parametersNames)
+		{
+			var lambda = ParseAs<TDelegate> (expressionText, parametersNames);
+			return lambda.LambdaExpression<TDelegate>();
+		}
+
+		public Lambda ParseAs<TDelegate>(string expressionText, params string[] parametersNames)
 		{
 			var delegateInfo = ReflectionExtensions.GetDelegateInfo(typeof(TDelegate), parametersNames);
 
-			var lambda = CreateLambda(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
-
-			return lambda.Compile<TDelegate>(delegateInfo.Parameters);
+			return CreateLambda(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
 		}
 		#endregion
 
@@ -341,12 +365,11 @@ namespace DynamicExpresso
 		#region Private methods
 		Lambda CreateLambda(string expressionText, Type expressionType, Parameter[] parameters)
 		{
-			var arguments = new ParserArguments(expressionText, _settings)
-				{
-					ExpressionReturnType = expressionType
-				};
-
-			arguments.AddParameters(parameters);
+			var arguments = new ParserArguments (
+				                expressionText, 
+				                _settings,
+				                expressionType,
+				                parameters);
 
 			var expression = Parser.Parse(arguments);
 
@@ -368,7 +391,7 @@ namespace DynamicExpresso
 				throw new Exception("Detected identifiers doesn't match actual identifiers");
 			if (info.Types.Count() != lambda.Types.Count())
 				throw new Exception("Detected types doesn't match actual types");
-			if (info.UnknownIdentifiers.Count() != lambda.Parameters.Count())
+			if (info.UnknownIdentifiers.Count() != lambda.UsedParameters.Count())
 				throw new Exception("Detected unknown identifiers doesn't match actual parameters");
 		}
 #endif
