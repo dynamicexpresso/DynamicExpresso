@@ -436,6 +436,14 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
+- In progress
+
+	- Various refactoring
+	- Added Interpreter.ParseAsDelegate to generate delegates.
+	- Added Interpreter.ParseAsExpression to generate Lambda Expression.
+	- Marked some methods as obsolete.
+	- FIX: Now you can specify parameter names with a different case when using case insensitive with delegate.
+
 - 1.1.0
 
 	- Added support for equal assignement operator (<code>=</code>). [#24](https://github.com/davideicardi/DynamicExpresso/issues/24)
