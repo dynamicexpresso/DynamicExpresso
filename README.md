@@ -436,7 +436,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
-- In progress
+- 1.2.0
 
 	- Various refactoring
 	- Added Interpreter.ParseAsDelegate to generate delegates.
