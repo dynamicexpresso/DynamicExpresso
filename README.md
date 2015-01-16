@@ -2,12 +2,12 @@
 Dynamic Expresso
 ================
 
-Dynamic Expresso is an expression interpreter for simple C# statements.
-Dynamic Expresso embeds its own parsing logic, and really interprets C# statements by converting it to .NET delegates that can be invoked as any standard delegate.
-It doesn't generate assembly but it creates dynamic expressions/delegates on the fly. 
+Dynamic Expresso is an interpreter for simple C# statements.
+Dynamic Expresso embeds its own parsing logic, really interprets C# statements by converting it to .NET lambda expressions or delegates.
 
-Using Dynamic Expresso developers can create scriptable applications and execute .NET code without compilation. 
-Statements are written using a subset of C# language specifications. Global variables or parameters can be injected and used inside expressions.
+Using Dynamic Expresso developers can create scriptable applications, execute .NET code without compilation or create dynamic linq statements. 
+
+Statements are written using a subset of C# language specifications. Global variables or parameters can be injected and used inside expressions. It doesn't generate assembly but it creates an expression tree on the fly. 
 
 ![dynamic expresso workflow](https://raw.github.com/davideicardi/DynamicExpresso/master/docs/workflow.png "dynamic expresso workflow")
 
