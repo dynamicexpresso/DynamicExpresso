@@ -444,6 +444,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- Marked some methods as obsolete.
 	- FIX: Now you can specify parameter names with a different case when using case insensitive with delegate.
 	- FIX: Resolve bug about expected order of parameter when call Lambda.Invoke(params object[] args), thanks to Alex141
+	- Lambda.Invoke(params object[] args) now only accepts declared parameters, in previous version accepted used parameters. Basically if you parse an expresison with x and y parameters but you only use x you should pass in any case also y. This is because this function doesn't know the parameter names and cannot ensure. Other Invoke methods are not changed.
 
 - 1.1.0
 
