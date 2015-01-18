@@ -47,9 +47,11 @@
     <Compile Include="..\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AssignmentOperators.cs" />
     <Compile Include="Detector.cs" />
     <Compile Include="Exceptions\DynamicExpressoException.cs" />
     <Compile Include="Exceptions\ExceptionExtensions.cs" />
+    <Compile Include="Exceptions\AssignmentOperatorDisabledException.cs" />
     <Compile Include="Exceptions\NoApplicableMethodException.cs" />
     <Compile Include="Exceptions\DuplicateParameterException.cs" />
     <Compile Include="Exceptions\UnknownIdentifierException.cs" />

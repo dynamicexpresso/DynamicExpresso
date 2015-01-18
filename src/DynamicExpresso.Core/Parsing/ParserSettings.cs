@@ -27,6 +27,8 @@ namespace DynamicExpresso.Parsing
 			_knownTypes = new Dictionary<string, ReferenceType>(KeyComparer);
 
 			_extensionMethods = new List<MethodInfo>();
+
+			AssignmentOperators = AssignmentOperators.All;
 		}
 
 		public IDictionary<string, ReferenceType> KnownTypes
@@ -62,5 +64,10 @@ namespace DynamicExpresso.Parsing
 			private set;
 		}
 
+		public AssignmentOperators AssignmentOperators
+		{
+			get;
+			set;
+		}
 	}
 }

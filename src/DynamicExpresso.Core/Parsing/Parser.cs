@@ -91,6 +91,9 @@ namespace DynamicExpresso.Parsing
 			Expression left = ParseConditional();
 			if (_token.id == TokenId.Equal)
 			{
+				if (!_arguments.Settings.AssignmentOperators.HasFlag(AssignmentOperators.AssignmentEqual))
+					throw new AssignmentOperatorDisabledException("=", _token.pos);
+
 				Token op = _token;
 				NextToken();
 				Expression right = ParseAssignement();

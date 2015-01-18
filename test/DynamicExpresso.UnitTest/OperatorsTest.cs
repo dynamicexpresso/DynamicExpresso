@@ -188,6 +188,36 @@ namespace DynamicExpresso.UnitTest
 		class TypeWithProperty { public int Property1 { get; set; } public int Property2 { get; set; } }
 
 		[Test]
+		public void Can_assign_a_parameter()
+		{
+			var target = new Interpreter();
+
+			var result = target.Eval<int>("x = 5", new Parameter("x", 0));
+
+			Assert.AreEqual(5, result);
+		}
+
+		[Test]
+		public void Cannot_assign_a_variable()
+		{
+			var target = new Interpreter()
+				.SetVariable("x", 0);
+
+			Assert.Throws<ArgumentException>(() => target.Parse("x = 5"));
+		}
+
+		[Test]
+		public void Assignment_Operators_can_be_disabled()
+		{
+			var target = new Interpreter()
+				.EnableAssignment(AssignmentOperators.None);
+
+			Assert.AreEqual(AssignmentOperators.None, target.AssignmentOperators);
+
+			Assert.Throws<AssignmentOperatorDisabledException>(() => target.Parse("x = 5", new Parameter("x", 0)));
+		}
+
+		[Test]
 		public void Can_compare_numeric_parameters_of_different_compatible_types()
 		{
 			var target = new Interpreter();

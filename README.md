@@ -258,6 +258,8 @@ Statements can be written using a subset of the C# syntax. Here you can find a l
 
 Operators precedence is respected following [C# rules (Operator precedence and associativity)](http://msdn.microsoft.com/en-us/library/aa691323(v=vs.71).aspx).
 
+Some operators, like the assignment operator, can be disabled for security reason.
+
 ### Literals
 
 <table>
@@ -383,6 +385,14 @@ Parsed expressions can access only the .NET types that you have referenced using
 You must pay attention of what types you expose.
 In any case generated delegates are executed as any other delegate and standard security .NET rules can be applied (for more info see [Security in the .NET Framework](http://msdn.microsoft.com/en-us/library/fkytk30f.aspx)). 
 
+If expressions test can be written directly by users you must ensure that only certain features are available. Here some guidelines:
+
+For example you can disable assignment operators, to ensure that the user cannot change some values that you don't expect. 
+By default assignment operators are enables, by you can disable it using:
+
+	var target = new Interpreter()
+		.EnableAssignment(AssignmentOperators.None);
+
 	
 ## Usage scenarios
 
@@ -435,6 +445,11 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 
 ## Release notes
+
+- In progress
+
+	- Allow to disable assignment operators (#28)
+
 
 - 1.2.0
 
