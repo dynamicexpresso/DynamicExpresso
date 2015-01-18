@@ -18,15 +18,14 @@ For example you can evaluate math expressions:
 
 or parse an expression with variables or parameters and invoke it multiple times:
 
-  var interpreter = new Interpreter()
-                  .SetVariable("service", new ServiceExample());
-	
+	var interpreter = new Interpreter()
+									.SetVariable("service", new ServiceExample());
+
 	string expression = "x > 4 ? service.OneMethod() : service.AnotherMethod()";
+	Lambda parsedExpression = interpreter.Parse(expression, 
+													new Parameter("x", typeof(int)));
 
-  Lambda parsedExpression = interpreter.Parse(expression, 
-                          new Parameter("x", typeof(int)));
-
-  parsedExpression.Invoke(5);
+	var result = parsedExpression.Invoke(5);
 
 or generate delegates and lambda expressions for LINQ queries:
 
@@ -35,7 +34,7 @@ or generate delegates and lambda expressions for LINQ queries:
 	var whereFunction = new Interpreter()
 		.ParseAsDelegate<Func<int, bool>>("arg > 5");
 
-	Assert.AreEqual(2, prices.Where(whereFunction).Count());
+	var count = prices.Where(whereFunction).Count();
 
 
 ## Live demo
