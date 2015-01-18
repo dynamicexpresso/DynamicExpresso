@@ -131,6 +131,17 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Linq_Where2()
+		{
+			var prices = new [] { 5, 8, 6, 2 };
+
+			var whereFunction = new Interpreter()
+				.ParseAsDelegate<Func<int, bool>>("arg > 5");
+
+			Assert.AreEqual(2, prices.Where(whereFunction).Count());
+		}
+
+		[Test]
 		public void Linq_Queryable_Expression_Where()
 		{
 			IQueryable<Customer> customers = (new List<Customer> { 

@@ -1,12 +1,10 @@
 ﻿using DynamicExpresso.Parsing;
 using DynamicExpresso.Reflection;
+using DynamicExpresso.Visitors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace DynamicExpresso
 {
@@ -17,6 +15,7 @@ namespace DynamicExpresso
 	public class Interpreter
 	{
 		readonly ParserSettings _settings;
+		readonly ISet<ExpressionVisitor> _visitors = new HashSet<ExpressionVisitor>();
 
 		#region Constructors
 		/// <summary>
@@ -52,6 +51,8 @@ namespace DynamicExpresso
 			{
 				Reference(LanguageConstants.CommonTypes);
 			}
+
+			_visitors.Add(new DisableReflectionVisitor());
 		}
 		#endregion
 
@@ -109,6 +110,26 @@ namespace DynamicExpresso
 		public Interpreter EnableAssignment(AssignmentOperators assignmentOperators)
 		{
 			_settings.AssignmentOperators = assignmentOperators;
+
+			return this;
+		}
+		#endregion
+
+		#region Visitors
+		public ISet<ExpressionVisitor> Visitors
+		{
+			get { return _visitors; }
+		}
+
+		/// <summary>
+		/// Enable reflection expression (like x.GetType().GetMethod() or typeof(double).Assembly) by removing the DisableReflectionVisitor.
+		/// </summary>
+		/// <returns></returns>
+		public Interpreter EnableReflection()
+		{
+			var visitor = Visitors.FirstOrDefault(p => p is DisableReflectionVisitor);
+			if (visitor != null)
+				Visitors.Remove(visitor);
 
 			return this;
 		}
@@ -295,7 +316,7 @@ namespace DynamicExpresso
 		/// <exception cref="ParseException"></exception>
 		public Lambda Parse(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
-			return CreateLambda(expressionText, expressionType, parameters);
+			return ParseAsLambda(expressionText, expressionType, parameters);
 		}
 
 		[Obsolete("Use ParseAsDelegate<TDelegate>(string, params string[])")]
@@ -336,7 +357,7 @@ namespace DynamicExpresso
 		{
 			var delegateInfo = ReflectionExtensions.GetDelegateInfo(typeof(TDelegate), parametersNames);
 
-			return CreateLambda(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
+			return ParseAsLambda(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
 		}
 		#endregion
 
@@ -386,7 +407,7 @@ namespace DynamicExpresso
 		#endregion
 
 		#region Private methods
-		Lambda CreateLambda(string expressionText, Type expressionType, Parameter[] parameters)
+		Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
 		{
 			var arguments = new ParserArguments (
 				                expressionText, 
@@ -395,6 +416,9 @@ namespace DynamicExpresso
 				                parameters);
 
 			var expression = Parser.Parse(arguments);
+
+			foreach (var visitor in Visitors)
+				expression = visitor.Visit(expression);
 
 			var lambda = new Lambda(expression, arguments);
 

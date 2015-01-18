@@ -1,6 +1,5 @@
 ﻿
-Dynamic Expresso
-================
+# Dynamic Expresso
 
 Dynamic Expresso is an interpreter for simple C# statements.
 Dynamic Expresso embeds its own parsing logic, really interprets C# statements by converting it to .NET lambda expressions or delegates.
@@ -11,26 +10,38 @@ Statements are written using a subset of C# language specifications. Global vari
 
 ![dynamic expresso workflow](https://raw.github.com/davideicardi/DynamicExpresso/master/docs/workflow.png "dynamic expresso workflow")
 
-Here an example of what you can do:
+
+For example you can evaluate math expressions:
 
 	var interpreter = new Interpreter();
 	var result = interpreter.Eval("8 / 2 + 2");
 
-or
+or parse an expression with variables or parameters and invoke it multiple times:
 
-    var interpreter = new Interpreter()
-                    .SetVariable("service", new ServiceExample());
+  var interpreter = new Interpreter()
+                  .SetVariable("service", new ServiceExample());
 	
 	string expression = "x > 4 ? service.OneMethod() : service.AnotherMethod()";
 
-    Lambda parsedExpression = interpreter.Parse(expression, 
-                            new Parameter("x", typeof(int)));
+  Lambda parsedExpression = interpreter.Parse(expression, 
+                          new Parameter("x", typeof(int)));
 
-    parsedExpression.Invoke(5);
+  parsedExpression.Invoke(5);
+
+or generate delegates and lambda expressions for LINQ queries:
+
+	var prices = new [] { 5, 8, 6, 2 };
+
+	var whereFunction = new Interpreter()
+		.ParseAsDelegate<Func<int, bool>>("arg > 5");
+
+	Assert.AreEqual(2, prices.Where(whereFunction).Count());
+
 
 ## Live demo
 
 Dynamic Expresso live demo: [http://dynamic-expresso.azurewebsites.net/](http://dynamic-expresso.azurewebsites.net/)
+
 
 ## Quick start
 
@@ -90,6 +101,7 @@ Custom functions can be passed with delegate variables using `Interpreter.SetFun
 	Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
 
 Custom [Expression](http://msdn.microsoft.com/en-us/library/system.linq.expressions.expression.aspx) can be passed by using `Interpreter.SetExpression` method.
+
 
 ### Parameters
 
@@ -168,12 +180,13 @@ In the example below I generate a `Func<Customer, bool>` delegate that can be us
 		string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
 
 		var interpreter = new Interpreter();
-		Func<Customer, bool> dynamicWhere = interpreter.Parse<Func<Customer, bool>>(whereExpression, "customer");
+		Func<Customer, bool> dynamicWhere = interpreter.ParseAsDelegate<Func<Customer, bool>>(whereExpression, "customer");
 
 		Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
 	}
 
 This is the preferred way to parse an expression that you known at compile time what parameters can accept and what value must return.
+
 
 ### Generate lambda expressions
 
@@ -213,6 +226,7 @@ In the example below I generate a `Expression<Func<Customer, bool>>` expression 
 ## Syntax and operators
 
 Statements can be written using a subset of the C# syntax. Here you can find a list of the supported expressions: 
+
 
 ### Operators
 
@@ -260,6 +274,7 @@ Operators precedence is respected following [C# rules (Operator precedence and a
 
 Some operators, like the assignment operator, can be disabled for security reason.
 
+
 ### Literals
 
 <table>
@@ -295,6 +310,7 @@ The following character escape sequences are supported inside string or char lit
 - `\t` - Horizontal tab (character 9)
 - `\v` - Vertical quote (character 11)
 
+
 ### Type's members invocation
 
 Any standard .NET method, field, property or constructor can be invoked.
@@ -323,6 +339,7 @@ Dynamic Expresso also supports:
 - Generics, only partially supported (only implicit, you cannot invoke an explicit generic method)
 - Params array (see C# `params` keyword)
 
+
 ### Case sensitive/insensitive
 
 By default all expressions are considered case sensitive (`VARX` is different than `varx`, as in C#).
@@ -337,6 +354,7 @@ There is an option to use a case insensitive parser. For example:
 
 	Assert.AreEqual(x, target.Eval("x", parameters));
 	Assert.AreEqual(x, target.Eval("X", parameters));
+
 
 ## Identifiers detection
 
@@ -354,6 +372,7 @@ In these cases you can use `Interpreter.DetectIdentifiers` method to obtain a li
 		new []{ "x", "y"}, 
 		detectedIdentifiers.UnknownIdentifiers.ToArray());
 
+
 ## Limitations
 
 Not every C# syntaxes are supported. Here some examples of NOT supported features:
@@ -364,10 +383,12 @@ Not every C# syntaxes are supported. Here some examples of NOT supported feature
 - Explicit generic invocation (like `method<type>(arg)`) 
 - Lambda/delegate declaration (delegate and lamda are only supported as variables or parameters or as a return type of the expression)
 
+
 ## Exceptions
 
 If there is an error during the parsing always an exception of type `ParseException` is throwed. 
 `ParseException` has several specialization classes based on the type of error (UnknownIdentifierException, NoApplicableMethodException. ...).
+
 
 ## Performance and multithreading
 
@@ -376,6 +397,7 @@ In essence only get properties, `Parse` and `Eval` methods are thread safe. Othe
 `Lambda` and `Parameter` classes are completely thread safe.
 
 If you need to run the same expression multiple times with different parameters I suggest to parse it one time and then invoke the parsed expression multiple times.
+
 
 ## Security
 
@@ -393,6 +415,20 @@ By default assignment operators are enables, by you can disable it using:
 	var target = new Interpreter()
 		.EnableAssignment(AssignmentOperators.None);
 
+From version 1.3 to prevent malicious users to call unexpected types or assemblies within an expression, 
+some reflection methods are blocked. For example you cannot write:
+
+	var target = new Interpreter();
+	target.Eval("typeof(double).GetMethods()");
+	// or
+	target.Eval("typeof(double).Assembly")
+
+The only exception to this rule is the `Type.Name` property that is permitted for debugging reasons.
+ To enable standard reflection features you can use `Interpreter.EnableReflection` method, like:
+
+	var target = new Interpreter()
+		.EnableReflection();
+
 	
 ## Usage scenarios
 
@@ -402,6 +438,7 @@ Here are some possible usage scenarios of Dynamic Expresso:
 - Allow the user to inject customizable rules and logic without recompiling
 - Evaluate dynamic functions or commands
 - LINQ dynamic query
+
 
 ## Future roadmap
 
@@ -414,6 +451,7 @@ If you need help you can try one of the following:
 - [FAQ](https://github.com/davideicardi/DynamicExpresso/wiki/FAQ) wiki page
 - Post your questions on [stackoverflow.com](http://stackoverflow.com/questions/tagged/dynamic-expresso) using `dynamic-expresso` tag
 - github [official repository](https://github.com/davideicardi/DynamicExpresso)
+
 
 ## Credits
 
@@ -446,9 +484,12 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
-- In progress
+- 1.3.0
 
 	- Allow to disable assignment operators (#28)
+	- Prevent unexpected access to types using reflection for security (#27) .
+		From now expressions that call reflection throw a `ReflectionNotAllowedException`.
+	- Added Interpreter.EnableReflection method to enable reflection features inside expression.
 
 
 - 1.2.0
