@@ -2,12 +2,12 @@
 Dynamic Expresso
 ================
 
-Dynamic Expresso is an expression interpreter for simple C# statements.
-Dynamic Expresso embeds its own parsing logic, and really interprets C# statements by converting it to .NET delegates that can be invoked as any standard delegate.
-It doesn't generate assembly but it creates dynamic expressions/delegates on the fly. 
+Dynamic Expresso is an interpreter for simple C# statements.
+Dynamic Expresso embeds its own parsing logic, really interprets C# statements by converting it to .NET lambda expressions or delegates.
 
-Using Dynamic Expresso developers can create scriptable applications and execute .NET code without compilation. 
-Statements are written using a subset of C# language specifications. Global variables or parameters can be injected and used inside expressions.
+Using Dynamic Expresso developers can create scriptable applications, execute .NET code without compilation or create dynamic linq statements. 
+
+Statements are written using a subset of C# language specifications. Global variables or parameters can be injected and used inside expressions. It doesn't generate assembly but it creates an expression tree on the fly. 
 
 ![dynamic expresso workflow](https://raw.github.com/davideicardi/DynamicExpresso/master/docs/workflow.png "dynamic expresso workflow")
 
@@ -459,6 +459,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 	- Marked some methods as obsolete.
 	- FIX: Now you can specify parameter names with a different case when using case insensitive with delegate.
 	- FIX: Resolve bug about expected order of parameter when call Lambda.Invoke(params object[] args), thanks to Alex141
+	- Lambda.Invoke(params object[] args) now only accepts declared parameters, in previous version accepted used parameters. Basically if you parse an expresison with x and y parameters but you only use x you should pass in any case also y. This is because this function doesn't know the parameter names and cannot ensure. Other Invoke methods are not changed.
 
 - 1.1.0
 
