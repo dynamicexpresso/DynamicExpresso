@@ -10,6 +10,7 @@ namespace DynamicExpresso.Parsing
 	{
 		Unknown,
 
+		Identifier,
 		PropertyOrField,
 		Method,
 		ExtensionMethod

@@ -642,6 +642,25 @@ namespace DynamicExpresso.Parsing
 				return parameterExpression;
 			}
 
+			// If we didn't find what we searched for, ask for the appropriate Expression via event.
+			if (_resolveExpressionEvent != null)
+			{
+				ResolveExpressionEventArgs eventArgs = new ResolveExpressionEventArgs(
+					ResolveExpressionType.Identifier,
+					null,
+					null,
+					_token.text,
+					null,
+					_memberFilterCase,
+					_bindingCase);
+				_resolveExpressionEvent(this, eventArgs);
+				if (eventArgs.IsResolved)
+				{
+					NextToken();
+					return eventArgs.ResolvedExpression;
+				}
+			}
+
 			// Working context implementation
 			//if (it != null)
 			//    return ParseMemberAccess(null, it);

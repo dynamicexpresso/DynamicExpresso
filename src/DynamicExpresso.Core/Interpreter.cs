@@ -442,8 +442,6 @@ namespace DynamicExpresso
 				throw new Exception("Detected identifiers doesn't match actual identifiers");
 			if (info.Types.Count() != lambda.Types.Count())
 				throw new Exception("Detected types doesn't match actual types");
-			if (info.UnknownIdentifiers.Count() != lambda.UsedParameters.Count())
-				throw new Exception("Detected unknown identifiers doesn't match actual parameters");
 		}
 #endif
 		#endregion
