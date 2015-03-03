@@ -59,6 +59,8 @@
     <Compile Include="IdentifiersInfo.cs" />
     <Compile Include="LanguageConstants.cs" />
     <Compile Include="ParserArguments.cs" />
+    <Compile Include="Parsing\ResolveExpressionType.cs" />
+    <Compile Include="Parsing\ResolveExpressionEventArgs.cs" />
     <Compile Include="Parsing\Token.cs" />
     <Compile Include="Parsing\TokenId.cs" />
     <Compile Include="ReferenceType.cs" />

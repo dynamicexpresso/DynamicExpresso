@@ -16,9 +16,9 @@ namespace DynamicExpresso.Parsing
 {
 	internal class Parser
 	{
-		public static Expression Parse(ParserArguments arguments)
+		public static Expression Parse(ParserArguments arguments, EventHandler<ResolveExpressionEventArgs> resolveEvent)
 		{
-			return new Parser(arguments).Parse();
+			return new Parser(arguments, resolveEvent).Parse();
 		}
 
 		const NumberStyles ParseLiteralNumberStyle = NumberStyles.AllowLeadingSign;
@@ -40,8 +40,11 @@ namespace DynamicExpresso.Parsing
 		BindingFlags _bindingCase;
 		MemberFilter _memberFilterCase;
 
-		Parser(ParserArguments arguments)
+		EventHandler<ResolveExpressionEventArgs> _resolveExpressionEvent;
+
+		Parser(ParserArguments arguments, EventHandler<ResolveExpressionEventArgs> resolveEvent)
 		{
+			_resolveExpressionEvent = resolveEvent;
 			_arguments = arguments;
 
 			_bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
@@ -859,6 +862,24 @@ namespace DynamicExpresso.Parsing
 						Expression.Property(instance, (PropertyInfo)member) :
 						Expression.Field(instance, (FieldInfo)member);
 			}
+			
+			// If we didn't find what we searched for, ask for the appropriate Expression via event.
+			if (_resolveExpressionEvent != null)
+			{
+				ResolveExpressionEventArgs eventArgs = new ResolveExpressionEventArgs(
+					ResolveExpressionType.PropertyOrField,
+					type,
+					instance,
+					propertyOrFieldName,
+					null,
+					_memberFilterCase,
+					_bindingCase);
+				_resolveExpressionEvent(this, eventArgs);
+				if (eventArgs.IsResolved)
+				{
+					return eventArgs.ResolvedExpression;
+				}
+			}
 
 			throw CreateParseException(errorPos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(type));
 		}
@@ -899,6 +920,24 @@ namespace DynamicExpresso.Parsing
 				return Expression.Call((MethodInfo)method.MethodBase, extensionMethodsArguments);
 			}
 
+			// If we didn't find what we searched for, ask for the appropriate Expression via event.
+			if (_resolveExpressionEvent != null)
+			{
+				ResolveExpressionEventArgs eventArgs = new ResolveExpressionEventArgs(
+					ResolveExpressionType.ExtensionMethod,
+					type,
+					instance,
+					id,
+					args,
+					_memberFilterCase,
+					_bindingCase);
+				_resolveExpressionEvent(this, eventArgs);
+				if (eventArgs.IsResolved)
+				{
+					return eventArgs.ResolvedExpression;
+				}
+			}
+
 			return null;
 		}
 
@@ -913,6 +952,24 @@ namespace DynamicExpresso.Parsing
 				var method = applicableMethods[0];
 
 				return Expression.Call(instance, (MethodInfo)method.MethodBase, method.PromotedParameters);
+			}
+
+			// If we didn't find what we searched for, ask for the appropriate Expression via event.
+			if (_resolveExpressionEvent != null)
+			{
+				ResolveExpressionEventArgs eventArgs = new ResolveExpressionEventArgs(
+					ResolveExpressionType.Method,
+					type,
+					instance,
+					id,
+					args,
+					_memberFilterCase,
+					_bindingCase);
+				_resolveExpressionEvent(this, eventArgs);
+				if (eventArgs.IsResolved)
+				{
+					return eventArgs.ResolvedExpression;
+				}
 			}
 
 			return null;

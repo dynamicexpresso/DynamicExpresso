@@ -100,6 +100,10 @@ namespace DynamicExpresso
 		}
 		#endregion
 
+		#region Events
+		public event EventHandler<ResolveExpressionEventArgs> ResolveUnknownExpression = null;
+		#endregion
+
 		#region Options
 		/// <summary>
 		/// Allows to enable/disable assignment operators. 
@@ -415,7 +419,7 @@ namespace DynamicExpresso
 				                expressionType,
 				                parameters);
 
-			var expression = Parser.Parse(arguments);
+			var expression = Parser.Parse(arguments, ResolveUnknownExpression);
 
 			foreach (var visitor in Visitors)
 				expression = visitor.Visit(expression);
