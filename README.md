@@ -1,5 +1,6 @@
-﻿
 # Dynamic Expresso
+
+[![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
 
 Dynamic Expresso is an interpreter for simple C# statements.
 Dynamic Expresso embeds its own parsing logic, really interprets C# statements by converting it to .NET lambda expressions or delegates.
