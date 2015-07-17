@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace DynamicExpresso
 {
@@ -278,13 +279,9 @@ namespace DynamicExpresso
 
 			_settings.KnownTypes[type.Name] = type;
 
-			var extensions = ReflectionExtensions.GetExtensionMethods(type.Type);
-			foreach (var extensionMethod in extensions)
+		    foreach (var extensionMethod in type.ExtensionMethods)
 			{
-				if (!_settings.ExtensionMethods.Contains(extensionMethod))
-				{
-					_settings.ExtensionMethods.Add(extensionMethod);
-				}
+			    _settings.ExtensionMethods.Add(extensionMethod);	
 			}
 
 			return this;

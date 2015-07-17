@@ -12,7 +12,7 @@ namespace DynamicExpresso.Parsing
 	{
 		readonly Dictionary<string, Identifier> _identifiers;
 		readonly Dictionary<string, ReferenceType> _knownTypes;
-		readonly List<MethodInfo> _extensionMethods;
+		readonly HashSet<MethodInfo> _extensionMethods;
 
 		public ParserSettings(bool caseInsensitive)
 		{
@@ -26,7 +26,7 @@ namespace DynamicExpresso.Parsing
 
 			_knownTypes = new Dictionary<string, ReferenceType>(KeyComparer);
 
-			_extensionMethods = new List<MethodInfo>();
+			_extensionMethods = new HashSet<MethodInfo>();
 
 			AssignmentOperators = AssignmentOperators.All;
 		}
@@ -41,7 +41,7 @@ namespace DynamicExpresso.Parsing
 			get { return _identifiers; }
 		}
 
-		public IList<MethodInfo> ExtensionMethods
+		public HashSet<MethodInfo> ExtensionMethods
 		{
 			get { return _extensionMethods; }
 		}
