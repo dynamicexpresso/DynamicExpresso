@@ -484,6 +484,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Release notes
 
+- 1.3.1
+
+	- Improved performance of Interpreter's ctor, thanks to @OmerRaviv
+
 - 1.3.0
 
 	- Allow to disable assignment operators (#28)
