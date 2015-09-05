@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -36,16 +37,15 @@ namespace DynamicExpresso.Reflection
 
 		public static IEnumerable<MethodInfo> GetExtensionMethods(Type type)
 		{
-			if (type.IsSealed && !type.IsGenericType && !type.IsNested)
+			if (type.IsSealed && type.IsAbstract && !type.IsGenericType && !type.IsNested)
 			{
 				var query = from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
 										where method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)
 										select method;
-
 				return query;
 			}
 
-			return new MethodInfo[0];
+			return Enumerable.Empty<MethodInfo>();
 		}
 
 		public class DelegateInfo
