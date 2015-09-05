@@ -4,17 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 
 namespace DynamicExpresso
 {
 	internal class ParserArguments
 	{
-		Dictionary<string, Parameter> _declaredParameters;
+		readonly Dictionary<string, Parameter> _declaredParameters;
 
-		HashSet<Parameter> _usedParameters = new HashSet<Parameter>();
-		HashSet<ReferenceType> _usedTypes = new HashSet<ReferenceType>();
-		HashSet<Identifier> _usedIdentifiers = new HashSet<Identifier>();
+		readonly HashSet<Parameter> _usedParameters = new HashSet<Parameter>();
+		readonly HashSet<ReferenceType> _usedTypes = new HashSet<ReferenceType>();
+		readonly HashSet<Identifier> _usedIdentifiers = new HashSet<Identifier>();
 
 		public ParserArguments(
 			string expressionText, 

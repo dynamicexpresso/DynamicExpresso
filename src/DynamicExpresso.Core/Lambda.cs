@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using DynamicExpresso.Exceptions;
-using DynamicExpresso.Reflection;
-using DynamicExpresso.Parsing;
 
 namespace DynamicExpresso
 {

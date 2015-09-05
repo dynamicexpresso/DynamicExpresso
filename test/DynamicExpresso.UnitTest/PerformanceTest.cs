@@ -3,20 +3,22 @@ using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
-    [TestFixture]
-    public class PerformanceTest
-    {
-        [Test]
-        public void InterperterCreation()
-        {
-            Stopwatch stopwatch = Stopwatch.StartNew();
-           
-            for (int i = 0; i < 1000; i++)
-            {
-                new Interpreter(InterpreterOptions.Default);      
-            }
+	[TestFixture]
+	public class PerformanceTest
+	{
+		[Test]
+		public void InterperterCreation()
+		{
+			// TODO Study if there is a better way to test performance
 
-            Assert.Less(stopwatch.ElapsedMilliseconds,200);
-          }
-    }
+			var stopwatch = Stopwatch.StartNew();
+
+			for (var i = 0; i < 1000; i++)
+			{
+				new Interpreter(InterpreterOptions.Default);
+			}
+
+			Assert.Less(stopwatch.ElapsedMilliseconds, 200);
+		}
+	}
 }

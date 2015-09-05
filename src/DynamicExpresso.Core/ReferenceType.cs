@@ -15,9 +15,9 @@ namespace DynamicExpresso
 		/// </summary>
 		public string Name { get; private set; }
 
-	    public IList<MethodInfo> ExtensionMethods { get; private set; }
+		public IList<MethodInfo> ExtensionMethods { get; private set; }
 
-	    public ReferenceType(string name, Type type)
+		public ReferenceType(string name, Type type)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException("name");
@@ -27,7 +27,7 @@ namespace DynamicExpresso
 
 			Type = type;
 			Name = name;
-	        ExtensionMethods = ReflectionExtensions.GetExtensionMethods(type).ToList();
+			ExtensionMethods = ReflectionExtensions.GetExtensionMethods(type).ToList();
 		}
 
 		public ReferenceType(Type type)
@@ -37,7 +37,7 @@ namespace DynamicExpresso
 
 			Type = type;
 			Name = type.Name;
-            ExtensionMethods = ReflectionExtensions.GetExtensionMethods(type).ToList();
+			ExtensionMethods = ReflectionExtensions.GetExtensionMethods(type).ToList();
 		}
 	}
 }

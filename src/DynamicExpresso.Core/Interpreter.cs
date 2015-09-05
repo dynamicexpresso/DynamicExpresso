@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace DynamicExpresso
 {
@@ -279,9 +278,9 @@ namespace DynamicExpresso
 
 			_settings.KnownTypes[type.Name] = type;
 
-		    foreach (var extensionMethod in type.ExtensionMethods)
+			foreach (var extensionMethod in type.ExtensionMethods)
 			{
-			    _settings.ExtensionMethods.Add(extensionMethod);	
+				_settings.ExtensionMethods.Add(extensionMethod);
 			}
 
 			return this;
@@ -319,7 +318,7 @@ namespace DynamicExpresso
 		[Obsolete("Use ParseAsDelegate<TDelegate>(string, params string[])")]
 		public TDelegate Parse<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			return ParseAsDelegate<TDelegate> (expressionText, parametersNames);
+			return ParseAsDelegate<TDelegate>(expressionText, parametersNames);
 		}
 
 		/// <summary>
@@ -332,7 +331,7 @@ namespace DynamicExpresso
 		/// <exception cref="ParseException"></exception>
 		public TDelegate ParseAsDelegate<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			var lambda = ParseAs<TDelegate> (expressionText, parametersNames);
+			var lambda = ParseAs<TDelegate>(expressionText, parametersNames);
 			return lambda.Compile<TDelegate>();
 		}
 
@@ -346,7 +345,7 @@ namespace DynamicExpresso
 		/// <exception cref="ParseException"></exception>
 		public Expression<TDelegate> ParseAsExpression<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			var lambda = ParseAs<TDelegate> (expressionText, parametersNames);
+			var lambda = ParseAs<TDelegate>(expressionText, parametersNames);
 			return lambda.LambdaExpression<TDelegate>();
 		}
 
@@ -406,11 +405,11 @@ namespace DynamicExpresso
 		#region Private methods
 		Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
 		{
-			var arguments = new ParserArguments (
-				                expressionText, 
-				                _settings,
-				                expressionType,
-				                parameters);
+			var arguments = new ParserArguments(
+												expressionText,
+												_settings,
+												expressionType,
+												parameters);
 
 			var expression = Parser.Parse(arguments);
 
