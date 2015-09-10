@@ -170,3 +170,11 @@ StyleCop.Cache
 #Other
 *.vsmdi
 *.InstallLog
+
+
+# Visual Studio 2015 cache/options directory
+.vs/
+
+# DNX
+project.lock.json
+artifacts/

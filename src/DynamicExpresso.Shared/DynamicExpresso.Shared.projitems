@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>3f5164d3-84d9-4f43-a413-52c9d0afcd40</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>DynamicExpresso.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AssignmentOperators.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Detector.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\AssignmentOperatorDisabledException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\DuplicateParameterException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\DynamicExpressoException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\ExceptionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\NoApplicableMethodException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\ParseException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\ReflectionNotAllowedException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Exceptions\UnknownIdentifierException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Identifier.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IdentifiersInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interpreter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InterpreterOptions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Lambda.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)LanguageConstants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parameter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ParserArguments.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsing\ErrorMessages.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsing\Parser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsing\ParserConstants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsing\ParserSettings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsing\ParseSignatures.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsing\Token.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Parsing\TokenId.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ReferenceType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Reflection\ReflectionExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Visitors\DisableReflectionVisitor.cs" />
+  </ItemGroup>
+</Project>

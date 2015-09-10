@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.UnitTest", "test\DynamicExpresso.UnitTest\DynamicExpresso.UnitTest.csproj", "{33157A92-C6B2-4A51-8262-1FEBFD6558BE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{4088369E-AB00-4333-A56A-27E05D3767B1}"
@@ -17,29 +19,94 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BF96BD
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 	EndProjectSection
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DynamicExpresso.Shared", "src\DynamicExpresso.Shared\DynamicExpresso.Shared.shproj", "{3F5164D3-84D9-4F43-A413-52C9D0AFCD40}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.Universal", "src\DynamicExpresso.Universal\DynamicExpresso.Universal.csproj", "{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		src\DynamicExpresso.Shared\DynamicExpresso.Shared.projitems*{c6b7c0d2-b84a-4307-9c61-d95613db564d}*SharedItemsImports = 4
+		src\DynamicExpresso.Shared\DynamicExpresso.Shared.projitems*{1e6f835a-3610-4359-a7cf-ff20c6f27ede}*SharedItemsImports = 4
+		src\DynamicExpresso.Shared\DynamicExpresso.Shared.projitems*{3f5164d3-84d9-4f43-a413-52c9d0afcd40}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|ARM = Release|ARM
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|ARM.Build.0 = Debug|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|x64.Build.0 = Debug|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|x86.Build.0 = Debug|Any CPU
 		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|ARM.ActiveCfg = Release|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|ARM.Build.0 = Release|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|x64.ActiveCfg = Release|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|x64.Build.0 = Release|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|x86.ActiveCfg = Release|Any CPU
+		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|x86.Build.0 = Release|Any CPU
 		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|ARM.Build.0 = Debug|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|x64.Build.0 = Debug|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|x86.Build.0 = Debug|Any CPU
 		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-	EndGlobalSection
-	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = test\DynamicExpresso.UnitTest\DynamicExpresso.UnitTest.csproj
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|ARM.ActiveCfg = Release|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|ARM.Build.0 = Release|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|x64.ActiveCfg = Release|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|x64.Build.0 = Release|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|x86.ActiveCfg = Release|Any CPU
+		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|x86.Build.0 = Release|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Debug|ARM.Build.0 = Debug|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Debug|x64.Build.0 = Debug|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Debug|x86.Build.0 = Debug|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|ARM.ActiveCfg = Release|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|ARM.Build.0 = Release|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|x64.ActiveCfg = Release|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|x64.Build.0 = Release|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|x86.ActiveCfg = Release|Any CPU
+		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|x86.Build.0 = Release|Any CPU
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|ARM.ActiveCfg = Debug|ARM
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|ARM.Build.0 = Debug|ARM
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|x64.ActiveCfg = Debug|x64
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|x64.Build.0 = Debug|x64
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|x86.ActiveCfg = Debug|x86
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|x86.Build.0 = Debug|x86
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Release|ARM.ActiveCfg = Release|ARM
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Release|ARM.Build.0 = Release|ARM
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Release|x64.ActiveCfg = Release|x64
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Release|x64.Build.0 = Release|x64
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Release|x86.ActiveCfg = Release|x86
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = test\DynamicExpresso.UnitTest\DynamicExpresso.UnitTest.csproj
 	EndGlobalSection
 EndGlobal
