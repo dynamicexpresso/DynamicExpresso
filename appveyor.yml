@@ -1,0 +1,10 @@
+version: 1.0.{build}
+before_build:
+- ps: nuget restore DynamicExpresso.sln
+build:
+  project: DynamicExpresso.sln
+  parallel: true
+  verbosity: minimal
+test_script:
+  - ps: nunit-console test\DynamicExpresso.UnitTest\bin\Debug\DynamicExpresso.UnitTest.dll
+  # - ps: (New-Object 'System.Net.WebClient').UploadFile("https://ci.appveyor.com/api/testresults/nunit/$($env:APPVEYOR_JOB_ID)", (Resolve-Path TestResult.xml))
