@@ -170,3 +170,6 @@ StyleCop.Cache
 #Other
 *.vsmdi
 *.InstallLog
+
+# NUnit console output
+TestResult.xml
