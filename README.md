@@ -467,8 +467,9 @@ This project is based on two old works:
 Below you can find a list of some similar projects that I have evaluated or that can be interesting to study. 
 For one reason or another none of these projects exactly fit my needs so I decided to write my own interpreter.
 
-- Roslyn Project - Compiler as a service - http://msdn.microsoft.com/en-us/vstudio/roslyn.aspx
-	- When Roslyn will be available this project can probably directly use the Roslyn compiler/interpreter.
+- Roslyn Project - Scripting API - https://github.com/dotnet/roslyn/wiki/Scripting-API-Samples
+	- This is the new Microsoft Official Compiler as a service library. I suggest to consider using Roslyin instead of DynamicExpresso whenever possible.
+
 - Mono.CSharp - C# Compiler Service and Runtime Evaulator - http://docs.go-mono.com/index.aspx?link=N%3AMono.CSharp
 - NCalc - Mathematical Expressions Evaluator for .NET - http://ncalc.codeplex.com/
 - David Wynne CSharpEval https://github.com/DavidWynne/CSharpEval
