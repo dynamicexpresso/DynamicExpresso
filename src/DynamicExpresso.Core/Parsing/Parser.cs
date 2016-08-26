@@ -1622,6 +1622,13 @@ namespace DynamicExpresso.Parsing
 			return parameterInfo.IsDefined(typeof(ParamArrayAttribute), false);
 		}
 
+		static Type GetParameterType(ParameterInfo parameterInfo)
+		{
+			bool isParamsArray = HasParamsArrayType(parameterInfo);
+			Type type = isParamsArray ? parameterInfo.ParameterType.GetElementType() : parameterInfo.ParameterType;
+			return type;
+		}
+
 		static bool MethodHasPriority(Expression[] args, MethodData method, MethodData otherMethod)
 		{
 			if (method.HasParamsArray == false && otherMethod.HasParamsArray)
@@ -1637,22 +1644,14 @@ namespace DynamicExpresso.Parsing
 			bool better = false;
 			for (int i = 0; i < args.Length; i++)
 			{
-				ParameterInfo methodParameter = method.Parameters[i];
-				ParameterInfo otherMethodParameter = otherMethod.Parameters[i];
-				bool isMethodParameterHasParamsArrayType = HasParamsArrayType(methodParameter);
-				bool isOtherMethodParameterHasParamsArrayType = HasParamsArrayType(otherMethodParameter);
-				Type methodParamType = isMethodParameterHasParamsArrayType 
-					? methodParameter.ParameterType.GetElementType()
-					: methodParameter.ParameterType;
-				Type otherMethodParamType = isOtherMethodParameterHasParamsArrayType
-					? otherMethodParameter.ParameterType.GetElementType()
-					: otherMethodParameter.ParameterType;
-				int c = CompareConversions(args[i].Type,
-						methodParamType,
-						otherMethodParamType);
+				ParameterInfo methodParam = method.Parameters[i];
+				ParameterInfo otherMethodParam = otherMethod.Parameters[i];
+				Type methodParamType = GetParameterType(methodParam);
+				Type otherMethodParamType = GetParameterType(otherMethodParam);
+				int c = CompareConversions(args[i].Type, methodParamType, otherMethodParamType);
 				if (c < 0) return false;
 				if (c > 0) better = true;
-				if (isMethodParameterHasParamsArrayType || isOtherMethodParameterHasParamsArrayType)
+				if (HasParamsArrayType(methodParam) || HasParamsArrayType(otherMethodParam))
 				{
 					break;
 				}
