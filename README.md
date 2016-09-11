@@ -482,6 +482,9 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - IronJS, IronRuby, IronPython
 - paxScript.NET http://eco148-88394.innterhost.net/paxscriptnet/
 
+## Continuous build
+
+There is a build service configured at [MyGet](https://www.myget.org/BuildSource/List/webplu).
 
 ## Release notes
 
