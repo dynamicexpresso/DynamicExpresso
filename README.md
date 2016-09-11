@@ -2,6 +2,8 @@
 
 [![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
 
+[![MyGet Build Status](https://www.myget.org/BuildSource/Badge/webplu?identifier=230c74d4-485f-49ff-8968-ffaeed70d9d8)](https://www.myget.org/)
+
 Dynamic Expresso is an interpreter for simple C# statements.
 Dynamic Expresso embeds its own parsing logic, really interprets C# statements by converting it to .NET lambda expressions or delegates.
 
@@ -485,6 +487,8 @@ For one reason or another none of these projects exactly fit my needs so I decid
 ## Continuous build
 
 There is a build service configured at [MyGet](https://www.myget.org/BuildSource/List/webplu).
+
+[![MyGet Build Status](https://www.myget.org/BuildSource/Badge/webplu?identifier=230c74d4-485f-49ff-8968-ffaeed70d9d8)](https://www.myget.org/)
 
 ## Release notes
 
