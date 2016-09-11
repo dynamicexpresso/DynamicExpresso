@@ -1279,7 +1279,7 @@ namespace DynamicExpresso.Parsing
 
 					parameterType = parameterDeclaration.ParameterType;
 
-					if (parameterDeclaration.IsDefined(typeof(ParamArrayAttribute), false))
+					if (HasParamsArrayType(parameterDeclaration))
 					{
 						paramsArrayTypeFound = parameterType;
 					}
@@ -1617,6 +1617,18 @@ namespace DynamicExpresso.Parsing
 			return FindAssignableGenericType(baseType, genericTypeDefinition);
 		}
 
+		static bool HasParamsArrayType(ParameterInfo parameterInfo)
+		{
+			return parameterInfo.IsDefined(typeof(ParamArrayAttribute), false);
+		}
+
+		static Type GetParameterType(ParameterInfo parameterInfo)
+		{
+			bool isParamsArray = HasParamsArrayType(parameterInfo);
+			Type type = isParamsArray ? parameterInfo.ParameterType.GetElementType() : parameterInfo.ParameterType;
+			return type;
+		}
+
 		static bool MethodHasPriority(Expression[] args, MethodData method, MethodData otherMethod)
 		{
 			if (method.HasParamsArray == false && otherMethod.HasParamsArray)
@@ -1632,11 +1644,17 @@ namespace DynamicExpresso.Parsing
 			bool better = false;
 			for (int i = 0; i < args.Length; i++)
 			{
-				int c = CompareConversions(args[i].Type,
-						method.Parameters[i].ParameterType,
-						otherMethod.Parameters[i].ParameterType);
+				ParameterInfo methodParam = method.Parameters[i];
+				ParameterInfo otherMethodParam = otherMethod.Parameters[i];
+				Type methodParamType = GetParameterType(methodParam);
+				Type otherMethodParamType = GetParameterType(otherMethodParam);
+				int c = CompareConversions(args[i].Type, methodParamType, otherMethodParamType);
 				if (c < 0) return false;
 				if (c > 0) better = true;
+				if (HasParamsArrayType(methodParam) || HasParamsArrayType(otherMethodParam))
+				{
+					break;
+				}
 			}
 			return better;
 		}

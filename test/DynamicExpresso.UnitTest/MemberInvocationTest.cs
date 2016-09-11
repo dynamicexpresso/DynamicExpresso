@@ -262,6 +262,15 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(1, x.AmbiguousMethod_ParamsArrayCalls);
 		}
 
+		[Test]
+		public void Overload_paramsArray_methods_with_compatible_type_params()
+		{
+			var target = new Interpreter();
+			var x = new MyTestService();
+			target.SetVariable("x", x);
+			Assert.AreEqual(3, target.Eval("x.OverloadMethodWithParamsArray(2, 3, 1)"));
+		}
+
 		interface MyTestInterface
 		{
 		}
@@ -339,6 +348,15 @@ namespace DynamicExpresso.UnitTest
 			public void AmbiguousMethod(DateTime fixedParam, int p1, int p2)
 			{
 				AmbiguousMethod_NormalCalls++;
+			}
+
+			public int OverloadMethodWithParamsArray(params int[] paramsArray)
+			{
+				return paramsArray.Max();
+			}
+			public long OverloadMethodWithParamsArray(params long[] paramsArray)
+			{
+				return paramsArray.Max();
 			}
 		}
 
