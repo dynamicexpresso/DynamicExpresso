@@ -4,6 +4,7 @@
 		<id>DynamicExpresso.Core</id>
 		<version>$version$</version>
 		<authors>Davide Icardi</authors>
+    <owners>Davide Icardi</owners>
 		<projectUrl>https://github.com/davideicardi/dynamicexpresso</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<summary>C# expression interpreter/evaluator</summary>
