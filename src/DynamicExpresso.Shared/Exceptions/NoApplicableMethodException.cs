@@ -6,12 +6,16 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+#if !WINDOWS_UWP
 using System.Security.Permissions;
+#endif
 using System.Runtime.Serialization;
 
 namespace DynamicExpresso
 {
-	[Serializable]
+#if !WINDOWS_UWP
+    [Serializable]
+#endif
 	public class NoApplicableMethodException : ParseException
 	{
 		public NoApplicableMethodException(string methodName, string methodTypeName, int position)
@@ -21,6 +25,11 @@ namespace DynamicExpresso
 			MethodName = methodName;
 		}
 
+   		public string MethodTypeName { get; private set; }
+		public string MethodName { get; private set; }
+
+
+#if !WINDOWS_UWP
 		protected NoApplicableMethodException(
 			SerializationInfo info,
 			StreamingContext context)
@@ -30,9 +39,6 @@ namespace DynamicExpresso
 			MethodName = info.GetString("MethodName");
 		}
 
-		public string MethodTypeName { get; private set; }
-		public string MethodName { get; private set; }
-
 		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
@@ -41,5 +47,6 @@ namespace DynamicExpresso
 
 			base.GetObjectData(info, context);
 		}
-	}
+#endif
+    }
 }

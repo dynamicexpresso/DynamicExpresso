@@ -37,7 +37,6 @@ namespace DynamicExpresso
 
 		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		public override void GetObjectData(StreamingContext context)
         {
             info.AddValue("OperatorString", OperatorString);
 

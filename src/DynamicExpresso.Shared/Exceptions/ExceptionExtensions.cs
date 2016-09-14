@@ -48,6 +48,6 @@ namespace DynamicExpresso.Exceptions
 	        var capturedException = ExceptionDispatchInfo.Capture(exception);
 	        capturedException?.Throw();
 	    }
-	}
 #endif
+    }
 }
