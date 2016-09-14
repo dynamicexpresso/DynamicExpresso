@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
-#if !NETFX_CORE
+#if !WINDOWS_UWP
 using System.Security.Permissions;
 #endif
 using System.Runtime.Serialization;
