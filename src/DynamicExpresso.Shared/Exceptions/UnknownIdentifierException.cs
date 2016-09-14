@@ -6,12 +6,16 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+#if !WINDOWS_UWP
 using System.Security.Permissions;
+#endif
 using System.Runtime.Serialization;
 
 namespace DynamicExpresso
 {
+#if !WINDOWS_UWP
 	[Serializable]
+#endif
 	public class UnknownIdentifierException : ParseException
 	{
 		public UnknownIdentifierException(string identifier, int position)
@@ -20,6 +24,9 @@ namespace DynamicExpresso
 			Identifier = identifier;
 		}
 
+        public string Identifier { get; private set; }
+
+#if !WINDOWS_UWP
 		protected UnknownIdentifierException(
 			SerializationInfo info,
 			StreamingContext context)
@@ -28,8 +35,6 @@ namespace DynamicExpresso
 			Identifier = info.GetString("Identifier");
 		}
 
-		public string Identifier { get; private set; }
-
 		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
@@ -37,5 +42,6 @@ namespace DynamicExpresso
 
 			base.GetObjectData(info, context);
 		}
-	}
+#endif
+    }
 }

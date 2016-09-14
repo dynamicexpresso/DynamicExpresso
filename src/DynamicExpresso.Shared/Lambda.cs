@@ -118,9 +118,13 @@ namespace DynamicExpresso
 			{
 				if (exc.InnerException != null)
 				{
-					exc.InnerException.PreserveStackTrace();
+#if !WINDOWS_UWP
+                    exc.InnerException.PreserveStackTrace();
 					throw exc.InnerException;
-				}
+#else
+                    exc.ThrowWithStackTracePreserved();
+#endif
+                }
 				else
 					throw;
 			}
