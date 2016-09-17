@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if WINDOWS_UWP
+using System.Globalization;
+#endif
 using System.Reflection;
 
 namespace DynamicExpresso.Parsing
@@ -14,11 +17,22 @@ namespace DynamicExpresso.Parsing
 		{
 			CaseInsensitive = caseInsensitive;
 
-			KeyComparer = CaseInsensitive ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
+#if WINDOWS_UWP
 
-			KeyComparison = CaseInsensitive ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
+            var comparerIgnoreCase = CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(CompareOptions.IgnoreCase);
+            var comparer = CultureInfo.InvariantCulture.CompareInfo.GetStringComparer(CompareOptions.Ordinal);
 
-			_identifiers = new Dictionary<string, Identifier>(KeyComparer);
+            KeyComparer = CaseInsensitive ? comparerIgnoreCase : comparer;
+
+            KeyComparison = CaseInsensitive ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+#else
+            KeyComparer = CaseInsensitive ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
+
+            KeyComparison = CaseInsensitive ? StringComparison.InvariantCultureIgnoreCase : StringComparison.InvariantCulture;
+#endif
+
+            _identifiers = new Dictionary<string, Identifier>(KeyComparer);
 
 			_knownTypes = new Dictionary<string, ReferenceType>(KeyComparer);
 

@@ -29,9 +29,7 @@ namespace DynamicExpresso.Exceptions
 
         public static void PreserveStackTrace(this Exception exception)
 		{
-			try
-			{
-                
+			try {
 				typeof(Exception).GetMethod("PrepForRemoting",
 						System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
 						.Invoke(exception, new object[0]);
@@ -41,13 +39,5 @@ namespace DynamicExpresso.Exceptions
 				System.Diagnostics.Debug.Assert(false, ex.Message);
 			}
 		}
-
-#if WINDOWS_UWP
-        public static void ThrowWithStackTracePreserved(this Exception exception)
-	    {
-	        var capturedException = ExceptionDispatchInfo.Capture(exception);
-	        capturedException?.Throw();
-	    }
-#endif
     }
 }
