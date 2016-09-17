@@ -41,16 +41,24 @@ namespace DynamicExpresso.Parsing
 		Token _token;
 
 		BindingFlags _bindingCase;
-		MemberFilter _memberFilterCase;
 
-		Parser(ParserArguments arguments)
+#if !WINDOWS_UWP
+        MemberFilter _memberFilterCase;
+
+#endif
+
+        Parser(ParserArguments arguments)
 		{
 			_arguments = arguments;
 
-			_bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
+#if WINDOWS_UWP
+            _bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : 0;
+#else
+            _bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
 			_memberFilterCase = arguments.Settings.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
+#endif
 
-			_expressionText = arguments.ExpressionText ?? string.Empty;
+            _expressionText = arguments.ExpressionText ?? string.Empty;
 			_expressionTextLength = _expressionText.Length;
 			SetTextPos(0);
 			NextToken();
@@ -1167,8 +1175,19 @@ namespace DynamicExpresso.Parsing
 					(staticAccess ? BindingFlags.Static : BindingFlags.Instance) | _bindingCase;
 			foreach (Type t in SelfAndBaseTypes(type))
 			{
-				MemberInfo[] members = t.FindMembers(MemberTypes.Property | MemberTypes.Field, flags, _memberFilterCase, memberName);
-				if (members.Length != 0)
+#if WINDOWS_UWP
+                var fields = type.GetFields(flags).Select(f => f as MemberInfo);
+                var properties = type.GetProperties(flags).Select(p => p as MemberInfo);
+			    MemberInfo[] members = fields.Concat(properties)
+			        .Where(f => _arguments.Settings.CaseInsensitive
+			                    ? f.Name.Equals(memberName, StringComparison.CurrentCultureIgnoreCase)
+                                : f.Name == memberName)
+                    .Select(m => m)
+                    .ToArray();
+#else
+                MemberInfo[] members = t.FindMembers(MemberTypes.Property | MemberTypes.Field, flags, _memberFilterCase, memberName);
+#endif
+                if (members.Length != 0)
 					return members[0];
 			}
 			return null;
@@ -1186,8 +1205,17 @@ namespace DynamicExpresso.Parsing
 					(staticAccess ? BindingFlags.Static : BindingFlags.Instance) | _bindingCase;
 			foreach (Type t in SelfAndBaseTypes(type))
 			{
-				MemberInfo[] members = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, methodName);
-				var applicableMethods = FindBestMethod(members.Cast<MethodBase>(), args);
+#if WINDOWS_UWP
+                MethodInfo[] members = t.GetMethods(flags)
+                    .Where(m => _arguments.Settings.CaseInsensitive
+                                ? m.Name.Equals(methodName, StringComparison.CurrentCultureIgnoreCase)
+                                : m.Name == methodName)
+                    .Select(m => m)
+                    .ToArray();
+#else
+                MemberInfo[] members = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, methodName);
+#endif
+                var applicableMethods = FindBestMethod(members.Cast<MethodBase>(), args);
 
 				if (applicableMethods.Length > 0)
 					return applicableMethods;
@@ -1226,7 +1254,7 @@ namespace DynamicExpresso.Parsing
 
 		static IEnumerable<Type> SelfAndBaseTypes(Type type)
 		{
-#if WINDOWS_UWP          
+#if WINDOWS_UWP
             if (type.GetTypeInfo().IsInterface)
 #else
             if (type.IsInterface)

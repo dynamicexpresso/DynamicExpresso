@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.UnitTest", "test\DynamicExpresso.UnitTest\DynamicExpresso.UnitTest.csproj", "{33157A92-C6B2-4A51-8262-1FEBFD6558BE}"
 EndProject
@@ -25,9 +25,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.Universal",
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		src\DynamicExpresso.Shared\DynamicExpresso.Shared.projitems*{c6b7c0d2-b84a-4307-9c61-d95613db564d}*SharedItemsImports = 4
 		src\DynamicExpresso.Shared\DynamicExpresso.Shared.projitems*{1e6f835a-3610-4359-a7cf-ff20c6f27ede}*SharedItemsImports = 4
 		src\DynamicExpresso.Shared\DynamicExpresso.Shared.projitems*{3f5164d3-84d9-4f43-a413-52c9d0afcd40}*SharedItemsImports = 13
+		src\DynamicExpresso.Shared\DynamicExpresso.Shared.projitems*{c6b7c0d2-b84a-4307-9c61-d95613db564d}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,8 +88,8 @@ Global
 		{35AC41DC-3783-466D-BD2C-C1D8EABEA551}.Release|x86.Build.0 = Release|Any CPU
 		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|ARM.ActiveCfg = Debug|ARM
-		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|ARM.Build.0 = Debug|ARM
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|ARM.Build.0 = Debug|Any CPU
 		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|x64.ActiveCfg = Debug|x64
 		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|x64.Build.0 = Debug|x64
 		{1E6F835A-3610-4359-A7CF-FF20C6F27EDE}.Debug|x86.ActiveCfg = Debug|x86
