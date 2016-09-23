@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.CSharp.RuntimeBinder;
+using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -850,8 +852,25 @@ namespace DynamicExpresso.Parsing
 			return GeneratePropertyOrFieldExpression(type, instance, errorPos, id);
 		}
 
+		bool IsDynamic(Type type)
+		{
+			return type.IsAssignableFrom(typeof(IDynamicMetaObjectProvider)) ||
+				type.IsAssignableFrom(typeof(ExpandoObject));
+		}
+
 		Expression GeneratePropertyOrFieldExpression(Type type, Expression instance, int errorPos, string propertyOrFieldName)
 		{
+			if (IsDynamic(type))
+			{
+				var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
+					CSharpBinderFlags.None,
+					propertyOrFieldName,
+					type,
+					new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) }
+					);
+
+				return Expression.Dynamic(binder, typeof(object), instance);
+			}
 			MemberInfo member = FindPropertyOrField(type, propertyOrFieldName, instance == null);
 			if (member != null)
 			{
@@ -866,6 +885,21 @@ namespace DynamicExpresso.Parsing
 		Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName)
 		{
 			Expression[] args = ParseArgumentList();
+
+			if (IsDynamic(type))
+			{
+				var argsDynamic = args.ToList();
+				argsDynamic.Insert(0, instance);
+				var binderM = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
+					CSharpBinderFlags.None,
+					methodName,
+					null,
+					type,
+					argsDynamic.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null))
+					);
+
+				return Expression.Dynamic(binderM, typeof(object), argsDynamic);
+			}
 
 			var methodInvocationExpression = ParseNormalMethodInvocation(type, instance, errorPos, methodName, args);
 
