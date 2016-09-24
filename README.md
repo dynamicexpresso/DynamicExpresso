@@ -61,7 +61,8 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 - Can generate delegates or lambda expression
 - Full suite of unit tests
 - Good performance compared to other similar projects
-- Partial support for generic, params array and extension methods
+- Partial support of generic, params array and extension methods
+- Partial support of `dynamic` (`ExpandoObject` for get properties and method invocation)
 - Case insensitive expressions (default is case sensitive)
 - Ability to discover identifiers (variables, types, parameters) of a given expression
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain

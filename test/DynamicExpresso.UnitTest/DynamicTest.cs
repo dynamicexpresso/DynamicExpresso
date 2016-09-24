@@ -1,11 +1,8 @@
 ﻿using Microsoft.CSharp.RuntimeBinder;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
 using System.Dynamic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -13,7 +10,7 @@ namespace DynamicExpresso.UnitTest
 	public class DynamicTest
 	{
 		[Test]
-		public void Read_Property_of_an_ExpandoObject()
+		public void Get_Property_of_an_ExpandoObject()
 		{
 			dynamic dyn = new ExpandoObject();
 			dyn.Foo = "bar";
@@ -22,6 +19,31 @@ namespace DynamicExpresso.UnitTest
 				.SetVariable("dyn", dyn);
 
 			Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
+		}
+
+		//[Test]
+		//public void Set_Property_of_an_ExpandoObject()
+		//{
+		//	dynamic dyn = new ExpandoObject();
+
+		//	var interpreter = new Interpreter()
+		//		.SetVariable("dyn", dyn);
+
+		//	interpreter.Eval("dyn.Foo = 6");
+
+		//	Assert.AreEqual(6, dyn.Foo);
+		//}
+
+		[Test]
+		public void Standard_properties_have_precedence_over_dynamic_properties()
+		{
+			var dyn = new TestDynamicClass();
+			dyn.RealProperty = "bar";
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", dyn);
+
+			Assert.AreEqual(dyn.RealProperty, interpreter.Eval("dyn.RealProperty"));
 		}
 
 		[Test]
@@ -34,6 +56,17 @@ namespace DynamicExpresso.UnitTest
 				.SetVariable("dyn", dyn);
 
 			Assert.AreEqual(dyn.Foo(), interpreter.Eval("dyn.Foo()"));
+		}
+
+		[Test]
+		public void Standard_methods_have_precedence_over_dynamic_methods()
+		{
+			var dyn = new TestDynamicClass();
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", dyn);
+
+			Assert.AreEqual(dyn.ToString(), interpreter.Eval("dyn.ToString()"));
 		}
 
 		[Test]
@@ -81,6 +114,24 @@ namespace DynamicExpresso.UnitTest
 			var expression = Expression.Lambda(methodCallExpression);
 
 			Assert.AreEqual(myInstance.MyMethod(), expression.Compile().DynamicInvoke());
+		}
+
+		public class TestDynamicClass : DynamicObject
+		{
+			public string RealProperty { get; set; }
+
+			public override DynamicMetaObject GetMetaObject(Expression parameter)
+			{
+				throw new Exception("This should not be called");
+			}
+			public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+			{
+				throw new Exception("This should not be called");
+			}
+			public override bool TryGetMember(GetMemberBinder binder, out object result)
+			{
+				throw new Exception("This should not be called");
+			}
 		}
 	}
 }
