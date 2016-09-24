@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using Microsoft.CSharp.RuntimeBinder;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -8,75 +9,78 @@ using System.Text;
 
 namespace DynamicExpresso.UnitTest
 {
-//	[TestFixture]
-//	public class DynamicTest
-//	{
-//		[Test]
-//		public void Read_Property_of_an_ExpandoObject()
-//		{
-//			dynamic dyn = new ExpandoObject();
-//			dyn.Foo = "bar";
-//
-//			var interpreter = new Interpreter()
-//				.SetVariable("dyn", dyn);
-//
-//			Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
-//		}
-//
-//		[Test]
-//		public void Invoke_Method_of_an_ExpandoObject()
-//		{
-//			dynamic dyn = new ExpandoObject();
-//			dyn.Foo = new Func<string>(() => "bar");
-//
-//			var interpreter = new Interpreter()
-//				.SetVariable("dyn", dyn);
-//
-//			Assert.AreEqual(dyn.Foo(), interpreter.Eval("dyn.Foo()")); 
-//		}
-//
-//		[Test]
-//		public void Case_Insensitive_Dynamic_Members()
-//		{
-//			dynamic dyn = new ExpandoObject();
-//			dyn.Bar = 10;
-//
-//			var result = new Interpreter()
-//				.Eval("dyn.BAR", new Parameter("dyn", dyn));
-//
-//			Assert.AreEqual(10, result);
-//		}
-//
-//		[Test]
-//		public void Test_With_Standard_Object()
-//		{
-//			var myInstance = DateTime.Now;
-//
-//			var methodInfo = myInstance.GetType().GetMethod("ToUniversalTime");
-//
-//			var methodCallExpression = Expression.Call(Expression.Constant(myInstance), methodInfo);
-//			var expression = Expression.Lambda(methodCallExpression);
-//
-//			Assert.AreEqual(myInstance.ToUniversalTime(), expression.Compile().DynamicInvoke());
-//		}
-//
-//		[Test]
-//		public void Test_With_Dynamic_Object()
-//		{
-//			dynamic myInstance = new ExpandoObject();
-//			myInstance.MyMethod = new Func<string>(() => "hello world");
-//
-//			var binder = Binder.InvokeMember(
-//				CSharpBinderFlags.None,
-//				"MyMethod",
-//				null,
-//				this.GetType(),
-//				new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.Constant, null) });
-//
-//			var methodCallExpression = Expression.Dynamic(binder, typeof(object), Expression.Constant(myInstance));
-//			var expression = Expression.Lambda(methodCallExpression);
-//
-//			Assert.AreEqual(myInstance.MyMethod(), expression.Compile().DynamicInvoke());
-//		}
-//	}
+	[TestFixture]
+	public class DynamicTest
+	{
+		[Test]
+		public void Read_Property_of_an_ExpandoObject()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = "bar";
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", dyn);
+
+			Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
+		}
+
+		[Test]
+		public void Invoke_Method_of_an_ExpandoObject()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = new Func<string>(() => "bar");
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", dyn);
+
+			Assert.AreEqual(dyn.Foo(), interpreter.Eval("dyn.Foo()"));
+		}
+
+		[Test]
+		public void Case_Insensitive_Dynamic_Members()
+		{
+			Assert.Throws<RuntimeBinderException>(() =>
+			{
+				dynamic dyn = new ExpandoObject();
+				dyn.Bar = 10;
+
+				var result = new Interpreter()
+					.Eval("dyn.BAR", new Parameter("dyn", dyn));
+
+				Assert.AreEqual(10, result);
+			});
+		}
+
+		[Test]
+		public void Test_With_Standard_Object()
+		{
+			var myInstance = DateTime.Now;
+
+			var methodInfo = myInstance.GetType().GetMethod("ToUniversalTime");
+
+			var methodCallExpression = Expression.Call(Expression.Constant(myInstance), methodInfo);
+			var expression = Expression.Lambda(methodCallExpression);
+
+			Assert.AreEqual(myInstance.ToUniversalTime(), expression.Compile().DynamicInvoke());
+		}
+
+		[Test]
+		public void Test_With_Dynamic_Object()
+		{
+			dynamic myInstance = new ExpandoObject();
+			myInstance.MyMethod = new Func<string>(() => "hello world");
+
+			var binder = Binder.InvokeMember(
+				CSharpBinderFlags.None,
+				"MyMethod",
+				null,
+				this.GetType(),
+				new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.Constant, null) });
+
+			var methodCallExpression = Expression.Dynamic(binder, typeof(object), Expression.Constant(myInstance));
+			var expression = Expression.Lambda(methodCallExpression);
+
+			Assert.AreEqual(myInstance.MyMethod(), expression.Compile().DynamicInvoke());
+		}
+	}
 }
