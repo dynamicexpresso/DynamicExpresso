@@ -4,96 +4,99 @@ using System.Linq.Expressions;
 
 namespace DynamicExpresso.UnitTest
 {
-	[TestFixture]
-	public class GenerateDelegatesTest
-	{
-		[Test]
-		public void Parse_To_a_Delegate()
-		{
-			var target = new Interpreter();
+    [TestFixture]
+    public class GenerateDelegatesTest
+    {
+        [Test]
+        public void Parse_To_a_Delegate()
+        {
+            var target = new Interpreter();
 
-			var func = target.ParseAsDelegate<Func<double, double, double>>("Math.Pow(x, y) + 5", "x", "y");
+            var func = target.ParseAsDelegate<Func<double, double, double>>("Math.Pow(x, y) + 5", "x", "y");
 
-			Assert.AreEqual(Math.Pow(10, 2) + 5, func(10, 2));
-		}
+            Assert.AreEqual(Math.Pow(10, 2) + 5, func(10, 2));
 
-		[Test]
-		public void Parse_To_a_Delegate_With_No_Parameters()
-		{
-			var target = new Interpreter();
+            func = target.ParseAsDelegate<Func<double, double, double>>("Math.Pow(x, y) + .5", "x", "y");
+            Assert.AreEqual(Math.Pow(10, 2) + .5, func(10, 2));
+        }
 
-			var func = target.ParseAsDelegate<Func<int>>("50");
+        [Test]
+        public void Parse_To_a_Delegate_With_No_Parameters()
+        {
+            var target = new Interpreter();
 
-			Assert.AreEqual(50, func());
-		}
+            var func = target.ParseAsDelegate<Func<int>>("50");
 
-		[Test]
-		public void Parse_To_a_Delegate_With_One_Parameter()
-		{
-			var target = new Interpreter();
+            Assert.AreEqual(50, func());
+        }
 
-			var func = target.ParseAsDelegate<Func<string, int>>("arg.Length");
+        [Test]
+        public void Parse_To_a_Delegate_With_One_Parameter()
+        {
+            var target = new Interpreter();
 
-			Assert.AreEqual(4, func("ciao"));
-			Assert.AreEqual(9, func("123456879"));
-		}
+            var func = target.ParseAsDelegate<Func<string, int>>("arg.Length");
 
-		[Test]
-		public void Parse_To_a_Delegate_With_One_Parameter_With_Custom_Name()
-		{
-			var target = new Interpreter();
+            Assert.AreEqual(4, func("ciao"));
+            Assert.AreEqual(9, func("123456879"));
+        }
 
-			var argumentName = "val"; // if not specified the delegate parameter is used which is "arg"
-			var func = target.ParseAsDelegate<Func<string, int>>("val.Length", argumentName);
+        [Test]
+        public void Parse_To_a_Delegate_With_One_Parameter_With_Custom_Name()
+        {
+            var target = new Interpreter();
 
-			Assert.AreEqual(4, func("ciao"));
-			Assert.AreEqual(9, func("123456879"));
-		}
+            var argumentName = "val"; // if not specified the delegate parameter is used which is "arg"
+            var func = target.ParseAsDelegate<Func<string, int>>("val.Length", argumentName);
 
-		[Test]
-		public void Parse_To_a_Delegate_With_Two_Parameters()
-		{
-			var target = new Interpreter();
+            Assert.AreEqual(4, func("ciao"));
+            Assert.AreEqual(9, func("123456879"));
+        }
 
-			var func = target.ParseAsDelegate<Func<double, double, double>>("arg1 * arg2");
+        [Test]
+        public void Parse_To_a_Delegate_With_Two_Parameters()
+        {
+            var target = new Interpreter();
 
-			Assert.AreEqual(6, func(3, 2));
-			Assert.AreEqual(50, func(5, 10));
-		}
+            var func = target.ParseAsDelegate<Func<double, double, double>>("arg1 * arg2");
 
-		[Test]
-		public void Parse_To_a_Delegate_With_Two_Parameters_With_Custom_Name()
-		{
-			var target = new Interpreter();
+            Assert.AreEqual(6, func(3, 2));
+            Assert.AreEqual(50, func(5, 10));
+        }
 
-			var argumentNames = new string[] { "x", "y" };
-			var func = target.ParseAsDelegate<Func<double, double, double>>("x * y", argumentNames);
+        [Test]
+        public void Parse_To_a_Delegate_With_Two_Parameters_With_Custom_Name()
+        {
+            var target = new Interpreter();
 
-			Assert.AreEqual(6, func(3, 2));
-			Assert.AreEqual(50, func(5, 10));
-		}
+            var argumentNames = new string[] { "x", "y" };
+            var func = target.ParseAsDelegate<Func<double, double, double>>("x * y", argumentNames);
 
-		[Test]
-		public void Parse_To_a_Custom_Delegate()
-		{
-			var target = new Interpreter();
+            Assert.AreEqual(6, func(3, 2));
+            Assert.AreEqual(50, func(5, 10));
+        }
 
-			var func = target.ParseAsDelegate<MyCustomDelegate>("x + y.Length");
+        [Test]
+        public void Parse_To_a_Custom_Delegate()
+        {
+            var target = new Interpreter();
 
-			Assert.AreEqual(7, func(3, "ciao"));
-			Assert.AreEqual(10, func(5, "mondo"));
-		}
+            var func = target.ParseAsDelegate<MyCustomDelegate>("x + y.Length");
 
-		delegate int MyCustomDelegate(int x, string y);
+            Assert.AreEqual(7, func(3, "ciao"));
+            Assert.AreEqual(10, func(5, "mondo"));
+        }
 
-		[ExpectedException(typeof(ParseException))]
-		[Test]
-		public void Return_Type_Mismatch_Cause_An_Exception()
-		{
-			var target = new Interpreter();
+        delegate int MyCustomDelegate(int x, string y);
 
-			// expected a double but I return a string
-			target.ParseAsDelegate<Func<double>>("\"ciao\"");
-		}
-	}
+        [ExpectedException(typeof(ParseException))]
+        [Test]
+        public void Return_Type_Mismatch_Cause_An_Exception()
+        {
+            var target = new Interpreter();
+
+            // expected a double but I return a string
+            target.ParseAsDelegate<Func<double>>("\"ciao\"");
+        }
+    }
 }
