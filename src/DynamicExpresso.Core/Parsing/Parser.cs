@@ -1836,261 +1836,261 @@ namespace DynamicExpresso.Parsing
 
             TokenId t = TokenId.Unknown;
             var tokenPos = _parsePosition;
-            bool isDouble = false;
-            if (_parseChar == '.')
-            {
-                NextChar();
-                if (Char.IsDigit(_parseChar))
-                {
-                    isDouble = true;
-                    t = TokenId.RealLiteral;
-                    do
+            switch (_parseChar)
+			{
+				case '!':
+					NextChar();
+					if (_parseChar == '=')
+					{
+						NextChar();
+						t = TokenId.ExclamationEqual;
+					}
+					else
+					{
+						t = TokenId.Exclamation;
+					}
+					break;
+				case '%':
+					NextChar();
+					t = TokenId.Percent;
+					break;
+				case '&':
+					NextChar();
+					if (_parseChar == '&')
+					{
+						NextChar();
+						t = TokenId.DoubleAmphersand;
+					}
+					else
+					{
+						throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
+					}
+					break;
+				case '(':
+					NextChar();
+					t = TokenId.OpenParen;
+					break;
+				case ')':
+					NextChar();
+					t = TokenId.CloseParen;
+					break;
+				case '*':
+					NextChar();
+					t = TokenId.Asterisk;
+					break;
+				case '+':
+					NextChar();
+					t = TokenId.Plus;
+					break;
+				case ',':
+					NextChar();
+					t = TokenId.Comma;
+					break;
+				case '-':
+					NextChar();
+					t = TokenId.Minus;
+					break;
+				case '.':
+					NextChar();
+                    if (Char.IsDigit(_parseChar))
                     {
-                        NextChar();
-                    } while (Char.IsDigit(_parseChar));
-                    _token.id = t;
-                    _token.text = _expressionText.Substring(tokenPos, _parsePosition - tokenPos);
-                    _token.pos = tokenPos;
-                }
-                else
-                {
-                    PreviousChar();
-                }
-            }
-            if (!isDouble) { 
-                switch (_parseChar)
-			    {
-				    case '!':
-					    NextChar();
-					    if (_parseChar == '=')
-					    {
-						    NextChar();
-						    t = TokenId.ExclamationEqual;
-					    }
-					    else
-					    {
-						    t = TokenId.Exclamation;
-					    }
-					    break;
-				    case '%':
-					    NextChar();
-					    t = TokenId.Percent;
-					    break;
-				    case '&':
-					    NextChar();
-					    if (_parseChar == '&')
-					    {
-						    NextChar();
-						    t = TokenId.DoubleAmphersand;
-					    }
-					    else
-					    {
-						    throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
-					    }
-					    break;
-				    case '(':
-					    NextChar();
-					    t = TokenId.OpenParen;
-					    break;
-				    case ')':
-					    NextChar();
-					    t = TokenId.CloseParen;
-					    break;
-				    case '*':
-					    NextChar();
-					    t = TokenId.Asterisk;
-					    break;
-				    case '+':
-					    NextChar();
-					    t = TokenId.Plus;
-					    break;
-				    case ',':
-					    NextChar();
-					    t = TokenId.Comma;
-					    break;
-				    case '-':
-					    NextChar();
-					    t = TokenId.Minus;
-					    break;
-				    case '.':
-					    NextChar();
-					    t = TokenId.Dot;
-					    break;
-				    case '/':
-					    NextChar();
-					    t = TokenId.Slash;
-					    break;
-				    case ':':
-					    NextChar();
-					    t = TokenId.Colon;
-					    break;
-				    case '<':
-					    NextChar();
-					    if (_parseChar == '=')
-					    {
-						    NextChar();
-						    t = TokenId.LessThanEqual;
-					    }
-					    else
-					    {
-						    t = TokenId.LessThan;
-					    }
-					    break;
-				    case '=':
-					    NextChar();
-					    if (_parseChar == '=')
-					    {
-						    NextChar();
-						    t = TokenId.DoubleEqual;
-					    }
-					    else
-					    {
-						    t = TokenId.Equal;
-					    }
-					    break;
-				    case '>':
-					    NextChar();
-					    if (_parseChar == '=')
-					    {
-						    NextChar();
-						    t = TokenId.GreaterThanEqual;
-					    }
-					    else
-					    {
-						    t = TokenId.GreaterThan;
-					    }
-					    break;
-				    case '?':
-					    NextChar();
-					    t = TokenId.Question;
-					    break;
-				    case '[':
-					    NextChar();
-					    t = TokenId.OpenBracket;
-					    break;
-				    case ']':
-					    NextChar();
-					    t = TokenId.CloseBracket;
-					    break;
-				    case '|':
-					    NextChar();
-					    if (_parseChar == '|')
-					    {
-						    NextChar();
-						    t = TokenId.DoubleBar;
-					    }
-					    else
-					    {
-						    t = TokenId.Bar;
-					    }
-					    break;
-				    case '"':
-					    NextChar();
-					    bool isEscapeS = false;
-					    bool isEndS = _parseChar == '\"';
-					    while (_parsePosition < _expressionTextLength && !isEndS)
-					    {
-						    isEscapeS = _parseChar == '\\' && !isEscapeS;
-						    NextChar();
-						    isEndS = (_parseChar == '\"' && !isEscapeS);
-					    }
+                        t = TokenId.RealLiteral;
+                        do
+                        {
+                            NextChar();
+                        } while (Char.IsDigit(_parseChar));
+                        if (_parseChar == 'E' || _parseChar == 'e')
+                        {
+                            t = TokenId.RealLiteral;
+                            NextChar();
+                            if (_parseChar == '+' || _parseChar == '-')
+                                NextChar();
+                            ValidateDigit();
+                            do
+                            {
+                                NextChar();
+                            } while (Char.IsDigit(_parseChar));
+                        }
+                        if (_parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm')
+                            NextChar();
+                        break;
+                    }
+                    t = TokenId.Dot;
+					break;
+				case '/':
+					NextChar();
+					t = TokenId.Slash;
+					break;
+				case ':':
+					NextChar();
+					t = TokenId.Colon;
+					break;
+				case '<':
+					NextChar();
+					if (_parseChar == '=')
+					{
+						NextChar();
+						t = TokenId.LessThanEqual;
+					}
+					else
+					{
+						t = TokenId.LessThan;
+					}
+					break;
+				case '=':
+					NextChar();
+					if (_parseChar == '=')
+					{
+						NextChar();
+						t = TokenId.DoubleEqual;
+					}
+					else
+					{
+						t = TokenId.Equal;
+					}
+					break;
+				case '>':
+					NextChar();
+					if (_parseChar == '=')
+					{
+						NextChar();
+						t = TokenId.GreaterThanEqual;
+					}
+					else
+					{
+						t = TokenId.GreaterThan;
+					}
+					break;
+				case '?':
+					NextChar();
+					t = TokenId.Question;
+					break;
+				case '[':
+					NextChar();
+					t = TokenId.OpenBracket;
+					break;
+				case ']':
+					NextChar();
+					t = TokenId.CloseBracket;
+					break;
+				case '|':
+					NextChar();
+					if (_parseChar == '|')
+					{
+						NextChar();
+						t = TokenId.DoubleBar;
+					}
+					else
+					{
+						t = TokenId.Bar;
+					}
+					break;
+				case '"':
+					NextChar();
+					bool isEscapeS = false;
+					bool isEndS = _parseChar == '\"';
+					while (_parsePosition < _expressionTextLength && !isEndS)
+					{
+						isEscapeS = _parseChar == '\\' && !isEscapeS;
+						NextChar();
+						isEndS = (_parseChar == '\"' && !isEscapeS);
+					}
 
-					    if (_parsePosition == _expressionTextLength)
-						    throw CreateParseException(_parsePosition, ErrorMessages.UnterminatedStringLiteral);
+					if (_parsePosition == _expressionTextLength)
+						throw CreateParseException(_parsePosition, ErrorMessages.UnterminatedStringLiteral);
 
-					    NextChar();
+					NextChar();
 
-					    t = TokenId.StringLiteral;
-					    break;
-				    case '\'':
-					    NextChar();
-					    bool isEscapeC = false;
-					    bool isEndC = false;
-					    while (_parsePosition < _expressionTextLength && !isEndC)
-					    {
-						    isEscapeC = _parseChar == '\\' && !isEscapeC;
-						    NextChar();
-						    isEndC = (_parseChar == '\'' && !isEscapeC);
-					    }
+					t = TokenId.StringLiteral;
+					break;
+				case '\'':
+					NextChar();
+					bool isEscapeC = false;
+					bool isEndC = false;
+					while (_parsePosition < _expressionTextLength && !isEndC)
+					{
+						isEscapeC = _parseChar == '\\' && !isEscapeC;
+						NextChar();
+						isEndC = (_parseChar == '\'' && !isEscapeC);
+					}
 
-					    if (_parsePosition == _expressionTextLength)
-						    throw CreateParseException(_parsePosition, ErrorMessages.UnterminatedStringLiteral);
+					if (_parsePosition == _expressionTextLength)
+						throw CreateParseException(_parsePosition, ErrorMessages.UnterminatedStringLiteral);
 
-					    NextChar();
+					NextChar();
 
-					    t = TokenId.CharLiteral;
-					    break;
-				    default:
+					t = TokenId.CharLiteral;
+					break;
+				default:
 
-					    if (Char.IsLetter(_parseChar) || _parseChar == '@' || _parseChar == '_')
-					    {
-						    do
-						    {
-							    NextChar();
-						    } while (Char.IsLetterOrDigit(_parseChar) || _parseChar == '_');
-						    t = TokenId.Identifier;
-						    break;
-					    }
+					if (Char.IsLetter(_parseChar) || _parseChar == '@' || _parseChar == '_')
+					{
+						do
+						{
+							NextChar();
+						} while (Char.IsLetterOrDigit(_parseChar) || _parseChar == '_');
+						t = TokenId.Identifier;
+						break;
+					}
 
-					    if (Char.IsDigit(_parseChar))
-					    {
-						    t = TokenId.IntegerLiteral;
-						    do
-						    {
-							    NextChar();
-						    } while (Char.IsDigit(_parseChar));
+					if (Char.IsDigit(_parseChar))
+					{
+						t = TokenId.IntegerLiteral;
+						do
+						{
+							NextChar();
+						} while (Char.IsDigit(_parseChar));
 
-						    if (_parseChar == '.')
-						    {
-							    NextChar();
-							    if (Char.IsDigit(_parseChar))
-							    {
-								    t = TokenId.RealLiteral;
-								    do
-								    {
-									    NextChar();
-								    } while (Char.IsDigit(_parseChar));
-							    }
-							    else
-							    {
-								    PreviousChar();
-								    break;
-							    }
-						    }
+						if (_parseChar == '.')
+						{
+							NextChar();
+							if (Char.IsDigit(_parseChar))
+							{
+								t = TokenId.RealLiteral;
+								do
+								{
+									NextChar();
+								} while (Char.IsDigit(_parseChar));
+							}
+							else
+							{
+								PreviousChar();
+								break;
+							}
+						}
 
-						    if (_parseChar == 'E' || _parseChar == 'e')
-						    {
-							    t = TokenId.RealLiteral;
-							    NextChar();
-							    if (_parseChar == '+' || _parseChar == '-')
-								    NextChar();
-							    ValidateDigit();
-							    do
-							    {
-								    NextChar();
-							    } while (Char.IsDigit(_parseChar));
-						    }
-						    if (_parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm')
-							    NextChar();
-						    break;
-					    }
-					    if (_parsePosition == _expressionTextLength)
-					    {
-						    t = TokenId.End;
-						    break;
-					    }
-					    throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
-			    }
-            }
+						if (_parseChar == 'E' || _parseChar == 'e')
+						{
+							t = TokenId.RealLiteral;
+							NextChar();
+							if (_parseChar == '+' || _parseChar == '-')
+								NextChar();
+							ValidateDigit();
+							do
+							{
+								NextChar();
+							} while (Char.IsDigit(_parseChar));
+						}
+						if (_parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm')
+							NextChar();
+						break;
+					}
+					if (_parsePosition == _expressionTextLength)
+					{
+						t = TokenId.End;
+						break;
+					}
+					throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
+			}
             _token.id = t;
 			_token.text = _expressionText.Substring(tokenPos, _parsePosition - tokenPos);
 			_token.pos = tokenPos;
 		}
 
-		//bool TokenIdentifierIs(string id)
-		//{
-		//	return _token.id == TokenId.Identifier && String.Equals(id, _token.text, StringComparison.OrdinalIgnoreCase);
-		//}
+        //bool TokenIdentifierIs(string id)
+        //{
+        //	return _token.id == TokenId.Identifier && String.Equals(id, _token.text, StringComparison.OrdinalIgnoreCase);
+        //}
 
 		string GetIdentifier()
 		{
