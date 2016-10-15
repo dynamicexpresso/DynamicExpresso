@@ -16,10 +16,8 @@ namespace DynamicExpresso
 	[Serializable]
 	public class ParseException : DynamicExpressoException
 	{
-		static readonly string PARSE_EXCEPTION_FORMAT = ErrorMessages.Format;
-
 		public ParseException(string message, int position)
-			: base(string.Format(PARSE_EXCEPTION_FORMAT, message, position)) 
+			: base(string.Format(ErrorMessages.Format, message, position)) 
 		{
 			Position = position;
 		}
