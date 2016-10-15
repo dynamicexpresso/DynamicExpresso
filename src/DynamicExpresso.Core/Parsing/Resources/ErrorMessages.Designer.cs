@@ -196,6 +196,15 @@ namespace DynamicExpresso.Parsing {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} (at index {1})..
+        /// </summary>
+        internal static string Format {
+            get {
+                return ResourceManager.GetString("Format", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Identifier expected.
         /// </summary>
         internal static string IdentifierExpected {

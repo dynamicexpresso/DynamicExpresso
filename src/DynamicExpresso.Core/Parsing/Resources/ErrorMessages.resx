@@ -162,6 +162,9 @@
   <data name="FirstExprMustBeBool" xml:space="preserve">
     <value>The first expression must be of type 'Boolean'</value>
   </data>
+  <data name="Format" xml:space="preserve">
+    <value>{0} (at index {1}).</value>
+  </data>
   <data name="IdentifierExpected" xml:space="preserve">
     <value>Identifier expected</value>
   </data>
