@@ -50,6 +50,11 @@
     </Compile>
     <Compile Include="AssignmentOperators.cs" />
     <Compile Include="Detector.cs" />
+    <Compile Include="Parsing\Resources\ErrorMessages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ErrorMessages.resx</DependentUpon>
+    </Compile>
     <Compile Include="Exceptions\DynamicExpressoException.cs" />
     <Compile Include="Exceptions\ExceptionExtensions.cs" />
     <Compile Include="Exceptions\AssignmentOperatorDisabledException.cs" />
@@ -67,7 +72,6 @@
     <Compile Include="InterpreterOptions.cs" />
     <Compile Include="Exceptions\ParseException.cs" />
     <Compile Include="Parsing\Parser.cs" />
-    <Compile Include="Parsing\ErrorMessages.cs" />
     <Compile Include="Lambda.cs" />
     <Compile Include="Interpreter.cs" />
     <Compile Include="Parameter.cs" />
@@ -80,6 +84,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DynamicExpresso.Core.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Parsing\Resources\ErrorMessages.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
