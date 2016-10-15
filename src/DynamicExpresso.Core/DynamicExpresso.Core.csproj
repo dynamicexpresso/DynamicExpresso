@@ -50,7 +50,7 @@
     </Compile>
     <Compile Include="AssignmentOperators.cs" />
     <Compile Include="Detector.cs" />
-    <Compile Include="Parsing\Resources\ErrorMessages.Designer.cs">
+    <Compile Include="Resources\ErrorMessages.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ErrorMessages.resx</DependentUpon>
@@ -86,7 +86,7 @@
     <None Include="DynamicExpresso.Core.nuspec" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Parsing\Resources\ErrorMessages.resx">
+    <EmbeddedResource Include="Resources\ErrorMessages.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ErrorMessages.Designer.cs</LastGenOutput>
     </EmbeddedResource>

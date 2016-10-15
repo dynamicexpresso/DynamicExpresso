@@ -9,6 +9,7 @@ using System.Threading;
 using System.Security.Permissions;
 using System.Runtime.Serialization;
 using DynamicExpresso.Parsing;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso
 {
