@@ -863,7 +863,7 @@ namespace DynamicExpresso.Parsing
 						Expression.Field(instance, (FieldInfo)member);
 			}
 
-			if (IsDynamicType(type))
+			if (IsDynamicType(type) || IsDynamicExpression(instance))
 				return ParseDynamicProperty(type, instance, propertyOrFieldName);
 
 			throw CreateParseException(errorPos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(type));
@@ -882,7 +882,7 @@ namespace DynamicExpresso.Parsing
 			if (methodInvocationExpression != null)
 				return methodInvocationExpression;
 
-			if (IsDynamicType(type))
+			if (IsDynamicType(type) || IsDynamicExpression(instance))
 				return ParseDynamicMethodInvocation(type, instance, methodName, args);
 
 			throw new NoApplicableMethodException(methodName, GetTypeName(type), errorPos);
@@ -1069,6 +1069,11 @@ namespace DynamicExpresso.Parsing
 		static bool IsDynamicType(Type type)
 		{
 			return typeof(IDynamicMetaObjectProvider).IsAssignableFrom(type);
+		}
+
+		static bool IsDynamicExpression(Expression instance)
+		{
+			return instance != null && instance.NodeType == ExpressionType.Dynamic;
 		}
 
 		static Type GetNonNullableType(Type type)
