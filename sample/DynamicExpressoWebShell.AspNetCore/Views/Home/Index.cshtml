@@ -1,0 +1,71 @@
+﻿@using System.Reflection
+@{
+    string assemblyVersion = typeof(DynamicExpresso.Interpreter).GetTypeInfo().Assembly.GetName().Version.ToString();
+}
+
+<div class="row">
+    <div id="terminal">
+        <p>Dynamic Expresso version: @assemblyVersion</p>
+        @*<p>type "help" for help</p>*@
+
+    </div>
+</div>
+
+<div class="row">
+    <p>
+        Dynamic Expresso understands a subset of C# syntax (numeric and string operators, comparison operators, typeof, new, primitive types, Math and Convert classes, ...).
+        It supports single statement expression only. See <a href="https://github.com/davideicardi/DynamicExpresso">documentation</a> for more information.<br />
+        In this example all the results are serialized using json to be more human readable.
+    </p>
+</div>
+
+<div class="row">
+    <div class="span6">
+        <div class="">
+            <h3>Commands examples</h3>
+            <p>
+                Here some expressions that you can try:
+            </p>
+            <ul>
+                <li><code>5 + 2 * 8 / (80 + 9.9)</code></li>
+                <li><code>"Hello" + " " + "world!"</code></li>
+                <li><code>DateTime.Now.AddDays(30)</code></li>
+                <li><code>new DateTime(2020, 2, 13)</code></li>
+                <li><code>string.Format("My name is {0}. Today is {1}", "R2-D2", DateTime.Now.ToShortDateString())</code></li>
+                <li><code>Commands.Count</code></li>
+                <li><code>Commands.Clear()</code></li>
+                <li><code>Commands.GetLastCommands()</code></li>
+            </ul>
+
+            <p>
+                The <code>Commands</code> variable is just for demostration purpose.
+            </p>
+        </div>
+    </div>
+
+    <div class="span6">
+        <div class="">
+            <h3>credits</h3>
+            <p>
+                <small>
+                    shell javascript code is based on the mongulator project (<a href="https://github.com/banker/mongulator">https://github.com/banker/mongulator</a>)<br />
+                    Copyright (c) 2009 Kyle Banker
+                </small>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+            $(document).ready(function () {
+                var deHandler = new DynamicExpressoHandler({ interpreterUrl: "@Url.Action("Eval", "Interpreter")" });
+                var terminal = new ReadLine({
+                    htmlForInput: DefaultInputHtml,
+                    handler: deHandler,
+                    scoper: null
+                });
+            });
+    </script>
+}

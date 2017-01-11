@@ -6,22 +6,28 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+#if !NET_COREAPP
 using System.Security.Permissions;
 using System.Runtime.Serialization;
+#endif
 
 namespace DynamicExpresso
 {
+#if !NET_COREAPP
 	[Serializable]
-	public class ParseException : DynamicExpressoException
-	{
-		const string PARSE_EXCEPTION_FORMAT = "{0} (at index {1}).";
+#endif
+    public class ParseException : DynamicExpressoException
+    {
+        const string PARSE_EXCEPTION_FORMAT = "{0} (at index {1}).";
 
-		public ParseException(string message, int position)
-			: base(string.Format(PARSE_EXCEPTION_FORMAT, message, position)) 
-		{
-			Position = position;
-		}
+        public int Position { get; private set; }
 
+        public ParseException(string message, int position)
+            : base(string.Format(PARSE_EXCEPTION_FORMAT, message, position))
+        {
+            Position = position;
+        }
+#if !NET_COREAPP
 		protected ParseException(
 			SerializationInfo info,
 			StreamingContext context)
@@ -30,8 +36,6 @@ namespace DynamicExpresso
 			Position = info.GetInt32("Position");
 		}
 
-		public int Position { get; private set; }
-
 		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
@@ -39,5 +43,6 @@ namespace DynamicExpresso
 
 			base.GetObjectData(info, context);
 		}
-	}
+#endif
+    }
 }

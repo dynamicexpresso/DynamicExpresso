@@ -40,14 +40,20 @@ namespace DynamicExpresso.Parsing
 		Token _token;
 
 		BindingFlags _bindingCase;
-		MemberFilter _memberFilterCase;
+#if !NET_COREAPP
+        MemberFilter _memberFilterCase;
+#endif
 
-		Parser(ParserArguments arguments)
+        Parser(ParserArguments arguments)
 		{
 			_arguments = arguments;
 
-			_bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
-			_memberFilterCase = arguments.Settings.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
+#if NET_COREAPP
+            _bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : 0;
+#else
+            _bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
+            _memberFilterCase = arguments.Settings.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
+#endif
 
 			_expressionText = arguments.ExpressionText ?? string.Empty;
 			_expressionTextLength = _expressionText.Length;
@@ -768,8 +774,14 @@ namespace DynamicExpresso.Parsing
 			NextToken();
 			if (_token.id == TokenId.Question)
 			{
-				if (!type.IsValueType || IsNullableType(type))
-					throw CreateParseException(errorPos, ErrorMessages.TypeHasNoNullableForm, GetTypeName(type));
+#if NET_COREAPP
+                if (!type.GetTypeInfo().IsValueType || IsNullableType(type))
+#else
+                if (!type.IsValueType || IsNullableType(type))
+#endif
+                {
+                    throw CreateParseException(errorPos, ErrorMessages.TypeHasNoNullableForm, GetTypeName(type));
+                }
 				type = typeof(Nullable<>).MakeGenericType(type);
 				NextToken();
 			}
@@ -982,11 +994,15 @@ namespace DynamicExpresso.Parsing
 				type,
 				new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) }
 				);
+#if NET_COREAPP
+            return DynamicExpression.Dynamic(binder, typeof(object), instance);
+#else
+            return Expression.Dynamic(binder, typeof(object), instance);
+#endif
 
-			return Expression.Dynamic(binder, typeof(object), instance);
-		}
+        }
 
-		private static Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
+        private static Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
@@ -997,9 +1013,12 @@ namespace DynamicExpresso.Parsing
 				type,
 				argsDynamic.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null))
 				);
-
-			return Expression.Dynamic(binderM, typeof(object), argsDynamic);
-		}
+#if NET_COREAPP
+            return DynamicExpression.Dynamic(binderM, typeof(object), argsDynamic);
+#else
+            return Expression.Dynamic(binderM, typeof(object), argsDynamic);
+#endif
+        }
 
 		Expression[] ParseArgumentList()
 		{
@@ -1063,7 +1082,11 @@ namespace DynamicExpresso.Parsing
 
 		static bool IsNullableType(Type type)
 		{
-			return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+#if NET_COREAPP
+            return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+#else
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+#endif
 		}
 
 		static bool IsDynamicType(Type type)
@@ -1107,7 +1130,11 @@ namespace DynamicExpresso.Parsing
 		static int GetNumericTypeKind(Type type)
 		{
 			type = GetNonNullableType(type);
-			if (type.IsEnum) return 0;
+#if NET_COREAPP
+            if (type.GetTypeInfo().IsEnum) return 0;
+#else
+            if (type.IsEnum) return 0;
+#endif
 			switch (Type.GetTypeCode(type))
 			{
 				case TypeCode.Char:
@@ -1170,7 +1197,18 @@ namespace DynamicExpresso.Parsing
 
 			foreach (var t in SelfAndBaseTypes(type))
 			{
-				var members = t.FindMembers(MemberTypes.Property | MemberTypes.Field, flags, _memberFilterCase, memberName);
+#if NET_COREAPP
+                var fields = t.GetFields(flags).Select(f => f as MemberInfo);
+                var properties = t.GetProperties(flags).Select(p => p as MemberInfo);
+			    var members = fields.Concat(properties)
+			        .Where(f => _arguments.Settings.CaseInsensitive
+			                    ? f.Name.Equals(memberName, StringComparison.CurrentCultureIgnoreCase)
+                                : f.Name == memberName)
+                    .Select(m => m)
+                    .ToArray();
+#else
+                var members = t.FindMembers(MemberTypes.Property | MemberTypes.Field, flags, _memberFilterCase, memberName);
+#endif
 				if (members.Length != 0)
 					return members[0];
 			}
@@ -1189,7 +1227,16 @@ namespace DynamicExpresso.Parsing
 					(staticAccess ? BindingFlags.Static : BindingFlags.Instance) | _bindingCase;
 			foreach (var t in SelfAndBaseTypes(type))
 			{
-				var members = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, methodName);
+#if NET_COREAPP
+                var members = t.GetMethods(flags)
+                    .Where(m => _arguments.Settings.CaseInsensitive
+                                ? m.Name.Equals(methodName, StringComparison.CurrentCultureIgnoreCase)
+                                : m.Name == methodName)
+                    .Select(m => m)
+                    .ToArray();
+#else
+                var members = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, methodName);
+#endif
 				var applicableMethods = FindBestMethod(members.Cast<MethodBase>(), args);
 
 				if (applicableMethods.Length > 0)
@@ -1229,9 +1276,13 @@ namespace DynamicExpresso.Parsing
 
 		static IEnumerable<Type> SelfAndBaseTypes(Type type)
 		{
-			if (type.IsInterface)
-			{
-				var types = new List<Type>();
+#if NET_COREAPP
+            if (type.GetTypeInfo().IsInterface)
+#else
+            if (type.IsInterface)
+#endif
+            {
+                var types = new List<Type>();
 				AddInterface(types, type);
 
 				types.Add(typeof(object));
@@ -1246,9 +1297,13 @@ namespace DynamicExpresso.Parsing
 			while (type != null)
 			{
 				yield return type;
-				type = type.BaseType;
-			}
-		}
+#if NET_COREAPP
+                type = type.GetTypeInfo().BaseType;
+#else
+                type = type.BaseType;
+#endif
+            }
+        }
 
 		static void AddInterface(List<Type> types, Type type)
 		{
@@ -1396,9 +1451,13 @@ namespace DynamicExpresso.Parsing
 				{
 					extractedGenericTypes.Add(actualType);
 				}
-				else if (requestedType.ContainsGenericParameters)
-				{
-					var innerGenericTypes = ExtractActualGenericArguments(requestedType.GetGenericArguments(), actualType.GetGenericArguments());
+#if NET_COREAPP
+                else if (requestedType.GetTypeInfo().ContainsGenericParameters)
+#else
+                else if (requestedType.ContainsGenericParameters)
+#endif
+                {
+                    var innerGenericTypes = ExtractActualGenericArguments(requestedType.GetGenericArguments(), actualType.GetGenericArguments());
 
 					extractedGenericTypes.AddRange(innerGenericTypes);
 				}
@@ -1415,23 +1474,37 @@ namespace DynamicExpresso.Parsing
 				var ce = (ConstantExpression)expr;
 				if (ce == ParserConstants.NULL_LITERAL_EXPRESSION)
 				{
-					if (!type.IsValueType || IsNullableType(type))
-						return Expression.Constant(null, type);
+#if NET_COREAPP
+                    if (!type.GetTypeInfo().IsValueType || IsNullableType(type))
+#else
+                    if (!type.IsValueType || IsNullableType(type))
+#endif
+                    {
+                        return Expression.Constant(null, type);
+                    }
 				}
 			}
 
-			if (type.IsGenericType)
-			{
-				var genericType = FindAssignableGenericType(expr.Type, type.GetGenericTypeDefinition());
+#if NET_COREAPP
+            if (type.GetTypeInfo().IsGenericType)
+#else
+            if (type.IsGenericType)
+#endif
+            {
+                var genericType = FindAssignableGenericType(expr.Type, type.GetGenericTypeDefinition());
 				if (genericType != null)
 					return Expression.Convert(expr, genericType);
 			}
 
 			if (IsCompatibleWith(expr.Type, type))
 			{
-				if (type.IsValueType || exact)
-				{
-					return Expression.Convert(expr, type);
+#if NET_COREAPP
+                if (type.GetTypeInfo().IsValueType || exact)
+#else
+                if (type.IsValueType || exact)
+#endif
+                {
+                    return Expression.Convert(expr, type);
 				}
 				return expr;
 			}
@@ -1510,16 +1583,26 @@ namespace DynamicExpresso.Parsing
 				return true;
 			}
 
-			if (!target.IsValueType)
-			{
-				return target.IsAssignableFrom(source);
+#if NET_COREAPP
+            if (!target.GetTypeInfo().IsValueType)
+#else
+            if (!target.IsValueType)
+#endif
+            {
+                return target.IsAssignableFrom(source);
 			}
 			var st = GetNonNullableType(source);
 			var tt = GetNonNullableType(target);
 			if (st != source && tt == target) return false;
-			var sc = st.IsEnum ? TypeCode.Object : Type.GetTypeCode(st);
-			var tc = tt.IsEnum ? TypeCode.Object : Type.GetTypeCode(tt);
-			switch (sc)
+
+#if NET_COREAPP
+            var sc = st.GetTypeInfo().IsEnum ? TypeCode.Object : Type.GetTypeCode(st);
+            var tc = tt.GetTypeInfo().IsEnum ? TypeCode.Object : Type.GetTypeCode(tt);
+#else
+            var sc = st.IsEnum ? TypeCode.Object : Type.GetTypeCode(st);
+            var tc = tt.IsEnum ? TypeCode.Object : Type.GetTypeCode(tt);
+#endif
+            switch (sc)
 			{
 				case TypeCode.SByte:
 					switch (tc)
@@ -1641,19 +1724,31 @@ namespace DynamicExpresso.Parsing
 
 			foreach (var it in interfaceTypes)
 			{
-				if (it.IsGenericType && it.GetGenericTypeDefinition() == genericTypeDefinition)
+#if NET_COREAPP
+                if (it.GetTypeInfo().IsGenericType && it.GetGenericTypeDefinition() == genericTypeDefinition)
+#else
+                if (it.IsGenericType && it.GetGenericTypeDefinition() == genericTypeDefinition)
+#endif
 				{
 					return it;
 				}
 			}
 
-			if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericTypeDefinition)
+#if NET_COREAPP
+            if (givenType.GetTypeInfo().IsGenericType && givenType.GetGenericTypeDefinition() == genericTypeDefinition)
+#else
+            if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericTypeDefinition)
+#endif
 			{
 				return givenType;
 			}
 
-			Type baseType = givenType.BaseType;
-			if (baseType == null) return null;
+#if NET_COREAPP
+            Type baseType = givenType.GetTypeInfo().BaseType;
+#else
+            Type baseType = givenType.BaseType;
+#endif
+            if (baseType == null) return null;
 
 			return FindAssignableGenericType(baseType, genericTypeDefinition);
 		}

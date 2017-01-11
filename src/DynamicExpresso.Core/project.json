@@ -1,0 +1,41 @@
+{
+  "version": "1.3.6-beta1",
+  "authors": [ "Davide Icardi" ],
+  "description": "Dynamic Expresso is an interpreter for simple C# statements. Dynamic Expresso embeds its own parsing logic, really interprets C# statements by converting it to .NET lambda expressions or delegates.\nUsing Dynamic Expresso developers can create scriptable applications, execute .NET code without compilation or create dynamic linq statements.\nStatements are written using a subset of C# language specifications. Global variables or parameters can be injected and used inside expressions. It doesn't generate assembly but it creates an expression tree on the fly.",
+  "packOptions": {
+    "tags": [ "dynamic expresso", "expression", "linq", "eval" ],
+    "projectUrl": "https://github.com/davideicardi/DynamicExpresso",
+    "summary": "C# expression interpreter/evaluator",
+    "owners": [ "Davide Icardi" ]
+  },
+  "dependencies": {
+  },
+  "frameworks": {
+    "netcoreapp1.1": {
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.1.0"
+        }
+      },
+      "imports": [
+        "dotnet5.6",
+        "portable-net45+win8"
+      ],
+      "buildOptions": {
+        "define": [ "NET_COREAPP" ]
+      }
+    },
+    "net40": {
+      "frameworkAssemblies": {
+        "System.Runtime.Serialization": "4.0.0.0"
+      },
+      "buildOptions": {
+        "define": [ "NET_40" ]
+      }
+    }
+  },
+  "buildOptions": {
+    "xmlDoc": true
+  }
+}

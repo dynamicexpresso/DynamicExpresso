@@ -6,21 +6,28 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+#if !NET_COREAPP
 using System.Security.Permissions;
 using System.Runtime.Serialization;
+#endif
 
 namespace DynamicExpresso
 {
+#if !NET_COREAPP
 	[Serializable]
+#endif
 	public class NoApplicableMethodException : ParseException
 	{
-		public NoApplicableMethodException(string methodName, string methodTypeName, int position)
+        public string MethodTypeName { get; private set; }
+        public string MethodName { get; private set; }
+
+        public NoApplicableMethodException(string methodName, string methodTypeName, int position)
 			: base(string.Format("No applicable method '{0}' exists in type '{1}'", methodName, methodTypeName), position) 
 		{
 			MethodTypeName = methodTypeName;
 			MethodName = methodName;
 		}
-
+#if !NET_COREAPP
 		protected NoApplicableMethodException(
 			SerializationInfo info,
 			StreamingContext context)
@@ -30,9 +37,6 @@ namespace DynamicExpresso
 			MethodName = info.GetString("MethodName");
 		}
 
-		public string MethodTypeName { get; private set; }
-		public string MethodName { get; private set; }
-
 		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
@@ -41,5 +45,6 @@ namespace DynamicExpresso
 
 			base.GetObjectData(info, context);
 		}
-	}
+#endif
+    }
 }

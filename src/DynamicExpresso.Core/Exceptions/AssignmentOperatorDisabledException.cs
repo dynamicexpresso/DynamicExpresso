@@ -6,29 +6,34 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+#if !NET_COREAPP
 using System.Security.Permissions;
 using System.Runtime.Serialization;
+#endif
 
 namespace DynamicExpresso
 {
-	[Serializable]
-	public class AssignmentOperatorDisabledException : ParseException
+#if !NET_COREAPP
+    [Serializable]
+#endif
+    public class AssignmentOperatorDisabledException : ParseException
 	{
-		public AssignmentOperatorDisabledException(string operatorString, int position)
+        public string OperatorString { get; private set; }
+
+        public AssignmentOperatorDisabledException(string operatorString, int position)
 			: base(string.Format("Assignment operator '{0}' not allowed", operatorString), position) 
 		{
 			OperatorString = operatorString;
 		}
 
-		protected AssignmentOperatorDisabledException(
+#if !NET_COREAPP
+        protected AssignmentOperatorDisabledException(
 			SerializationInfo info,
 			StreamingContext context)
 			: base(info, context) 
 		{
 			OperatorString = info.GetString("OperatorString");
 		}
-
-		public string OperatorString { get; private set; }
 
 		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -37,5 +42,7 @@ namespace DynamicExpresso
 
 			base.GetObjectData(info, context);
 		}
-	}
+#endif
+    }
+
 }

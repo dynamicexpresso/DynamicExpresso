@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System;
 using System.Dynamic;
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -115,10 +116,12 @@ namespace DynamicExpresso.UnitTest
 		public void Test_With_Standard_Object()
 		{
 			var myInstance = DateTime.Now;
-
-			var methodInfo = myInstance.GetType().GetMethod("ToUniversalTime");
-
-			var methodCallExpression = Expression.Call(Expression.Constant(myInstance), methodInfo);
+#if NET_COREAPP
+            var methodInfo = myInstance.GetType().GetTypeInfo().GetMethod("ToUniversalTime");
+#else
+            var methodInfo = myInstance.GetType().GetMethod("ToUniversalTime");
+#endif
+            var methodCallExpression = Expression.Call(Expression.Constant(myInstance), methodInfo);
 			var expression = Expression.Lambda(methodCallExpression);
 
 			Assert.AreEqual(myInstance.ToUniversalTime(), expression.Compile().DynamicInvoke());
@@ -130,17 +133,19 @@ namespace DynamicExpresso.UnitTest
 			dynamic myInstance = new ExpandoObject();
 			myInstance.MyMethod = new Func<string>(() => "hello world");
 
-			var binder = Binder.InvokeMember(
+			var binder = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
 				CSharpBinderFlags.None,
 				"MyMethod",
 				null,
 				this.GetType(),
 				new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.Constant, null) });
-
-			var methodCallExpression = Expression.Dynamic(binder, typeof(object), Expression.Constant(myInstance));
-			var expression = Expression.Lambda(methodCallExpression);
-
-			Assert.AreEqual(myInstance.MyMethod(), expression.Compile().DynamicInvoke());
+#if NET_COREAPP
+            var methodCallExpression = DynamicExpression.Dynamic(binder, typeof(object), Expression.Constant(myInstance));
+#else
+            var methodCallExpression = Expression.Dynamic(binder, typeof(object), Expression.Constant(myInstance));
+#endif
+            var expression = Expression.Lambda(methodCallExpression);
+            Assert.AreEqual(myInstance.MyMethod(), expression.Compile().DynamicInvoke());
 		}
 
 		public class TestDynamicClass : DynamicObject

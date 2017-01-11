@@ -45,22 +45,20 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		[ExpectedException(typeof(ParseException))]
 		public void Invalid_Numeric_Literals_multiple_dots()
 		{
 			var target = new Interpreter();
 
-			target.Eval("45.5.456");
-		}
+            Assert.Throws<ParseException>(() => target.Eval("45.5.456"));
+        }
 
 		[Test]
-		[ExpectedException(typeof(ParseException))]
 		public void Invalid_Numeric_Literals_wrong_suffix_x()
 		{
 			var target = new Interpreter();
 
-			target.Eval("45.5x");
-		}
+            Assert.Throws<ParseException>(() => target.Eval("45.5x"));
+        }
 
 		[Test]
 		public void Calling_System_Method_On_Literals()
@@ -179,58 +177,52 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("L\'aquila\r\n\tè\tbella.", target.Eval("\"L\\'aquila\\r\\n\\tè\\tbella.\""));
 		}
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Invalid_Escape_char()
 		{
 			var target = new Interpreter();
 
-			target.Eval("'\\'");
-		}
+            Assert.Throws<ParseException>(() => target.Eval("'\\'"));
+        }
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Invalid_Escape_string()
 		{
 			var target = new Interpreter();
 
-			target.Eval("\"\\\"");
-		}
+            Assert.Throws<ParseException>(() => target.Eval("\"\\\""));
+        }
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Character_Literal_Must_be_closed()
 		{
 			var target = new Interpreter();
 
-			target.Eval("'1");
-		}
+            Assert.Throws<ParseException>(() => target.Eval("'1"));
+        }
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void String_Literal_Must_be_closed()
 		{
 			var target = new Interpreter();
 
-			target.Eval("\"1");
-		}
+            Assert.Throws<ParseException>(() => target.Eval("\"1"));
+        }
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Character_Literal_Must_one_char_maximum()
 		{
 			var target = new Interpreter();
 
-			target.Eval("'12'");
-		}
+            Assert.Throws<ParseException>(() => target.Eval("'12'"));
+        }
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Character_Literal_Must_one_char_minimum()
 		{
 			var target = new Interpreter();
 
-			target.Eval("''");
+            Assert.Throws<ParseException>(() => target.Eval("''"));
 		}
 
 		[Test]
@@ -257,22 +249,38 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Thread_Culture_WithUS_Culture_is_ignored_for_literals()
 		{
-			var originalCulture = Thread.CurrentThread.CurrentCulture;
+#if NET_COREAPP
+            var originalCulture = CultureInfo.CurrentCulture;
+            CultureInfo.CurrentCulture = new CultureInfo("en-US");
+            var target = new Interpreter();
+            Assert.AreEqual(45.5, target.Eval("45.5"));
+            CultureInfo.CurrentCulture = originalCulture;
+#else
+            var originalCulture = Thread.CurrentThread.CurrentCulture;
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
 			var target = new Interpreter();
 			Assert.AreEqual(45.5, target.Eval("45.5"));
 			Thread.CurrentThread.CurrentCulture = originalCulture;
-		}
+#endif
+        }
 
-		[Test]
+        [Test]
 		public void Thread_Culture_WithIT_Culture_is_ignored_for_literals()
 		{
+#if NET_COREAPP
+            var originalCulture = CultureInfo.CurrentCulture;
+            CultureInfo.CurrentCulture = new CultureInfo("it-IT");
+            var target = new Interpreter();
+            Assert.AreEqual(45.5, target.Eval("45.5"));
+            CultureInfo.CurrentCulture = originalCulture;
+#else
 			var originalCulture = Thread.CurrentThread.CurrentCulture;
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("it-IT");
 			var target = new Interpreter();
 			Assert.AreEqual(45.5, target.Eval("45.5"));
 			Thread.CurrentThread.CurrentCulture = originalCulture;
-		}
+#endif
+        }
 
-	}
+    }
 }

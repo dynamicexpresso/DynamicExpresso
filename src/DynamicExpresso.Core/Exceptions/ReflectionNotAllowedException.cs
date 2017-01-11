@@ -1,17 +1,22 @@
 ﻿using System;
+#if !NET_COREAPP
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+#endif
 
 namespace DynamicExpresso
 {
+#if !NET_COREAPP
 	[Serializable]
-	public class ReflectionNotAllowedException : ParseException
-	{
-		public ReflectionNotAllowedException()
-			: base("Reflection expression not allowed. To enable reflection use Interpreter.EnableReflection().", 0) 
-		{
-		}
+#endif
+    public class ReflectionNotAllowedException : ParseException
+    {
+        public ReflectionNotAllowedException()
+            : base("Reflection expression not allowed. To enable reflection use Interpreter.EnableReflection().", 0)
+        {
+        }
 
+#if !NET_COREAPP
 		protected ReflectionNotAllowedException(
 			SerializationInfo info,
 			StreamingContext context)
@@ -24,5 +29,6 @@ namespace DynamicExpresso
 		{
 			base.GetObjectData(info, context);
 		}
-	}
+#endif
+    }
 }

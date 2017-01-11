@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace DynamicExpresso.Exceptions
@@ -32,7 +33,8 @@ namespace DynamicExpresso.Exceptions
 				typeof(Exception).GetMethod("PrepForRemoting",
 						System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
 						.Invoke(exception, new object[0]);
-			}
+
+            }
 			catch (Exception ex)
 			{
 				System.Diagnostics.Debug.Assert(false, ex.Message);

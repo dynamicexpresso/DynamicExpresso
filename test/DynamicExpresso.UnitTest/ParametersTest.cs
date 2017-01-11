@@ -62,7 +62,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(15, exp.Invoke());
 		}
 
-		[ExpectedException(typeof(TargetParameterCountException))]
 		[Test]
 		public void Parameters_Mismatch()
 		{
@@ -79,7 +78,10 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("x", 546)
                             };
 
-			Assert.AreEqual(30, exp.Invoke(parametersMismatch));
+			//Assert.AreEqual(30, exp.Invoke(parametersMismatch));
+
+            // TODO: Investigate where exception throws.
+            Assert.Throws<TargetParameterCountException>(() => exp.Invoke(parametersMismatch));
 		}
 
 		[Test]
@@ -205,8 +207,12 @@ namespace DynamicExpresso.UnitTest
 
 			var x = new MyTestService();
 			var y = new Uri("http://www.google.com");
-			var z = CultureInfo.GetCultureInfo("en-US");
-			var parameters = new[] {
+#if NET_COREAPP
+            var z = new CultureInfo("en-US");
+#else
+            var z = CultureInfo.GetCultureInfo("en-US");
+#endif
+            var parameters = new[] {
                             new Parameter("x", x.GetType(), x),
                             new Parameter("y", y.GetType(), y),
                             new Parameter("z", z.GetType(), z)

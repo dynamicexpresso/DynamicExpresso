@@ -86,14 +86,13 @@ namespace DynamicExpresso.UnitTest
 
 		delegate int MyCustomDelegate(int x, string y);
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Return_Type_Mismatch_Cause_An_Exception()
 		{
 			var target = new Interpreter();
 
 			// expected a double but I return a string
-			target.ParseAsDelegate<Func<double>>("\"ciao\"");
+            Assert.Throws<ParseException>(() => target.ParseAsDelegate<Func<double>>("\"ciao\""));
 		}
 	}
 }

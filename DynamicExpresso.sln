@@ -1,16 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.UnitTest", "test\DynamicExpresso.UnitTest\DynamicExpresso.UnitTest.csproj", "{33157A92-C6B2-4A51-8262-1FEBFD6558BE}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{4088369E-AB00-4333-A56A-27E05D3767B1}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.Core", "src\DynamicExpresso.Core\DynamicExpresso.Core.csproj", "{C6B7C0D2-B84A-4307-9C61-D95613DB564D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BF96BDDD-2CA4-4AD7-81FD-DB695507D678}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,8 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BF96BD
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{995B5142-F7FA-42D2-A17E-C4D0F64DAD40}"
 	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DynamicExpresso.Core", "src\DynamicExpresso.Core\DynamicExpresso.Core.xproj", "{4C327D3F-D5F2-4C97-9D8B-9219E32557A7}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "DynamicExpresso.UnitTest", "test\DynamicExpresso.UnitTest\DynamicExpresso.UnitTest.xproj", "{A59FE5B6-5D37-440B-8B36-7F2C16A1C366}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,14 +29,14 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{33157A92-C6B2-4A51-8262-1FEBFD6558BE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C327D3F-D5F2-4C97-9D8B-9219E32557A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C327D3F-D5F2-4C97-9D8B-9219E32557A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C327D3F-D5F2-4C97-9D8B-9219E32557A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C327D3F-D5F2-4C97-9D8B-9219E32557A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A59FE5B6-5D37-440B-8B36-7F2C16A1C366}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A59FE5B6-5D37-440B-8B36-7F2C16A1C366}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A59FE5B6-5D37-440B-8B36-7F2C16A1C366}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A59FE5B6-5D37-440B-8B36-7F2C16A1C366}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

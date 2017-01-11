@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -26,7 +27,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual("Double", target.Eval("typeof(double).Name"));
+            Assert.AreEqual("Double", target.Eval("typeof(double).Name"));
 			Assert.AreEqual("X", target.Eval("x.GetType().Name", new Parameter("x", typeof(X), new X())));
 		}
 
@@ -36,14 +37,21 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 				.EnableReflection();
 
-			Assert.AreEqual(typeof(double).GetMethods(), target.Eval("typeof(double).GetMethods()"));
+            Assert.AreEqual(typeof(double).GetMethods(), target.Eval("typeof(double).GetMethods()"));
+#if NET_COREAPP
+            Assert.AreEqual(typeof(double).GetTypeInfo().Assembly, target.Eval("typeof(double).Assembly"));
+#else
 			Assert.AreEqual(typeof(double).Assembly, target.Eval("typeof(double).Assembly"));
-
-			var x = new X();
+#endif
+            var x = new X();
 			Assert.AreEqual(x.GetType().GetMethods(), target.Eval("x.GetType().GetMethods()", new Parameter("x", x)));
-			Assert.AreEqual(x.GetType().Assembly, target.Eval("x.GetType().Assembly", new Parameter("x", x)));
-		}
+#if NET_COREAPP
+            Assert.AreEqual(x.GetType().GetTypeInfo().Assembly, target.Eval("x.GetType().Assembly", new Parameter("x", x)));
+#else
+            Assert.AreEqual(x.GetType().Assembly, target.Eval("x.GetType().Assembly", new Parameter("x", x)));
+#endif
+        }
 
-		public class X { }
+        public class X { }
 	}
 }

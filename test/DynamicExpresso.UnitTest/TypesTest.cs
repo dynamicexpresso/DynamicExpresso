@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -51,15 +52,16 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Load_interpreter_without_any_configuration_doesn_t_recognize_types()
 		{
 			var target = new Interpreter(InterpreterOptions.None);
 
-			target.Eval("typeof(string)");
+            Assert.Throws<UnknownIdentifierException>(() => target.Eval("typeof(string)"));
 		}
 
-		[Test]
+#if !NET_COREAPP
+        // This functionality will be added in Net Core 1.2 according to https://github.com/dotnet/corefx/pull/10300.
+        [Test]
 		public void Custom_Types()
 		{
 			var target = new Interpreter()
@@ -67,7 +69,8 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
 			Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
-		}
+        }
+
 
 		[Test]
 		public void Reference_the_same_type_multiple_times_doesn_t_have_effect()
@@ -82,8 +85,9 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
 			Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
 		}
+#endif
 
-		[Test]
+        [Test]
 		public void References_can_be_case_insensitive()
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
@@ -118,14 +122,20 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Custom_Enum()
 		{
-			var target = new Interpreter()
+#if NET_COREAPP
+            var target = new Interpreter()
+                                .Reference(typeof(CalendarWeekRule));
+            Assert.AreEqual(CalendarWeekRule.FirstDay, target.Eval("CalendarWeekRule.FirstDay"));
+            Assert.AreEqual(CalendarWeekRule.FirstFullWeek, target.Eval("CalendarWeekRule.FirstFullWeek"));
+#else
+            var target = new Interpreter()
 											.Reference(typeof(CalendarAlgorithmType));
-
 			Assert.AreEqual(CalendarAlgorithmType.LunisolarCalendar, target.Eval("CalendarAlgorithmType.LunisolarCalendar"));
 			Assert.AreEqual(CalendarAlgorithmType.SolarCalendar, target.Eval("CalendarAlgorithmType.SolarCalendar"));
-		}
+#endif
+        }
 
-		[Test]
+        [Test]
 		public void Enum_are_case_sensitive_by_default()
 		{
 			var target = new Interpreter()

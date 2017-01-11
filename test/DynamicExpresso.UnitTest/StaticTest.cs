@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using System.Net;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -65,10 +66,10 @@ namespace DynamicExpresso.UnitTest
 		public void Static_Properties_And_Methods_Of_Custom_Types()
 		{
 			var target = new Interpreter()
-											.Reference(typeof(Uri))
+											.Reference(typeof(HttpWebRequest))
 											.Reference(typeof(MyTestService));
-
-			Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
+            
+			Assert.AreEqual(HttpWebRequest.DefaultWebProxy, target.Eval("HttpWebRequest.DefaultWebProxy"));
 			Assert.AreEqual(MyTestService.MyStaticMethod(), target.Eval("MyTestService.MyStaticMethod()"));
 		}
 

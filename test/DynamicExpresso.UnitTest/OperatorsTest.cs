@@ -270,13 +270,12 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		[ExpectedException(typeof(ParseException))]
 		public void Operator_LessGreater_Is_Not_Supported()
 		{
 			var target = new Interpreter();
 
-			target.Parse("5 <> 4");
-		}
+            Assert.Throws<ParseException>(() => target.Parse("5 <> 4"));
+        }
 
 		[Test]
 		public void Implicit_conversion_operator_for_lambda()
@@ -452,7 +451,6 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_equal_operator()
 		{
 			var target = new Interpreter();
@@ -461,11 +459,11 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 
 			string y = "5";
-			target.Parse("x == y", new Parameter("y", y));
-		}
+			
+            Assert.Throws<InvalidOperationException>(() => target.Parse("x == y", new Parameter("y", y)));
+        }
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_plus_operator()
 		{
 			var target = new Interpreter();
@@ -474,11 +472,10 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 
 			int y = 5;
-			target.Parse("x + y", new Parameter("y", y));
+            Assert.Throws<InvalidOperationException>(() => target.Parse("x + y", new Parameter("y", y)));
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_not_operator()
 		{
 			var target = new Interpreter();
@@ -486,8 +483,8 @@ namespace DynamicExpresso.UnitTest
 			var x = new TypeWithoutOverloadedBinaryOperators(3);
 			target.SetVariable("x", x);
 
-			target.Parse("!x");
-		}
+            Assert.Throws<InvalidOperationException>(() => target.Parse("!x"));
+        }
 
 		struct TypeWithoutOverloadedBinaryOperators
 		{

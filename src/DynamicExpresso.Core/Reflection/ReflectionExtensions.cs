@@ -37,9 +37,14 @@ namespace DynamicExpresso.Reflection
 
 		public static IEnumerable<MethodInfo> GetExtensionMethods(Type type)
 		{
-			if (type.IsSealed && type.IsAbstract && !type.IsGenericType && !type.IsNested)
-			{
-				var query = from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+            var typeInfo = type;
+#if NET_COREAPP
+            if (type.GetTypeInfo().IsSealed && type.GetTypeInfo().IsAbstract && !type.GetTypeInfo().IsGenericType && !type.GetTypeInfo().IsNested)
+#else
+            if (typeInfo.IsSealed && typeInfo.IsAbstract && !typeInfo.IsGenericType && !typeInfo.IsNested)
+#endif
+            {
+                var query = from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
 										where method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), false)
 										select method;
 				return query;

@@ -5,15 +5,19 @@ using System.Text;
 
 namespace DynamicExpresso
 {
+#if !NET_COREAPP
 	[Serializable]
-	public class DynamicExpressoException : Exception
-	{
-		public DynamicExpressoException() { }
-		public DynamicExpressoException(string message) : base(message) { }
-		public DynamicExpressoException(string message, Exception inner) : base(message, inner) { }
-		protected DynamicExpressoException(
+#endif
+    public class DynamicExpressoException : Exception
+    {
+        public DynamicExpressoException() { }
+        public DynamicExpressoException(string message) : base(message) { }
+        public DynamicExpressoException(string message, Exception inner) : base(message, inner) { }
+#if !NET_COREAPP
+        protected DynamicExpressoException(
 		System.Runtime.Serialization.SerializationInfo info,
 		System.Runtime.Serialization.StreamingContext context)
 			: base(info, context) { }
-	}
+#endif
+    }
 }
