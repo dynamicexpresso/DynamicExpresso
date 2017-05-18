@@ -62,5 +62,6 @@ namespace DynamicExpresso.Parsing
 		public const string CloseBracketOrCommaExpected = "']' or ',' expected";
 		public const string IdentifierExpected = "Identifier expected";
 		public const string TypeIdentifierExpected = "Type identifier expected";
+		public const string ResolveExpressionTwice = "The expression '{0}' on '{1}' '{2}' has already been resolved to '{3}' and cannot be resolved twice.";
 	}
 }

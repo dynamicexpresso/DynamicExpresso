@@ -100,6 +100,10 @@ namespace DynamicExpresso
 		}
 		#endregion
 
+		#region Events
+		public event EventHandler<ResolveExpressionEventArgs> ResolveUnknownExpression = null;
+		#endregion
+
 		#region Options
 		/// <summary>
 		/// Allows to enable/disable assignment operators. 
@@ -411,7 +415,7 @@ namespace DynamicExpresso
 												expressionType,
 												parameters);
 
-			var expression = Parser.Parse(arguments);
+			var expression = Parser.Parse(arguments, ResolveUnknownExpression);
 
 			foreach (var visitor in Visitors)
 				expression = visitor.Visit(expression);
@@ -434,8 +438,6 @@ namespace DynamicExpresso
 				throw new Exception("Detected identifiers doesn't match actual identifiers");
 			if (info.Types.Count() != lambda.Types.Count())
 				throw new Exception("Detected types doesn't match actual types");
-			if (info.UnknownIdentifiers.Count() != lambda.UsedParameters.Count())
-				throw new Exception("Detected unknown identifiers doesn't match actual parameters");
 		}
 #endif
 		#endregion
