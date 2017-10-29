@@ -38,6 +38,7 @@ namespace DynamicExpresso
 		{
 			info.AddValue("MethodName", MethodName);
 			info.AddValue("MethodTypeName", MethodTypeName);
+            info.AddValue("Position", Position);
 
 			base.GetObjectData(info, context);
 		}
