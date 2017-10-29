@@ -34,8 +34,9 @@ namespace DynamicExpresso
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue("Identifier", Identifier);
+            info.AddValue("Position", Position);
 
-			base.GetObjectData(info, context);
+            base.GetObjectData(info, context);
 		}
 	}
 }
