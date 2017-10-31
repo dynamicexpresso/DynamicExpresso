@@ -1839,9 +1839,9 @@ namespace DynamicExpresso.Parsing
 			while (char.IsWhiteSpace(_parseChar))
 				NextChar();
 
-			TokenId t;
-			var tokenPos = _parsePosition;
-			switch (_parseChar)
+            TokenId t = TokenId.Unknown;
+            var tokenPos = _parsePosition;
+            switch (_parseChar)
 			{
 				case '!':
 					NextChar();
@@ -1897,7 +1897,30 @@ namespace DynamicExpresso.Parsing
 					break;
 				case '.':
 					NextChar();
-					t = TokenId.Dot;
+                    if (Char.IsDigit(_parseChar))
+                    {
+                        t = TokenId.RealLiteral;
+                        do
+                        {
+                            NextChar();
+                        } while (Char.IsDigit(_parseChar));
+                        if (_parseChar == 'E' || _parseChar == 'e')
+                        {
+                            t = TokenId.RealLiteral;
+                            NextChar();
+                            if (_parseChar == '+' || _parseChar == '-')
+                                NextChar();
+                            ValidateDigit();
+                            do
+                            {
+                                NextChar();
+                            } while (Char.IsDigit(_parseChar));
+                        }
+                        if (_parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm')
+                            NextChar();
+                        break;
+                    }
+                    t = TokenId.Dot;
 					break;
 				case '/':
 					NextChar();
@@ -2064,15 +2087,15 @@ namespace DynamicExpresso.Parsing
 					}
 					throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
 			}
-			_token.id = t;
+            _token.id = t;
 			_token.text = _expressionText.Substring(tokenPos, _parsePosition - tokenPos);
 			_token.pos = tokenPos;
 		}
 
-		//bool TokenIdentifierIs(string id)
-		//{
-		//	return _token.id == TokenId.Identifier && String.Equals(id, _token.text, StringComparison.OrdinalIgnoreCase);
-		//}
+        //bool TokenIdentifierIs(string id)
+        //{
+        //	return _token.id == TokenId.Identifier && String.Equals(id, _token.text, StringComparison.OrdinalIgnoreCase);
+        //}
 
 		string GetIdentifier()
 		{

@@ -26,9 +26,12 @@ namespace DynamicExpresso.UnitTest
 			Expression<Func<double, double>> lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + 5");
 
 			Assert.AreEqual(15, lambdaExpression.Compile()(10));
-		}
 
-		[Test]
+            lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + .5");
+            Assert.AreEqual(10.5, lambdaExpression.Compile()(10));
+        }
+
+        [Test]
 		public void Parse_To_a_Delegate_With_Two_Parameters()
 		{
 			var target = new Interpreter();

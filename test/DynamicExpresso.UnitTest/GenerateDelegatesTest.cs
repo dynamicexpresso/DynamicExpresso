@@ -15,7 +15,10 @@ namespace DynamicExpresso.UnitTest
 			var func = target.ParseAsDelegate<Func<double, double, double>>("Math.Pow(x, y) + 5", "x", "y");
 
 			Assert.AreEqual(Math.Pow(10, 2) + 5, func(10, 2));
-		}
+
+            func = target.ParseAsDelegate<Func<double, double, double>>("Math.Pow(x, y) + .5", "x", "y");
+            Assert.AreEqual(Math.Pow(10, 2) + .5, func(10, 2));
+        }
 
 		[Test]
 		public void Parse_To_a_Delegate_With_No_Parameters()
