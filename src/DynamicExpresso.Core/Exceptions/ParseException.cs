@@ -8,16 +8,16 @@ using System.Reflection.Emit;
 using System.Threading;
 using System.Security.Permissions;
 using System.Runtime.Serialization;
+using DynamicExpresso.Parsing;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso
 {
 	[Serializable]
 	public class ParseException : DynamicExpressoException
 	{
-		const string PARSE_EXCEPTION_FORMAT = "{0} (at index {1}).";
-
 		public ParseException(string message, int position)
-			: base(string.Format(PARSE_EXCEPTION_FORMAT, message, position)) 
+			: base(string.Format(ErrorMessages.Format, message, position)) 
 		{
 			Position = position;
 		}

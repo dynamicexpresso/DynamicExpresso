@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using DynamicExpresso.Resources;
 
 // Code based on the Dynamic.cs file of the DynamicQuery sample by Microsoft
 // http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx
