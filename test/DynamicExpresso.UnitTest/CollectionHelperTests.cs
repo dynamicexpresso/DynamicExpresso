@@ -28,7 +28,7 @@ namespace DynamicExpresso.UnitTest
 
 	public class CollectionHelper<T>
 	{
-		readonly Interpreter _interpreter;
+		private readonly Interpreter _interpreter;
 
 		public CollectionHelper()
 		{

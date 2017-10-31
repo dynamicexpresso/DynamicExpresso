@@ -9,11 +9,11 @@ namespace DynamicExpresso
 {
 	internal class ParserArguments
 	{
-		readonly Dictionary<string, Parameter> _declaredParameters;
+		private readonly Dictionary<string, Parameter> _declaredParameters;
 
-		readonly HashSet<Parameter> _usedParameters = new HashSet<Parameter>();
-		readonly HashSet<ReferenceType> _usedTypes = new HashSet<ReferenceType>();
-		readonly HashSet<Identifier> _usedIdentifiers = new HashSet<Identifier>();
+		private readonly HashSet<Parameter> _usedParameters = new HashSet<Parameter>();
+		private readonly HashSet<ReferenceType> _usedTypes = new HashSet<ReferenceType>();
+		private readonly HashSet<Identifier> _usedIdentifiers = new HashSet<Identifier>();
 
 		public ParserArguments(
 			string expressionText, 

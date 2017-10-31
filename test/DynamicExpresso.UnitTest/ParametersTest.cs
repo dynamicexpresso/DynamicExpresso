@@ -362,7 +362,7 @@ namespace DynamicExpresso.UnitTest
 
 		public delegate int TestDelegate(int x, int y, int z);
 
-		class MyTestService
+		private class MyTestService
 		{
 			public DateTime AField = DateTime.Now;
 
@@ -382,7 +382,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		delegate int MyDelegate(string s);
+		private delegate int MyDelegate(string s);
 
 	}
 }

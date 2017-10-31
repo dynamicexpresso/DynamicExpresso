@@ -6,9 +6,9 @@ namespace DynamicExpresso.Parsing
 {
 	internal class ParserSettings
 	{
-		readonly Dictionary<string, Identifier> _identifiers;
-		readonly Dictionary<string, ReferenceType> _knownTypes;
-		readonly HashSet<MethodInfo> _extensionMethods;
+		private readonly Dictionary<string, Identifier> _identifiers;
+		private readonly Dictionary<string, ReferenceType> _knownTypes;
+		private readonly HashSet<MethodInfo> _extensionMethods;
 
 		public ParserSettings(bool caseInsensitive)
 		{

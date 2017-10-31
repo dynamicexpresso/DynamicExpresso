@@ -177,7 +177,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(((double)5).GetType().Name, interpreter.Eval("((double)5).GetType().Name"));
 		}
 
-		class MyTestService
+		private class MyTestService
 		{
 			public DateTime AField = DateTime.Now;
 			public DateTime AFIELD = DateTime.UtcNow;
@@ -217,7 +217,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		class Customer
+		private class Customer
 		{
 			public string Name { get; set; }
 			public int Age { get; set; }

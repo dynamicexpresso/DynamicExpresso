@@ -14,8 +14,8 @@ namespace DynamicExpresso
 	/// </summary>
 	public class Interpreter
 	{
-		readonly ParserSettings _settings;
-		readonly ISet<ExpressionVisitor> _visitors = new HashSet<ExpressionVisitor>();
+		private readonly ParserSettings _settings;
+		private readonly ISet<ExpressionVisitor> _visitors = new HashSet<ExpressionVisitor>();
 
 		#region Constructors
 		/// <summary>
@@ -403,7 +403,8 @@ namespace DynamicExpresso
 		#endregion
 
 		#region Private methods
-		Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
+
+		private Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
 		{
 			var arguments = new ParserArguments(
 												expressionText,
@@ -426,7 +427,7 @@ namespace DynamicExpresso
 		}
 
 #if TEST_DetectIdentifiers
-		void AssertDetectIdentifiers(Lambda lambda)
+		private void AssertDetectIdentifiers(Lambda lambda)
 		{
 			var info = DetectIdentifiers(lambda.ExpressionText);
 

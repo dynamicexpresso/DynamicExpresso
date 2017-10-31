@@ -87,7 +87,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(10, func(5, "mondo"));
 		}
 
-		delegate int MyCustomDelegate(int x, string y);
+		private delegate int MyCustomDelegate(int x, string y);
 
 		[ExpectedException(typeof(ParseException))]
 		[Test]

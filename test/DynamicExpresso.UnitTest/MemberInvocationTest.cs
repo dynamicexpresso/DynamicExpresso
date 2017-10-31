@@ -271,15 +271,16 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(3, target.Eval("x.OverloadMethodWithParamsArray(2, 3, 1)"));
 		}
 
-		interface MyTestInterface
+		private interface MyTestInterface
 		{
 		}
-		class MyTestInterfaceImp : MyTestInterface
+
+		private class MyTestInterfaceImp : MyTestInterface
 		{
 
 		}
 
-		class MyTestService
+		private class MyTestService
 		{
 			public DateTime AField = DateTime.Now;
 			public DateTime AFIELD = DateTime.UtcNow;
@@ -360,7 +361,7 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		class MyTestServiceCaseInsensitive
+		private class MyTestServiceCaseInsensitive
 		{
 			public DateTime AField = DateTime.Now;
 

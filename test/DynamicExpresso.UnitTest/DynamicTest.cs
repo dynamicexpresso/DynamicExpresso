@@ -21,18 +21,18 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
 		}
 
-        [Test]
-        public void Get_Property_of_a_nested_ExpandoObject()
-        {
-            dynamic dyn = new ExpandoObject();
-            dyn.Sub = new ExpandoObject();
-            dyn.Sub.Foo = "bar";
+		[Test]
+		public void Get_Property_of_a_nested_ExpandoObject()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new ExpandoObject();
+			dyn.Sub.Foo = "bar";
 
-            var interpreter = new Interpreter()
-                .SetVariable("dyn", dyn);
+			var interpreter = new Interpreter()
+					.SetVariable("dyn", dyn);
 
-            Assert.AreEqual(dyn.Sub.Foo, interpreter.Eval("dyn.Sub.Foo"));
-        }
+			Assert.AreEqual(dyn.Sub.Foo, interpreter.Eval("dyn.Sub.Foo"));
+		}
 
 		//[Test]
 		//public void Set_Property_of_an_ExpandoObject()
@@ -72,18 +72,18 @@ namespace DynamicExpresso.UnitTest
 		}
 
 
-        [Test]
-        public void Invoke_Method_of_a_nested_ExpandoObject()
-        {
-            dynamic dyn = new ExpandoObject();
-            dyn.Sub = new ExpandoObject();
-            dyn.Sub.Foo = new Func<string>(() => "bar");
+		[Test]
+		public void Invoke_Method_of_a_nested_ExpandoObject()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new ExpandoObject();
+			dyn.Sub.Foo = new Func<string>(() => "bar");
 
-            var interpreter = new Interpreter()
-                .SetVariable("dyn", dyn);
+			var interpreter = new Interpreter()
+					.SetVariable("dyn", dyn);
 
-            Assert.AreEqual(dyn.Sub.Foo(), interpreter.Eval("dyn.Sub.Foo()"));
-        }
+			Assert.AreEqual(dyn.Sub.Foo(), interpreter.Eval("dyn.Sub.Foo()"));
+		}
 
 		[Test]
 		public void Standard_methods_have_precedence_over_dynamic_methods()

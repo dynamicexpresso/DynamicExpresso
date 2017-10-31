@@ -15,30 +15,30 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var predefinedTypes = new Dictionary<string, Type>{
-                    {"Object", typeof(Object)},
-                    {"object", typeof(Object)},
-                    {"Boolean", typeof(Boolean)},
-                    {"bool", typeof(Boolean)},
-                    {"Char", typeof(Char)},
-                    {"char", typeof(Char)},
-                    {"String", typeof(String)},
-                    {"string", typeof(String)},
-                    {"SByte", typeof(SByte)},
-                    {"Byte", typeof(Byte)},
-                    {"byte", typeof(Byte)},
-                    {"Int16", typeof(Int16)},
-                    {"UInt16", typeof(UInt16)},
-                    {"Int32", typeof(Int32)},
-                    {"int", typeof(Int32)},
-                    {"UInt32", typeof(UInt32)},
-                    {"Int64", typeof(Int64)},
-                    {"long", typeof(Int64)},
-                    {"UInt64", typeof(UInt64)},
-                    {"Single", typeof(Single)},
-                    {"Double", typeof(Double)},
-                    {"double", typeof(Double)},
-                    {"Decimal", typeof(Decimal)},
-                    {"decimal", typeof(Decimal)},
+                    {"Object", typeof(object)},
+                    {"object", typeof(object)},
+                    {"Boolean", typeof(bool)},
+                    {"bool", typeof(bool)},
+                    {"Char", typeof(char)},
+                    {"char", typeof(char)},
+                    {"String", typeof(string)},
+                    {"string", typeof(string)},
+                    {"SByte", typeof(sbyte)},
+                    {"Byte", typeof(byte)},
+                    {"byte", typeof(byte)},
+                    {"Int16", typeof(short)},
+                    {"UInt16", typeof(ushort)},
+                    {"Int32", typeof(int)},
+                    {"int", typeof(int)},
+                    {"UInt32", typeof(uint)},
+                    {"Int64", typeof(long)},
+                    {"long", typeof(long)},
+                    {"UInt64", typeof(ulong)},
+                    {"Single", typeof(float)},
+                    {"Double", typeof(double)},
+                    {"double", typeof(double)},
+                    {"Decimal", typeof(decimal)},
+                    {"decimal", typeof(decimal)},
                     {"DateTime", typeof(DateTime)},
                     {"TimeSpan", typeof(TimeSpan)},
                     {"Guid", typeof(Guid)},
@@ -153,7 +153,7 @@ namespace DynamicExpresso.UnitTest
 			TEST = 2
 		}
 
-		class MyDataContract
+		private class MyDataContract
 		{
 			public MyDataContract(string name)
 			{
@@ -170,7 +170,7 @@ namespace DynamicExpresso.UnitTest
 
 		public class MyTestClass<T>
 		{
-			T _val;
+			private T _val;
 			public MyTestClass(T val)
 			{
 				_val = val;

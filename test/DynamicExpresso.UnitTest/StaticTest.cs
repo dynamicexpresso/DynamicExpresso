@@ -11,12 +11,12 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(Int32.MaxValue, target.Eval("Int32.MaxValue"));
-			Assert.AreEqual(Double.MaxValue, target.Eval("Double.MaxValue"));
+			Assert.AreEqual(int.MaxValue, target.Eval("Int32.MaxValue"));
+			Assert.AreEqual(double.MaxValue, target.Eval("Double.MaxValue"));
 			Assert.AreEqual(DateTime.MaxValue, target.Eval("DateTime.MaxValue"));
 			Assert.AreEqual(DateTime.Today, target.Eval("DateTime.Today"));
-			Assert.AreEqual(String.Empty, target.Eval("String.Empty"));
-			Assert.AreEqual(Boolean.FalseString, target.Eval("Boolean.FalseString"));
+			Assert.AreEqual(string.Empty, target.Eval("String.Empty"));
+			Assert.AreEqual(bool.FalseString, target.Eval("Boolean.FalseString"));
 			Assert.AreEqual(TimeSpan.TicksPerMillisecond, target.Eval("TimeSpan.TicksPerMillisecond"));
 			Assert.AreEqual(Guid.Empty, target.Eval("Guid.Empty"));
 		}
@@ -82,7 +82,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(DateTime.Now.GetType(), target.Eval("DateTime.Now.GetType()"));
 		}
 
-		class MyTestService
+		private class MyTestService
 		{
 			public static int MyStaticMethod()
 			{

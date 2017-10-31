@@ -9,11 +9,11 @@ namespace DynamicExpresso
 {
 	internal class Detector
 	{
-		readonly ParserSettings _settings;
-		static readonly Regex IDENTIFIERS_DETECTION_REGEX = new Regex(@"([^\.]|^)\b(?<id>[a-zA-Z_]\w*)\b", RegexOptions.Compiled);
+		private readonly ParserSettings _settings;
+		private static readonly Regex IDENTIFIERS_DETECTION_REGEX = new Regex(@"([^\.]|^)\b(?<id>[a-zA-Z_]\w*)\b", RegexOptions.Compiled);
 
-		static readonly Regex STRING_DETECTION_REGEX = new Regex(@"(?<!\\)?"".*?(?<!\\)""", RegexOptions.Compiled);
-		static readonly Regex CHAR_DETECTION_REGEX = new Regex(@"(?<!\\)?'.{1,2}?(?<!\\)'", RegexOptions.Compiled);
+		private static readonly Regex STRING_DETECTION_REGEX = new Regex(@"(?<!\\)?"".*?(?<!\\)""", RegexOptions.Compiled);
+		private static readonly Regex CHAR_DETECTION_REGEX = new Regex(@"(?<!\\)?'.{1,2}?(?<!\\)'", RegexOptions.Compiled);
 
 		public Detector(ParserSettings settings)
 		{
@@ -49,7 +49,7 @@ namespace DynamicExpresso
 			return new IdentifiersInfo(unknownIdentifiers, knownIdentifiers, knownTypes);
 		}
 
-		string PrepareExpression(string expression)
+		private string PrepareExpression(string expression)
 		{
 			expression = expression ?? string.Empty;
 
@@ -60,22 +60,22 @@ namespace DynamicExpresso
 			return expression;
 		}
 
-		string RemoveStringLiterals(string expression)
+		private string RemoveStringLiterals(string expression)
 		{
 			return STRING_DETECTION_REGEX.Replace(expression, "");
 		}
 
-		string RemoveCharLiterals(string expression)
+		private string RemoveCharLiterals(string expression)
 		{
 			return CHAR_DETECTION_REGEX.Replace(expression, "");
 		}
 
-		bool IsReserverKeyword(string identifier)
+		private bool IsReserverKeyword(string identifier)
 		{
 			return ParserConstants.RESERVED_KEYWORDS.Contains(identifier, _settings.KeyComparer);
 		}
 
-		bool IsKnownIdentifier(string identifier)
+		private bool IsKnownIdentifier(string identifier)
 		{
 			return _settings.Identifiers.ContainsKey(identifier)
 				|| _settings.KnownTypes.ContainsKey(identifier);

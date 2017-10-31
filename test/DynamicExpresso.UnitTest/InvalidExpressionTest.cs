@@ -177,7 +177,7 @@ namespace DynamicExpresso.UnitTest
 			public MyException(string message) : base(message) { }
 		}
 
-		class MyTestService
+		private class MyTestService
 		{
 			public string ThrowException()
 			{

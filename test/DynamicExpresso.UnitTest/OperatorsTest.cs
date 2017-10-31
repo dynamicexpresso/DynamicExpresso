@@ -185,7 +185,8 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(20, x.Property1);
 			Assert.AreEqual(2, x.Property2);
 		}
-		class TypeWithProperty { public int Property1 { get; set; } public int Property2 { get; set; } }
+
+		private class TypeWithProperty { public int Property1 { get; set; } public int Property2 { get; set; } }
 
 		[Test]
 		public void Can_assign_a_parameter()
@@ -290,7 +291,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(10, val);
 		}
 
-		struct TypeWithImplicitConversion
+		private struct TypeWithImplicitConversion
 		{
 			private int _value;
 
@@ -332,7 +333,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
 		}
 
-		struct StructWithOverloadedBinaryOperators
+		private struct StructWithOverloadedBinaryOperators
 		{
 			private int _value;
 
@@ -405,7 +406,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
 		}
 
-		class ClassWithOverloadedBinaryOperators
+		private class ClassWithOverloadedBinaryOperators
 		{
 			private int _value;
 
@@ -489,7 +490,7 @@ namespace DynamicExpresso.UnitTest
 			target.Parse("!x");
 		}
 
-		struct TypeWithoutOverloadedBinaryOperators
+		private struct TypeWithoutOverloadedBinaryOperators
 		{
 			public TypeWithoutOverloadedBinaryOperators(int value)
 			{

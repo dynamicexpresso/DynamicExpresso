@@ -95,6 +95,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(Math.Pow(10, 2) + 5, result);
 		}
 
-		class TestReferenceType { };
+		private class TestReferenceType { };
 	}
 }

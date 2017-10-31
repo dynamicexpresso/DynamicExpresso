@@ -27,11 +27,11 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(15, lambdaExpression.Compile()(10));
 
-            lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + .5");
-            Assert.AreEqual(10.5, lambdaExpression.Compile()(10));
-        }
+			lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + .5");
+			Assert.AreEqual(10.5, lambdaExpression.Compile()(10));
+		}
 
-        [Test]
+		[Test]
 		public void Parse_To_a_Delegate_With_Two_Parameters()
 		{
 			var target = new Interpreter();
@@ -59,12 +59,12 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var lambda = target.Parse("Math.Pow(x, y) + 5", 
+			var lambda = target.Parse("Math.Pow(x, y) + 5",
 				new Parameter("x", typeof(double)),
 				new Parameter("y", typeof(double))
 			);
 
-			Expression<Func<double, double, double>> lambdaExpression = lambda.LambdaExpression<Func<double, double, double>> ();
+			Expression<Func<double, double, double>> lambdaExpression = lambda.LambdaExpression<Func<double, double, double>>();
 
 			Assert.AreEqual(Math.Pow(10, 2) + 5, lambdaExpression.Compile()(10, 2));
 		}
@@ -76,11 +76,11 @@ namespace DynamicExpresso.UnitTest
 
 			// Func delegate has 2 inputs, I just use one
 
-			var lambda = target.Parse("x + 5", 
+			var lambda = target.Parse("x + 5",
 				new Parameter("x", typeof(double))
 			);
 
-			Assert.Throws<ArgumentException>(() => lambda.LambdaExpression<Func<double, double, double>> ());
+			Assert.Throws<ArgumentException>(() => lambda.LambdaExpression<Func<double, double, double>>());
 		}
 
 		[Test]
@@ -90,11 +90,11 @@ namespace DynamicExpresso.UnitTest
 
 			// Func delegate takes a string, I pass a double
 
-			var lambda = target.Parse("x + 5", 
+			var lambda = target.Parse("x + 5",
 				new Parameter("x", typeof(double))
 			);
 
-			Assert.Throws<ArgumentException>(() => lambda.LambdaExpression<Func<string, double>> ());
+			Assert.Throws<ArgumentException>(() => lambda.LambdaExpression<Func<string, double>>());
 		}
 
 		[Test]
@@ -104,11 +104,11 @@ namespace DynamicExpresso.UnitTest
 
 			// Func delegate returns a string, I return a double
 
-			var lambda = target.Parse("x + 5", 
+			var lambda = target.Parse("x + 5",
 				new Parameter("x", typeof(double))
 			);
 
-			Assert.Throws<ArgumentException>(() => lambda.LambdaExpression<Func<double, string>> ());
+			Assert.Throws<ArgumentException>(() => lambda.LambdaExpression<Func<double, string>>());
 		}
 
 	}

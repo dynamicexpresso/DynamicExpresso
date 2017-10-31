@@ -12,10 +12,10 @@ namespace DynamicExpresso
 	/// </summary>
 	public class Lambda
 	{
-		readonly Expression _expression;
-		readonly ParserArguments _parserArguments;
+		private readonly Expression _expression;
+		private readonly ParserArguments _parserArguments;
 
-		readonly Delegate _delegate;
+		private readonly Delegate _delegate;
 
 		internal Lambda(Expression expression, ParserArguments parserArguments)
 		{
