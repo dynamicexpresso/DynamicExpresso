@@ -3,6 +3,21 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
 		<RootNamespace>DynamicExpresso</RootNamespace>
+
+		<Authors>Davide Icardi</Authors>
+		<Company>davideicardi.com</Company>
+		<Description>Interpreter for simple C# statements</Description>
+		<Copyright>Davide Icardi</Copyright>
+		<PackageTags>dynamic expresso expression linq eval</PackageTags>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<IncludeSymbols>True</IncludeSymbols>
+		<IncludeSource>True</IncludeSource>
+		<PackageProjectUrl>https://github.com/davideicardi/DynamicExpresso</PackageProjectUrl>
+		<PackageLicenseUrl>https://github.com/davideicardi/DynamicExpresso#license</PackageLicenseUrl>
+		<RepositoryUrl>https://github.com/davideicardi/DynamicExpresso.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<VersionPrefix>2.0.0</VersionPrefix>
+		<VersionSuffix>alpha</VersionSuffix>
 	</PropertyGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">

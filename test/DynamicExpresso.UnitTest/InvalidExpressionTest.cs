@@ -134,9 +134,9 @@ namespace DynamicExpresso.UnitTest
 		public void SystemExceptions_are_preserved_using_method_invocation()
 		{
 			var target = new Interpreter();
-			target.SetVariable("a", new NotImplementedException());
+			target.SetVariable("a", new MyTestService());
 
-			Assert.Throws<MyException>(() => target.Eval("a.ThrowException()"));
+			Assert.Throws<NotImplementedException>(() => target.Eval("a.ThrowException()"));
 		}
 
 		public class MyException : Exception

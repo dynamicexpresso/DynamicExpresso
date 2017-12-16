@@ -29,24 +29,19 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual((-1-.1-0.1).ToString(), interpreter.Eval("(-1-.1-0.1).ToString()"));
 		}
 
-		/**
-		 * Once the bug is fixed, this test should fail.
-		 **/
+		[Ignore("TODO")]
 		[Test]
 		public void GitHub_Issue_39_Simple_Reassignment()
 		{
 			var target = new Interpreter().SetVariable("x", 3);
 			Assert.AreEqual(3, target.Eval("x"));
 
-			// Remove throws when fixed...
-			Assert.Throws<Exception>(() => target.Eval("x = 23"));
+			target.Eval("x = 23");
 
 			Assert.AreEqual(23, target.Eval("x"));
 		}
 
-		/**
-		 * Once the bug is fixed, this test should fail.
-		 **/
+		[Ignore("TODO")]
 		[Test]
 		public void GitHub_Issue_39_Array_Reassignment()
 		{
@@ -55,16 +50,13 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter().SetVariable("arr", arr);
 			Assert.AreEqual(2, target.Eval("arr[0]"));
 
-			// Remove throws when fixed...
-			Assert.Throws<Exception>(() => target.Eval("arr[0] = 3"));
+			target.Eval("arr[0] = 3");
 
 			Assert.AreNotEqual(2, target.Eval("arr[0]"));
 			Assert.AreEqual(3, target.Eval("arr[0]"));
 		}
 
-		/**
-		 * Once the bug is fixed, this test should fail.
-		 **/
+		[Ignore("TODO")]
 		[Test]
 		public void GitHub_Issue_39_List_Reassignment()
 		{
@@ -73,8 +65,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter().SetVariable("list", list);
 			Assert.AreEqual(2, target.Eval("list[0]"));
 
-			// Remove throws when fixed...
-			Assert.Throws<Exception>(() => target.Eval("list[0] = 3"));
+			target.Eval("list[0] = 3");
 
 			Assert.AreNotEqual(2, target.Eval("list[0]"));
 			Assert.AreEqual(3, target.Eval("list[0]"));
