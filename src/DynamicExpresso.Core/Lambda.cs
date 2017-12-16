@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso
@@ -117,12 +118,9 @@ namespace DynamicExpresso
 			catch (TargetInvocationException exc)
 			{
 				if (exc.InnerException != null)
-				{
-					exc.InnerException.PreserveStackTrace();
-					throw exc.InnerException;
-				}
-				else
-					throw;
+					ExceptionDispatchInfo.Capture(exc.InnerException).Throw();
+
+				throw;
 			}
 		}
 

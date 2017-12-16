@@ -1,10 +1,14 @@
-﻿using System;
-using System.Security.Permissions;
+﻿#if !NETSTANDARD1_6
+using System;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
+#endif
 
-namespace DynamicExpresso
+namespace DynamicExpresso.Exceptions
 {
+	#if !NETSTANDARD1_6
 	[Serializable]
+	#endif
 	public class AssignmentOperatorDisabledException : ParseException
 	{
 		public AssignmentOperatorDisabledException(string operatorString, int position)
@@ -13,6 +17,9 @@ namespace DynamicExpresso
 			OperatorString = operatorString;
 		}
 
+		public string OperatorString { get; private set; }
+
+		#if !NETSTANDARD1_6
 		protected AssignmentOperatorDisabledException(
 			SerializationInfo info,
 			StreamingContext context)
@@ -21,14 +28,13 @@ namespace DynamicExpresso
 			OperatorString = info.GetString("OperatorString");
 		}
 
-		public string OperatorString { get; private set; }
-
-		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue("OperatorString", OperatorString);
 
 			base.GetObjectData(info, context);
 		}
+		#endif
 	}
 }

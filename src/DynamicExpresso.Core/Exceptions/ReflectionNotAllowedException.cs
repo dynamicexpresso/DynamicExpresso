@@ -1,10 +1,14 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿#if !NETSTANDARD1_6
+using System;
 using System.Security.Permissions;
+using System.Runtime.Serialization;
+#endif
 
-namespace DynamicExpresso
+namespace DynamicExpresso.Exceptions
 {
+#if !NETSTANDARD1_6
 	[Serializable]
+#endif
 	public class ReflectionNotAllowedException : ParseException
 	{
 		public ReflectionNotAllowedException()
@@ -12,6 +16,7 @@ namespace DynamicExpresso
 		{
 		}
 
+		#if !NETSTANDARD1_6
 		protected ReflectionNotAllowedException(
 			SerializationInfo info,
 			StreamingContext context)
@@ -19,10 +24,11 @@ namespace DynamicExpresso
 		{
 		}
 
-		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			base.GetObjectData(info, context);
 		}
+		#endif
 	}
 }

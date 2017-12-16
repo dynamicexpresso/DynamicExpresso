@@ -1,4 +1,5 @@
 ﻿using System;
+using DynamicExpresso.Exceptions;
 using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
@@ -425,15 +426,14 @@ namespace DynamicExpresso.UnitTest
 
 			public static bool operator ==(ClassWithOverloadedBinaryOperators instance, string value)
 			{
-				return instance != null && instance._value.ToString().Equals(value);
+				return ReferenceEquals(instance, null) == false
+					&& instance._value.ToString().Equals(value);
 			}
 
 			public static bool operator !=(ClassWithOverloadedBinaryOperators instance, string value)
 			{
-				if (instance == null)
-				{
+				if (ReferenceEquals(instance, null))
 					return value != null;
-				}
 
 				return !instance._value.ToString().Equals(value);
 			}

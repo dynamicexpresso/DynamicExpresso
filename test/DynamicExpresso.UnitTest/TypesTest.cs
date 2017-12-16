@@ -1,8 +1,8 @@
 ﻿using System;
 using NUnit.Framework;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
+using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -65,7 +65,7 @@ namespace DynamicExpresso.UnitTest
 											.Reference(typeof(Uri));
 
 			Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
-			Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
+			Assert.AreEqual(new Uri("http://test"), target.Eval("new Uri(\"http://test\")"));
 		}
 
 		[Test]
@@ -79,7 +79,7 @@ namespace DynamicExpresso.UnitTest
 											.Reference(typeof(Uri));
 
 			Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
-			Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
+			Assert.AreEqual(new Uri("http://test"), target.Eval("new Uri(\"http://test\")"));
 		}
 
 		[Test]
@@ -118,10 +118,10 @@ namespace DynamicExpresso.UnitTest
 		public void Custom_Enum()
 		{
 			var target = new Interpreter()
-											.Reference(typeof(CalendarAlgorithmType));
+											.Reference(typeof(MyCustomEnum));
 
-			Assert.AreEqual(CalendarAlgorithmType.LunisolarCalendar, target.Eval("CalendarAlgorithmType.LunisolarCalendar"));
-			Assert.AreEqual(CalendarAlgorithmType.SolarCalendar, target.Eval("CalendarAlgorithmType.SolarCalendar"));
+			Assert.AreEqual(MyCustomEnum.Value1, target.Eval("MyCustomEnum.Value1"));
+			Assert.AreEqual(MyCustomEnum.Value2, target.Eval("MyCustomEnum.Value2"));
 		}
 
 		[Test]
@@ -149,7 +149,14 @@ namespace DynamicExpresso.UnitTest
 		public enum EnumCaseSensitive
 		{
 			Test = 1,
+			// ReSharper disable once InconsistentNaming
 			TEST = 2
+		}
+
+		public enum MyCustomEnum
+		{
+			Value1,
+			Value2
 		}
 
 		private class MyDataContract

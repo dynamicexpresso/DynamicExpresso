@@ -1,10 +1,14 @@
-﻿using System;
-using System.Security.Permissions;
+﻿#if !NETSTANDARD1_6
+using System;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
+#endif
 
-namespace DynamicExpresso
+namespace DynamicExpresso.Exceptions
 {
+#if !NETSTANDARD1_6
 	[Serializable]
+#endif
 	public class NoApplicableMethodException : ParseException
 	{
 		public NoApplicableMethodException(string methodName, string methodTypeName, int position)
@@ -14,6 +18,10 @@ namespace DynamicExpresso
 			MethodName = methodName;
 		}
 
+		public string MethodTypeName { get; private set; }
+		public string MethodName { get; private set; }
+
+#if !NETSTANDARD1_6
 		protected NoApplicableMethodException(
 			SerializationInfo info,
 			StreamingContext context)
@@ -23,10 +31,7 @@ namespace DynamicExpresso
 			MethodName = info.GetString("MethodName");
 		}
 
-		public string MethodTypeName { get; private set; }
-		public string MethodName { get; private set; }
-
-		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue("MethodName", MethodName);
@@ -34,5 +39,6 @@ namespace DynamicExpresso
 
 			base.GetObjectData(info, context);
 		}
+#endif
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso.Visitors
 {

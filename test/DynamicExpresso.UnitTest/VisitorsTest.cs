@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using DynamicExpresso.Exceptions;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {

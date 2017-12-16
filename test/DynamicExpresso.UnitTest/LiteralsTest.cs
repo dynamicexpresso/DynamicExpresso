@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System.Threading;
 using System.Globalization;
+using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso.UnitTest
 {

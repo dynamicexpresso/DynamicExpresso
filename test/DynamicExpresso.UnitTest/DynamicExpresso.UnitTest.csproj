@@ -13,7 +13,7 @@
 		<Reference Include="Microsoft.CSharp" />
 	  <PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
 	</ItemGroup>
-
+	
 	<ItemGroup>
 	  <ProjectReference Include="..\..\src\DynamicExpresso.Core\DynamicExpresso.Core.csproj" />
 	</ItemGroup>

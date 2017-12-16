@@ -1,11 +1,15 @@
-﻿using System;
-using System.Security.Permissions;
+﻿#if !NETSTANDARD1_6
+using System;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
+#endif
 using DynamicExpresso.Resources;
 
-namespace DynamicExpresso
+namespace DynamicExpresso.Exceptions
 {
+	#if !NETSTANDARD1_6
 	[Serializable]
+	#endif
 	public class ParseException : DynamicExpressoException
 	{
 		public ParseException(string message, int position)
@@ -14,6 +18,9 @@ namespace DynamicExpresso
 			Position = position;
 		}
 
+		public int Position { get; private set; }
+
+		#if !NETSTANDARD1_6
 		protected ParseException(
 			SerializationInfo info,
 			StreamingContext context)
@@ -22,14 +29,13 @@ namespace DynamicExpresso
 			Position = info.GetInt32("Position");
 		}
 
-		public int Position { get; private set; }
-
-		[SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+		[SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
 		public override void GetObjectData(SerializationInfo info, StreamingContext context)
 		{
 			info.AddValue("Position", Position);
 
 			base.GetObjectData(info, context);
 		}
+		#endif
 	}
 }
