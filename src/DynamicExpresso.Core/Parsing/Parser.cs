@@ -1,5 +1,4 @@
-﻿using Microsoft.CSharp.RuntimeBinder;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
@@ -977,29 +976,37 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression ParseDynamicProperty(Type type, Expression instance, string propertyOrFieldName)
 		{
+#if NETSTANDARD2_0
+			throw new NotImplementedException("Dynamic types are not supported in .NET Standard build");
+#else
 			var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
-				CSharpBinderFlags.None,
+				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
 				propertyOrFieldName,
 				type,
-				new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) }
+				new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
 				);
 
 			return Expression.Dynamic(binder, typeof(object), instance);
+#endif
 		}
 
 		private static Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
 		{
+#if NETSTANDARD2_0
+			throw new NotImplementedException("Dynamic types are not supported in .NET Standard build");
+#else
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
 			var binderM = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
-				CSharpBinderFlags.None,
+				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
 				methodName,
 				null,
 				type,
-				argsDynamic.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null))
+				argsDynamic.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
 				);
 
 			return Expression.Dynamic(binderM, typeof(object), argsDynamic);
+#endif
 		}
 
 		private Expression[] ParseArgumentList()

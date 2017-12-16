@@ -62,7 +62,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(15, exp.Invoke());
 		}
 
-		[ExpectedException(typeof(TargetParameterCountException))]
 		[Test]
 		public void Parameters_Mismatch()
 		{
@@ -79,7 +78,7 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("x", 546)
                             };
 
-			Assert.AreEqual(30, exp.Invoke(parametersMismatch));
+			Assert.Throws<TargetParameterCountException>(() => exp.Invoke(parametersMismatch));
 		}
 
 		[Test]

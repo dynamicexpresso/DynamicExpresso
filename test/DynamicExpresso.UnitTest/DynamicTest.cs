@@ -1,4 +1,5 @@
-﻿using Microsoft.CSharp.RuntimeBinder;
+﻿#if !NETSTANDARD2_0
+using Microsoft.CSharp.RuntimeBinder;
 using NUnit.Framework;
 using System;
 using System.Dynamic;
@@ -99,16 +100,11 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Case_Insensitive_Dynamic_Members()
 		{
-			Assert.Throws<RuntimeBinderException>(() =>
-			{
-				dynamic dyn = new ExpandoObject();
-				dyn.Bar = 10;
+			dynamic dyn = new ExpandoObject();
+			dyn.Bar = 10;
 
-				var result = new Interpreter()
-					.Eval("dyn.BAR", new Parameter("dyn", dyn));
-
-				Assert.AreEqual(10, result);
-			});
+			var interpreter = new Interpreter();
+			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.BAR", new Parameter("dyn", dyn)));
 		}
 
 		[Test]
@@ -162,3 +158,4 @@ namespace DynamicExpresso.UnitTest
 		}
 	}
 }
+#endif

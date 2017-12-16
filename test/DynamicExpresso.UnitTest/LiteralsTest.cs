@@ -1,5 +1,4 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Threading;
 using System.Globalization;
 
@@ -66,48 +65,43 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		[ExpectedException(typeof(ParseException))]
 		public void Invalid_Numeric_Literals_multiple_dots()
 		{
 			var target = new Interpreter();
 
-			target.Eval("45.5.456");
+			Assert.Throws<ParseException>(() => target.Eval("45.5.456"));
 		}
 
 		[Test]
-		[ExpectedException(typeof(ParseException))]
 		public void Invalid_Numeric_Literals_wrong_space()
 		{
 			var target = new Interpreter();
 
-			target.Eval(".2 F");
+			Assert.Throws<ParseException>(() => target.Eval(".2 F"));
 		}
 
 		[Test]
-		[ExpectedException(typeof(ParseException))]
 		public void Invalid_Numeric_Literals_wrong_space_before_point()
 		{
 			var target = new Interpreter();
 
-			target.Eval(". 2");
+			Assert.Throws<ParseException>(() => target.Eval(". 2"));
 		}
 
 		[Test]
-		[ExpectedException(typeof(ParseException))]
 		public void Invalid_Numeric_Literals_multiple_suffix()
 		{
 			var target = new Interpreter();
 
-			target.Eval("45.5M456F");
+			Assert.Throws<ParseException>(() => target.Eval("45.5M456F"));
 		}
 
 		[Test]
-		[ExpectedException(typeof(ParseException))]
 		public void Invalid_Numeric_Literals_wrong_suffix_x()
 		{
 			var target = new Interpreter();
 
-			target.Eval("45.5x");
+			Assert.Throws<ParseException>(() => target.Eval("45.5x"));
 		}
 
 		[Test]
@@ -233,58 +227,52 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("L\'aquila\r\n\tè\tbella.", target.Eval("\"L\\'aquila\\r\\n\\tè\\tbella.\""));
 		}
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Invalid_Escape_char()
 		{
 			var target = new Interpreter();
 
-			target.Eval("'\\'");
+			Assert.Throws<ParseException>(() => target.Eval("'\\'"));
 		}
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Invalid_Escape_string()
 		{
 			var target = new Interpreter();
 
-			target.Eval("\"\\\"");
+			Assert.Throws<ParseException>(() => target.Eval("\"\\\""));
 		}
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Character_Literal_Must_be_closed()
 		{
 			var target = new Interpreter();
 
-			target.Eval("'1");
+			Assert.Throws<ParseException>(() => target.Eval("'1"));
 		}
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void String_Literal_Must_be_closed()
 		{
 			var target = new Interpreter();
 
-			target.Eval("\"1");
+			Assert.Throws<ParseException>(() => target.Eval("\"1"));
 		}
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Character_Literal_Must_one_char_maximum()
 		{
 			var target = new Interpreter();
 
-			target.Eval("'12'");
+			Assert.Throws<ParseException>(() => target.Eval("'12'"));
 		}
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Character_Literal_Must_one_char_minimum()
 		{
 			var target = new Interpreter();
 
-			target.Eval("''");
+			Assert.Throws<ParseException>(() => target.Eval("''"));
 		}
 
 		[Test]

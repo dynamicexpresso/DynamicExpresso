@@ -51,12 +51,11 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		[ExpectedException(typeof(UnknownIdentifierException))]
 		public void Load_interpreter_without_any_configuration_doesn_t_recognize_types()
 		{
 			var target = new Interpreter(InterpreterOptions.None);
 
-			target.Eval("typeof(string)");
+			Assert.Throws<UnknownIdentifierException>(() => target.Eval("typeof(string)"));
 		}
 
 		[Test]

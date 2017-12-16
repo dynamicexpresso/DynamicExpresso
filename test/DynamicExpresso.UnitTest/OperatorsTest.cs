@@ -76,9 +76,12 @@ namespace DynamicExpresso.UnitTest
 													.SetVariable("a", a, typeof(object))
 													.SetVariable("b", b, typeof(object));
 
+			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 			Assert.AreEqual(a is string, target.Eval("a is string"));
 			Assert.AreEqual(typeof(bool), target.Parse("a is string").ReturnType);
+			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 			Assert.AreEqual(b is string, target.Eval("b is string"));
+			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 			Assert.AreEqual(b is int, target.Eval("b is int"));
 		}
 
@@ -91,8 +94,10 @@ namespace DynamicExpresso.UnitTest
 													.SetVariable("a", a, typeof(object))
 													.SetVariable("b", b, typeof(object));
 
+			// ReSharper disable once TryCastAlwaysSucceeds
 			Assert.AreEqual(a as string, target.Eval("a as string"));
 			Assert.AreEqual(typeof(string), target.Parse("a as string").ReturnType);
+			// ReSharper disable once ExpressionIsAlwaysNull
 			Assert.AreEqual(b as string, target.Eval("b as string"));
 			Assert.AreEqual(typeof(string), target.Parse("b as string").ReturnType);
 		}
@@ -103,6 +108,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			Assert.AreEqual(typeof(string) != typeof(int), target.Eval("typeof(string) != typeof(int)"));
+			// ReSharper disable once EqualExpressionComparison
 			Assert.AreEqual(typeof(string) == typeof(string), target.Eval("typeof(string) == typeof(string)"));
 		}
 
@@ -170,7 +176,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.Property1, returnValue);
 
 			// assignment can be chained
-			returnValue = target.Eval("x.Property1 = x.Property2 = 2014");
+			target.Eval("x.Property1 = x.Property2 = 2014");
 			Assert.AreEqual(2014, x.Property1);
 			Assert.AreEqual(x.Property1, x.Property2);
 
@@ -181,11 +187,12 @@ namespace DynamicExpresso.UnitTest
 
 			// right member is not modified
 			x.Property2 = 2;
-			returnValue = target.Eval("x.Property1 = x.Property2 * 10");
+			target.Eval("x.Property1 = x.Property2 * 10");
 			Assert.AreEqual(20, x.Property1);
 			Assert.AreEqual(2, x.Property2);
 		}
 
+		// ReSharper disable once UnusedAutoPropertyAccessor.Local
 		private class TypeWithProperty { public int Property1 { get; set; } public int Property2 { get; set; } }
 
 		[Test]
@@ -266,17 +273,18 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
+			// ReSharper disable once UnreachableCode
 			Assert.AreEqual(10 > 3 ? "yes" : "no", target.Eval("10 > 3 ? \"yes\" : \"no\""));
+			// ReSharper disable once UnreachableCode
 			Assert.AreEqual(10 < 3 ? "yes" : "no", target.Eval("10 < 3 ? \"yes\" : \"no\""));
 		}
 
 		[Test]
-		[ExpectedException(typeof(ParseException))]
 		public void Operator_LessGreater_Is_Not_Supported()
 		{
 			var target = new Interpreter();
 
-			target.Parse("5 <> 4");
+			Assert.Throws<ParseException>(() => target.Parse("5 <> 4"));
 		}
 
 		[Test]
@@ -286,7 +294,7 @@ namespace DynamicExpresso.UnitTest
 					.SetVariable("x", new TypeWithImplicitConversion(10));
 
 			var func = target.ParseAsDelegate<Func<int>>("x");
-			int val = func();
+			var val = func();
 
 			Assert.AreEqual(10, val);
 		}
@@ -297,7 +305,7 @@ namespace DynamicExpresso.UnitTest
 
 			public TypeWithImplicitConversion(byte value)
 			{
-				this._value = value;
+				_value = value;
 			}
 
 			public static implicit operator int(TypeWithImplicitConversion d)
@@ -314,7 +322,7 @@ namespace DynamicExpresso.UnitTest
 			var x = new StructWithOverloadedBinaryOperators(3);
 			target.SetVariable("x", x);
 
-			string y = "5";
+			var y = "5";
 			Assert.IsFalse(x == y);
 			Assert.IsFalse(target.Eval<bool>("x == y", new Parameter("y", y)));
 
@@ -335,7 +343,7 @@ namespace DynamicExpresso.UnitTest
 
 		private struct StructWithOverloadedBinaryOperators
 		{
-			private int _value;
+			private readonly int _value;
 
 			public StructWithOverloadedBinaryOperators(int value)
 			{
@@ -368,7 +376,7 @@ namespace DynamicExpresso.UnitTest
 					return false;
 				if (obj is StructWithOverloadedBinaryOperators)
 				{
-					return this._value.Equals(((StructWithOverloadedBinaryOperators)obj)._value);
+					return _value.Equals(((StructWithOverloadedBinaryOperators)obj)._value);
 				}
 				return base.Equals(obj);
 			}
@@ -408,7 +416,7 @@ namespace DynamicExpresso.UnitTest
 
 		private class ClassWithOverloadedBinaryOperators
 		{
-			private int _value;
+			private readonly int _value;
 
 			public ClassWithOverloadedBinaryOperators(int value)
 			{
@@ -417,11 +425,16 @@ namespace DynamicExpresso.UnitTest
 
 			public static bool operator ==(ClassWithOverloadedBinaryOperators instance, string value)
 			{
-				return instance._value.ToString().Equals(value);
+				return instance != null && instance._value.ToString().Equals(value);
 			}
 
 			public static bool operator !=(ClassWithOverloadedBinaryOperators instance, string value)
 			{
+				if (instance == null)
+				{
+					return value != null;
+				}
+
 				return !instance._value.ToString().Equals(value);
 			}
 
@@ -439,11 +452,8 @@ namespace DynamicExpresso.UnitTest
 			{
 				if (obj == null)
 					return false;
-				if (obj is ClassWithOverloadedBinaryOperators)
-				{
-					return this._value.Equals(((ClassWithOverloadedBinaryOperators)obj)._value);
-				}
-				return base.Equals(obj);
+				var operators = obj as ClassWithOverloadedBinaryOperators;
+				return operators != null ? _value.Equals(operators._value) : base.Equals(obj);
 			}
 
 			public override int GetHashCode()
@@ -453,7 +463,6 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_equal_operator()
 		{
 			var target = new Interpreter();
@@ -461,12 +470,12 @@ namespace DynamicExpresso.UnitTest
 			var x = new TypeWithoutOverloadedBinaryOperators(3);
 			target.SetVariable("x", x);
 
-			string y = "5";
-			target.Parse("x == y", new Parameter("y", y));
+			var y = "5";
+
+			Assert.Throws<InvalidOperationException>(() => target.Parse("x == y", new Parameter("y", y)));
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_plus_operator()
 		{
 			var target = new Interpreter();
@@ -474,12 +483,12 @@ namespace DynamicExpresso.UnitTest
 			var x = new TypeWithoutOverloadedBinaryOperators(3);
 			target.SetVariable("x", x);
 
-			int y = 5;
-			target.Parse("x + y", new Parameter("y", y));
+			var y = 5;
+
+			Assert.Throws<InvalidOperationException>(() => target.Parse("x + y", new Parameter("y", y)));
 		}
 
 		[Test]
-		[ExpectedException(typeof(InvalidOperationException))]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_not_operator()
 		{
 			var target = new Interpreter();
@@ -487,11 +496,12 @@ namespace DynamicExpresso.UnitTest
 			var x = new TypeWithoutOverloadedBinaryOperators(3);
 			target.SetVariable("x", x);
 
-			target.Parse("!x");
+			Assert.Throws<InvalidOperationException>(() => target.Parse("!x"));
 		}
 
 		private struct TypeWithoutOverloadedBinaryOperators
 		{
+			// ReSharper disable once UnusedParameter.Local
 			public TypeWithoutOverloadedBinaryOperators(int value)
 			{
 			}

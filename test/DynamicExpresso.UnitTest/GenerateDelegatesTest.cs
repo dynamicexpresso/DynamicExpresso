@@ -1,6 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using System.Linq.Expressions;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -69,7 +68,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var argumentNames = new string[] { "x", "y" };
+			var argumentNames = new [] { "x", "y" };
 			var func = target.ParseAsDelegate<Func<double, double, double>>("x * y", argumentNames);
 
 			Assert.AreEqual(6, func(3, 2));
@@ -89,14 +88,13 @@ namespace DynamicExpresso.UnitTest
 
 		private delegate int MyCustomDelegate(int x, string y);
 
-		[ExpectedException(typeof(ParseException))]
 		[Test]
 		public void Return_Type_Mismatch_Cause_An_Exception()
 		{
 			var target = new Interpreter();
 
 			// expected a double but I return a string
-			target.ParseAsDelegate<Func<double>>("\"ciao\"");
+			Assert.Throws<ParseException>(() => target.ParseAsDelegate<Func<double>>("\"ciao\""));
 		}
 	}
 }
