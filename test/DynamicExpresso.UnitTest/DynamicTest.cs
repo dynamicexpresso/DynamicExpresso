@@ -1,5 +1,4 @@
-﻿#if !NETSTANDARD2_0
-using Microsoft.CSharp.RuntimeBinder;
+﻿using Microsoft.CSharp.RuntimeBinder;
 using NUnit.Framework;
 using System;
 using System.Dynamic;
@@ -7,6 +6,9 @@ using System.Linq.Expressions;
 
 namespace DynamicExpresso.UnitTest
 {
+#if NETCOREAPP2_0
+	[Ignore("Not supported on dotnet core")]
+#endif
 	[TestFixture]
 	public class DynamicTest
 	{
@@ -158,4 +160,3 @@ namespace DynamicExpresso.UnitTest
 		}
 	}
 }
-#endif

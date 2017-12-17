@@ -432,9 +432,21 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - IronJS, IronRuby, IronPython
 - paxScript.NET http://eco148-88394.innterhost.net/paxscriptnet/
 
-## Continuous integration
+## Developer notes
 
-I have setup a CI environment with Visual Studio Online.
+I have setup a continuous integration environment with Visual Studio Online.
+
+To compile the solution you can run:
+
+	dotnet build DynamicExpresso.sln -c Release
+
+To create nuget packages:
+
+	dotnet pack DynamicExpresso.sln -c Release
+
+To run unit tests:
+
+	dotnet test DynamicExpresso.sln -c Release
 
 ## Release notes
 See [wiki release notes page](https://github.com/davideicardi/DynamicExpresso/wiki/Release-notes).
