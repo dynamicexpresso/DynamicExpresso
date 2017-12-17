@@ -448,6 +448,8 @@ To run unit tests:
 
 	dotnet test DynamicExpresso.sln -c Release
 
+Add `--logger:trx` to generate test results.
+
 ## Release notes
 See [wiki release notes page](https://github.com/davideicardi/DynamicExpresso/wiki/Release-notes).
 
