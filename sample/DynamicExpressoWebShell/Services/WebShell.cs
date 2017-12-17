@@ -1,20 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Web;
 
 namespace DynamicExpressoWebShell.Services
 {
     public class WebShell
     {
-        public static WebShell Current { get; private set;}
-
-        public static void Init()
-        {
-            Current = new WebShell();
-        }
-
         readonly DynamicExpresso.Interpreter _interpreter;
         readonly CommandsHistory _commandsHistory;
 

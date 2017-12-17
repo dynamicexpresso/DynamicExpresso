@@ -1,35 +1,38 @@
 ﻿using DynamicExpressoWebShell.Services;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DynamicExpressoWebShell.Controllers
 {
-    public class InterpreterController : Controller
-    {
-        [HttpPost]
-        [ValidateInput(false)]
-        public ActionResult Eval(string expression)
-        {
-            try
-            {
-                var result = WebShell.Current.Eval(expression);
+	public class InterpreterController : Controller
+	{
+		private readonly WebShell _webShell;
 
-                //if (result == null)
-                //    return Json(new { success = true, result = "<null>" });
+		public InterpreterController(WebShell webShell)
+		{
+			_webShell = webShell;
+		}
 
-                string prettifyOutput = JsonConvert.SerializeObject(result, Formatting.Indented);
+		[HttpPost]
+		public ActionResult Eval(string expression)
+		{
+			try
+			{
+				var result = _webShell.Eval(expression);
 
-                return Json(new { success = true, result = prettifyOutput });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, result = ex.Message });
-            }
-        }
+				//if (result == null)
+				//    return Json(new { success = true, result = "<null>" });
 
-    }
+				var prettifyOutput = JsonConvert.SerializeObject(result, Formatting.Indented);
+
+				return Json(new { success = true, result = prettifyOutput });
+			}
+			catch (Exception ex)
+			{
+				return Json(new { success = false, result = ex.Message });
+			}
+		}
+
+	}
 }

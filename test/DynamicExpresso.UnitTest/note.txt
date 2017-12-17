@@ -1,4 +1,0 @@
-﻿Missing tests
---------------
-- performance test (memory/cpu/threads/handles)?
-

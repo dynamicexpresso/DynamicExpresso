@@ -6,7 +6,7 @@
 
 		<Authors>Davide Icardi</Authors>
 		<Company>davideicardi.com</Company>
-		<Description>Interpreter for simple C# statements</Description>
+		<Description>C# expression interpreter/evaluator</Description>
 		<Copyright>Davide Icardi</Copyright>
 		<PackageTags>dynamic expresso expression linq eval</PackageTags>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>

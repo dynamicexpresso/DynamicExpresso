@@ -1,5 +1,7 @@
 # Dynamic Expresso
 
+Platforms: .NET Core 2.0, .NET 4.6.1
+
 [![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
 
 [![MyGet Build Status](https://www.myget.org/BuildSource/Badge/webplu?identifier=230c74d4-485f-49ff-8968-ffaeed70d9d8)](https://www.myget.org/)
@@ -53,7 +55,8 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 - Ability to discover identifiers (variables, types, parameters) of a given expression
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
 - Easy to use and deploy, it is all contained in a single assembly without other external dependencies
-- 100 % managed code written in C# 4.0
+- Written in .NET Standard 2.0
+	- Build available for .NET 4.6.1 and .NET Core 2.0
 - Open source (MIT license)
 
 ### Return value
@@ -411,7 +414,6 @@ This project is based on two old works:
 - "Converting String expressions to Funcs with FunctionFactory by Matthew Abbott" (http://www.fidelitydesign.net/?p=333) 
 - DynamicQuery - Dynamic LINQ - Visual Studio 2008 sample:
 	- http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx 
-	- http://weblogs.asp.net/scottgu/archive/2008/01/07/dynamic-linq-part-1-using-the-linq-dynamic-query-library.aspx
 
 
 ## Other resources or similar projects
@@ -432,10 +434,9 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - IronJS, IronRuby, IronPython
 - paxScript.NET http://eco148-88394.innterhost.net/paxscriptnet/
 
-## Continuous build
-There is a build service configured at [MyGet](https://www.myget.org/BuildSource/List/webplu).
+## Continuous integration
 
-[![MyGet Build Status](https://www.myget.org/BuildSource/Badge/webplu?identifier=230c74d4-485f-49ff-8968-ffaeed70d9d8)](https://www.myget.org/)
+I have setup a CI environment with Visual Studio Online.
 
 ## Release notes
 See [wiki release notes page](https://github.com/davideicardi/DynamicExpresso/wiki/Release-notes).
@@ -443,7 +444,7 @@ See [wiki release notes page](https://github.com/davideicardi/DynamicExpresso/wi
 ## License
 *[MIT License]* 
 
-Copyright (c) 2015 Davide Icardi
+Copyright (c) 2017 Davide Icardi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 - The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
