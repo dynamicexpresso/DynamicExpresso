@@ -17,7 +17,7 @@
 		<RepositoryUrl>https://github.com/davideicardi/DynamicExpresso.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<VersionPrefix>2.0.0</VersionPrefix>
-		<VersionSuffix>alpha</VersionSuffix>
+		<VersionSuffix>beta</VersionSuffix>
 	</PropertyGroup>
 
 	<ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">

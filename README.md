@@ -434,7 +434,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Developer notes
 
-I have setup a continuous integration environment with Visual Studio Online.
+I have setup a continuous integration environment with Visual Studio Online Team Services.
 
 To compile the solution you can run:
 
