@@ -1743,8 +1743,10 @@ namespace DynamicExpresso.Parsing
 						GenerateStaticMethodCall("Compare", left, right),
 						Expression.Constant(0)
 				);
-			}
-			return Expression.GreaterThan(left, right);
+            }
+
+            left = Expression.ConvertChecked(left, right.Type);
+            return Expression.GreaterThan(left, right);
 		}
 
 		Expression GenerateGreaterThanEqual(Expression left, Expression right)
@@ -1756,7 +1758,9 @@ namespace DynamicExpresso.Parsing
 						Expression.Constant(0)
 				);
 			}
-			return Expression.GreaterThanOrEqual(left, right);
+
+		    left = Expression.ConvertChecked(left, right.Type);
+            return Expression.GreaterThanOrEqual(left, right);
 		}
 
 		Expression GenerateLessThan(Expression left, Expression right)
@@ -1767,8 +1771,10 @@ namespace DynamicExpresso.Parsing
 						GenerateStaticMethodCall("Compare", left, right),
 						Expression.Constant(0)
 				);
-			}
-			return Expression.LessThan(left, right);
+            }
+
+            left = Expression.ConvertChecked(left, right.Type);
+            return Expression.LessThan(left, right);
 		}
 
 		Expression GenerateLessThanEqual(Expression left, Expression right)
@@ -1780,7 +1786,9 @@ namespace DynamicExpresso.Parsing
 						Expression.Constant(0)
 				);
 			}
-			return Expression.LessThanOrEqual(left, right);
+
+            left = Expression.ConvertChecked(left, right.Type);
+            return Expression.LessThanOrEqual(left, right);
 		}
 
 		Expression GenerateAdd(Expression left, Expression right)
