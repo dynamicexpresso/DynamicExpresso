@@ -1726,13 +1726,15 @@ namespace DynamicExpresso.Parsing
 		}
 
 		Expression GenerateEqual(Expression left, Expression right)
-		{
-			return Expression.Equal(left, right);
+        {
+            left = Expression.ConvertChecked(left, right.Type);
+            return Expression.Equal(left, right);
 		}
 
 		Expression GenerateNotEqual(Expression left, Expression right)
-		{
-			return Expression.NotEqual(left, right);
+        {
+            left = Expression.ConvertChecked(left, right.Type);
+            return Expression.NotEqual(left, right);
 		}
 
 		Expression GenerateGreaterThan(Expression left, Expression right)
@@ -1757,7 +1759,7 @@ namespace DynamicExpresso.Parsing
 						GenerateStaticMethodCall("Compare", left, right),
 						Expression.Constant(0)
 				);
-			}
+            }
 
 		    left = Expression.ConvertChecked(left, right.Type);
             return Expression.GreaterThanOrEqual(left, right);
