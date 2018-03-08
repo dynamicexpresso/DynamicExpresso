@@ -69,6 +69,16 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Variables_should_take_precedence_over_known_types()
+		{
+			var o = new {Foo = "bar"};
+			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
+				.SetVariable("Object", o);
+
+			Assert.AreEqual("bar", target.Eval("Object.Foo"));
+		}
+
+		[Test]
 		public void Null_Variables()
 		{
 			var target = new Interpreter()
