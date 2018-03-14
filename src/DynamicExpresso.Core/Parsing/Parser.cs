@@ -623,12 +623,6 @@ namespace DynamicExpresso.Parsing
 			if (_token.text == ParserConstants.KEYWORD_TYPEOF)
 				return ParseTypeof();
 
-			Type knownType;
-			if (_arguments.TryGetKnownType(_token.text, out knownType))
-			{
-				return ParseTypeKeyword(knownType);
-			}
-
 			Expression keywordExpression;
 			if (_arguments.TryGetIdentifier(_token.text, out keywordExpression))
 			{
@@ -641,6 +635,12 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				return parameterExpression;
+			}
+
+			Type knownType;
+			if (_arguments.TryGetKnownType(_token.text, out knownType))
+			{
+				return ParseTypeKeyword(knownType);
 			}
 
 			// Working context implementation

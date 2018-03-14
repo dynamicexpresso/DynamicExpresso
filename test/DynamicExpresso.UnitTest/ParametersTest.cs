@@ -51,6 +51,19 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Parameters_should_take_precedence_over_known_types()
+		{
+			var target = new Interpreter();
+
+			var parameters = new[] {
+				new Parameter("Int1", 23),
+				new Parameter("Int32", 7)
+			};
+
+			Assert.AreEqual(30, target.Eval("Int1 + Int32", parameters));
+		}
+
+		[Test]
 		public void Expression_Without_Parameters()
 		{
 			var target = new Interpreter();
