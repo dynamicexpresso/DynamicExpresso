@@ -1262,15 +1262,7 @@ namespace DynamicExpresso.Parsing
 			}
 		}
 
-		private class MethodData
-		{
-			public MethodBase MethodBase;
-			public ParameterInfo[] Parameters;
-			public Expression[] PromotedParameters;
-			public bool HasParamsArray;
-		}
-
-		private MethodData[] FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
+		private static MethodData[] FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
 		{
 			var applicable = methods.
 					Select(m => new MethodData { MethodBase = m, Parameters = m.GetParameters() }).
@@ -1278,7 +1270,7 @@ namespace DynamicExpresso.Parsing
 					ToArray();
 			if (applicable.Length > 1)
 			{
-				applicable = applicable.
+				return applicable.
 						Where(m => applicable.All(n => m == n || MethodHasPriority(args, m, n))).
 						ToArray();
 			}
@@ -1286,7 +1278,7 @@ namespace DynamicExpresso.Parsing
 			return applicable;
 		}
 
-		private bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
+		private static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
 		{
 			if (method.Parameters.Length > args.Length)
 				return false;
@@ -1374,41 +1366,48 @@ namespace DynamicExpresso.Parsing
 			{
 				var methodInfo = (MethodInfo)method.MethodBase;
 
-				var genericArgsType = ExtractActualGenericArguments(
-									method.Parameters.Select(p => p.ParameterType).ToArray(),
-									method.PromotedParameters.Select(p => p.Type).ToArray());
+				var actualGenericArgs = ExtractActualGenericArguments(
+					method.Parameters.Select(p => p.ParameterType).ToArray(),
+					method.PromotedParameters.Select(p => p.Type).ToArray());
 
-				method.MethodBase = methodInfo.MakeGenericMethod(genericArgsType.ToArray());
+				var genericArgs = methodInfo.GetGenericArguments()
+					.Select(p => actualGenericArgs[p.Name])
+					.ToArray();
+
+				method.MethodBase = methodInfo.MakeGenericMethod(genericArgs);
 			}
 
 			return true;
 		}
 
-		private List<Type> ExtractActualGenericArguments(Type[] requestedParameters, Type[] actualParameters)
+		private static Dictionary<string, Type> ExtractActualGenericArguments(
+			Type[] methodGenericParameters,
+			Type[] methodActualParameters)
 		{
-			var extractedGenericTypes = new List<Type>();
+			var extractedGenericTypes = new Dictionary<string, Type>();
 
-			for (var i = 0; i < requestedParameters.Length; i++)
+			for (var i = 0; i < methodGenericParameters.Length; i++)
 			{
-				var requestedType = requestedParameters[i];
-				var actualType = actualParameters[i];
+				var requestedType = methodGenericParameters[i];
+				var actualType = methodActualParameters[i];
 
 				if (requestedType.IsGenericParameter)
 				{
-					extractedGenericTypes.Add(actualType);
+					extractedGenericTypes[requestedType.Name] = actualType;
 				}
 				else if (requestedType.ContainsGenericParameters)
 				{
 					var innerGenericTypes = ExtractActualGenericArguments(requestedType.GetGenericArguments(), actualType.GetGenericArguments());
 
-					extractedGenericTypes.AddRange(innerGenericTypes);
+					foreach (var innerGenericType in innerGenericTypes)
+						extractedGenericTypes[innerGenericType.Key] = innerGenericType.Value;
 				}
 			}
 
 			return extractedGenericTypes;
 		}
 
-		private Expression PromoteExpression(Expression expr, Type type, bool exact)
+		private static Expression PromoteExpression(Expression expr, Type type, bool exact)
 		{
 			if (expr.Type == type) return expr;
 			if (expr is ConstantExpression)
@@ -1439,70 +1438,6 @@ namespace DynamicExpresso.Parsing
 
 			return null;
 		}
-
-		//object ParseNumber(string text, Type type)
-		//{
-		//	switch (Type.GetTypeCode(GetNonNullableType(type)))
-		//	{
-		//		case TypeCode.SByte:
-		//			sbyte sb;
-		//			if (sbyte.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out sb)) return sb;
-		//			break;
-		//		case TypeCode.Byte:
-		//			byte b;
-		//			if (byte.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out b)) return b;
-		//			break;
-		//		case TypeCode.Int16:
-		//			short s;
-		//			if (short.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out s)) return s;
-		//			break;
-		//		case TypeCode.UInt16:
-		//			ushort us;
-		//			if (ushort.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out us)) return us;
-		//			break;
-		//		case TypeCode.Int32:
-		//			int i;
-		//			if (int.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out i)) return i;
-		//			break;
-		//		case TypeCode.UInt32:
-		//			uint ui;
-		//			if (uint.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out ui)) return ui;
-		//			break;
-		//		case TypeCode.Int64:
-		//			long l;
-		//			if (long.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out l)) return l;
-		//			break;
-		//		case TypeCode.UInt64:
-		//			ulong ul;
-		//			if (ulong.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out ul)) return ul;
-		//			break;
-		//		case TypeCode.Single:
-		//			float f;
-		//			if (float.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out f)) return f;
-		//			break;
-		//		case TypeCode.Double:
-		//			double d;
-		//			if (double.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out d)) return d;
-		//			break;
-		//		case TypeCode.Decimal:
-		//			decimal e;
-		//			if (decimal.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out e)) return e;
-		//			break;
-		//	}
-		//	return null;
-		//}
-
-		//static object ParseEnum(string name, Type type)
-		//{
-		//	if (type.IsEnum)
-		//	{
-		//		MemberInfo[] memberInfos = type.FindMembers(MemberTypes.Field,
-		//				BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Static,
-		//				Type.FilterNameIgnoreCase, name);
-		//		if (memberInfos.Length != 0) return ((FieldInfo)memberInfos[0]).GetValue(null);
-		//	}
-		//	return null;
-		//}
 
 		private static bool IsCompatibleWith(Type source, Type target)
 		{
@@ -2113,7 +2048,7 @@ namespace DynamicExpresso.Parsing
 		private string GetIdentifier()
 		{
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
-			string id = _token.text;
+			var id = _token.text;
 			if (id.Length > 1 && id[0] == '@')
 				id = id.Substring(1);
 			return id;
@@ -2139,9 +2074,17 @@ namespace DynamicExpresso.Parsing
 				throw CreateParseException(_token.pos, ErrorMessages.SyntaxError);
 		}
 
-		private Exception CreateParseException(int pos, string format, params object[] args)
+		private static Exception CreateParseException(int pos, string format, params object[] args)
 		{
 			return new ParseException(string.Format(format, args), pos);
+		}
+
+		private class MethodData
+		{
+			public MethodBase MethodBase;
+			public ParameterInfo[] Parameters;
+			public Expression[] PromotedParameters;
+			public bool HasParamsArray;
 		}
 	}
 }
