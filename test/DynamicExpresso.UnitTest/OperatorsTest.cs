@@ -122,6 +122,15 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void String_Concatenation_with_type_conversion()
+		{
+			var target = new Interpreter();
+
+			Assert.AreEqual("ciao " + 1981, target.Eval("\"ciao \" + 1981"));
+			Assert.AreEqual(1981 + "ciao ", target.Eval("1981 + \"ciao \""));
+		}
+
+		[Test]
 		public void Numeric_Expression()
 		{
 			var target = new Interpreter();

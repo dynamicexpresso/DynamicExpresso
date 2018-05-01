@@ -1730,17 +1730,17 @@ namespace DynamicExpresso.Parsing
 			return 0;
 		}
 
-		private Expression GenerateEqual(Expression left, Expression right)
+		private static Expression GenerateEqual(Expression left, Expression right)
 		{
 			return Expression.Equal(left, right);
 		}
 
-		private Expression GenerateNotEqual(Expression left, Expression right)
+		private static Expression GenerateNotEqual(Expression left, Expression right)
 		{
 			return Expression.NotEqual(left, right);
 		}
 
-		private Expression GenerateGreaterThan(Expression left, Expression right)
+		private static Expression GenerateGreaterThan(Expression left, Expression right)
 		{
 			if (left.Type == typeof(string))
 			{
@@ -1752,7 +1752,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.GreaterThan(left, right);
 		}
 
-		private Expression GenerateGreaterThanEqual(Expression left, Expression right)
+		private static Expression GenerateGreaterThanEqual(Expression left, Expression right)
 		{
 			if (left.Type == typeof(string))
 			{
@@ -1764,7 +1764,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.GreaterThanOrEqual(left, right);
 		}
 
-		private Expression GenerateLessThan(Expression left, Expression right)
+		private static Expression GenerateLessThan(Expression left, Expression right)
 		{
 			if (left.Type == typeof(string))
 			{
@@ -1776,7 +1776,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.LessThan(left, right);
 		}
 
-		private Expression GenerateLessThanEqual(Expression left, Expression right)
+		private static Expression GenerateLessThanEqual(Expression left, Expression right)
 		{
 			if (left.Type == typeof(string))
 			{
@@ -1788,38 +1788,43 @@ namespace DynamicExpresso.Parsing
 			return Expression.LessThanOrEqual(left, right);
 		}
 
-		private Expression GenerateAdd(Expression left, Expression right)
+		private static Expression GenerateAdd(Expression left, Expression right)
 		{
-			if (left.Type == typeof(string) && right.Type == typeof(string))
-			{
-				return GenerateStaticMethodCall("Concat", left, right);
-			}
 			return Expression.Add(left, right);
 		}
 
-		private Expression GenerateSubtract(Expression left, Expression right)
+		private static Expression GenerateSubtract(Expression left, Expression right)
 		{
 			return Expression.Subtract(left, right);
 		}
 
-		private Expression GenerateStringConcat(Expression left, Expression right)
+		private static Expression GenerateStringConcat(Expression left, Expression right)
 		{
 			var concatMethod = typeof(string).GetMethod("Concat", new[] {typeof(object), typeof(object)});
 			if (concatMethod == null)
-				throw new Exception("String concat not found");
+				throw new Exception("String concat method not found");
+
+			var rightObj =
+				right.Type.IsValueType
+				? Expression.ConvertChecked(right, typeof(object))
+				: right;
+			var leftObj =
+				left.Type.IsValueType
+				? Expression.ConvertChecked(left, typeof(object))
+				: left;
 
 			return Expression.Call(
 					null,
 					concatMethod,
-					new[] { left, right });
+					new[] { leftObj, rightObj });
 		}
 
-		private MethodInfo GetStaticMethod(string methodName, Expression left, Expression right)
+		private static MethodInfo GetStaticMethod(string methodName, Expression left, Expression right)
 		{
 			return left.Type.GetMethod(methodName, new[] { left.Type, right.Type });
 		}
 
-		private Expression GenerateStaticMethodCall(string methodName, Expression left, Expression right)
+		private static Expression GenerateStaticMethodCall(string methodName, Expression left, Expression right)
 		{
 			return Expression.Call(null, GetStaticMethod(methodName, left, right), new[] { left, right });
 		}
