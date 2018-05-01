@@ -415,6 +415,9 @@ This project is based on two old works:
 	- http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx 
 
 
+Thanks to JetBrain for helping me with a license of Resharper.
+[![JetBrain Resharper](https://github.com//davideicardi/DynamicExpresso/blob/master/docs/jetbrains.png?raw=true)](https://www.jetbrains.com/)
+
 ## Other resources or similar projects
 Below you can find a list of some similar projects that I have evaluated or that can be interesting to study. 
 For one reason or another none of these projects exactly fit my needs so I decided to write my own interpreter.
