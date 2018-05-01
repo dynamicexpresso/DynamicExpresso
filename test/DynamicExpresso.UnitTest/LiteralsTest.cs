@@ -50,6 +50,10 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(.201, target.Eval(".201"));
 			Assert.AreEqual(-.201, target.Eval("-.201"));
 			Assert.AreEqual(+.201, target.Eval("+.201"));
+
+			// f suffix (single)
+			Assert.AreEqual(4f, target.Eval("4f"));
+			Assert.AreEqual(45F, target.Eval("45F"));
 			Assert.AreEqual(45.8f, target.Eval("45.8f"));
 			Assert.AreEqual(45.8F, target.Eval("45.8F"));
 			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
@@ -57,6 +61,10 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(.2F, target.Eval(".2F"));
 			Assert.AreEqual(-.2f, target.Eval("-.2f"));
 			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+
+			// m suffix (decimal)
+			Assert.AreEqual(5M, target.Eval("5M"));
+			Assert.AreEqual(254m, target.Eval("254m"));
 			Assert.AreEqual(45.232M, target.Eval("45.232M"));
 			Assert.AreEqual(45.232m, target.Eval("45.232m"));
 			Assert.AreEqual(.022M, target.Eval(".022M"));
@@ -79,6 +87,12 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			Assert.Throws<ParseException>(() => target.Eval(".2 F"));
+			Assert.Throws<ParseException>(() => target.Eval("4.2 F"));
+			Assert.Throws<ParseException>(() => target.Eval("6.2 f"));
+			Assert.Throws<ParseException>(() => target.Eval("2 F"));
+			Assert.Throws<ParseException>(() => target.Eval("2 f"));
+			Assert.Throws<ParseException>(() => target.Eval("2 M"));
+			Assert.Throws<ParseException>(() => target.Eval("2 m"));
 		}
 
 		[Test]

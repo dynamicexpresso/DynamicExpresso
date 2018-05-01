@@ -390,7 +390,8 @@ namespace DynamicExpresso.Parsing
 					var lambda = expr as LambdaExpression;
 					if (lambda != null)
 						return ParseLambdaInvocation(lambda, tokenPos);
-					else if (typeof(Delegate).IsAssignableFrom(expr.Type))
+
+					if (typeof(Delegate).IsAssignableFrom(expr.Type))
 						expr = ParseDelegateInvocation(expr, tokenPos);
 					else
 						throw CreateParseException(tokenPos, ErrorMessages.InvalidMethodCall, GetTypeName(expr.Type));
@@ -519,8 +520,7 @@ namespace DynamicExpresso.Parsing
 			var text = _token.text;
 			if (text[0] != '-')
 			{
-				ulong value;
-				if (!ulong.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out value))
+				if (!ulong.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out ulong value))
 					throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
 
 				NextToken();
@@ -536,8 +536,7 @@ namespace DynamicExpresso.Parsing
 			}
 			else
 			{
-				long value;
-				if (!long.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out value))
+				if (!long.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out long value))
 					throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
 
 				NextToken();
@@ -552,25 +551,23 @@ namespace DynamicExpresso.Parsing
 		private Expression ParseRealLiteral()
 		{
 			ValidateToken(TokenId.RealLiteral);
-			string text = _token.text;
+			var text = _token.text;
 			object value = null;
-			char last = text[text.Length - 1];
+			var last = text[text.Length - 1];
+
 			if (last == 'F' || last == 'f')
 			{
-				float f;
-				if (float.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out f))
+				if (float.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out float f))
 					value = f;
 			}
 			else if (last == 'M' || last == 'm')
 			{
-				decimal dc;
-				if (decimal.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out dc))
+				if (decimal.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out decimal dc))
 					value = dc;
 			}
 			else
 			{
-				double d;
-				if (double.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out d))
+				if (double.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out double d))
 					value = d;
 			}
 
@@ -2090,8 +2087,13 @@ namespace DynamicExpresso.Parsing
 								NextChar();
 							} while (char.IsDigit(_parseChar));
 						}
+
 						if (_parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm')
+						{
+							t = TokenId.RealLiteral;
 							NextChar();
+						}
+
 						break;
 					}
 					if (_parsePosition == _expressionTextLength)

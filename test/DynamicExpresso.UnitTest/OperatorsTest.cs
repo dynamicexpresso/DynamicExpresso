@@ -146,10 +146,22 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsTrue((bool)target.Eval("5 == 5"));
 			Assert.IsTrue((bool)target.Eval("5 >= 5"));
 			Assert.IsTrue((bool)target.Eval("5 <= 5"));
+			Assert.IsTrue((bool)target.Eval("5m >= 5m"));
+			Assert.IsTrue((bool)target.Eval("5f <= 5f"));
 			Assert.IsTrue((bool)target.Eval("5 != 3"));
 			Assert.IsTrue((bool)target.Eval("\"dav\" == \"dav\""));
 			Assert.IsFalse((bool)target.Eval("\"dav\" == \"jack\""));
 		}
+
+		//[Test]
+		//public void Comparison_Operators_with_different_types()
+		//{
+		//	var target = new Interpreter();
+
+		//	Assert.IsTrue((bool)target.Eval("3m < 5f"));
+		//	Assert.IsTrue((bool)target.Eval("3f > 1m"));
+		//	Assert.IsTrue((bool)target.Eval("3f == 3m"));
+		//}
 
 		[Test]
 		public void Assignment_Operator_Equal()
