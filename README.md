@@ -205,6 +205,9 @@ public void Linq_Queryable_Expression_Where()
 Statements can be written using a subset of the C# syntax. Here you can find a list of the supported expressions: 
 
 ### Operators
+
+Supported operators:
+
 <table>
 	<thead>
 		<tr>
@@ -349,6 +352,8 @@ Not every C# syntaxes are supported. Here some examples of NOT supported feature
 - Array/list/dictionary initialization
 - Explicit generic invocation (like `method<type>(arg)`) 
 - Lambda/delegate declaration (delegate and lamda are only supported as variables or parameters or as a return type of the expression)
+- Array/list/dictionary element assignment (set indexer operator)
+- Other operations on `dynamic` objects (only property and method invocation now are supported)
 
 ## Exceptions
 If there is an error during the parsing always an exception of type `ParseException` is throwed. 
