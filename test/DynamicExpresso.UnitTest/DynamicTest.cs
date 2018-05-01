@@ -19,7 +19,7 @@ namespace DynamicExpresso.UnitTest
 			dyn.Foo = "bar";
 
 			var interpreter = new Interpreter()
-				.SetVariable("dyn", dyn);
+				.SetVariable("dyn", (object)dyn);
 
 			Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
 		}
@@ -32,7 +32,7 @@ namespace DynamicExpresso.UnitTest
 			dyn.Sub.Foo = "bar";
 
 			var interpreter = new Interpreter()
-					.SetVariable("dyn", dyn);
+					.SetVariable("dyn", (object)dyn);
 
 			Assert.AreEqual(dyn.Sub.Foo, interpreter.Eval("dyn.Sub.Foo"));
 		}
@@ -73,7 +73,6 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(dyn.Foo(), interpreter.Eval("dyn.Foo()"));
 		}
-
 
 		[Test]
 		public void Invoke_Method_of_a_nested_ExpandoObject()

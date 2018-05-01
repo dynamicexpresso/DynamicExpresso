@@ -28,47 +28,5 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual((.1).ToString(), interpreter.Eval(".1.ToString()"));
 			Assert.AreEqual((-1-.1-0.1).ToString(), interpreter.Eval("(-1-.1-0.1).ToString()"));
 		}
-
-		[Ignore("TODO")]
-		[Test]
-		public void GitHub_Issue_39_Simple_Reassignment()
-		{
-			var target = new Interpreter().SetVariable("x", 3);
-			Assert.AreEqual(3, target.Eval("x"));
-
-			target.Eval("x = 23");
-
-			Assert.AreEqual(23, target.Eval("x"));
-		}
-
-		[Ignore("TODO")]
-		[Test]
-		public void GitHub_Issue_39_Array_Reassignment()
-		{
-			var arr = new[] { 1 };
-			arr[0] = 2;
-			var target = new Interpreter().SetVariable("arr", arr);
-			Assert.AreEqual(2, target.Eval("arr[0]"));
-
-			target.Eval("arr[0] = 3");
-
-			Assert.AreNotEqual(2, target.Eval("arr[0]"));
-			Assert.AreEqual(3, target.Eval("arr[0]"));
-		}
-
-		[Ignore("TODO")]
-		[Test]
-		public void GitHub_Issue_39_List_Reassignment()
-		{
-			var list = new List<int>(new[] { 1 });
-			list[0] = 2;
-			var target = new Interpreter().SetVariable("list", list);
-			Assert.AreEqual(2, target.Eval("list[0]"));
-
-			target.Eval("list[0] = 3");
-
-			Assert.AreNotEqual(2, target.Eval("list[0]"));
-			Assert.AreEqual(3, target.Eval("list[0]"));
-		}
 	}
 }
