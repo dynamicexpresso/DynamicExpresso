@@ -452,7 +452,11 @@ To run unit tests:
 
 	dotnet test DynamicExpresso.sln -c Release
 
-Add `--logger:trx` to generate test results.
+or run unit tests for a specific project with a specific framework:
+
+	dotnet test ./test/DynamicExpresso.UnitTest/DynamicExpresso.UnitTest.csproj -f netcoreapp2.0
+
+Add `--logger:trx` to generate test results for VSTS.
 
 ## Release notes
 
