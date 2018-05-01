@@ -157,7 +157,7 @@ namespace DynamicExpresso
 		public Interpreter SetVariable(string name, object value)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 
 			return SetExpression(name, Expression.Constant(value));
 		}
@@ -172,9 +172,9 @@ namespace DynamicExpresso
 		public Interpreter SetVariable(string name, object value, Type type)
 		{
 			if (type == null)
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException(nameof(type));
 			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 
 			return SetExpression(name, Expression.Constant(value, type));
 		}
@@ -214,7 +214,10 @@ namespace DynamicExpresso
 		public Interpreter SetIdentifier(Identifier identifier)
 		{
 			if (identifier == null)
-				throw new ArgumentNullException("identifier");
+				throw new ArgumentNullException(nameof(identifier));
+
+			if (LanguageConstants.ReservedKeywords.Contains(identifier.Name))
+				throw new InvalidOperationException($"{identifier.Name} is a reserved word");
 
 			_settings.Identifiers[identifier.Name] = identifier;
 
@@ -232,7 +235,7 @@ namespace DynamicExpresso
 		public Interpreter Reference(Type type)
 		{
 			if (type == null)
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException(nameof(type));
 
 			return Reference(type, type.Name);
 		}
@@ -246,7 +249,7 @@ namespace DynamicExpresso
 		public Interpreter Reference(IEnumerable<ReferenceType> types)
 		{
 			if (types == null)
-				throw new ArgumentNullException("types");
+				throw new ArgumentNullException(nameof(types));
 
 			foreach (var t in types)
 				Reference(t);
@@ -275,7 +278,7 @@ namespace DynamicExpresso
 		public Interpreter Reference(ReferenceType type)
 		{
 			if (type == null)
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException(nameof(type));
 
 			_settings.KnownTypes[type.Name] = type;
 

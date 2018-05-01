@@ -4,18 +4,18 @@ namespace DynamicExpresso.Parsing
 {
 	internal static class ParserConstants
 	{
-		public static readonly Expression NULL_LITERAL_EXPRESSION = Expression.Constant(null);
+		public static readonly Expression NullLiteralExpression = Expression.Constant(null);
 
-		public const string KEYWORD_AS = "as";
-		public const string KEYWORD_IS = "is";
-		public const string KEYWORD_NEW = "new";
-		public const string KEYWORD_TYPEOF = "typeof";
+		public const string KeywordAs = "as";
+		public const string KeywordIs = "is";
+		public const string KeywordNew = "new";
+		public const string KeywordTypeof = "typeof";
 
-		public static readonly string[] RESERVED_KEYWORDS = new[]{
-				KEYWORD_AS,
-				KEYWORD_IS,
-				KEYWORD_NEW,
-				KEYWORD_TYPEOF
+		public static readonly string[] ReservedKeywords = {
+				KeywordAs,
+				KeywordIs,
+				KeywordNew,
+				KeywordTypeof
 			};
 	}
 }

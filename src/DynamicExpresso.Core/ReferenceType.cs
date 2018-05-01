@@ -20,10 +20,10 @@ namespace DynamicExpresso
 		public ReferenceType(string name, Type type)
 		{
 			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException("name");
+				throw new ArgumentNullException(nameof(name));
 
 			if (type == null)
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException(nameof(type));
 
 			Type = type;
 			Name = name;
@@ -33,7 +33,7 @@ namespace DynamicExpresso
 		public ReferenceType(Type type)
 		{
 			if (type == null)
-				throw new ArgumentNullException("type");
+				throw new ArgumentNullException(nameof(type));
 
 			Type = type;
 			Name = type.Name;

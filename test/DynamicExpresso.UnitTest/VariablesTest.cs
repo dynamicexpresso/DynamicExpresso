@@ -8,7 +8,34 @@ namespace DynamicExpresso.UnitTest
 	public class VariablesTest
 	{
 		[Test]
-		public void Variables()
+		public void Cannot_create_variables_with_reserved_keywords()
+		{
+			var target = new Interpreter();
+
+			foreach (var keyword in LanguageConstants.ReservedKeywords)
+				Assert.Throws<InvalidOperationException>(() => target.SetVariable(keyword, 1));
+		}
+
+		[Test]
+		public void Can_create_variables_that_override_known_types()
+		{
+			// Note that in C# some of these keywords are not permitted, like `bool`,
+			// but other , like `Boolean` is permitted. (c# keywords are not permitted, .NET types yes)
+			// In my case are all considered in the same way, so now are permitted.
+			// But in real case scenarios try to use variables names with a more ubiquitous name to reduce possible conflict for the future.
+
+			var target = new Interpreter()
+				.SetVariable("bool", 1) // this in c# is not permitted
+				.SetVariable("Int32", 2)
+				.SetVariable("Math", 3);
+
+			Assert.AreEqual(1, target.Eval("bool"));
+			Assert.AreEqual(2, target.Eval("Int32"));
+			Assert.AreEqual(3, target.Eval("Math"));
+		}
+
+		[Test]
+		public void Assign_and_use_variables()
 		{
 			var target = new Interpreter()
 											.SetVariable("myk", 23);

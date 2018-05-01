@@ -240,8 +240,8 @@ namespace DynamicExpresso.Parsing
 		private Expression ParseTypeTesting()
 		{
 			var left = ParseAdditive();
-			while (_token.text == ParserConstants.KEYWORD_IS
-					|| _token.text == ParserConstants.KEYWORD_AS)
+			while (_token.text == ParserConstants.KeywordIs
+					|| _token.text == ParserConstants.KeywordAs)
 			{
 				var typeOperator = _token.text;
 
@@ -252,9 +252,9 @@ namespace DynamicExpresso.Parsing
 				if (!_arguments.TryGetKnownType(_token.text, out knownType))
 					throw CreateParseException(op.pos, ErrorMessages.TypeIdentifierExpected);
 
-				if (typeOperator == ParserConstants.KEYWORD_IS)
+				if (typeOperator == ParserConstants.KeywordIs)
 					left = Expression.TypeIs(left, knownType);
-				else if (typeOperator == ParserConstants.KEYWORD_AS)
+				else if (typeOperator == ParserConstants.KeywordAs)
 					left = Expression.TypeAs(left, knownType);
 				else
 					throw CreateParseException(_token.pos, ErrorMessages.SyntaxError);
@@ -614,29 +614,26 @@ namespace DynamicExpresso.Parsing
 			//if (token.text == ParserConstants.keywordIt)
 			//    return ParseIt();
 
-			if (_token.text == ParserConstants.KEYWORD_NEW)
+			if (_token.text == ParserConstants.KeywordNew)
 				return ParseNew();
-			if (_token.text == ParserConstants.KEYWORD_TYPEOF)
+			if (_token.text == ParserConstants.KeywordTypeof)
 				return ParseTypeof();
 
-			Type knownType;
-			if (_arguments.TryGetKnownType(_token.text, out knownType))
-			{
-				return ParseTypeKeyword(knownType);
-			}
-
-			Expression keywordExpression;
-			if (_arguments.TryGetIdentifier(_token.text, out keywordExpression))
+			if (_arguments.TryGetIdentifier(_token.text, out Expression keywordExpression))
 			{
 				NextToken();
 				return keywordExpression;
 			}
 
-			ParameterExpression parameterExpression;
-			if (_arguments.TryGetParameters(_token.text, out parameterExpression))
+			if (_arguments.TryGetParameters(_token.text, out ParameterExpression parameterExpression))
 			{
 				NextToken();
 				return parameterExpression;
+			}
+
+			if (_arguments.TryGetKnownType(_token.text, out Type knownType))
+			{
+				return ParseTypeKeyword(knownType);
 			}
 
 			// Working context implementation
@@ -686,8 +683,8 @@ namespace DynamicExpresso.Parsing
 				throw CreateParseException(errorPos, ErrorMessages.FirstExprMustBeBool);
 			if (expr1.Type != expr2.Type)
 			{
-				var expr1As2 = expr2 != ParserConstants.NULL_LITERAL_EXPRESSION ? PromoteExpression(expr1, expr2.Type, true) : null;
-				var expr2As1 = expr1 != ParserConstants.NULL_LITERAL_EXPRESSION ? PromoteExpression(expr2, expr1.Type, true) : null;
+				var expr1As2 = expr2 != ParserConstants.NullLiteralExpression ? PromoteExpression(expr1, expr2.Type, true) : null;
+				var expr2As1 = expr1 != ParserConstants.NullLiteralExpression ? PromoteExpression(expr2, expr1.Type, true) : null;
 				if (expr1As2 != null && expr2As1 == null)
 				{
 					expr1 = expr1As2;
@@ -698,8 +695,8 @@ namespace DynamicExpresso.Parsing
 				}
 				else
 				{
-					var type1 = expr1 != ParserConstants.NULL_LITERAL_EXPRESSION ? expr1.Type.Name : "null";
-					var type2 = expr2 != ParserConstants.NULL_LITERAL_EXPRESSION ? expr2.Type.Name : "null";
+					var type1 = expr1 != ParserConstants.NullLiteralExpression ? expr1.Type.Name : "null";
+					var type2 = expr2 != ParserConstants.NullLiteralExpression ? expr2.Type.Name : "null";
 					if (expr1As2 != null)
 						throw CreateParseException(errorPos, ErrorMessages.BothTypesConvertToOther, type1, type2);
 
@@ -1417,7 +1414,7 @@ namespace DynamicExpresso.Parsing
 			if (expr is ConstantExpression)
 			{
 				var ce = (ConstantExpression)expr;
-				if (ce == ParserConstants.NULL_LITERAL_EXPRESSION)
+				if (ce == ParserConstants.NullLiteralExpression)
 				{
 					if (!type.IsValueType || IsNullableType(type))
 						return Expression.Constant(null, type);

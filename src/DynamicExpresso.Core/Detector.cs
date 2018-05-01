@@ -8,10 +8,10 @@ namespace DynamicExpresso
 	internal class Detector
 	{
 		private readonly ParserSettings _settings;
-		private static readonly Regex IDENTIFIERS_DETECTION_REGEX = new Regex(@"([^\.]|^)\b(?<id>[a-zA-Z_]\w*)\b", RegexOptions.Compiled);
+		private static readonly Regex IdentifiersDetectionRegex = new Regex(@"([^\.]|^)\b(?<id>[a-zA-Z_]\w*)\b", RegexOptions.Compiled);
 
-		private static readonly Regex STRING_DETECTION_REGEX = new Regex(@"(?<!\\)?"".*?(?<!\\)""", RegexOptions.Compiled);
-		private static readonly Regex CHAR_DETECTION_REGEX = new Regex(@"(?<!\\)?'.{1,2}?(?<!\\)'", RegexOptions.Compiled);
+		private static readonly Regex StringDetectionRegex = new Regex(@"(?<!\\)?"".*?(?<!\\)""", RegexOptions.Compiled);
+		private static readonly Regex CharDetectionRegex = new Regex(@"(?<!\\)?'.{1,2}?(?<!\\)'", RegexOptions.Compiled);
 
 		public Detector(ParserSettings settings)
 		{
@@ -26,19 +26,16 @@ namespace DynamicExpresso
 			var knownIdentifiers = new HashSet<Identifier>();
 			var knownTypes = new HashSet<ReferenceType>();
 
-			foreach (Match match in IDENTIFIERS_DETECTION_REGEX.Matches(expression))
+			foreach (Match match in IdentifiersDetectionRegex.Matches(expression))
 			{
 				var identifier = match.Groups["id"].Value;
 
-				Identifier knownIdentifier;
-				ReferenceType knownType;
-
-				if (IsReserverKeyword(identifier))
+				if (IsReservedKeyword(identifier))
 					continue;
 
-				if (_settings.Identifiers.TryGetValue(identifier, out knownIdentifier))
+				if (_settings.Identifiers.TryGetValue(identifier, out Identifier knownIdentifier))
 					knownIdentifiers.Add(knownIdentifier);
-				else if (_settings.KnownTypes.TryGetValue(identifier, out knownType))
+				else if (_settings.KnownTypes.TryGetValue(identifier, out ReferenceType knownType))
 					knownTypes.Add(knownType);
 				else
 					unknownIdentifiers.Add(identifier);
@@ -47,7 +44,7 @@ namespace DynamicExpresso
 			return new IdentifiersInfo(unknownIdentifiers, knownIdentifiers, knownTypes);
 		}
 
-		private string PrepareExpression(string expression)
+		private static string PrepareExpression(string expression)
 		{
 			expression = expression ?? string.Empty;
 
@@ -58,25 +55,19 @@ namespace DynamicExpresso
 			return expression;
 		}
 
-		private string RemoveStringLiterals(string expression)
+		private static string RemoveStringLiterals(string expression)
 		{
-			return STRING_DETECTION_REGEX.Replace(expression, "");
+			return StringDetectionRegex.Replace(expression, "");
 		}
 
-		private string RemoveCharLiterals(string expression)
+		private static string RemoveCharLiterals(string expression)
 		{
-			return CHAR_DETECTION_REGEX.Replace(expression, "");
+			return CharDetectionRegex.Replace(expression, "");
 		}
 
-		private bool IsReserverKeyword(string identifier)
+		private bool IsReservedKeyword(string identifier)
 		{
-			return ParserConstants.RESERVED_KEYWORDS.Contains(identifier, _settings.KeyComparer);
-		}
-
-		private bool IsKnownIdentifier(string identifier)
-		{
-			return _settings.Identifiers.ContainsKey(identifier)
-				|| _settings.KnownTypes.ContainsKey(identifier);
+			return ParserConstants.ReservedKeywords.Contains(identifier, _settings.KeyComparer);
 		}
 	}
 }

@@ -57,9 +57,12 @@ namespace DynamicExpresso
 		public static readonly Identifier[] Literals = {
 					new Identifier("true", Expression.Constant(true)),
 					new Identifier("false", Expression.Constant(false)),
-					new Identifier("null", ParserConstants.NULL_LITERAL_EXPRESSION)
+					new Identifier("null", ParserConstants.NullLiteralExpression)
 				};
 
-		public static readonly string[] ReserverKeywords = ParserConstants.RESERVED_KEYWORDS;
+		[Obsolete("Use ReservedKeywords")]
+		public static readonly string[] ReserverKeywords = ParserConstants.ReservedKeywords;
+
+		public static readonly string[] ReservedKeywords = ParserConstants.ReservedKeywords;
 	}
 }
