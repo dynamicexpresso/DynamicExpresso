@@ -16,7 +16,7 @@
 		<PackageLicenseUrl>https://github.com/davideicardi/DynamicExpresso#license</PackageLicenseUrl>
 		<RepositoryUrl>https://github.com/davideicardi/DynamicExpresso.git</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>2.0.0</VersionPrefix>
+		<VersionPrefix>2.0.1</VersionPrefix>
 		<VersionSuffix></VersionSuffix>
 	</PropertyGroup>
 
