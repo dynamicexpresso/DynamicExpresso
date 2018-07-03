@@ -1280,7 +1280,7 @@ namespace DynamicExpresso.Parsing
 
 		private static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
 		{
-			if (method.Parameters.Length > args.Length)
+			if (method.Parameters.Count(y => !y.HasDefaultValue) > args.Length)
 				return false;
 
 			var promotedArgs = new List<Expression>();
@@ -1358,6 +1358,9 @@ namespace DynamicExpresso.Parsing
 					throw new Exception("Type is not an array, element not found");
 				promotedArgs.Add(Expression.NewArrayInit(paramsArrayElementType, paramsArrayPromotedArgument));
 			}
+
+			// Add default params, if needed.
+			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select(x => Expression.Constant(x.DefaultValue)));
 
 			method.PromotedParameters = promotedArgs.ToArray();
 
