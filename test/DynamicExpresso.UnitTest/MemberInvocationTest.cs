@@ -270,6 +270,29 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 			Assert.AreEqual(3, target.Eval("x.OverloadMethodWithParamsArray(2, 3, 1)"));
 		}
+		
+		[Test]
+		public void Method_with_optional_param()
+		{
+			var target = new Interpreter();
+
+			var x = new MyTestService();
+			var y = "1";
+			var z = "2";
+			var w = "3";
+			var parameters = new[] {
+				new Parameter("x", x.GetType(), x),
+				new Parameter("y", y.GetType(), y),
+				new Parameter("z", z.GetType(), z),
+				new Parameter("w", w.GetType(), w)
+			};
+
+			Assert.AreEqual(x.MethodWithOptionalParam(y), target.Eval("x.MethodWithOptionalParam(y)", parameters));
+			Assert.AreEqual(x.MethodWithOptionalParam(y, z), target.Eval("x.MethodWithOptionalParam(y, z)", parameters));
+			Assert.AreEqual(x.MethodWithOptionalParam(z, y), target.Eval("x.MethodWithOptionalParam(z, y)", parameters));
+			Assert.AreEqual(x.MethodWithOptionalParam(y, z, w), target.Eval("x.MethodWithOptionalParam(y, z, w)", parameters));
+			Assert.AreEqual(x.MethodWithOptionalParam(w, y, z), target.Eval("x.MethodWithOptionalParam(w, y, z)", parameters));
+		}
 
 		private interface MyTestInterface
 		{
@@ -325,6 +348,11 @@ namespace DynamicExpresso.UnitTest
 			public string MethodWithGenericParam<T>(string a, T p)
 			{
 				return string.Format("{0} {1}", a, p);
+			}
+
+			public string MethodWithOptionalParam(string param1, string param2 = "2", string param3 = "3")
+			{
+				return string.Format("{0} {1} {2}", param1, param2, param3);
 			}
 
 			public DateTime this[int i]
