@@ -24,9 +24,6 @@ namespace DynamicExpresso.Parsing
 			return new Parser(arguments).Parse();
 		}
 
-		private const NumberStyles ParseLiteralNumberStyle = NumberStyles.AllowLeadingSign;
-		private const NumberStyles ParseLiteralUnsignedNumberStyle = NumberStyles.AllowLeadingSign;
-		private const NumberStyles ParseLiteralDecimalNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
 		private static readonly CultureInfo ParseCulture = CultureInfo.InvariantCulture;
 
 		private readonly ParserArguments _arguments;
@@ -517,33 +514,18 @@ namespace DynamicExpresso.Parsing
 		{
 			ValidateToken(TokenId.IntegerLiteral);
 			var text = _token.text;
-			if (text[0] != '-')
+
+			try
 			{
-				if (!ulong.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out ulong value))
-					throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
+				var number = _arguments.IntegerConverter.Convert(text);
 
 				NextToken();
 
-				if (value <= int.MaxValue)
-					return CreateLiteral((int)value);
-				if (value <= uint.MaxValue)
-					return CreateLiteral((uint)value);
-				if (value <= long.MaxValue)
-					return CreateLiteral((long)value);
-
-				return CreateLiteral(value);
+				return CreateLiteral(number);
 			}
-			else
+			catch
 			{
-				if (!long.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out long value))
-					throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
-
-				NextToken();
-
-				if (value >= int.MinValue && value <= int.MaxValue)
-					return CreateLiteral((int)value);
-
-				return CreateLiteral(value);
+				throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
 			}
 		}
 
@@ -551,31 +533,19 @@ namespace DynamicExpresso.Parsing
 		{
 			ValidateToken(TokenId.RealLiteral);
 			var text = _token.text;
-			object value = null;
-			var last = text[text.Length - 1];
+			
+			try
+			{
+				var value = _arguments.RealConverter.Convert(text);
 
-			if (last == 'F' || last == 'f')
-			{
-				if (float.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out float f))
-					value = f;
-			}
-			else if (last == 'M' || last == 'm')
-			{
-				if (decimal.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out decimal dc))
-					value = dc;
-			}
-			else
-			{
-				if (double.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out double d))
-					value = d;
-			}
+				NextToken();
 
-			if (value == null)
+				return CreateLiteral(value);
+			}
+			catch
+			{
 				throw CreateParseException(_token.pos, ErrorMessages.InvalidRealLiteral, text);
-
-			NextToken();
-
-			return CreateLiteral(value);
+			}
 		}
 
 		private static Expression CreateLiteral(object value)

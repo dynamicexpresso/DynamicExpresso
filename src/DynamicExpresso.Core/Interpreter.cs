@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using DynamicExpresso.Exceptions;
+using DynamicExpresso.Converters;
 
 namespace DynamicExpresso
 {
@@ -304,6 +305,11 @@ namespace DynamicExpresso
 			return Parse(expressionText, typeof(void), parameters);
 		}
 
+		public Lambda Parse(string expressionText, IConverter integerConverter, IConverter realConverter, params Parameter[] parameters)
+		{
+			return Parse(expressionText, typeof(void), integerConverter, realConverter, parameters);
+		}
+
 		/// <summary>
 		/// Parse a text expression and returns a Lambda class that can be used to invoke it.
 		/// If the expression cannot be converted to the type specified in the expressionType parameter
@@ -317,6 +323,11 @@ namespace DynamicExpresso
 		public Lambda Parse(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
 			return ParseAsLambda(expressionText, expressionType, parameters);
+		}
+
+		public Lambda Parse(string expressionText, Type expressionType, IConverter integerConverter, IConverter realConverter, params Parameter[] parameters)
+		{
+			return ParseAsLambda(expressionText, expressionType, parameters, integerConverter, realConverter);
 		}
 
 		[Obsolete("Use ParseAsDelegate<TDelegate>(string, params string[])")]
@@ -408,13 +419,15 @@ namespace DynamicExpresso
 
 		#region Private methods
 
-		private Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
+		private Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters, IConverter integerConverter = null, IConverter realConverter = null)
 		{
 			var arguments = new ParserArguments(
 												expressionText,
 												_settings,
 												expressionType,
-												parameters);
+												parameters,
+												integerConverter,
+												realConverter);
 
 			var expression = Parser.Parse(arguments);
 

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using DynamicExpresso.Exceptions;
+using DynamicExpresso.Converters;
 
 namespace DynamicExpresso
 {
@@ -16,7 +17,7 @@ namespace DynamicExpresso
 		private readonly HashSet<ReferenceType> _usedTypes = new HashSet<ReferenceType>();
 		private readonly HashSet<Identifier> _usedIdentifiers = new HashSet<Identifier>();
 
-		public ParserArguments(
+		private ParserArguments(
 			string expressionText, 
 			ParserSettings settings, 
 			Type expressionReturnType,
@@ -40,6 +41,21 @@ namespace DynamicExpresso
 				}
 			}
 		}
+
+		public ParserArguments(
+			string expressionText,
+			ParserSettings settings,
+			Type expressionReturnType,
+			IEnumerable<Parameter> declaredParameters,
+			IConverter intergerConverter,
+			IConverter realConverter) : this(expressionText, settings, expressionReturnType, declaredParameters)
+		{
+			IntegerConverter = intergerConverter ?? new IntegerConverter();
+			RealConverter = realConverter ?? new RealConverter();
+		}
+
+		public IConverter IntegerConverter { get; }
+		public IConverter RealConverter { get; }
 
 		public ParserSettings Settings { get; private set;}
 		public string ExpressionText { get; private set; }
