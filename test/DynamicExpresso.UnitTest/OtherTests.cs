@@ -14,7 +14,7 @@ namespace DynamicExpresso.UnitTest
         {
             var target = new Interpreter();
 
-            target.Eval("(1+1");
+            target.Eval(")1+1");
         }
 
 		[Test]
