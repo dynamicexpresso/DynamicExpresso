@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using DynamicExpresso.Exceptions;
+using DynamicExpresso.Helpers;
 using DynamicExpresso.Resources;
 
 // Code based on the Dynamic.cs file of the DynamicQuery sample by Microsoft
@@ -587,10 +588,10 @@ namespace DynamicExpresso.Parsing
 
 		private Expression ParseParenExpression()
 		{
-			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
+			ValidateToken(TokenId.OpenParen, TranslateExtension.TranslateText("OpenParenExpected"));
 			NextToken();
 			Expression innerParenthesesExpression = ParseExpressionSegment();
-			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrOperatorExpected);
+			ValidateToken(TokenId.CloseParen, TranslateExtension.TranslateText("CloseParenOrOperatorExpected"));
 
 			var constExp = innerParenthesesExpression as ConstantExpression;
 			if (constExp != null && constExp.Value is Type)
