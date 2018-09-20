@@ -23,12 +23,12 @@ namespace DynamicExpresso.Helpers
         /// </summary>
         /// <param name="text">The text to be translate</param>
         /// <returns>The translated text</returns>
-        public static string TranslateText(string text)
+        public static string TranslateText(string text, CultureInfo cultureInfo)
         {
             if (text == null)
                 return "";
 
-            var ci = CultureInfo.GetCultureInfo("pt-BR");
+            var ci = cultureInfo ?? CultureInfo.InvariantCulture;
             var translation = resmgr.Value.GetString(text, ci);
 
             if (translation == null)
