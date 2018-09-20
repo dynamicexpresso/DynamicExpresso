@@ -9,14 +9,6 @@ namespace DynamicExpresso.UnitTest
 	[TestFixture]
 	public class OtherTests
 	{
-        [Test]
-        public void Test_Throw_Exception_And_Error_Message_Translation()
-        {
-            var target = new Interpreter();
-
-            target.Eval(")1+1");
-        }
-
 		[Test]
 		public void Space_Characters_Are_Ignored()
 		{
