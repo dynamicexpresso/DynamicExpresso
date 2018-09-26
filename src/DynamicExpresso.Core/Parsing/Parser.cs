@@ -1423,7 +1423,7 @@ namespace DynamicExpresso.Parsing
 				}
 			}
 
-			if (type.IsGenericType)
+			if (type.IsGenericType && GetNumericTypeKind(type) == 0)
 			{
 				var genericType = FindAssignableGenericType(expr.Type, type.GetGenericTypeDefinition());
 				if (genericType != null)
