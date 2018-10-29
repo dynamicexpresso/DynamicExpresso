@@ -292,6 +292,16 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Logical_ExclusiveOr()
+		{
+			var target = new Interpreter();
+			Assert.IsTrue((bool)target.Eval("true ^ false"));
+			Assert.IsTrue((bool)target.Eval("false ^ true"));
+			Assert.IsFalse((bool)target.Eval("true ^ true"));
+			Assert.IsFalse((bool)target.Eval("false ^ false"));
+		}
+
+		[Test]
 		public void If_Operators()
 		{
 			var target = new Interpreter();
