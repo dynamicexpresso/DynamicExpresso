@@ -108,12 +108,12 @@ namespace DynamicExpresso.Parsing
 		{
 			var errorPos = _token.pos;
 			var expr = ParseLogicalOr();
-            if(_token.id == TokenId.QuestionQuestion)
-            {
-                NextToken();
-                var exprRight = ParseExpressionSegment();
-                expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), exprRight, expr, errorPos);
-            } else if (_token.id == TokenId.Question)
+			if(_token.id == TokenId.QuestionQuestion)
+			{
+				NextToken();
+				var exprRight = ParseExpressionSegment();
+				expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), exprRight, expr, errorPos);
+			} else if (_token.id == TokenId.Question)
 			{
 				NextToken();
 				var expr1 = ParseExpressionSegment();
@@ -385,11 +385,11 @@ namespace DynamicExpresso.Parsing
 					NextToken();
 					expr = ParseMemberAccess(null, expr);
 				}
-                else if(_token.id == TokenId.QuestionDot)
-                {
-                    NextToken();
-                    GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, ParseMemberAccess(null, expr), _token.pos);
-                }
+				else if(_token.id == TokenId.QuestionDot)
+				{
+					NextToken();
+					GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, ParseMemberAccess(null, expr), _token.pos);
+				}
 				else if (_token.id == TokenId.OpenBracket)
 				{
 					expr = ParseElementAccess(expr);
@@ -845,17 +845,17 @@ namespace DynamicExpresso.Parsing
 			}
 		}
 
-        private Expression ParseMemberAccess(Type type, Expression instance)
-        {
-            if (instance != null) type = instance.Type;
-            var errorPos = _token.pos;
-            var id = GetIdentifier();
-            NextToken();
-            if (_token.id == TokenId.OpenParen)
-                return ParseMethodInvocation(type, instance, errorPos, id);
+		private Expression ParseMemberAccess(Type type, Expression instance)
+		{
+			if (instance != null) type = instance.Type;
+			var errorPos = _token.pos;
+			var id = GetIdentifier();
+			NextToken();
+			if (_token.id == TokenId.OpenParen)
+				return ParseMethodInvocation(type, instance, errorPos, id);
 
-            return GeneratePropertyOrFieldExpression(type, instance, errorPos, id);
-        }
+			return GeneratePropertyOrFieldExpression(type, instance, errorPos, id);
+		}
 
 		private Expression GeneratePropertyOrFieldExpression(Type type, Expression instance, int errorPos, string propertyOrFieldName)
 		{
@@ -1929,18 +1929,18 @@ namespace DynamicExpresso.Parsing
 					break;
 				case '?':
 					NextChar();
-                    if(_parseChar == '.')
-                    {
-                        NextChar();
-                        t = TokenId.QuestionDot;
-                    } else if(_parseChar == '?')
-                    {
-                        NextChar();
-                        t = TokenId.QuestionQuestion;
-                    } else
-                    {
-                        t = TokenId.Question;
-                    }
+					if (_parseChar == '.')
+					{
+						NextChar();
+						t = TokenId.QuestionDot;
+					} else if(_parseChar == '?')
+					{
+						NextChar();
+						t = TokenId.QuestionQuestion;
+					} else
+					{
+						t = TokenId.Question;
+					}
 					break;
 				case '[':
 					NextChar();
