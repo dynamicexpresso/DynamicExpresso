@@ -388,7 +388,7 @@ namespace DynamicExpresso.Parsing
 				else if(_token.id == TokenId.QuestionDot)
 				{
 					NextToken();
-					GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, ParseMemberAccess(null, expr), _token.pos);
+					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, ParseMemberAccess(null, expr), _token.pos);
 				}
 				else if (_token.id == TokenId.OpenBracket)
 				{

@@ -57,10 +57,14 @@ namespace DynamicExpresso.UnitTest
 		{
 			var interpreter = new Interpreter();
 
-			var x = new { var1 = "hallo", var2 = (String) null };
-			interpreter.SetVariable("x", x);
+            var x = new {
+                var1 = "hallo",
+                var2 = (String)null };
+
+            interpreter.SetVariable("x", x);
 			Assert.AreEqual("hallo", interpreter.Eval("x.var1?.ToString()"));
-			Assert.AreEqual(null, interpreter.Eval("x.var2?.ToString()"));
-		}
-	}
+            Assert.AreEqual(null, interpreter.Eval("x.var2?.ToString()"));
+            Assert.AreEqual("allo", interpreter.Eval("x.var1?.Substring(1)"));
+        }
+    }
 }
