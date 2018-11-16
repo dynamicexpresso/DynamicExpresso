@@ -409,7 +409,6 @@ See [github open issues and milestones](https://github.com/davideicardi/DynamicE
 If you need help you can try one of the following:
 
 - [FAQ](https://github.com/davideicardi/DynamicExpresso/wiki/FAQ) wiki page
-- Post your questions on [stackoverflow.com](http://stackoverflow.com/questions/tagged/dynamic-expresso) using `dynamic-expresso` tag
 - github [official repository](https://github.com/davideicardi/DynamicExpresso)
 
 
