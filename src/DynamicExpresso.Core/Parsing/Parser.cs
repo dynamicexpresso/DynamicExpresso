@@ -81,7 +81,7 @@ namespace DynamicExpresso.Parsing
 		{
 			// The following methods respect the operator precedence as defined in
 			// MSDN C# "Operator precedence and associativity"
-			// http://msdn.microsoft.com/en-us/library/aa691323(v=vs.71).aspx
+			// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/
 
 			return ParseAssignement();
 		}
@@ -107,8 +107,14 @@ namespace DynamicExpresso.Parsing
 		private Expression ParseConditional()
 		{
 			var errorPos = _token.pos;
-			var expr = ParseLogicalOr();
-			if (_token.id == TokenId.Question)
+			var expr = ParseConditionalOr();
+			if (_token.id == TokenId.QuestionQuestion)
+			{
+				NextToken();
+				var exprRight = ParseExpressionSegment();
+				expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), exprRight, expr, errorPos);
+			}
+			else if (_token.id == TokenId.Question)
 			{
 				NextToken();
 				var expr1 = ParseExpressionSegment();
@@ -121,13 +127,13 @@ namespace DynamicExpresso.Parsing
 		}
 
 		// || operator
-		private Expression ParseLogicalOr()
+		private Expression ParseConditionalOr()
 		{
-			var left = ParseLogicalAnd();
+			var left = ParseConditionalAnd();
 			while (_token.id == TokenId.DoubleBar)
 			{
 				NextToken();
-				var right = ParseLogicalAnd();
+				var right = ParseConditionalAnd();
 				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
 				left = Expression.OrElse(left, right);
 			}
@@ -135,15 +141,57 @@ namespace DynamicExpresso.Parsing
 		}
 
 		// && operator
+		private Expression ParseConditionalAnd()
+		{
+			var left = ParseLogicalOr();
+			while (_token.id == TokenId.DoubleAmphersand)
+			{
+				NextToken();
+				var right = ParseLogicalOr();
+				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				left = Expression.AndAlso(left, right);
+			}
+			return left;
+		}
+
+		// | operator
+		private Expression ParseLogicalOr()
+		{
+			var left = ParseLogicalXor();
+			while (_token.id == TokenId.Bar)
+			{
+				NextToken();
+				var right = ParseLogicalXor();
+				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				left = Expression.Or(left, right);
+			}
+			return left;
+		}
+
+		// ^ operator
+		private Expression ParseLogicalXor()
+		{
+			var left = ParseLogicalAnd();
+			while (_token.id == TokenId.Caret)
+			{
+				NextToken();
+				var right = ParseLogicalAnd();
+				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				left = Expression.ExclusiveOr(left, right);
+			}
+			return left;
+		}
+
+		// & operator
 		private Expression ParseLogicalAnd()
 		{
 			var left = ParseComparison();
-			while (_token.id == TokenId.DoubleAmphersand)
+			while (_token.id == TokenId.Amphersand)
 			{
 				NextToken();
 				var right = ParseComparison();
 				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
-				left = Expression.AndAlso(left, right);
+				left = Expression.And(left, right);
 			}
 			return left;
 		}
@@ -379,6 +427,11 @@ namespace DynamicExpresso.Parsing
 				{
 					NextToken();
 					expr = ParseMemberAccess(null, expr);
+				}
+				else if(_token.id == TokenId.QuestionDot)
+				{
+					NextToken();
+					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, ParseMemberAccess(null, expr), _token.pos);
 				}
 				else if (_token.id == TokenId.OpenBracket)
 				{
@@ -1089,10 +1142,10 @@ namespace DynamicExpresso.Parsing
 			return s;
 		}
 
-		//static bool IsNumericType(Type type)
-		//{
-		//	return GetNumericTypeKind(type) != 0;
-		//}
+		static bool IsNumericType(Type type)
+		{
+			return GetNumericTypeKind(type) != 0;
+		}
 
 		private static bool IsSignedIntegralType(Type type)
 		{
@@ -1423,7 +1476,7 @@ namespace DynamicExpresso.Parsing
 				}
 			}
 
-			if (type.IsGenericType)
+			if (type.IsGenericType && !IsNumericType(type))
 			{
 				var genericType = FindAssignableGenericType(expr.Type, type.GetGenericTypeDefinition());
 				if (genericType != null)
@@ -1604,8 +1657,8 @@ namespace DynamicExpresso.Parsing
 		private static Type GetParameterType(ParameterInfo parameterInfo)
 		{
 			var isParamsArray = HasParamsArrayType(parameterInfo);
-			var type = isParamsArray 
-				? parameterInfo.ParameterType.GetElementType() 
+			var type = isParamsArray
+				? parameterInfo.ParameterType.GetElementType()
 				: parameterInfo.ParameterType;
 			return type;
 		}
@@ -1735,7 +1788,7 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression GenerateStringConcat(Expression left, Expression right)
 		{
-			var concatMethod = typeof(string).GetMethod("Concat", new[] {typeof(object), typeof(object)});
+			var concatMethod = typeof(string).GetMethod("Concat", new[] { typeof(object), typeof(object) });
 			if (concatMethod == null)
 				throw new Exception("String concat method not found");
 
@@ -1817,7 +1870,7 @@ namespace DynamicExpresso.Parsing
 					}
 					else
 					{
-						throw CreateParseException(_parsePosition, ErrorMessages.InvalidCharacter, _parseChar);
+						t = TokenId.Amphersand;
 					}
 					break;
 				case '(':
@@ -1919,7 +1972,18 @@ namespace DynamicExpresso.Parsing
 					break;
 				case '?':
 					NextChar();
-					t = TokenId.Question;
+					if (_parseChar == '.')
+					{
+						NextChar();
+						t = TokenId.QuestionDot;
+					} else if(_parseChar == '?')
+					{
+						NextChar();
+						t = TokenId.QuestionQuestion;
+					} else
+					{
+						t = TokenId.Question;
+					}
 					break;
 				case '[':
 					NextChar();
@@ -1976,6 +2040,10 @@ namespace DynamicExpresso.Parsing
 					NextChar();
 
 					t = TokenId.CharLiteral;
+					break;
+				case '^':
+					NextChar();
+					t = TokenId.Caret;
 					break;
 				default:
 

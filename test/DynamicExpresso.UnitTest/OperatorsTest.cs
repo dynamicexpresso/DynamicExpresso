@@ -215,6 +215,30 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(2, x.Property2);
 		}
 
+		[Test]
+		public void Null_coalescing()
+		{
+			var interpreter = new Interpreter();
+			Assert.AreEqual(null, interpreter.Eval("null ?? null"));
+			Assert.AreEqual("hallo", interpreter.Eval("\"hallo\" ?? null"));
+			Assert.AreEqual("hallo", interpreter.Eval("null ?? \"hallo\""));
+
+			interpreter.SetVariable("x", null, typeof(string));
+			interpreter.SetVariable("y", "hello", typeof(string));
+			Assert.AreEqual(null, interpreter.Eval("x ?? null"));
+			Assert.AreEqual("hallo", interpreter.Eval("x ?? \"hallo\""));
+			Assert.AreEqual("hello", interpreter.Eval("y ?? \"hallo\""));
+		}
+
+		[Test]
+		public void Null_coalescing_precedence()
+		{
+			var interpreter = new Interpreter();
+			interpreter.SetVariable("x", null, typeof(double?));
+
+			Assert.AreEqual(50.5, interpreter.Eval("x * 2 ?? 50.5"));
+		}
+
 		// ReSharper disable once UnusedAutoPropertyAccessor.Local
 		private class TypeWithProperty { public int Property1 { get; set; } public int Property2 { get; set; } }
 
@@ -283,12 +307,85 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		public void Logical_Operators()
+		public void Conditional_Operators()
 		{
 			var target = new Interpreter();
 
 			Assert.IsTrue((bool)target.Eval("0 > 3 || true"));
 			Assert.IsFalse((bool)target.Eval("0 > 3 && 4 < 6"));
+		}
+
+		[Test]
+		public void Logical_ExclusiveOr()
+		{
+			var target = new Interpreter();
+			Assert.IsTrue((bool)target.Eval("true ^ false"));
+			Assert.IsTrue((bool)target.Eval("false ^ true"));
+			Assert.IsFalse((bool)target.Eval("true ^ true"));
+			Assert.IsFalse((bool)target.Eval("false ^ false"));
+
+			Assert.AreEqual(2, target.Eval("1 ^ 3"));
+			Assert.AreEqual(3, target.Eval("1 ^ 2"));
+		}
+
+		[Test]
+		public void Conditional_And()
+		{
+			var target = new Interpreter();
+			Assert.IsFalse((bool)target.Eval("true && false"));
+			Assert.IsFalse((bool)target.Eval("false && true"));
+			Assert.IsTrue((bool)target.Eval("true && true"));
+			Assert.IsFalse((bool)target.Eval("false && false"));
+		}
+
+		[Test]
+		public void Logical_And()
+		{
+			var target = new Interpreter();
+			Assert.IsFalse((bool)target.Eval("true & false"));
+			Assert.IsFalse((bool)target.Eval("false & true"));
+			Assert.IsTrue((bool)target.Eval("true & true"));
+			Assert.IsFalse((bool)target.Eval("false & false"));
+
+			Assert.AreEqual(1, target.Eval("1 & 3"));
+			Assert.AreEqual(0, target.Eval("1 & 2"));
+		}
+
+		[Test]
+		public void Conditional_Or()
+		{
+			var target = new Interpreter();
+			Assert.IsTrue((bool)target.Eval("true || false"));
+			Assert.IsTrue((bool)target.Eval("false || true"));
+			Assert.IsTrue((bool)target.Eval("true || true"));
+			Assert.IsFalse((bool)target.Eval("false || false"));
+		}
+
+		[Test]
+		public void Logical_Or()
+		{
+			var target = new Interpreter();
+			Assert.IsTrue((bool)target.Eval("true | false"));
+			Assert.IsTrue((bool)target.Eval("false | true"));
+			Assert.IsTrue((bool)target.Eval("true | true"));
+			Assert.IsFalse((bool)target.Eval("false | false"));
+
+			Assert.AreEqual(3, target.Eval("1 | 3"));
+			Assert.AreEqual(3, target.Eval("1 | 2"));
+		}
+
+		[Test]
+		public void Operators_Precedence()
+		{
+			// Precedence:
+			// &, ^, |, &&, ||
+			// From: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/
+
+			var target = new Interpreter();
+			Assert.AreEqual(false ^ false | true & true, target.Eval("false ^ false | true & true"));
+			Assert.AreEqual(false & false ^ false | true, target.Eval("false & false ^ false | true"));
+			Assert.AreEqual(true ^ true & false, target.Eval("true ^ true & false"));
+			Assert.AreEqual(true ^ true && false, target.Eval("true ^ true && false"));
 		}
 
 		[Test]

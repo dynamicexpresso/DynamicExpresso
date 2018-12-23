@@ -18,6 +18,8 @@
 		Comma,
 		Minus,
 		Dot,
+		QuestionDot,
+		QuestionQuestion,
 		Slash,
 		Colon,
 		LessThan,
@@ -25,14 +27,16 @@
 		Question,
 		OpenBracket,
 		CloseBracket,
-		Bar,
 		ExclamationEqual,
+		Amphersand,
 		DoubleAmphersand,
 		LessThanEqual,
 		DoubleEqual,
 		GreaterThanEqual,
+		Bar,
 		DoubleBar,
-		Equal
+		Equal,
+		Caret
 	}
 
 }
