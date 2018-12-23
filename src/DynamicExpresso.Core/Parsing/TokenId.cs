@@ -27,14 +27,16 @@
 		Question,
 		OpenBracket,
 		CloseBracket,
-		Bar,
 		ExclamationEqual,
+		Amphersand,
 		DoubleAmphersand,
 		LessThanEqual,
 		DoubleEqual,
 		GreaterThanEqual,
+		Bar,
 		DoubleBar,
-		Equal
+		Equal,
+		Caret
 	}
 
 }

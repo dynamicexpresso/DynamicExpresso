@@ -1,7 +1,6 @@
-﻿using System;
-using NUnit.Framework;
-using System.Collections.Generic;
+﻿using NUnit.Framework;
 using System.Linq;
+
 // ReSharper disable SpecifyACultureInStringConversionExplicitly
 
 namespace DynamicExpresso.UnitTest
@@ -27,7 +26,7 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual((-.5).ToString(), interpreter.Eval("-.5.ToString()"));
 			Assert.AreEqual((.1).ToString(), interpreter.Eval(".1.ToString()"));
-			Assert.AreEqual((-1-.1-0.1).ToString(), interpreter.Eval("(-1-.1-0.1).ToString()"));
+			Assert.AreEqual((-1 - .1 - 0.1).ToString(), interpreter.Eval("(-1-.1-0.1).ToString()"));
 		}
 
 		[Test]
@@ -57,14 +56,28 @@ namespace DynamicExpresso.UnitTest
 		{
 			var interpreter = new Interpreter();
 
-            var x = new {
-                var1 = "hallo",
-                var2 = (String)null };
+			var x = new
+			{
+				var1 = "hallo",
+				var2 = (string)null
+			};
 
-            interpreter.SetVariable("x", x);
+			interpreter.SetVariable("x", x);
 			Assert.AreEqual("hallo", interpreter.Eval("x.var1?.ToString()"));
-            Assert.AreEqual(null, interpreter.Eval("x.var2?.ToString()"));
-            Assert.AreEqual("allo", interpreter.Eval("x.var1?.Substring(1)"));
-        }
-    }
+			Assert.AreEqual(null, interpreter.Eval("x.var2?.ToString()"));
+			Assert.AreEqual("allo", interpreter.Eval("x.var1?.Substring(1)"));
+		}
+
+		[Test]
+		public void GitHub_Issue_88()
+		{
+			var interpreter = new Interpreter();
+
+			interpreter.SetVariable("a", 1, typeof(int));
+			interpreter.SetVariable("b", 1.2, typeof(double?));
+			var result = interpreter.Eval("a + b");
+
+			Assert.AreEqual(result, 2.2);
+		}
+	}
 }
