@@ -32,7 +32,8 @@
 		DoubleEqual,
 		GreaterThanEqual,
 		DoubleBar,
-		Equal
+		Equal,
+		ExclusiveOr
 	}
 
 }

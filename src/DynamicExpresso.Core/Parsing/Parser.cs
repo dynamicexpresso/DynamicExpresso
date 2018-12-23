@@ -137,13 +137,27 @@ namespace DynamicExpresso.Parsing
 		// && operator
 		private Expression ParseLogicalAnd()
 		{
-			var left = ParseComparison();
+			var left = ParseLogicXor();
 			while (_token.id == TokenId.DoubleAmphersand)
 			{
 				NextToken();
-				var right = ParseComparison();
+				var right = ParseLogicXor();
 				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
 				left = Expression.AndAlso(left, right);
+			}
+			return left;
+		}
+
+		private Expression ParseLogicXor()
+		{
+			Expression left = ParseComparison();
+			while (_token.id == TokenId.ExclusiveOr)
+			{
+				Token op = _token;
+				NextToken();
+				Expression right = ParseComparison();
+				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				left = Expression.ExclusiveOr(left, right);
 			}
 			return left;
 		}
@@ -1977,6 +1991,10 @@ namespace DynamicExpresso.Parsing
 
 					t = TokenId.CharLiteral;
 					break;
+                case '^':
+                    NextChar();
+                    t = TokenId.ExclusiveOr;
+                    break;
 				default:
 
 					if (char.IsLetter(_parseChar) || _parseChar == '@' || _parseChar == '_')
