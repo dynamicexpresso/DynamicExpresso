@@ -42,5 +42,29 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(array.Contains(5), interpreter.Eval("array.Contains(5)"));
 			Assert.AreEqual(array.Contains(3), interpreter.Eval("array.Contains(3)"));
 		}
-	}
+
+		[Test]
+		public void GitHub_Issue_64()
+		{
+			var interpreter = new Interpreter();
+			Assert.AreEqual(null, interpreter.Eval("null ?? null"));
+			Assert.AreEqual("hallo", interpreter.Eval("\"hallo\" ?? null"));
+			Assert.AreEqual("hallo", interpreter.Eval("null ?? \"hallo\""));
+		}
+
+		[Test]
+		public void GitHub_Issue_65_Part1()
+		{
+			var interpreter = new Interpreter();
+
+            var x = new {
+                var1 = "hallo",
+                var2 = (String)null };
+
+            interpreter.SetVariable("x", x);
+			Assert.AreEqual("hallo", interpreter.Eval("x.var1?.ToString()"));
+            Assert.AreEqual(null, interpreter.Eval("x.var2?.ToString()"));
+            Assert.AreEqual("allo", interpreter.Eval("x.var1?.Substring(1)"));
+        }
+    }
 }
