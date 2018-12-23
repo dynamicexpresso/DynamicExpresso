@@ -1,7 +1,6 @@
-﻿using System;
-using NUnit.Framework;
-using System.Collections.Generic;
+﻿using NUnit.Framework;
 using System.Linq;
+
 // ReSharper disable SpecifyACultureInStringConversionExplicitly
 
 namespace DynamicExpresso.UnitTest
@@ -42,5 +41,17 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(array.Contains(5), interpreter.Eval("array.Contains(5)"));
 			Assert.AreEqual(array.Contains(3), interpreter.Eval("array.Contains(3)"));
 		}
+
+	    [Test]
+	    public void GitHub_Issue_88()
+	    {
+	        var interpreter = new Interpreter();
+
+	        interpreter.SetVariable("a", 1, typeof(int));
+	        interpreter.SetVariable("b", 1.2, typeof(double?));
+	        var result = interpreter.Eval("a + b");
+
+            Assert.AreEqual(result, 2.2);
+	    }
 	}
 }
