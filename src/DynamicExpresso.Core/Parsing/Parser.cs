@@ -1089,10 +1089,10 @@ namespace DynamicExpresso.Parsing
 			return s;
 		}
 
-		//static bool IsNumericType(Type type)
-		//{
-		//	return GetNumericTypeKind(type) != 0;
-		//}
+		static bool IsNumericType(Type type)
+		{
+			return GetNumericTypeKind(type) != 0;
+		}
 
 		private static bool IsSignedIntegralType(Type type)
 		{
@@ -1423,7 +1423,7 @@ namespace DynamicExpresso.Parsing
 				}
 			}
 
-			if (type.IsGenericType && GetNumericTypeKind(type) == 0)
+			if (type.IsGenericType && !IsNumericType(type))
 			{
 				var genericType = FindAssignableGenericType(expr.Type, type.GetGenericTypeDefinition());
 				if (genericType != null)
