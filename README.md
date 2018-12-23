@@ -234,6 +234,15 @@ Supported operators:
 			<td>Equality</td><td><code>==  !=</code></td>
 		</tr>
 		<tr>
+			<td>Logical AND</td><td><code>&</code></td>
+		</tr>
+		<tr>
+			<td>Logical OR</td><td><code>|</code></td>
+		</tr>
+		<tr>
+			<td>Logical XOR</td><td><code>^</code></td>
+		</tr>
+		<tr>
 			<td>Conditional AND</td><td><code>&&</code></td>
 		</tr>
 		<tr>
@@ -248,7 +257,7 @@ Supported operators:
 	</tbody>
 </table>
 
-Operators precedence is respected following [C# rules (Operator precedence and associativity)](http://msdn.microsoft.com/en-us/library/aa691323(v=vs.71).aspx).
+Operators precedence is respected following [C# rules (Operator precedence and associativity)](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/).
 
 Some operators, like the assignment operator, can be disabled for security reason.
 
