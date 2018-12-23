@@ -283,7 +283,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		public void Logical_Operators()
+		public void Conditional_Operators()
 		{
 			var target = new Interpreter();
 
@@ -299,6 +299,69 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsTrue((bool)target.Eval("false ^ true"));
 			Assert.IsFalse((bool)target.Eval("true ^ true"));
 			Assert.IsFalse((bool)target.Eval("false ^ false"));
+
+			Assert.AreEqual(2, target.Eval("1 ^ 3"));
+			Assert.AreEqual(3, target.Eval("1 ^ 2"));
+		}
+
+		[Test]
+		public void Conditional_And()
+		{
+			var target = new Interpreter();
+			Assert.IsFalse((bool)target.Eval("true && false"));
+			Assert.IsFalse((bool)target.Eval("false && true"));
+			Assert.IsTrue((bool)target.Eval("true && true"));
+			Assert.IsFalse((bool)target.Eval("false && false"));
+		}
+
+		[Test]
+		public void Logical_And()
+		{
+			var target = new Interpreter();
+			Assert.IsFalse((bool)target.Eval("true & false"));
+			Assert.IsFalse((bool)target.Eval("false & true"));
+			Assert.IsTrue((bool)target.Eval("true & true"));
+			Assert.IsFalse((bool)target.Eval("false & false"));
+
+			Assert.AreEqual(1, target.Eval("1 & 3"));
+			Assert.AreEqual(0, target.Eval("1 & 2"));
+		}
+
+		[Test]
+		public void Conditional_Or()
+		{
+			var target = new Interpreter();
+			Assert.IsTrue((bool)target.Eval("true || false"));
+			Assert.IsTrue((bool)target.Eval("false || true"));
+			Assert.IsTrue((bool)target.Eval("true || true"));
+			Assert.IsFalse((bool)target.Eval("false || false"));
+		}
+
+		[Test]
+		public void Logical_Or()
+		{
+			var target = new Interpreter();
+			Assert.IsTrue((bool)target.Eval("true | false"));
+			Assert.IsTrue((bool)target.Eval("false | true"));
+			Assert.IsTrue((bool)target.Eval("true | true"));
+			Assert.IsFalse((bool)target.Eval("false | false"));
+
+			Assert.AreEqual(3, target.Eval("1 | 3"));
+			Assert.AreEqual(3, target.Eval("1 | 2"));
+		}
+
+		[Test]
+		public void Operators_Precedence()
+		{
+			// Precedence:
+			// &, ^, |, &&, ||
+			// From: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/
+
+			var target = new Interpreter();
+			Assert.AreEqual(false ^ false | true & true, target.Eval("false ^ false | true & true"));
+			Assert.AreEqual(false & false ^ false | true, target.Eval("false & false ^ false | true"));
+			Assert.AreEqual(true ^ true & false, target.Eval("true ^ true & false"));
+			Assert.AreEqual(true ^ true && false, target.Eval("true ^ true && false"));
 		}
 
 		[Test]
