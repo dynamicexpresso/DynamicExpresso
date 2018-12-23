@@ -215,6 +215,30 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(2, x.Property2);
 		}
 
+		[Test]
+		public void Null_coalescing()
+		{
+			var interpreter = new Interpreter();
+			Assert.AreEqual(null, interpreter.Eval("null ?? null"));
+			Assert.AreEqual("hallo", interpreter.Eval("\"hallo\" ?? null"));
+			Assert.AreEqual("hallo", interpreter.Eval("null ?? \"hallo\""));
+
+			interpreter.SetVariable("x", null, typeof(string));
+			interpreter.SetVariable("y", "hello", typeof(string));
+			Assert.AreEqual(null, interpreter.Eval("x ?? null"));
+			Assert.AreEqual("hallo", interpreter.Eval("x ?? \"hallo\""));
+			Assert.AreEqual("hello", interpreter.Eval("y ?? \"hallo\""));
+		}
+
+		[Test]
+		public void Null_coalescing_precedence()
+		{
+			var interpreter = new Interpreter();
+			interpreter.SetVariable("x", null, typeof(double?));
+
+			Assert.AreEqual(50.5, interpreter.Eval("x * 2 ?? 50.5"));
+		}
+
 		// ReSharper disable once UnusedAutoPropertyAccessor.Local
 		private class TypeWithProperty { public int Property1 { get; set; } public int Property2 { get; set; } }
 

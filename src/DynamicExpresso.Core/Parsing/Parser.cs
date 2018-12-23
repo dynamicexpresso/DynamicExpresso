@@ -108,7 +108,13 @@ namespace DynamicExpresso.Parsing
 		{
 			var errorPos = _token.pos;
 			var expr = ParseConditionalOr();
-			if (_token.id == TokenId.Question)
+			if (_token.id == TokenId.QuestionQuestion)
+			{
+				NextToken();
+				var exprRight = ParseExpressionSegment();
+				expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), exprRight, expr, errorPos);
+			}
+			else if (_token.id == TokenId.Question)
 			{
 				NextToken();
 				var expr1 = ParseExpressionSegment();
@@ -421,6 +427,11 @@ namespace DynamicExpresso.Parsing
 				{
 					NextToken();
 					expr = ParseMemberAccess(null, expr);
+				}
+				else if(_token.id == TokenId.QuestionDot)
+				{
+					NextToken();
+					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, ParseMemberAccess(null, expr), _token.pos);
 				}
 				else if (_token.id == TokenId.OpenBracket)
 				{
@@ -1961,7 +1972,18 @@ namespace DynamicExpresso.Parsing
 					break;
 				case '?':
 					NextChar();
-					t = TokenId.Question;
+					if (_parseChar == '.')
+					{
+						NextChar();
+						t = TokenId.QuestionDot;
+					} else if(_parseChar == '?')
+					{
+						NextChar();
+						t = TokenId.QuestionQuestion;
+					} else
+					{
+						t = TokenId.Question;
+					}
 					break;
 				case '[':
 					NextChar();

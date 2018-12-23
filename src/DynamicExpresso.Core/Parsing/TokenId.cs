@@ -18,6 +18,8 @@
 		Comma,
 		Minus,
 		Dot,
+		QuestionDot,
+		QuestionQuestion,
 		Slash,
 		Colon,
 		LessThan,

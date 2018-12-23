@@ -254,6 +254,9 @@ Supported operators:
 		<tr>
 			<td>Assignment</td><td><code>=</code></td>
 		</tr>
+		<tr>
+			<td>Null coalescing</td><td><code>??</code></td>
+		</tr>
 	</tbody>
 </table>
 

@@ -19,6 +19,15 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.AField, target.Eval("x.AField"));
 		}
 
+		[Ignore("See issue 65")]
+		[Test]
+		public void Null_conditional_property()
+		{
+			var target = new Interpreter().SetVariable("x", null, typeof(MyTestService));
+			MyTestService x = null;
+			Assert.IsNull(target.Eval("x?.AProperty"));
+		}
+
 		[Test]
 		public void Indexer()
 		{
