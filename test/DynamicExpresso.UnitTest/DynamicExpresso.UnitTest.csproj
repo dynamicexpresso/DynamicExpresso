@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp2.0;net461</TargetFrameworks>
+		<TargetFrameworks>netcoreapp2.0;net461;net45</TargetFrameworks>
 
 		<IsPackable>false</IsPackable>		
 	</PropertyGroup>
@@ -11,8 +11,8 @@
 		<PackageReference Include="NUnit" Version="3.9.0" />
 		<PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
 	</ItemGroup>
-	
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net4')) ">
 		<Reference Include="Microsoft.CSharp" />
 	</ItemGroup>
 

@@ -1,27 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-		<RootNamespace>DynamicExpresso</RootNamespace>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net461;net45</TargetFrameworks>
+    <RootNamespace>DynamicExpresso</RootNamespace>
 
-		<Authors>Davide Icardi</Authors>
-		<Company>davideicardi.com</Company>
-		<Description>C# expression interpreter/evaluator</Description>
-		<Copyright>Davide Icardi</Copyright>
-		<PackageTags>dynamic expresso expression linq eval</PackageTags>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<IncludeSymbols>True</IncludeSymbols>
-		<IncludeSource>True</IncludeSource>
-		<PackageProjectUrl>https://github.com/davideicardi/DynamicExpresso</PackageProjectUrl>
-		<PackageLicenseUrl>https://github.com/davideicardi/DynamicExpresso#license</PackageLicenseUrl>
-		<RepositoryUrl>https://github.com/davideicardi/DynamicExpresso.git</RepositoryUrl>
-		<RepositoryType>git</RepositoryType>
-		<VersionPrefix>0.0.1</VersionPrefix>
-		<VersionSuffix></VersionSuffix>
-	</PropertyGroup>
+    <Authors>Davide Icardi</Authors>
+    <Company>davideicardi.com</Company>
+    <Description>C# expression interpreter/evaluator</Description>
+    <Copyright>Davide Icardi</Copyright>
+    <PackageTags>dynamic expresso expression linq eval</PackageTags>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IncludeSymbols>True</IncludeSymbols>
+    <IncludeSource>True</IncludeSource>
+    <PackageProjectUrl>https://github.com/davideicardi/DynamicExpresso</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/davideicardi/DynamicExpresso#license</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/davideicardi/DynamicExpresso.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionSuffix></VersionSuffix>
+  </PropertyGroup>
 
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-		<Reference Include="Microsoft.CSharp" />
-	</ItemGroup>
+
+  <ItemGroup Condition=" $(TargetFramework.StartsWith('net4')) ">
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
 
 </Project>
