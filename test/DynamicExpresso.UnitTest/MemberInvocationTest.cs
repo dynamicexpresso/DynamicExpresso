@@ -24,7 +24,6 @@ namespace DynamicExpresso.UnitTest
 		public void Null_conditional_property()
 		{
 			var target = new Interpreter().SetVariable("x", null, typeof(MyTestService));
-			MyTestService x = null;
 			Assert.IsNull(target.Eval("x?.AProperty"));
 		}
 
