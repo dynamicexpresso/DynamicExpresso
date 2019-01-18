@@ -19,21 +19,21 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(5.ToString(), interpreter.Eval("5.ToString()"));
 		}
 
-	    [Test]
-	    public void GitHub_Issue_39_Array_Reassignment()
-	    {
-	        var arr = new[] { 1 };
-	        arr[0] = 2;
-	        var target = new Interpreter().SetVariable("arr", arr);
-	        Assert.AreEqual(2, target.Eval("arr[0]"));
+		[Test]
+		public void GitHub_Issue_39_Array_Reassignment()
+		{
+			var arr = new[] { 1 };
+			arr[0] = 2;
+			var target = new Interpreter().SetVariable("arr", arr);
+			Assert.AreEqual(2, target.Eval("arr[0]"));
 
-	        target.Eval("arr[0] = 3");
+			target.Eval("arr[0] = 3");
 
-	        Assert.AreNotEqual(2, target.Eval("arr[0]"));
-	        Assert.AreEqual(3, target.Eval("arr[0]"));
-	    }
+			Assert.AreNotEqual(2, target.Eval("arr[0]"));
+			Assert.AreEqual(3, target.Eval("arr[0]"));
+		}
 
-        [Test]
+		[Test]
 		public void GitHub_Issue_43()
 		{
 			var interpreter = new Interpreter();
