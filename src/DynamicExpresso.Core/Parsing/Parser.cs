@@ -83,11 +83,11 @@ namespace DynamicExpresso.Parsing
 			// MSDN C# "Operator precedence and associativity"
 			// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/
 
-			return ParseAssignement();
+			return ParseAssignment();
 		}
 
 		// = operator
-		private Expression ParseAssignement()
+		private Expression ParseAssignment()
 		{
 			var left = ParseConditional();
 			if (_token.id == TokenId.Equal)
@@ -96,7 +96,7 @@ namespace DynamicExpresso.Parsing
 					throw new AssignmentOperatorDisabledException("=", _token.pos);
 
 				NextToken();
-				var right = ParseAssignement();
+				var right = ParseAssignment();
 				CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref left, ref right);
 				left = Expression.Assign(left, right);
 			}
@@ -1093,7 +1093,7 @@ namespace DynamicExpresso.Parsing
 				var index = PromoteExpression(args[0], typeof(int), true);
 				if (index == null)
 					throw CreateParseException(errorPos, ErrorMessages.InvalidIndex);
-				return Expression.ArrayIndex(expr, index);
+				return Expression.ArrayAccess(expr, index);
 			}
 
 			var applicableMethods = FindIndexer(expr.Type, args);
