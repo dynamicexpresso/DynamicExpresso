@@ -22,8 +22,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void GitHub_Issue_39_Array_Reassignment()
 		{
-			var arr = new[] { 1 };
-			arr[0] = 2;
+			var arr = new[] { 2 };
 			var target = new Interpreter().SetVariable("arr", arr);
 			Assert.AreEqual(2, target.Eval("arr[0]"));
 
@@ -31,6 +30,19 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreNotEqual(2, target.Eval("arr[0]"));
 			Assert.AreEqual(3, target.Eval("arr[0]"));
+		}
+
+		[Test]
+		public void GitHub_Issue_39_Multidimensional_Array_Reassignment()
+		{
+			var arr = new[,] { { 1, 2 }, { 3, 4 } };
+			var target = new Interpreter().SetVariable("arr", arr);
+			Assert.AreEqual(3, target.Eval("arr[1, 0]"));
+
+			target.Eval("arr[1, 0] = 5");
+
+			var expected = new[,] { { 1, 2 }, { 5, 4 } };
+			Assert.AreEqual(arr, expected);
 		}
 
 		[Test]

@@ -36,10 +36,27 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 			var y = new MyTestService();
 			target.SetVariable("y", y);
+			var z = new[] {7, 8, 9, 10};
+			target.SetVariable("z", z);
 
 			Assert.AreEqual(x[2], target.Eval("x[2]"));
 			Assert.AreEqual(y[2], target.Eval("y[2]"));
 			Assert.AreEqual(y[2].ToString(), target.Eval("y[2].ToString()"));
+			Assert.AreEqual(z[2], target.Eval("z[2]"));
+		}
+
+		[Test]
+		public void Multiarray_indexer()
+		{
+			var target = new Interpreter();
+
+			var x = new[,] { { 11, 12, 13, 14 }, { 21, 22, 23, 24 }, { 31, 32, 33, 34 } };
+			target.SetVariable("x", x);
+			var y = new MyTestService();
+			target.SetVariable("y", y);
+			
+			Assert.AreEqual(x[1, 2], target.Eval("x[1, 2]"));
+			Assert.AreEqual(y[y[1], 2], target.Eval("y[y[1], 2]"));
 		}
 
 		[Test]
@@ -366,6 +383,11 @@ namespace DynamicExpresso.UnitTest
 			public DateTime this[int i]
 			{
 				get { return DateTime.Today.AddDays(i); }
+			}
+
+			public DateTime this[DateTime dateTime, int i]
+			{
+				get { return dateTime.AddDays(i); }
 			}
 
 			public int MethodWithParamsArrayCalls { get; set; }

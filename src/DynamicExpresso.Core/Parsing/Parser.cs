@@ -1088,12 +1088,17 @@ namespace DynamicExpresso.Parsing
 			NextToken();
 			if (expr.Type.IsArray)
 			{
-				if (expr.Type.GetArrayRank() != 1 || args.Length != 1)
-					throw CreateParseException(errorPos, ErrorMessages.CannotIndexMultiDimArray);
-				var index = PromoteExpression(args[0], typeof(int), true);
-				if (index == null)
-					throw CreateParseException(errorPos, ErrorMessages.InvalidIndex);
-				return Expression.ArrayAccess(expr, index);
+				if (expr.Type.GetArrayRank() != args.Length)
+					throw CreateParseException(errorPos, ErrorMessages.IncorrectNumberOfIndexes);
+
+				for (int i = 0; i < args.Length; i++)
+				{
+					args[i] = PromoteExpression(args[i], typeof(int), true);
+					if (args[i] == null)
+						throw CreateParseException(errorPos, ErrorMessages.InvalidIndex);
+				}
+
+				return Expression.ArrayAccess(expr, args);
 			}
 
 			var applicableMethods = FindIndexer(expr.Type, args);
