@@ -96,9 +96,14 @@ namespace DynamicExpresso.Parsing
 					throw new AssignmentOperatorDisabledException("=", _token.pos);
 
 				NextToken();
+
 				var right = ParseAssignment();
-				CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref left, ref right);
-				left = Expression.Assign(left, right);
+				var promoted = PromoteExpression(right, left.Type, true);
+				if (promoted == null)
+					throw CreateParseException(_token.pos, ErrorMessages.CannotConvertValue,
+						GetTypeName(right.Type), GetTypeName(left.Type));
+
+				left = Expression.Assign(left, promoted);
 			}
 			return left;
 		}
@@ -1114,9 +1119,8 @@ namespace DynamicExpresso.Parsing
 						GetTypeName(expr.Type));
 			}
 
-			var method = applicableMethods[0];
-
-			return Expression.Call(expr, (MethodInfo)method.MethodBase, method.PromotedParameters);
+			var indexer = (IndexerData) applicableMethods[0];
+			return Expression.Property(expr, indexer.Indexer, indexer.PromotedParameters);
 		}
 
 		private static bool IsNullableType(Type type)
@@ -1271,10 +1275,9 @@ namespace DynamicExpresso.Parsing
 				MemberInfo[] members = t.GetDefaultMembers();
 				if (members.Length != 0)
 				{
-					IEnumerable<MethodBase> methods = members.
+					IEnumerable<MethodData> methods = members.
 							OfType<PropertyInfo>().
-							Select(p => (MethodBase)p.GetGetMethod()).
-							Where(m => m != null);
+							Select(p => (MethodData) new IndexerData(p));
 
 					var applicableMethods = FindBestMethod(methods, args);
 					if (applicableMethods.Length > 0)
@@ -1322,8 +1325,12 @@ namespace DynamicExpresso.Parsing
 
 		private static MethodData[] FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
 		{
+			return FindBestMethod(methods.Select(MethodData.Gen), args);
+		}
+
+		private static MethodData[] FindBestMethod(IEnumerable<MethodData> methods, Expression[] args)
+		{
 			var applicable = methods.
-					Select(m => new MethodData { MethodBase = m, Parameters = m.GetParameters() }).
 					Where(m => CheckIfMethodIsApplicableAndPrepareIt(m, args)).
 					ToArray();
 			if (applicable.Length > 1)
@@ -1422,7 +1429,7 @@ namespace DynamicExpresso.Parsing
 
 			method.PromotedParameters = promotedArgs.ToArray();
 
-			if (method.MethodBase.IsGenericMethodDefinition &&
+			if (method.MethodBase != null && method.MethodBase.IsGenericMethodDefinition &&
 					method.MethodBase is MethodInfo)
 			{
 				var methodInfo = (MethodInfo)method.MethodBase;
@@ -2161,6 +2168,43 @@ namespace DynamicExpresso.Parsing
 			public ParameterInfo[] Parameters;
 			public Expression[] PromotedParameters;
 			public bool HasParamsArray;
+
+			public static MethodData Gen(MethodBase method)
+			{
+				return new MethodData
+				{
+					MethodBase = method,
+					Parameters = method.GetParameters()
+				};
+			}
+		}
+
+		private class IndexerData : MethodData
+		{
+			public readonly PropertyInfo Indexer;
+
+			public IndexerData(PropertyInfo indexer)
+			{
+				Indexer = indexer;
+
+				var method = indexer.GetGetMethod();
+				if (method != null)
+				{
+					Parameters = method.GetParameters();
+				}
+				else
+				{
+					method = indexer.GetSetMethod();
+					Parameters = RemoveLast(method.GetParameters());
+				}
+			}
+
+			private static T[] RemoveLast<T>(T[] array)
+			{
+				T[] result = new T[array.Length - 1];
+				Array.Copy(array, 0, result, 0, result.Length);
+				return result;
+			}
 		}
 	}
 }
