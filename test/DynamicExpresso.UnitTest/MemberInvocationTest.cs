@@ -70,6 +70,16 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Cannot_assign_without_setter()
+		{
+			var target = new Interpreter()
+				.SetVariable("x", new MyTestService());
+
+			Assert.Throws<Exceptions.ParseException>(() => target.Parse("x[8] = x.Today"));
+			Assert.Throws<Exceptions.ParseException>(() => target.Parse("x.AProperty = x.Today"));
+		}
+
+		[Test]
 		public void Indexer_Collections()
 		{
 			var target = new Interpreter();

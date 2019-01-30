@@ -178,6 +178,15 @@ namespace DynamicExpresso.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Expression must be writable.
+        /// </summary>
+        internal static string ExpressionMustBeWritable {
+            get {
+                return ResourceManager.GetString("ExpressionMustBeWritable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The first expression must be of type &apos;Boolean&apos;.
         /// </summary>
         internal static string FirstExprMustBeBool {

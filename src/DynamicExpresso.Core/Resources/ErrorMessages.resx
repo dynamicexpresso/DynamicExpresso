@@ -156,6 +156,9 @@
   <data name="ExpressionExpected" xml:space="preserve">
     <value>Expression expected</value>
   </data>
+  <data name="ExpressionMustBeWritable" xml:space="preserve">
+    <value>Expression must be writable</value>
+  </data>
   <data name="FirstExprMustBeBool" xml:space="preserve">
     <value>The first expression must be of type 'Boolean'</value>
   </data>

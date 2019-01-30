@@ -95,6 +95,9 @@ namespace DynamicExpresso.Parsing
 				if (!_arguments.Settings.AssignmentOperators.HasFlag(AssignmentOperators.AssignmentEqual))
 					throw new AssignmentOperatorDisabledException("=", _token.pos);
 
+				if (!IsWritable(left))
+					throw CreateParseException(_token.pos, ErrorMessages.ExpressionMustBeWritable);
+
 				NextToken();
 
 				var right = ParseAssignment();
@@ -1635,6 +1638,30 @@ namespace DynamicExpresso.Parsing
 					if (st == tt) return true;
 					break;
 			}
+			return false;
+		}
+
+		private static bool IsWritable(Expression expression)
+		{
+			switch (expression.NodeType)
+			{
+				case ExpressionType.Index:
+					PropertyInfo indexer = ((IndexExpression)expression).Indexer;
+					return indexer == null || indexer.CanWrite;
+				case ExpressionType.MemberAccess:
+					MemberInfo member = ((MemberExpression)expression).Member;
+					var prop = member as PropertyInfo;
+					if (prop != null)
+						return prop.CanWrite;
+					else
+					{
+						var field = (FieldInfo)member;
+						return !(field.IsInitOnly || field.IsLiteral);
+					}
+				case ExpressionType.Parameter:
+					return true;
+			}
+
 			return false;
 		}
 
