@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
@@ -28,7 +29,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		public void Indexer()
+		public void Indexer_Getter()
 		{
 			var target = new Interpreter();
 
@@ -36,10 +37,101 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 			var y = new MyTestService();
 			target.SetVariable("y", y);
+			var z = new[] {7, 8, 9, 10};
+			target.SetVariable("z", z);
 
 			Assert.AreEqual(x[2], target.Eval("x[2]"));
 			Assert.AreEqual(y[2], target.Eval("y[2]"));
 			Assert.AreEqual(y[2].ToString(), target.Eval("y[2].ToString()"));
+			Assert.AreEqual(y[(short)2], target.Eval("y[(Int16)2]"));
+			Assert.AreEqual(z[2], target.Eval("z[2]"));
+		}
+
+		[Test]
+		public void Indexer_Setter()
+		{
+			var target = new Interpreter();
+
+			var x = new System.Text.StringBuilder("time");
+			target.SetVariable("x", x);
+			var y = new MyTestService();
+			target.SetVariable("y", y);
+			var z = new[] { 7, 8, 9, 10 };
+			target.SetVariable("z", z);
+
+			target.Eval("x[2] = 'r'");
+			Assert.AreEqual(x.ToString(), "tire");
+			target.Eval("y[(Int16)9] = y.Today");
+			Assert.AreEqual(y.AField, y.Today.AddYears(9));
+			target.Eval("y[(Int64)7] = y.Today");
+			Assert.AreEqual(y.AField, y.Today.AddSeconds(7));
+			target.Eval("z[2] = 4");
+			Assert.AreEqual(z, new[] { 7, 8, 4, 10 });
+		}
+
+		[Test]
+		public void Cannot_assign_without_setter()
+		{
+			var target = new Interpreter()
+				.SetVariable("x", new MyTestService());
+
+			Assert.Throws<Exceptions.ParseException>(() => target.Parse("x[8] = x.Today"));
+			Assert.Throws<Exceptions.ParseException>(() => target.Parse("x.AProperty = x.Today"));
+		}
+
+		[Test]
+		public void Indexer_Collections()
+		{
+			var target = new Interpreter();
+
+			var x = new List<int> { 3, 4, 5, 6 };
+			target.SetVariable("x", x);
+			var y = new Dictionary<string, int> { { "first", 1 }, { "second", 2 }, { "third", 3 } };
+			target.SetVariable("y", y);
+
+			Assert.AreEqual(x[2], target.Eval("x[2]"));
+			Assert.AreEqual(y["second"], target.Eval("y[\"second\"]"));
+
+			target.Eval("x[2] = 1");
+			Assert.AreEqual(x, new List<int> { 3, 4, 1, 6 });
+			target.Eval("y[\"second\"] = 2000");
+			Assert.AreEqual(y, new Dictionary<string, int> { { "first", 1 }, { "second", 2000 }, { "third", 3 } });
+		}
+
+		[Test]
+		public void Indexer_Getter_MultiDimensional()
+		{
+			var target = new Interpreter();
+
+			var x = new[,] { { 11, 12, 13, 14 }, { 21, 22, 23, 24 }, { 31, 32, 33, 34 } };
+			target.SetVariable("x", x);
+			var y = new MyTestService();
+			target.SetVariable("y", y);
+			
+			Assert.AreEqual(x[1, 2], target.Eval("x[1, 2]"));
+			Assert.AreEqual(y[y.Today, 2], target.Eval("y[y.Today, 2]"));
+			Assert.AreEqual(y[y.Today], target.Eval("y[y.Today]"));
+		}
+
+		[Test]
+		public void Indexer_Setter_MultiDimensional()
+		{
+			var target = new Interpreter();
+
+			var x = new[,] { { 11, 12, 13, 14 }, { 21, 22, 23, 24 }, { 31, 32, 33, 34 } };
+			target.SetVariable("x", x);
+			var y = new MyTestService();
+			target.SetVariable("y", y);
+
+			var span = TimeSpan.FromDays(3.5);
+			target.SetVariable("span", span);
+
+			target.Eval("x[1, 2] = 7");
+			Assert.AreEqual(x, new[,] { { 11, 12, 13, 14 }, { 21, 22, 7, 24 }, { 31, 32, 33, 34 } });
+			target.Eval("y[y.Today, 2] = span");
+			Assert.AreEqual(y.AField, y.Today.AddDays(2).Add(span));
+			target.Eval("y[y.Today] = span");
+			Assert.AreEqual(y.AField, y.Today.AddDays(3).Add(span));
 		}
 
 		[Test]
@@ -315,6 +407,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			public DateTime AField = DateTime.Now;
 			public DateTime AFIELD = DateTime.UtcNow;
+			public DateTime Today = DateTime.Today;
 
 			public int AProperty
 			{
@@ -365,7 +458,24 @@ namespace DynamicExpresso.UnitTest
 
 			public DateTime this[int i]
 			{
-				get { return DateTime.Today.AddDays(i); }
+				get { return AField.AddDays(i); }
+			}
+
+			public DateTime this[long i]
+			{
+				set { AField = value.AddSeconds(i); }
+			}
+
+			public DateTime this[short i]
+			{
+				get => AField.AddYears(i);
+				set => AField = value.AddYears(i);
+			}
+
+			public TimeSpan this[DateTime dateTime, int i = 3]
+			{
+				get => AField.AddDays(-i).Subtract(dateTime);
+				set => AField = dateTime.AddDays(i).Add(value);
 			}
 
 			public int MethodWithParamsArrayCalls { get; set; }

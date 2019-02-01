@@ -28,7 +28,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.Throws<ArgumentException>(() => target.Eval("352=234"));
+			Assert.Throws<ParseException>(() => target.Eval("352=234"));
 		}
 
 		[Test]

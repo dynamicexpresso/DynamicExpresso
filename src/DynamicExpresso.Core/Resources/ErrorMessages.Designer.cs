@@ -115,15 +115,6 @@ namespace DynamicExpresso.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Indexing of multi-dimensional arrays is not supported.
-        /// </summary>
-        internal static string CannotIndexMultiDimArray {
-            get {
-                return ResourceManager.GetString("CannotIndexMultiDimArray", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &apos;]&apos; or &apos;,&apos; expected.
         /// </summary>
         internal static string CloseBracketOrCommaExpected {
@@ -187,6 +178,15 @@ namespace DynamicExpresso.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Expression must be writable.
+        /// </summary>
+        internal static string ExpressionMustBeWritable {
+            get {
+                return ResourceManager.GetString("ExpressionMustBeWritable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The first expression must be of type &apos;Boolean&apos;.
         /// </summary>
         internal static string FirstExprMustBeBool {
@@ -228,6 +228,15 @@ namespace DynamicExpresso.Resources {
         internal static string IncompatibleOperands {
             get {
                 return ResourceManager.GetString("IncompatibleOperands", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Incorrect number of indexes.
+        /// </summary>
+        internal static string IncorrectNumberOfIndexes {
+            get {
+                return ResourceManager.GetString("IncorrectNumberOfIndexes", resourceCulture);
             }
         }
         

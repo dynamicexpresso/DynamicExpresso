@@ -135,9 +135,6 @@
   <data name="CannotConvertValue" xml:space="preserve">
     <value>A value of type '{0}' cannot be converted to type '{1}'</value>
   </data>
-  <data name="CannotIndexMultiDimArray" xml:space="preserve">
-    <value>Indexing of multi-dimensional arrays is not supported</value>
-  </data>
   <data name="CloseBracketOrCommaExpected" xml:space="preserve">
     <value>']' or ',' expected</value>
   </data>
@@ -159,6 +156,9 @@
   <data name="ExpressionExpected" xml:space="preserve">
     <value>Expression expected</value>
   </data>
+  <data name="ExpressionMustBeWritable" xml:space="preserve">
+    <value>Expression must be writable</value>
+  </data>
   <data name="FirstExprMustBeBool" xml:space="preserve">
     <value>The first expression must be of type 'Boolean'</value>
   </data>
@@ -173,6 +173,9 @@
   </data>
   <data name="IncompatibleOperands" xml:space="preserve">
     <value>Operator '{0}' incompatible with operand types '{1}' and '{2}'</value>
+  </data>
+  <data name="IncorrectNumberOfIndexes" xml:space="preserve">
+    <value>Incorrect number of indexes</value>
   </data>
   <data name="InvalidCharacter" xml:space="preserve">
     <value>Syntax error '{0}'</value>

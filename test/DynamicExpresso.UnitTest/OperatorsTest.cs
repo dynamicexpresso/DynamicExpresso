@@ -258,7 +258,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 				.SetVariable("x", 0);
 
-			Assert.Throws<ArgumentException>(() => target.Parse("x = 5"));
+			Assert.Throws<ParseException>(() => target.Parse("x = 5"));
 		}
 
 		[Test]

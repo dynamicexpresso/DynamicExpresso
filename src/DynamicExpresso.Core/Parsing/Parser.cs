@@ -83,11 +83,11 @@ namespace DynamicExpresso.Parsing
 			// MSDN C# "Operator precedence and associativity"
 			// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/
 
-			return ParseAssignement();
+			return ParseAssignment();
 		}
 
 		// = operator
-		private Expression ParseAssignement()
+		private Expression ParseAssignment()
 		{
 			var left = ParseConditional();
 			if (_token.id == TokenId.Equal)
@@ -95,10 +95,18 @@ namespace DynamicExpresso.Parsing
 				if (!_arguments.Settings.AssignmentOperators.HasFlag(AssignmentOperators.AssignmentEqual))
 					throw new AssignmentOperatorDisabledException("=", _token.pos);
 
+				if (!IsWritable(left))
+					throw CreateParseException(_token.pos, ErrorMessages.ExpressionMustBeWritable);
+
 				NextToken();
-				var right = ParseAssignement();
-				CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref left, ref right);
-				left = Expression.Assign(left, right);
+
+				var right = ParseAssignment();
+				var promoted = PromoteExpression(right, left.Type, true);
+				if (promoted == null)
+					throw CreateParseException(_token.pos, ErrorMessages.CannotConvertValue,
+						GetTypeName(right.Type), GetTypeName(left.Type));
+
+				left = Expression.Assign(left, promoted);
 			}
 			return left;
 		}
@@ -1088,12 +1096,17 @@ namespace DynamicExpresso.Parsing
 			NextToken();
 			if (expr.Type.IsArray)
 			{
-				if (expr.Type.GetArrayRank() != 1 || args.Length != 1)
-					throw CreateParseException(errorPos, ErrorMessages.CannotIndexMultiDimArray);
-				var index = PromoteExpression(args[0], typeof(int), true);
-				if (index == null)
-					throw CreateParseException(errorPos, ErrorMessages.InvalidIndex);
-				return Expression.ArrayIndex(expr, index);
+				if (expr.Type.GetArrayRank() != args.Length)
+					throw CreateParseException(errorPos, ErrorMessages.IncorrectNumberOfIndexes);
+
+				for (int i = 0; i < args.Length; i++)
+				{
+					args[i] = PromoteExpression(args[i], typeof(int), true);
+					if (args[i] == null)
+						throw CreateParseException(errorPos, ErrorMessages.InvalidIndex);
+				}
+
+				return Expression.ArrayAccess(expr, args);
 			}
 
 			var applicableMethods = FindIndexer(expr.Type, args);
@@ -1109,9 +1122,8 @@ namespace DynamicExpresso.Parsing
 						GetTypeName(expr.Type));
 			}
 
-			var method = applicableMethods[0];
-
-			return Expression.Call(expr, (MethodInfo)method.MethodBase, method.PromotedParameters);
+			var indexer = (IndexerData) applicableMethods[0];
+			return Expression.Property(expr, indexer.Indexer, indexer.PromotedParameters);
 		}
 
 		private static bool IsNullableType(Type type)
@@ -1266,10 +1278,9 @@ namespace DynamicExpresso.Parsing
 				MemberInfo[] members = t.GetDefaultMembers();
 				if (members.Length != 0)
 				{
-					IEnumerable<MethodBase> methods = members.
+					IEnumerable<MethodData> methods = members.
 							OfType<PropertyInfo>().
-							Select(p => (MethodBase)p.GetGetMethod()).
-							Where(m => m != null);
+							Select(p => (MethodData) new IndexerData(p));
 
 					var applicableMethods = FindBestMethod(methods, args);
 					if (applicableMethods.Length > 0)
@@ -1317,8 +1328,12 @@ namespace DynamicExpresso.Parsing
 
 		private static MethodData[] FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
 		{
+			return FindBestMethod(methods.Select(MethodData.Gen), args);
+		}
+
+		private static MethodData[] FindBestMethod(IEnumerable<MethodData> methods, Expression[] args)
+		{
 			var applicable = methods.
-					Select(m => new MethodData { MethodBase = m, Parameters = m.GetParameters() }).
 					Where(m => CheckIfMethodIsApplicableAndPrepareIt(m, args)).
 					ToArray();
 			if (applicable.Length > 1)
@@ -1417,7 +1432,7 @@ namespace DynamicExpresso.Parsing
 
 			method.PromotedParameters = promotedArgs.ToArray();
 
-			if (method.MethodBase.IsGenericMethodDefinition &&
+			if (method.MethodBase != null && method.MethodBase.IsGenericMethodDefinition &&
 					method.MethodBase is MethodInfo)
 			{
 				var methodInfo = (MethodInfo)method.MethodBase;
@@ -1623,6 +1638,30 @@ namespace DynamicExpresso.Parsing
 					if (st == tt) return true;
 					break;
 			}
+			return false;
+		}
+
+		private static bool IsWritable(Expression expression)
+		{
+			switch (expression.NodeType)
+			{
+				case ExpressionType.Index:
+					PropertyInfo indexer = ((IndexExpression)expression).Indexer;
+					return indexer == null || indexer.CanWrite;
+				case ExpressionType.MemberAccess:
+					MemberInfo member = ((MemberExpression)expression).Member;
+					var prop = member as PropertyInfo;
+					if (prop != null)
+						return prop.CanWrite;
+					else
+					{
+						var field = (FieldInfo)member;
+						return !(field.IsInitOnly || field.IsLiteral);
+					}
+				case ExpressionType.Parameter:
+					return true;
+			}
+
 			return false;
 		}
 
@@ -2156,6 +2195,43 @@ namespace DynamicExpresso.Parsing
 			public ParameterInfo[] Parameters;
 			public Expression[] PromotedParameters;
 			public bool HasParamsArray;
+
+			public static MethodData Gen(MethodBase method)
+			{
+				return new MethodData
+				{
+					MethodBase = method,
+					Parameters = method.GetParameters()
+				};
+			}
+		}
+
+		private class IndexerData : MethodData
+		{
+			public readonly PropertyInfo Indexer;
+
+			public IndexerData(PropertyInfo indexer)
+			{
+				Indexer = indexer;
+
+				var method = indexer.GetGetMethod();
+				if (method != null)
+				{
+					Parameters = method.GetParameters();
+				}
+				else
+				{
+					method = indexer.GetSetMethod();
+					Parameters = RemoveLast(method.GetParameters());
+				}
+			}
+
+			private static T[] RemoveLast<T>(T[] array)
+			{
+				T[] result = new T[array.Length - 1];
+				Array.Copy(array, 0, result, 0, result.Length);
+				return result;
+			}
 		}
 	}
 }
