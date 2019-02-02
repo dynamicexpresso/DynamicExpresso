@@ -1428,7 +1428,7 @@ namespace DynamicExpresso.Parsing
 			}
 
 			// Add default params, if needed.
-			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select(x => Expression.Constant(x.DefaultValue)));
+			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select(x => Expression.Constant(x.DefaultValue, x.ParameterType)));
 
 			method.PromotedParameters = promotedArgs.ToArray();
 
