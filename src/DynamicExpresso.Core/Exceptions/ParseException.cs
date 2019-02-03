@@ -12,10 +12,15 @@ namespace DynamicExpresso.Exceptions
 	#endif
 	public class ParseException : DynamicExpressoException
 	{
-		public ParseException(string message, int position)
+		protected ParseException(string message, int position)
 			: base(string.Format(ErrorMessages.Format, message, position)) 
 		{
 			Position = position;
+		}
+
+		internal static Exception Create(int pos, string format, params object[] args)
+		{
+			return new ParseException(string.Format(format, args), pos);
 		}
 
 		public int Position { get; private set; }
