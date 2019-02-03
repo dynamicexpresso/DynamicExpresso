@@ -394,6 +394,24 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.MethodWithOptionalParam(w, y, z), target.Eval("x.MethodWithOptionalParam(w, y, z)", parameters));
 		}
 
+		[Test]
+		public void Method_with_optional_null_param()
+		{
+			var target = new Interpreter();
+
+			var x = new MyTestService();
+			var y = "1";
+			var z = "2";
+			var parameters = new[] {
+				new Parameter("x", x.GetType(), x),
+				new Parameter("y", y.GetType(), y),
+				new Parameter("z", z.GetType(), z),
+			};
+
+			Assert.AreEqual(x.MethodWithOptionalNullParam(y), target.Eval("x.MethodWithOptionalNullParam(y)", parameters));
+			Assert.AreEqual(x.MethodWithOptionalNullParam(y, z), target.Eval("x.MethodWithOptionalNullParam(y, z)", parameters));
+		}
+
 		private interface MyTestInterface
 		{
 		}
@@ -454,6 +472,11 @@ namespace DynamicExpresso.UnitTest
 			public string MethodWithOptionalParam(string param1, string param2 = "2", string param3 = "3")
 			{
 				return string.Format("{0} {1} {2}", param1, param2, param3);
+			}
+
+			public string MethodWithOptionalNullParam(string param1, string param2 = null)
+			{
+				return string.Format("{0} {1}", param1, param2 ?? "(null)");
 			}
 
 			public DateTime this[int i]
