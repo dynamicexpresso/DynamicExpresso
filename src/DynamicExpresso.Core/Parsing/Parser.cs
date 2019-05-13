@@ -690,9 +690,7 @@ namespace DynamicExpresso.Parsing
 				return ParseNew();
 			if (_token.text == ParserConstants.KeywordTypeof)
 				return ParseTypeof();
-            if (_token.text == ParserConstants.KeywordHasVerbatim)
-                return ParseTypeof();
-
+            
 			if (_arguments.TryGetIdentifier(_token.text, out Expression keywordExpression))
 			{
 				NextToken();
