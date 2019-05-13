@@ -412,6 +412,14 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.MethodWithOptionalNullParam(y, z), target.Eval("x.MethodWithOptionalNullParam(y, z)", parameters));
 		}
 
+        [Test]
+        public void VerbatimStrings()
+        {
+            var target = new Interpreter();
+            Assert.AreEqual(@"Hello, world!", target.Eval(@"@""Hello, world!"""));
+
+        }
+
 		private interface MyTestInterface
 		{
 		}

@@ -482,6 +482,8 @@ namespace DynamicExpresso.Parsing
 					return ParseParenExpression();
 				case TokenId.End:
 					return Expression.Empty();
+                case TokenId.Verbatim:
+                    return ParseVerbatim();
 				default:
 					throw CreateParseException(_token.pos, ErrorMessages.ExpressionExpected);
 			}
@@ -500,6 +502,15 @@ namespace DynamicExpresso.Parsing
 			NextToken();
 			return CreateLiteral(s[0]);
 		}
+
+        private Expression ParseVerbatim()
+        {
+            NextToken();
+            var s = _token.text.Substring(1, _token.text.Length - 2);
+            s = EvalEscapeStringLiteral(s);
+            NextToken();
+            return CreateLiteral(s);
+        }
 
 		private Expression ParseStringLiteral()
 		{
@@ -679,6 +690,8 @@ namespace DynamicExpresso.Parsing
 				return ParseNew();
 			if (_token.text == ParserConstants.KeywordTypeof)
 				return ParseTypeof();
+            if (_token.text == ParserConstants.KeywordHasVerbatim)
+                return ParseTypeof();
 
 			if (_arguments.TryGetIdentifier(_token.text, out Expression keywordExpression))
 			{
@@ -2084,6 +2097,10 @@ namespace DynamicExpresso.Parsing
 					NextChar();
 					t = TokenId.Caret;
 					break;
+                case '@':
+                    NextChar();
+                    t = TokenId.Verbatim;
+                    break;
 				default:
 
 					if (char.IsLetter(_parseChar) || _parseChar == '@' || _parseChar == '_')

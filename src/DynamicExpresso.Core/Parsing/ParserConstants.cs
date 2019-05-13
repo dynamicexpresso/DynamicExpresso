@@ -10,6 +10,7 @@ namespace DynamicExpresso.Parsing
 		public const string KeywordIs = "is";
 		public const string KeywordNew = "new";
 		public const string KeywordTypeof = "typeof";
+        public const string KeywordHasVerbatim = "@";
 
 		public static readonly string[] ReservedKeywords = {
 				KeywordAs,
