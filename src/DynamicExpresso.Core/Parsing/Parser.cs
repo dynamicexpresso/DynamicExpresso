@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using DynamicExpresso.Exceptions;
 using DynamicExpresso.Resources;
+using static DynamicExpresso.Parsing.ParseSignatures;
 
 // Code based on the Dynamic.cs file of the DynamicQuery sample by Microsoft
 // http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx
@@ -1260,8 +1261,16 @@ namespace DynamicExpresso.Parsing
 				if (applicableMethods.Length > 0)
 					return applicableMethods;
 			}
+            if(!staticAccess && args.Length == 2)
+            {
+                var methodInfoNoNullable = typeof(ICustomSignature).GetMethod("F").MakeGenericMethod(GetUnderlyingType(args[0].Type), GetUnderlyingType(args[1].Type));
+                var methodInfoNullable = typeof(ICustomSignature).GetMethod("F").MakeGenericMethod(GetNullableType(args[0].Type), GetNullableType(args[1].Type));
+                var methods = FindBestMethod(new MethodBase[] { methodInfoNoNullable, methodInfoNullable }, args);
+                if (methods.Length > 0)
+                    return methods;
+            }
 
-			return new MethodData[0];
+            return new MethodData[0];
 		}
 
 		private MethodData[] FindExtensionMethods(string methodName, Expression[] args)
@@ -1271,7 +1280,20 @@ namespace DynamicExpresso.Parsing
 			return FindBestMethod(matchMethods, args);
 		}
 
-		private MethodData[] FindIndexer(Type type, Expression[] args)
+        private Type GetNullableType(Type type)
+        {
+            type = Nullable.GetUnderlyingType(type) ?? type; 
+            if (type.IsValueType)
+                return typeof(Nullable<>).MakeGenericType(type);
+            else
+                return type;
+        }
+        private Type GetUnderlyingType(Type type)
+        {
+            return Nullable.GetUnderlyingType(type) ?? type;
+        }
+
+        private MethodData[] FindIndexer(Type type, Expression[] args)
 		{
 			foreach (var t in SelfAndBaseTypes(type))
 			{
@@ -1759,7 +1781,8 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression GenerateEqual(Expression left, Expression right)
 		{
-			return Expression.Equal(left, right);
+
+            return Expression.Equal(left, right);
 		}
 
 		private static Expression GenerateNotEqual(Expression left, Expression right)

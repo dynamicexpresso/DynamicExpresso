@@ -79,6 +79,11 @@ namespace DynamicExpresso.Parsing
 			void F(bool? x);
 		}
 
+        public interface ICustomSignature 
+        {
+            void F<T1, T2>(T1 x, T2 y);
+        }
+
 		//interface IEnumerableSignatures
 		//{
 		//    void Where(bool predicate);
