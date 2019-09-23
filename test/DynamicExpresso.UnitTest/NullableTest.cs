@@ -1,5 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
+using static DynamicExpresso.UnitTest.TypesTest;
 // ReSharper disable ConvertNullableToShortForm
 // ReSharper disable PossibleNullReferenceException
 
@@ -227,5 +228,57 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(expected, lambda.Invoke());
 			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 		}
-	}
+
+        [Test]
+        public void Nullable_Enum_with_left_null()
+        {
+            MyCustomEnum? a = MyCustomEnum.Value1;
+            MyCustomEnum b = MyCustomEnum.Value1;
+
+            var interpreter = new Interpreter();
+            interpreter.SetVariable("a", a, typeof(MyCustomEnum));
+            interpreter.SetVariable("b", b, typeof(Nullable<MyCustomEnum>));
+            var expectedReturnType = typeof(bool);
+
+            var expected = a == b;
+            var lambda = interpreter.Parse("a == b");
+            Assert.AreEqual(expected, lambda.Invoke());
+            Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+        }
+
+        [Test]
+        public void Nullable_Enum_with_right_null()
+        {
+            MyCustomEnum a = MyCustomEnum.Value1;
+            MyCustomEnum? b = MyCustomEnum.Value1;
+
+            var interpreter = new Interpreter();
+            interpreter.SetVariable("a", a, typeof(Nullable<MyCustomEnum>));
+            interpreter.SetVariable("b", b, typeof(MyCustomEnum));
+            var expectedReturnType = typeof(bool);
+
+            var expected = a == b;
+            var lambda = interpreter.Parse("a == b");
+            Assert.AreEqual(expected, lambda.Invoke());
+            Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+        }
+
+
+        [Test]
+        public void Nullable_Enum_Nullable_Enum()
+        {
+            MyCustomEnum? a = MyCustomEnum.Value1;
+            MyCustomEnum? b = MyCustomEnum.Value1;
+
+            var interpreter = new Interpreter();
+            interpreter.SetVariable("a", a, typeof(Nullable<MyCustomEnum>));
+            interpreter.SetVariable("b", b, typeof(Nullable<MyCustomEnum>));
+            var expectedReturnType = typeof(bool);
+
+            var expected = a == b;
+            var lambda = interpreter.Parse("a == b");
+            Assert.AreEqual(expected, lambda.Invoke());
+            Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+        }
+    }
 }
