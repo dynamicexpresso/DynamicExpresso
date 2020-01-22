@@ -102,9 +102,19 @@ namespace DynamicExpresso.Parsing
 
 				var right = ParseAssignment();
 				var promoted = PromoteExpression(right, left.Type, true);
-				if (promoted == null)
-					throw CreateParseException(_token.pos, ErrorMessages.CannotConvertValue,
-						GetTypeName(right.Type), GetTypeName(left.Type));
+				if (promoted == null) 
+				{
+					try
+					{
+						promoted = Expression.ConvertChecked(right, left.Type);
+					}
+					catch (InvalidOperationException)
+					{
+						throw CreateParseException(_token.pos, ErrorMessages.CannotConvertValue,
+							GetTypeName(right.Type), GetTypeName(left.Type));
+					}
+
+				}
 
 				left = Expression.Assign(left, promoted);
 			}
