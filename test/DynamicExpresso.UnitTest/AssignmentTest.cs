@@ -20,7 +20,7 @@ namespace DynamicExpresso.UnitTest {
    [TestFixture]
    public class AssignmentTest {
       [Test]
-      public void ImplicitOperatorAssignment()
+      public void Can_Assign_Using_ImplicitCast()
       {
          var container = new Container();
 
