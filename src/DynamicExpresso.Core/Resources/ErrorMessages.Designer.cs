@@ -284,6 +284,16 @@ namespace DynamicExpresso.Resources {
                 return ResourceManager.GetString("InvalidIntegerLiteral", resourceCulture);
             }
         }
+         
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid integer literal &apos;{0}&apos;.
+        /// </summary>
+        internal static string InvalidHexLiteral
+        {
+            get {
+                return ResourceManager.GetString("InvalidHexLiteral", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to No applicable method exists in type &apos;{0}&apos;.

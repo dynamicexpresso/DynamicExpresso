@@ -1,16 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.UnitTest", "test\DynamicExpresso.UnitTest\DynamicExpresso.UnitTest.csproj", "{33157A92-C6B2-4A51-8262-1FEBFD6558BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicExpresso.UnitTest", "test\DynamicExpresso.UnitTest\DynamicExpresso.UnitTest.csproj", "{33157A92-C6B2-4A51-8262-1FEBFD6558BE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{4088369E-AB00-4333-A56A-27E05D3767B1}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.Core", "src\DynamicExpresso.Core\DynamicExpresso.Core.csproj", "{C6B7C0D2-B84A-4307-9C61-D95613DB564D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DynamicExpresso.Core", "src\DynamicExpresso.Core\DynamicExpresso.Core.csproj", "{C6B7C0D2-B84A-4307-9C61-D95613DB564D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinFroemTest", "WinFroemTest\WinFroemTest.csproj", "{64005C89-E9AF-4871-BDB1-CF0BA56E3275}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +28,10 @@ Global
 		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6B7C0D2-B84A-4307-9C61-D95613DB564D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64005C89-E9AF-4871-BDB1-CF0BA56E3275}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64005C89-E9AF-4871-BDB1-CF0BA56E3275}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64005C89-E9AF-4871-BDB1-CF0BA56E3275}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64005C89-E9AF-4871-BDB1-CF0BA56E3275}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

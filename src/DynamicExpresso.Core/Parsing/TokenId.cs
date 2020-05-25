@@ -36,7 +36,8 @@
 		Bar,
 		DoubleBar,
 		Equal,
-		Caret
+		Caret,
+		HexLiteral,
 	}
 
 }
