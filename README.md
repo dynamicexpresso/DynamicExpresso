@@ -1,7 +1,8 @@
 # Dynamic Expresso
 
 [![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
-[![Build Status](https://public-davideicardi.visualstudio.com/dynamic-expresso/_apis/build/status/dynamic-expresso-CI?branchName=master)](https://public-davideicardi.visualstudio.com/dynamic-expresso/_build/latest?definitionId=4&branchName=master)
+[![Build Status](https://public-davideicardi.visualstudio.com/dynamic-expresso/_apis/build/status/dynamic-expresso-CI?branchName=master)](https://public-davideicardi.visualstudio.com/dynamic-expresso/_build?definitionId=4
+)
 
 Available platforms: .NET Core 2.0, .NET 4.5, .NET 4.6.1
 
