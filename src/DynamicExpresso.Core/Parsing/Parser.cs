@@ -2198,19 +2198,14 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression GenerateNullableTypeConversion(Expression expr)
 		{
-			if(expr.Type.IsGenericType && expr.Type.GetGenericTypeDefinition() == typeof(Nullable<>))
+			var exprType = expr.Type;
+
+			if (exprType.IsGenericType && exprType.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
 				return expr;
             }
 
 			var conversionType = typeof(Nullable<>).MakeGenericType(expr.Type);
-
-			var exprType = expr.Type;
-			if (exprType == conversionType)
-			{
-				return expr;
-			}
-
 			return Expression.ConvertChecked(expr, conversionType);
 		}
 
