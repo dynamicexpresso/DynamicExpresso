@@ -238,7 +238,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(DateTimeOffset));
 			interpreter.SetVariable("b", b, typeof(Nullable<DateTimeOffset>));
-			interpreter.SetVariable("c", c, typeof(Nullable<DateTimeOffset>));
+			interpreter.SetVariable("c", c, typeof(DateTimeOffset));
 			var expectedReturnType = typeof(bool);
 
 			var expected = a < b;
