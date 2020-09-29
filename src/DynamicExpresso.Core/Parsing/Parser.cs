@@ -263,7 +263,7 @@ namespace DynamicExpresso.Parsing
 				//}
 
 				if((IsNullableType(left.Type) || IsNullableType(right.Type)) && (GetNonNullableType(left.Type) == right.Type || GetNonNullableType(right.Type) == left.Type))
-                {
+				{
 					left = GenerateNullableTypeConversion(left);
 					right = GenerateNullableTypeConversion(right);
 				}
@@ -2201,9 +2201,9 @@ namespace DynamicExpresso.Parsing
 			var exprType = expr.Type;
 
 			if (exprType.IsGenericType && exprType.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
+			{
 				return expr;
-            }
+			}
 
 			var conversionType = typeof(Nullable<>).MakeGenericType(expr.Type);
 			return Expression.ConvertChecked(expr, conversionType);
