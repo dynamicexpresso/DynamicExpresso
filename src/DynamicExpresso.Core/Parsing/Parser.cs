@@ -262,6 +262,12 @@ namespace DynamicExpresso.Parsing
 				//			op.text, ref left, ref right, op.pos);
 				//}
 
+				if((IsNullableType(left.Type) || IsNullableType(right.Type)) && (GetNonNullableType(left.Type) == right.Type || GetNonNullableType(right.Type) == left.Type))
+				{
+					left = GenerateNullableTypeConversion(left);
+					right = GenerateNullableTypeConversion(right);
+				}
+
 				CheckAndPromoteOperands(
 					isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
 					ref left,
@@ -1800,6 +1806,7 @@ namespace DynamicExpresso.Parsing
 						Expression.Constant(0)
 				);
 			}
+
 			return Expression.LessThan(left, right);
 		}
 
@@ -2188,6 +2195,20 @@ namespace DynamicExpresso.Parsing
 		{
 			return new ParseException(string.Format(format, args), pos);
 		}
+
+		private static Expression GenerateNullableTypeConversion(Expression expr)
+		{
+			var exprType = expr.Type;
+
+			if (exprType.IsGenericType && exprType.GetGenericTypeDefinition() == typeof(Nullable<>))
+			{
+				return expr;
+			}
+
+			var conversionType = typeof(Nullable<>).MakeGenericType(expr.Type);
+			return Expression.ConvertChecked(expr, conversionType);
+		}
+
 
 		private class MethodData
 		{

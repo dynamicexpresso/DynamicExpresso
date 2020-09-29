@@ -227,5 +227,49 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(expected, lambda.Invoke());
 			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 		}
+
+		[Test]
+		public void NullableDateTimeOffset_DatetimeOffset()
+		{
+			var a = DateTimeOffset.Now;
+			DateTimeOffset? b = DateTimeOffset.Now.AddDays(1);
+			var c = b.Value;
+
+			var interpreter = new Interpreter();
+			interpreter.SetVariable("a", a, typeof(DateTimeOffset));
+			interpreter.SetVariable("b", b, typeof(Nullable<DateTimeOffset>));
+			interpreter.SetVariable("c", c, typeof(DateTimeOffset));
+			var expectedReturnType = typeof(bool);
+
+			var expected = a < b;
+			var lambda = interpreter.Parse("a < b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			expected = a > b;
+			lambda = interpreter.Parse("a > b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			expected = a == b;
+			lambda = interpreter.Parse("a == b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			expected = a != b;
+			lambda = interpreter.Parse("a != b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			expected = b == c;
+			lambda = interpreter.Parse("b == b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			expected = b != c;
+			lambda = interpreter.Parse("b != c");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+		}
 	}
 }
