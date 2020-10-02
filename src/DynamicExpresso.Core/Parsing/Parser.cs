@@ -1037,9 +1037,6 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression ParseDynamicProperty(Type type, Expression instance, string propertyOrFieldName)
 		{
-#if NETSTANDARD2_0
-			throw new NotImplementedException("Dynamic types are not supported in .NET Standard build");
-#else
 			var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
 				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
 				propertyOrFieldName,
@@ -1048,14 +1045,10 @@ namespace DynamicExpresso.Parsing
 				);
 
 			return Expression.Dynamic(binder, typeof(object), instance);
-#endif
 		}
 
 		private static Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
 		{
-#if NETSTANDARD2_0
-			throw new NotImplementedException("Dynamic types are not supported in .NET Standard build");
-#else
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
 			var binderM = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
@@ -1067,7 +1060,6 @@ namespace DynamicExpresso.Parsing
 				);
 
 			return Expression.Dynamic(binderM, typeof(object), argsDynamic);
-#endif
 		}
 
 		private Expression[] ParseArgumentList()
