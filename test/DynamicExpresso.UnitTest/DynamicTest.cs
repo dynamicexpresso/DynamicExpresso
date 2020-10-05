@@ -6,9 +6,6 @@ using System.Linq.Expressions;
 
 namespace DynamicExpresso.UnitTest
 {
-#if NETCOREAPP2_0
-	[Ignore("Not supported on dotnet core")]
-#endif
 	[TestFixture]
 	public class DynamicTest
 	{
