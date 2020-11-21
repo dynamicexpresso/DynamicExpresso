@@ -83,7 +83,14 @@ namespace DynamicExpresso.Parsing
 			// MSDN C# "Operator precedence and associativity"
 			// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/
 
-			return ParseAssignment();
+			try
+			{
+				return ParseAssignment();
+			}
+			catch (InvalidOperationException ex)
+			{
+				throw WrapWithParseException(_token.pos, ErrorMessages.InvalidOperation, ex);
+			}
 		}
 
 		// = operator
@@ -1242,12 +1249,6 @@ namespace DynamicExpresso.Parsing
 
 		private MethodData[] FindMethods(Type type, string methodName, bool staticAccess, Expression[] args)
 		{
-			//var exactMethod = type.GetMethod(methodName, args.Select(p => p.Type).ToArray());
-			//if (exactMethod != null)
-			//{
-			//	return new MethodData[] { new MethodData(){ MethodBase = exactMethod, Parameters = exactMethod.GetParameters(), PromotedParameters = args} };
-			//}
-
 			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
 					(staticAccess ? BindingFlags.Static : BindingFlags.Instance) | _bindingCase;
 			foreach (var t in SelfAndBaseTypes(type))
@@ -2181,6 +2182,11 @@ namespace DynamicExpresso.Parsing
 		{
 			if (_token.id != t)
 				throw CreateParseException(_token.pos, ErrorMessages.SyntaxError);
+		}
+
+		private static Exception WrapWithParseException(int pos, string msg, Exception ex)
+		{
+			return new ParseException(msg, pos, ex);
 		}
 
 		private static Exception CreateParseException(int pos, string format, params object[] args)

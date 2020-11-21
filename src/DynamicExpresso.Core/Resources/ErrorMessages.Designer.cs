@@ -401,5 +401,14 @@ namespace DynamicExpresso.Resources {
                 return ResourceManager.GetString("UnterminatedStringLiteral", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unterminated string literal.
+        /// </summary>
+        internal static string InvalidOperation {
+            get {
+                return ResourceManager.GetString("InvalidOperation", resourceCulture);
+            }
+        }
     }
 }
