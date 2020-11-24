@@ -231,4 +231,7 @@
   <data name="UnterminatedStringLiteral" xml:space="preserve">
     <value>Unterminated string literal</value>
   </data>
+  <data name="InvalidOperation" xml:space="preserve">
+    <value>Invalid Operation</value>
+  </data>
 </root>

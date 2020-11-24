@@ -591,7 +591,8 @@ namespace DynamicExpresso.UnitTest
 
 			var y = "5";
 
-			Assert.Throws<InvalidOperationException>(() => target.Parse("x == y", new Parameter("y", y)));
+			var ex = Assert.Throws<ParseException>(() => target.Parse("x == y", new Parameter("y", y)));
+			Assert.IsInstanceOf<InvalidOperationException>(ex.InnerException);
 		}
 
 		[Test]
@@ -604,7 +605,8 @@ namespace DynamicExpresso.UnitTest
 
 			var y = 5;
 
-			Assert.Throws<InvalidOperationException>(() => target.Parse("x + y", new Parameter("y", y)));
+			var ex = Assert.Throws<ParseException>(() => target.Parse("x + y", new Parameter("y", y)));
+			Assert.IsInstanceOf<InvalidOperationException>(ex.InnerException);
 		}
 
 		[Test]
@@ -615,7 +617,8 @@ namespace DynamicExpresso.UnitTest
 			var x = new TypeWithoutOverloadedBinaryOperators(3);
 			target.SetVariable("x", x);
 
-			Assert.Throws<InvalidOperationException>(() => target.Parse("!x"));
+			var ex = Assert.Throws<ParseException>(() => target.Parse("!x"));
+			Assert.IsInstanceOf<InvalidOperationException>(ex.InnerException);
 		}
 
 		private struct TypeWithoutOverloadedBinaryOperators

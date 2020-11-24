@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using DynamicExpresso.Exceptions;
+using NUnit.Framework;
 using System.Linq;
 
 // ReSharper disable SpecifyACultureInStringConversionExplicitly
@@ -78,6 +79,15 @@ namespace DynamicExpresso.UnitTest
 			var result = interpreter.Eval("a + b");
 
 			Assert.AreEqual(result, 2.2);
+		}
+
+		[Test]
+		public void GitHub_Issue_128()
+		{
+			var target = new Interpreter();
+
+			Assert.Throws<ParseException>(() => target.Eval("1+1*"));
+			Assert.Throws<ParseException>(() => target.Eval("1+1*'a'"));
 		}
 	}
 }

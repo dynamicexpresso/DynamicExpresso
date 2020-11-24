@@ -18,6 +18,12 @@ namespace DynamicExpresso.Exceptions
 			Position = position;
 		}
 
+		public ParseException(string message, int position, Exception innerException)
+			: base(string.Format(ErrorMessages.Format, message, position), innerException)
+		{
+			Position = position;
+		}
+
 		public int Position { get; private set; }
 
 		#if !NETSTANDARD1_6
