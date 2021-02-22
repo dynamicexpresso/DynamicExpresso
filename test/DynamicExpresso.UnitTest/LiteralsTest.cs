@@ -50,6 +50,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(.201, target.Eval(".201"));
 			Assert.AreEqual(-.201, target.Eval("-.201"));
 			Assert.AreEqual(+.201, target.Eval("+.201"));
+			Assert.AreEqual(2e+201, target.Eval("2e+201"));
 
 			// f suffix (single)
 			Assert.AreEqual(4f, target.Eval("4f"));
