@@ -27,7 +27,7 @@ namespace DynamicExpresso.Parsing
 		private const NumberStyles ParseLiteralNumberStyle = NumberStyles.AllowLeadingSign;
 		private const NumberStyles ParseLiteralUnsignedNumberStyle = NumberStyles.AllowLeadingSign;
 		private const NumberStyles ParseLiteralDecimalNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
-        private const NumberStyles ParseLiteralDoubleNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent;
+		private const NumberStyles ParseLiteralDoubleNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent;
 		private static readonly CultureInfo ParseCulture = CultureInfo.InvariantCulture;
 
 		private readonly ParserArguments _arguments;
