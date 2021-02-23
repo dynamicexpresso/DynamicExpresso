@@ -51,6 +51,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(-.201, target.Eval("-.201"));
 			Assert.AreEqual(+.201, target.Eval("+.201"));
 			Assert.AreEqual(2e+201, target.Eval("2e+201"));
+			Assert.AreEqual(2e+20, target.Eval("2e+20"));
 
 			// f suffix (single)
 			Assert.AreEqual(4f, target.Eval("4f"));
@@ -315,7 +316,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual((45.5).GetType(), target.Eval("45.5").GetType());
 			Assert.AreEqual((45.8f).GetType(), target.Eval("45.8f").GetType());
 			Assert.AreEqual((45.232M).GetType(), target.Eval("45.232M").GetType());
-
+			Assert.AreEqual((2e+201).GetType(), target.Eval("2e+201").GetType());
 		}
 
 		[Test]
