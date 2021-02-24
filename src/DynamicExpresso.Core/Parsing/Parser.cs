@@ -27,6 +27,7 @@ namespace DynamicExpresso.Parsing
 		private const NumberStyles ParseLiteralNumberStyle = NumberStyles.AllowLeadingSign;
 		private const NumberStyles ParseLiteralUnsignedNumberStyle = NumberStyles.AllowLeadingSign;
 		private const NumberStyles ParseLiteralDecimalNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
+		private const NumberStyles ParseLiteralDoubleNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent;
 		private static readonly CultureInfo ParseCulture = CultureInfo.InvariantCulture;
 
 		private readonly ParserArguments _arguments;
@@ -640,7 +641,7 @@ namespace DynamicExpresso.Parsing
 			}
 			else
 			{
-				if (double.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out double d))
+				if (double.TryParse(text, ParseLiteralDoubleNumberStyle, ParseCulture, out double d))
 					value = d;
 			}
 
