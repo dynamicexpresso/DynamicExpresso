@@ -234,4 +234,10 @@
   <data name="InvalidOperation" xml:space="preserve">
     <value>Invalid Operation</value>
   </data>
+  <data name="AmbiguousBinaryOperatorInvocation" xml:space="preserve">
+    <value>Ambiguous invocation of user defined operator '{0}' in types '{1}' and '{2}'</value>
+  </data>
+  <data name="AmbiguousUnaryOperatorInvocation" xml:space="preserve">
+    <value>Ambiguous invocation of user defined operator '{0}' in type '{1}'</value>
+  </data>
 </root>
