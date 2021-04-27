@@ -581,6 +581,55 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
+		private class DerivedClassWithOverloadedBinaryOperators : ClassWithOverloadedBinaryOperators
+		{
+			public DerivedClassWithOverloadedBinaryOperators(int value) : base(value)
+			{
+			}
+		}
+
+		[Test]
+		public void Can_use_overloaded_operators_on_derived_class()
+		{
+			var target = new Interpreter();
+
+			var x = new DerivedClassWithOverloadedBinaryOperators(3);
+			target.SetVariable("x", x);
+
+			string y = "5";
+			Assert.IsFalse(x == y);
+			Assert.IsFalse(target.Eval<bool>("x == y", new Parameter("y", y)));
+
+			y = "3";
+			Assert.IsTrue(x == y);
+			Assert.IsTrue(target.Eval<bool>("x == y", new Parameter("y", y)));
+
+			Assert.IsFalse(target.Eval<bool>("x == \"4\""));
+			Assert.IsTrue(target.Eval<bool>("x == \"3\""));
+
+			Assert.IsTrue(!x == "-3");
+			Assert.IsTrue(target.Eval<bool>("!x == \"-3\""));
+
+			var z = new DerivedClassWithOverloadedBinaryOperators(10);
+			Assert.IsTrue((x + z) == "13");
+			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
+		}
+
+		[Test]
+		public void Can_mix_overloaded_operators()
+		{
+			var target = new Interpreter();
+
+			var x = new ClassWithOverloadedBinaryOperators(3);
+			target.SetVariable("x", x);
+
+			// ensure we don't trigger an ambiguous operator exception
+			var z = new DerivedClassWithOverloadedBinaryOperators(10);
+			Assert.IsTrue((x + z) == "13");
+			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
+		}
+
+
 		[Test]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_equal_operator()
 		{
