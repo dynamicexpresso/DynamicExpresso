@@ -1937,6 +1937,10 @@ namespace DynamicExpresso.Parsing
 				// we found a matching user defined operator on either type, but it might be the same method
 				if (userDefinedOperator != null && rightOperator != null && !ReferenceEquals(userDefinedOperator.MethodBase, rightOperator.MethodBase))
 					throw error;
+
+				// we didn't find an operator on the left type, but we found one on the right type
+				if (userDefinedOperator == null && rightOperator != null)
+					userDefinedOperator = rightOperator;
 			}
 
 			return userDefinedOperator;
