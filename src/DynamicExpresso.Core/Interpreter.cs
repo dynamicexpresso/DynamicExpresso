@@ -145,7 +145,19 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetFunction(string name, Delegate value)
 		{
-			return SetVariable(name, value);
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException(nameof(name));
+
+			if (_settings.Identifiers.TryGetValue(name, out var identifier) && identifier is FunctionIdentifier fIdentifier)
+			{
+				fIdentifier.AddOverload(value);
+			}
+			else
+			{
+				SetIdentifier(new FunctionIdentifier(name, value));
+			}
+
+			return this;
 		}
 
 		/// <summary>

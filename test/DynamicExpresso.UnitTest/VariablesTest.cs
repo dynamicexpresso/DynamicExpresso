@@ -1,6 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 using System.Linq.Expressions;
+using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -137,5 +138,48 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
 		}
 
+		[Test]
+		public void Keywords_with_invalid_delegate_call()
+		{
+			Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
+			var target = new Interpreter()
+									.SetFunction("pow", pow);
+
+			Assert.Throws<ParseException>(() => target.Eval("pow(3)"));
+		}
+
+		[Test]
+		public void Keywords_with_overloaded_delegates()
+		{
+			Func<decimal, decimal> roundFunction1 = (userNumber) => Math.Round(userNumber);
+			Func<decimal, int, decimal> roundFunction2 = (userNumber, decimals) => Math.Round(userNumber, decimals);
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("ROUND", roundFunction1);
+			interpreter.SetFunction("ROUND", roundFunction2);
+
+			Assert.AreEqual(3.13M, interpreter.Eval("ROUND(3.12789M, 2)"));
+			Assert.AreEqual(3M, interpreter.Eval("ROUND(3.12789M)"));
+		}
+
+		[Test]
+		public void Keywords_with_ambiguous_delegates()
+		{
+			Func<string, string> ambiguous1 = (val) => val;
+			Func<int?, string> ambiguous2 = (val) => "integer";
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("MyFunc", ambiguous1);
+			interpreter.SetFunction("MyFunc", ambiguous2);
+
+			// ambiguous call: null can either be a string or an object
+			// note: if there's no ambiguous exception, it means that the resolution
+			// lifted the parameters from the string overload, which prevented the int? overload 
+			// from being considered
+			Assert.Throws<ParseException>(() => interpreter.Eval("MyFunc(null)"));
+
+			// call resolved to the string overload
+			Assert.AreEqual("test", interpreter.Eval("MyFunc(\"test\")"));
+		}
 	}
 }

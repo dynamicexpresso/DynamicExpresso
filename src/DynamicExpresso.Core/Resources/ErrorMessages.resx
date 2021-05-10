@@ -240,4 +240,7 @@
   <data name="AmbiguousUnaryOperatorInvocation" xml:space="preserve">
     <value>Ambiguous invocation of user defined operator '{0}' in type '{1}'</value>
   </data>
+  <data name="AmbiguousDelegateInvocation" xml:space="preserve">
+    <value>Ambiguous invocation of delegate (multiple overloads found)</value>
+  </data>
 </root>
