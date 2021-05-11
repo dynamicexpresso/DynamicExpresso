@@ -39,9 +39,15 @@ namespace DynamicExpresso
 	/// </summary>
 	internal class MethodGroupExpression : Expression
 	{
-		private readonly List<Expression> _overloads = new List<Expression>();
+		private readonly List<Delegate> _overloads = new List<Delegate>();
 
-		internal IReadOnlyCollection<Expression> Overloads => _overloads.AsReadOnly();
+		internal IReadOnlyCollection<Delegate> Overloads
+		{
+			get
+			{
+				return _overloads.AsReadOnly();
+			}
+		}
 
 		internal MethodGroupExpression(Delegate overload)
 		{
@@ -50,7 +56,7 @@ namespace DynamicExpresso
 
 		internal void AddOverload(Delegate overload)
 		{
-			_overloads.Add(Constant(overload));
+			_overloads.Add(overload);
 		}
 	}
 }

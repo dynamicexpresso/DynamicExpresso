@@ -2,6 +2,8 @@
 using NUnit.Framework;
 using System.Linq.Expressions;
 using DynamicExpresso.Exceptions;
+using System.Linq;
+using System.Reflection;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -180,6 +182,26 @@ namespace DynamicExpresso.UnitTest
 
 			// call resolved to the string overload
 			Assert.AreEqual("test", interpreter.Eval("MyFunc(\"test\")"));
+		}
+
+		[Test]
+		public void Set_function_With_Object_Params()
+		{
+			var target = new Interpreter();
+
+			// import static method with params array 
+			var methodInfo = typeof(VariablesTest).GetMethod("Sum", BindingFlags.Static | BindingFlags.NonPublic);
+			var types = methodInfo.GetParameters().Select(p => p.ParameterType).Concat(new[] { methodInfo.ReturnType });
+			var del = methodInfo.CreateDelegate(Expression.GetDelegateType(types.ToArray()));
+			target.SetFunction(methodInfo.Name, del);
+
+			// the imported Sum function can be called with any parameters
+			Assert.AreEqual(6, target.Eval<int>("Sum(1, 2, 3)"));
+		}
+
+		internal static int Sum(params int[] integers)
+		{
+			return integers.Sum();
 		}
 	}
 }

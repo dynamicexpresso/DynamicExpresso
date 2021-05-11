@@ -862,13 +862,11 @@ namespace DynamicExpresso.Parsing
 			var args = ParseArgumentList();
 
 			// find all the delegates that can be used with the provided arguments
-			// note: we don't use PrepareDelegateInvoke because it modifies the argument list, 
-			// and it will prevent the algorithm from finding ambiguous calls
 			var candidates = methodGroup.Overloads
 				.Select(_ => new
 				{
-					DelegateExp = _,
-					ApplicableMethods = FindMethods(_.Type, "Invoke", false, args)
+					DelegateExp = Expression.Constant(_),
+					ApplicableMethods = FindBestMethod(new[] { _.Method }, args)
 				})
 				.Where(_ => _.ApplicableMethods.Length == 1)
 				.ToList();
@@ -1965,6 +1963,10 @@ namespace DynamicExpresso.Parsing
 				// we found a matching user defined operator on either type, but it might be the same method
 				if (userDefinedOperator != null && rightOperator != null && !ReferenceEquals(userDefinedOperator.MethodBase, rightOperator.MethodBase))
 					throw error;
+
+				// we didn't find an operator on the left type, but we found one on the right type
+				if (userDefinedOperator == null && rightOperator != null)
+					userDefinedOperator = rightOperator;
 			}
 
 			return userDefinedOperator;
