@@ -861,24 +861,18 @@ namespace DynamicExpresso.Parsing
 		{
 			var args = ParseArgumentList();
 
-			// find all the delegates that can be used with the provided arguments
-			var candidates = methodGroup.Overloads
-				.Select(_ => new
-				{
-					DelegateExp = Expression.Constant(_),
-					ApplicableMethods = FindBestMethod(new[] { _.Method }, args)
-				})
-				.Where(_ => _.ApplicableMethods.Length == 1)
-				.ToList();
+			// find the best delegates that can be used with the provided arguments
+			var applicableMethods = FindBestMethod(methodGroup.Overloads.Select(_ => _.Method), args);
 
-			if (candidates.Count == 0)
+			if (applicableMethods.Length == 0)
 				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
 
-			if (candidates.Count > 1)
+			if (applicableMethods.Length > 1)
 				throw CreateParseException(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
 
-			var candidate = candidates[0];
-			return Expression.Invoke(candidate.DelegateExp, candidate.ApplicableMethods[0].PromotedParameters);
+			var applicableMethod = applicableMethods[0];
+			var delegateExp = Expression.Constant(methodGroup.Overloads.Single(_ => _.Method == applicableMethod.MethodBase));
+			return Expression.Invoke(delegateExp, applicableMethod.PromotedParameters);
 		}
 
 		private Expression ParseDelegateInvocation(Expression delegateExp, int errorPos)

@@ -185,6 +185,21 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Keywords_with_non_ambiguous_delegates()
+		{
+			Func<double, string> ambiguous1 = (val) => "double";
+			Func<int, string> ambiguous2 = (val) => "integer";
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("MyFunc", ambiguous1);
+			interpreter.SetFunction("MyFunc", ambiguous2);
+
+			// there should be no ambiguous exception: int can implicitly be converted to double, 
+			// but there's a perfect match 
+			Assert.AreEqual("integer", interpreter.Eval("MyFunc(5)"));
+		}
+
+		[Test]
 		public void Set_function_With_Object_Params()
 		{
 			var target = new Interpreter();
