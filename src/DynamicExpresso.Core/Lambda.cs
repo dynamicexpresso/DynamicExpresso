@@ -8,6 +8,11 @@ using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso
 {
+	/// <summary>Dummy type used to indicate we want the generic type to be inferred</summary>
+	internal class InferredType
+	{
+	}
+
 	/// <summary>
 	/// Represents a lambda expression that can be invoked. This class is thread safe.
 	/// </summary>
@@ -154,6 +159,20 @@ namespace DynamicExpresso
 		public Expression<TDelegate> LambdaExpression<TDelegate>()
 		{
 			return Expression.Lambda<TDelegate>(_expression, DeclaredParameters.Select(p => p.Expression).ToArray());
+		}
+
+		internal LambdaExpression LambdaExpression(Type delegateType)
+		{
+			var types = delegateType.GetGenericArguments();
+			for (var i = 0; i < types.Length; i++)
+			{
+				if (types[i] == typeof(InferredType))
+					types[i] = _expression.Type;
+			}
+
+			var genericType = delegateType.GetGenericTypeDefinition();
+			var inferredDelegateType = genericType.MakeGenericType(types);
+			return Expression.Lambda(inferredDelegateType, _expression, DeclaredParameters.Select(p => p.Expression).ToArray());
 		}
 	}
 }

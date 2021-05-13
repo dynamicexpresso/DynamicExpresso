@@ -365,9 +365,20 @@ namespace DynamicExpresso
 			return lambda.LambdaExpression<TDelegate>();
 		}
 
+		internal LambdaExpression ParseAsExpression(Type delegateType, string expressionText, params string[] parametersNames)
+		{
+			var lambda = ParseAs(delegateType, expressionText, parametersNames);
+			return lambda.LambdaExpression(delegateType);
+		}
+
 		public Lambda ParseAs<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			var delegateInfo = ReflectionExtensions.GetDelegateInfo(typeof(TDelegate), parametersNames);
+			return ParseAs(typeof(TDelegate), expressionText, parametersNames); 
+		}
+
+		internal Lambda ParseAs(Type delegateType, string expressionText, params string[] parametersNames)
+		{
+			var delegateInfo = ReflectionExtensions.GetDelegateInfo(delegateType, parametersNames);
 
 			return ParseAsLambda(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
 		}

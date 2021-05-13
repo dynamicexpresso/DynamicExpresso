@@ -70,7 +70,7 @@ namespace DynamicExpresso.Parsing
 			int errorPos = _token.pos;
 			var expression = ParseExpressionSegment();
 
-			if (returnType != typeof(void))
+			if (returnType != typeof(void) && returnType != typeof(InferredType))
 			{
 				return GenerateConversion(expression, returnType, errorPos);
 			}
@@ -84,6 +84,10 @@ namespace DynamicExpresso.Parsing
 			// MSDN C# "Operator precedence and associativity"
 			// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/
 
+			var lambdaExpr = ParseLambdaExpression();
+			if (lambdaExpr != null)
+				return lambdaExpr;
+
 			try
 			{
 				return ParseAssignment();
@@ -92,6 +96,100 @@ namespace DynamicExpresso.Parsing
 			{
 				throw WrapWithParseException(_token.pos, ErrorMessages.InvalidOperation, ex);
 			}
+		}
+
+		// => operator
+		private Expression ParseLambdaExpression()
+		{
+			// in case the expression is not a lambda, we have to restart parsing
+			var originalPos = _token.pos;
+
+			try
+			{
+				var parameters = ParseLambdaParameterList();
+				ValidateToken(TokenId.LambdaArrow);
+
+				var startExpr = _parsePosition;
+
+				var parenCount = 0;
+				var inLambdaBody = true;
+				while (inLambdaBody)
+				{
+					NextToken();
+					if (_token.id == TokenId.OpenParen)
+						parenCount++;
+					if (_token.id == TokenId.CloseParen)
+						parenCount--;
+
+					// lambda is a function parameter
+					if (parenCount == 0 && _token.id == TokenId.Comma)
+						inLambdaBody = false;
+
+					// body closure
+					if (parenCount < 0)
+						inLambdaBody = false;
+				}
+
+				var lambdaBodyExp = _expressionText.Substring(startExpr, _parsePosition - 1 - startExpr);
+				return new InterpreterExpression(lambdaBodyExp, parameters);
+			}
+			catch (Exception)
+			{
+				// not a lambda, return to the saved position
+				SetTextPos(originalPos);
+				NextToken();
+
+				return null;
+			}
+		}
+
+		private Parameter[] ParseLambdaParameterList()
+		{
+			var hasOpenParen = _token.id == TokenId.OpenParen;
+			if (hasOpenParen)
+				NextToken();
+
+			var parameters = ParseLambdaParameters();
+			if (hasOpenParen)
+			{
+				ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+				NextToken();
+			}
+
+			return parameters;
+		}
+
+		private Parameter[] ParseLambdaParameters()
+		{
+			var argList = new List<Parameter>();
+			while (true)
+			{
+				argList.Add(ParseLambdaParameter());
+				if (_token.id != TokenId.Comma) break;
+				NextToken();
+			}
+			return argList.ToArray();
+		}
+
+		private Parameter ParseLambdaParameter()
+		{
+			ValidateToken(TokenId.Identifier);
+			var name = _token.text;
+
+			if (_arguments.TryGetKnownType(name, out var type))
+			{
+				type = ParseFullType(type);
+
+				ValidateToken(TokenId.Identifier);
+				name = _token.text;
+			}
+			else
+			{
+				type = typeof(object);
+			}
+
+			NextToken();
+			return new Parameter(name, type);
 		}
 
 		// = operator
@@ -757,7 +855,7 @@ namespace DynamicExpresso.Parsing
 			{
 				return ParseTypeKeyword(knownType);
 			}
-
+			
 			// Working context implementation
 			//if (it != null)
 			//    return ParseMemberAccess(null, it);
@@ -896,7 +994,8 @@ namespace DynamicExpresso.Parsing
 			return true;
 		}
 
-		private Expression ParseTypeKeyword(Type type)
+		// we found a known type identifier, check if it has some modifiers
+		private Type ParseFullType(Type type)
 		{
 			var errorPos = _token.pos;
 			NextToken();
@@ -907,6 +1006,13 @@ namespace DynamicExpresso.Parsing
 				type = typeof(Nullable<>).MakeGenericType(type);
 				NextToken();
 			}
+
+			return type;
+		}
+
+		private Expression ParseTypeKeyword(Type type)
+		{
+			type = ParseFullType(type);
 
 			//if (token.id == TokenId.OpenParen)
 			//{
@@ -1500,20 +1606,52 @@ namespace DynamicExpresso.Parsing
 			if (method.MethodBase != null && method.MethodBase.IsGenericMethodDefinition &&
 					method.MethodBase is MethodInfo)
 			{
-				var methodInfo = (MethodInfo)method.MethodBase;
+				var genericMethod = MakeGenericMethod(method);
+				if (genericMethod == null)
+					return false;
 
+				// we have all the type information we can get, update interpreter expressions and evaluate them
+				var actualMethodParameters = genericMethod.GetParameters();
+				for (var i = 0; i < method.PromotedParameters.Length; i++)
+				{
+					if (method.PromotedParameters[i] is InterpreterExpression ie)
+					{
+						var actualParamInfo = actualMethodParameters[i];
+						var paramType = actualParamInfo.ParameterType;
+						method.PromotedParameters[i] = ie.EvalAs(paramType);
+
+						// we have inferred all types, update the method definition
+						genericMethod = MakeGenericMethod(method);
+					}
+				}
+
+				method.MethodBase = genericMethod;
+			}
+
+			return true;
+		}
+
+		private static MethodInfo MakeGenericMethod(MethodData method)
+		{
+			try
+			{
+				var methodInfo = (MethodInfo)method.MethodBase;
 				var actualGenericArgs = ExtractActualGenericArguments(
 					method.Parameters.Select(p => p.ParameterType).ToArray(),
 					method.PromotedParameters.Select(p => p.Type).ToArray());
 
 				var genericArgs = methodInfo.GetGenericArguments()
-					.Select(p => actualGenericArgs[p.Name])
+					.Select(p => actualGenericArgs.TryGetValue(p.Name, out var typ) ? typ : typeof(InferredType))
 					.ToArray();
 
-				method.MethodBase = methodInfo.MakeGenericMethod(genericArgs);
+				return methodInfo.MakeGenericMethod(genericArgs);
 			}
-
-			return true;
+			catch (IndexOutOfRangeException)
+			{
+				// can happen if a parameter is a generic type, and the promoted parameter 
+				// doesn't have the same number of generic parameters
+				return null;
+			}
 		}
 
 		private static Dictionary<string, Type> ExtractActualGenericArguments(
@@ -1529,7 +1667,8 @@ namespace DynamicExpresso.Parsing
 
 				if (requestedType.IsGenericParameter)
 				{
-					extractedGenericTypes[requestedType.Name] = actualType;
+					if (!actualType.IsGenericParameter)
+						extractedGenericTypes[requestedType.Name] = actualType;
 				}
 				else if (requestedType.ContainsGenericParameters)
 				{
@@ -1554,6 +1693,11 @@ namespace DynamicExpresso.Parsing
 					if (!type.IsValueType || IsNullableType(type))
 						return Expression.Constant(null, type);
 				}
+			}
+
+			if (expr is InterpreterExpression)
+			{
+				return expr;
 			}
 
 			if (type.IsGenericType && !IsNumericType(type))
@@ -1786,6 +1930,12 @@ namespace DynamicExpresso.Parsing
 				var otherMethodParam = otherMethod.Parameters[i];
 				var methodParamType = GetParameterType(methodParam);
 				var otherMethodParamType = GetParameterType(otherMethodParam);
+				
+				if (methodParamType.IsGenericType)
+					methodParamType = method.PromotedParameters[i].Type;
+				if (otherMethodParamType.IsGenericType)
+					otherMethodParamType = otherMethod.PromotedParameters[i].Type;
+				
 				var c = CompareConversions(args[i].Type, methodParamType, otherMethodParamType);
 				if (c < 0)
 					return false;
@@ -2133,6 +2283,11 @@ namespace DynamicExpresso.Parsing
 						NextChar();
 						t = TokenId.DoubleEqual;
 					}
+					else if (_parseChar == '>')
+					{
+						NextChar();
+						t = TokenId.LambdaArrow;
+					}
 					else
 					{
 						t = TokenId.Equal;
@@ -2348,6 +2503,38 @@ namespace DynamicExpresso.Parsing
 			return Expression.ConvertChecked(expr, conversionType);
 		}
 
+		/// <summary>
+		/// Expression that wraps over an interpreter. This is used when parsing a lambda expression 
+		/// definition, because we don't know the parameters type before resolution.
+		/// </summary>
+		private class InterpreterExpression : Expression
+		{
+			private readonly Interpreter _interpreter = new Interpreter();
+			private readonly string _expressionText;
+			private readonly IList<Parameter> _parameters;
+			private Type _type;
+
+			public InterpreterExpression(string expressionText, params Parameter[] parameters)
+			{
+				_expressionText = expressionText;
+				_parameters = parameters;
+
+				// prior to evaluation, we don't know the generic arguments types
+				_type = typeof(Func<>).Assembly.GetType($"System.Func`{parameters.Length + 1}");
+			}
+
+			public override Type Type
+			{
+				get { return _type; }
+			}
+
+			internal LambdaExpression EvalAs(Type delegateType)
+			{
+				var lambdaExpr = _interpreter.ParseAsExpression(delegateType, _expressionText, _parameters.Select(p => p.Name).ToArray());
+				_type = lambdaExpr.Type;
+				return lambdaExpr;
+			}
+		}
 
 		private class MethodData
 		{
