@@ -101,6 +101,17 @@ namespace DynamicExpresso.Resources {
         }
 
         /// <summary>
+		/// Looks up a localized string similar to Ambiguous invocation of delegate (multiple overloads found).
+        /// </summary>
+        internal static string AmbiguousDelegateInvocation
+		{
+			get
+			{
+				return ResourceManager.GetString("AmbiguousDelegateInvocation", resourceCulture);
+			}
+		}
+
+        /// <summary>
         ///   Looks up a localized string similar to Argument list incompatible with delegate expression.
         /// </summary>
         internal static string ArgsIncompatibleWithDelegate {

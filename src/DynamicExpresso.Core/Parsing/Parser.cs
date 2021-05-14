@@ -506,9 +506,11 @@ namespace DynamicExpresso.Parsing
 				}
 				else if (_token.id == TokenId.OpenParen)
 				{
-					var lambda = expr as LambdaExpression;
-					if (lambda != null)
+					if (expr is LambdaExpression lambda)
 						return ParseLambdaInvocation(lambda, tokenPos);
+
+					if (expr is MethodGroupExpression methodGroup)
+						return ParseMethodGroupInvocation(methodGroup, tokenPos);
 
 					if (typeof(Delegate).IsAssignableFrom(expr.Type))
 						expr = ParseDelegateInvocation(expr, tokenPos);
@@ -853,6 +855,24 @@ namespace DynamicExpresso.Parsing
 				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithLambda);
 
 			return Expression.Invoke(lambda, args);
+		}
+
+		private Expression ParseMethodGroupInvocation(MethodGroupExpression methodGroup, int errorPos)
+		{
+			var args = ParseArgumentList();
+
+			// find the best delegates that can be used with the provided arguments
+			var applicableMethods = FindBestMethod(methodGroup.Overloads.Select(_ => _.Method), args);
+
+			if (applicableMethods.Length == 0)
+				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
+
+			if (applicableMethods.Length > 1)
+				throw CreateParseException(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
+
+			var applicableMethod = applicableMethods[0];
+			var delegateExp = Expression.Constant(methodGroup.Overloads.Single(_ => _.Method == applicableMethod.MethodBase));
+			return Expression.Invoke(delegateExp, applicableMethod.PromotedParameters);
 		}
 
 		private Expression ParseDelegateInvocation(Expression delegateExp, int errorPos)
