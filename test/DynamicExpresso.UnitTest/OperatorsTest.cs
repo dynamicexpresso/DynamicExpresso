@@ -567,6 +567,16 @@ namespace DynamicExpresso.UnitTest
 				return new ClassWithOverloadedBinaryOperators(-instance._value);
 			}
 
+			public static ClassWithOverloadedBinaryOperators operator *(ClassWithOverloadedBinaryOperators left, int right)
+			{
+				return new ClassWithOverloadedBinaryOperators(left._value * right);
+			}
+
+			public static ClassWithOverloadedBinaryOperators operator *(int left, ClassWithOverloadedBinaryOperators right)
+			{
+				return new ClassWithOverloadedBinaryOperators(left * right._value);
+			}
+
 			public override bool Equals(object obj)
 			{
 				if (obj == null)
@@ -613,6 +623,13 @@ namespace DynamicExpresso.UnitTest
 			var z = new DerivedClassWithOverloadedBinaryOperators(10);
 			Assert.IsTrue((x + z) == "13");
 			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
+
+			Assert.IsTrue((x * 4) == "12");
+			Assert.IsTrue(target.Eval<bool>("(x * 4) == \"12\""));
+
+			// ensure a user defined operator can be found if it's on the right side operand's type
+			Assert.IsTrue((4 * x) == "12");
+			Assert.IsTrue(target.Eval<bool>("(4 * x) == \"12\""));
 		}
 
 		[Test]
