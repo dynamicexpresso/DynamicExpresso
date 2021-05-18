@@ -111,6 +111,12 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			Assert.Throws<ParseException>(() => target.Eval("45.5M456F"));
+			Assert.Throws<ParseException>(() => target.Eval("45df"));
+			Assert.Throws<ParseException>(() => target.Eval("45md"));
+			Assert.Throws<ParseException>(() => target.Eval("45uu"));
+			Assert.Throws<ParseException>(() => target.Eval("45ud"));
+			Assert.Throws<ParseException>(() => target.Eval("45du"));
+			Assert.Throws<ParseException>(() => target.Eval("45ull"));
 		}
 
 		[Test]
@@ -119,6 +125,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			Assert.Throws<ParseException>(() => target.Eval("45.5x"));
+			Assert.Throws<ParseException>(() => target.Eval("45G"));
 		}
 
 		[Test]
