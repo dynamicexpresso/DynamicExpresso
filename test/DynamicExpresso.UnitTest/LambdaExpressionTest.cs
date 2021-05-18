@@ -59,8 +59,8 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(new[] { "AWESOME" }, results);
 		}
 
-		[Test,Ignore("SelectMany not resolved")]
-		public void Select_many()
+		[Test]
+		public void Select_many_str()
 		{
 			var target = new Interpreter();
 			var list = new List<string> { "ab", "cd" };
@@ -70,6 +70,23 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(4, results.Count());
 			Assert.AreEqual(new[] { 'a', 'b', 'c', 'd' }, results);
+		}
+
+		[Test]
+		public void Select_many()
+		{
+			var target = new Interpreter();
+			var list = new[]{
+				new { Strings = new[] { "ab", "cd" } },
+				new { Strings = new[] { "ef", "gh" } },
+			};
+
+			target.SetVariable("myList", list);
+
+			var results = target.Eval<IEnumerable<string>>("myList.SelectMany(obj => obj.Strings)");
+
+			Assert.AreEqual(4, results.Count());
+			Assert.AreEqual(new[] { "ab", "cd", "ef", "gh" }, results);
 		}
 
 		[Test]

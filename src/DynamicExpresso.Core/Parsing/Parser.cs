@@ -1070,6 +1070,24 @@ namespace DynamicExpresso.Parsing
 			//	return Expression.Convert(expr, type);
 			//}
 
+			// generic type was not fully resolved; try to find a type in the inheritance hierarchy
+			// that matches the generic type definition
+			if (type.ContainsGenericParameters)
+			{
+				var typeDef = type.GetGenericTypeDefinition();
+				var interfaces = exprType.GetInterfaces().ToList();
+				for (var nextType = exprType.BaseType; nextType != null; nextType = nextType.BaseType)
+				{
+					interfaces.Add(nextType);
+				}
+
+				foreach (var inherited in interfaces)
+				{
+					if (inherited.IsGenericType && inherited.GetGenericTypeDefinition() == typeDef)
+						type = inherited;
+				}
+			}
+
 			try
 			{
 				return Expression.ConvertChecked(expr, type);
@@ -1672,10 +1690,17 @@ namespace DynamicExpresso.Parsing
 				}
 				else if (requestedType.ContainsGenericParameters)
 				{
-					var innerGenericTypes = ExtractActualGenericArguments(requestedType.GetGenericArguments(), actualType.GetGenericArguments());
+					if (actualType.IsGenericParameter)
+					{
+						extractedGenericTypes[actualType.Name] = requestedType;
+					}
+					else
+					{
+						var innerGenericTypes = ExtractActualGenericArguments(requestedType.GetGenericArguments(), actualType.GetGenericArguments());
 
-					foreach (var innerGenericType in innerGenericTypes)
-						extractedGenericTypes[innerGenericType.Key] = innerGenericType.Value;
+						foreach (var innerGenericType in innerGenericTypes)
+							extractedGenericTypes[innerGenericType.Key] = innerGenericType.Value;
+					}
 				}
 			}
 
