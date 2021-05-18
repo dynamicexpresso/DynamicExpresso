@@ -1635,8 +1635,11 @@ namespace DynamicExpresso.Parsing
 					if (method.PromotedParameters[i] is InterpreterExpression ie)
 					{
 						var actualParamInfo = actualMethodParameters[i];
-						var paramType = actualParamInfo.ParameterType;
-						method.PromotedParameters[i] = ie.EvalAs(paramType);
+						var delegateType = actualParamInfo.ParameterType;
+						if (delegateType.GetGenericArguments().Length != ie.Parameters.Count + 1)
+							return false;
+
+						method.PromotedParameters[i] = ie.EvalAs(delegateType);
 
 						// we have inferred all types, update the method definition
 						genericMethod = MakeGenericMethod(method);
@@ -2557,6 +2560,11 @@ namespace DynamicExpresso.Parsing
 
 				// prior to evaluation, we don't know the generic arguments types
 				_type = typeof(Func<>).Assembly.GetType($"System.Func`{parameters.Length + 1}");
+			}
+
+			public IList<Parameter> Parameters
+			{
+				get { return _parameters; }
 			}
 
 			public override Type Type

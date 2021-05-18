@@ -151,5 +151,44 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(3, results.Count());
 			Assert.AreEqual(new[] { 4, 5, 6 }, results);
 		}
+
+		[Test]
+		public void Lambda_with_multiple_params()
+		{
+			var target = new Interpreter();
+			var list = new List<string> { "aaaaa", "bbbb", "ccc", "ddd" };
+			target.SetVariable("myList", list);
+
+			var results = target.Eval<IEnumerable<string>>("myList.TakeWhile((item, idx) => idx <= 2 && item.Length >= 3)");
+
+			Assert.AreEqual(3, results.Count());
+			Assert.AreEqual(new[] { "aaaaa", "bbbb", "ccc" }, results);
+		}
+
+		[Test]
+		public void Two_lambda_parameters()
+		{
+			var target = new Interpreter();
+			var list = new List<string> { "aaaaa", "bbbb", "ccc", "ddd" };
+			target.SetVariable("myList", list);
+			var results = target.Eval<Dictionary<string, int>>("myList.ToDictionary(str => str, str => str.Length)");
+
+			Assert.AreEqual(4, results.Count);
+			Assert.AreEqual(list.ToDictionary(str => str, str => str.Length), results);
+		}
+
+		[Test]
+		public void Zip()
+		{
+			var target = new Interpreter();
+			var strList = new List<string> { "aa", "bb", "cc", "dd" };
+			var intList = new List<int> { 1, 2, 3 };
+			target.SetVariable("strList", strList);
+			target.SetVariable("intList", intList);
+			var results = target.Eval<IEnumerable<string>>("strList.Zip(intList, (str, i) => str + i)");
+			
+			Assert.AreEqual(3, results.Count());
+			Assert.AreEqual(strList.Zip(intList, (str, i) => str + i), results);
+		}
 	}
 }
