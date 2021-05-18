@@ -73,6 +73,19 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Nested_lambda()
+		{
+			var target = new Interpreter();
+			var list = new List<string> { "ab", "cd" };
+			target.SetVariable("myList", list);
+
+			var results = target.Eval<IEnumerable<char>>("myList.Select(str => str.SingleOrDefault(c => c == 'd')).Where(c => c != '\0')");
+
+			Assert.AreEqual(1, results.Count());
+			Assert.AreEqual(new[] { 'd' }, results);
+		}
+
+		[Test]
 		public void Sum()
 		{
 			var target = new Interpreter();
