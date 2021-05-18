@@ -119,6 +119,8 @@ namespace DynamicExpresso.Parsing
 				while (inLambdaBody)
 				{
 					NextToken();
+					if (_token.id == TokenId.End)
+						inLambdaBody = false;
 					if (_token.id == TokenId.OpenParen)
 						parenCount++;
 					if (_token.id == TokenId.CloseParen)
@@ -133,7 +135,7 @@ namespace DynamicExpresso.Parsing
 						inLambdaBody = false;
 				}
 
-				var lambdaBodyExp = _expressionText.Substring(startExpr, _parsePosition - 1 - startExpr);
+				var lambdaBodyExp = _expressionText.Substring(startExpr, _token.pos - startExpr);
 				return new InterpreterExpression(_arguments.Settings, lambdaBodyExp, parameters);
 			}
 			catch (Exception)
@@ -1093,6 +1095,11 @@ namespace DynamicExpresso.Parsing
 
 			try
 			{
+				if (expr is InterpreterExpression ie)
+				{
+					return ie.EvalAs(type);
+				}
+
 				return Expression.ConvertChecked(expr, type);
 			}
 			catch (InvalidOperationException)

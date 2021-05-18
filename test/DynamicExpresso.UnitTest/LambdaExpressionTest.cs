@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -59,6 +60,23 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(1, results.Count());
 			Assert.AreEqual(new[] { "AWESOME" }, results);
+		}
+
+		[Test]
+		public void Lambda_expression_to_delegate()
+		{
+			var target = new Interpreter(_options);
+			var lambda = target.Eval<Func<string, string>>("str => str.ToUpper()");
+			Assert.AreEqual("TEST", lambda.Invoke("test"));
+		}
+
+		[Test]
+		public void Lambda_expression_to_delegate_multi_params()
+		{
+			var target = new Interpreter(_options);
+			target.SetVariable("increment", 3);
+			var lambda = target.Eval<Func<int, string, string>>("(i, str) => str.ToUpper() + (i + increment)");
+			Assert.AreEqual("TEST8", lambda.Invoke(5, "test"));
 		}
 
 		[Test]
