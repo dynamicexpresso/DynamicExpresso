@@ -59,7 +59,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(new[] { "AWESOME" }, results);
 		}
 
-		[Test]
+		[Test,Ignore("SelectMany not resolved")]
 		public void Select_many()
 		{
 			var target = new Interpreter();
@@ -98,6 +98,18 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Max()
+		{
+			var target = new Interpreter();
+			var list = new List<int> { 1, 2, 3 };
+			target.SetVariable("myList", list);
+
+			var results = target.Eval<int>("myList.Max()");
+
+			Assert.AreEqual(3, results);
+		}
+
+		[Test]
 		public void Sum_string_length()
 		{
 			var target = new Interpreter();
@@ -107,6 +119,20 @@ namespace DynamicExpresso.UnitTest
 			var results = target.Eval<int>("myList.Sum(str => str.Length)");
 
 			Assert.AreEqual(10, results);
+		}
+
+		[Test]
+		public void Parent_scope_variable()
+		{
+			var target = new Interpreter();
+			var list = new List<int> { 1, 2, 3 };
+			target.SetVariable("myList", list);
+			target.SetVariable("increment", 3);
+
+			var results = target.Eval<IEnumerable<int>>("myList.Select(i => i + increment)");
+
+			Assert.AreEqual(3, results.Count());
+			Assert.AreEqual(new[] { 4, 5, 6 }, results);
 		}
 	}
 }

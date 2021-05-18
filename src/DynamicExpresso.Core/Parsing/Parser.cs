@@ -131,7 +131,7 @@ namespace DynamicExpresso.Parsing
 				}
 
 				var lambdaBodyExp = _expressionText.Substring(startExpr, _parsePosition - 1 - startExpr);
-				return new InterpreterExpression(lambdaBodyExp, parameters);
+				return new InterpreterExpression(_arguments.Settings, lambdaBodyExp, parameters);
 			}
 			catch (Exception)
 			{
@@ -1930,10 +1930,13 @@ namespace DynamicExpresso.Parsing
 				var otherMethodParam = otherMethod.Parameters[i];
 				var methodParamType = GetParameterType(methodParam);
 				var otherMethodParamType = GetParameterType(otherMethodParam);
-				
-				if (methodParamType.IsGenericType)
+
+				var promoteMethodParam = methodParamType.IsGenericType && methodParamType.ContainsGenericParameters;
+				var promoteOtherMethodParam = otherMethodParamType.IsGenericType && otherMethodParamType.ContainsGenericParameters;
+
+				if (promoteMethodParam) 
 					methodParamType = method.PromotedParameters[i].Type;
-				if (otherMethodParamType.IsGenericType)
+				if (promoteOtherMethodParam)
 					otherMethodParamType = otherMethod.PromotedParameters[i].Type;
 				
 				var c = CompareConversions(args[i].Type, methodParamType, otherMethodParamType);
@@ -1941,6 +1944,13 @@ namespace DynamicExpresso.Parsing
 					return false;
 				if (c > 0)
 					better = true;
+
+				// no conversion to param types is better: favor the one without promotion
+				if (!promoteMethodParam && promoteOtherMethodParam)
+					better = true;
+				if (promoteMethodParam && !promoteOtherMethodParam)
+					return false;
+
 				if (HasParamsArrayType(methodParam) || HasParamsArrayType(otherMethodParam))
 					break;
 			}
@@ -2509,13 +2519,14 @@ namespace DynamicExpresso.Parsing
 		/// </summary>
 		private class InterpreterExpression : Expression
 		{
-			private readonly Interpreter _interpreter = new Interpreter();
+			private readonly Interpreter _interpreter;
 			private readonly string _expressionText;
 			private readonly IList<Parameter> _parameters;
 			private Type _type;
 
-			public InterpreterExpression(string expressionText, params Parameter[] parameters)
+			public InterpreterExpression(ParserSettings parentSettings, string expressionText, params Parameter[] parameters)
 			{
+				_interpreter = new Interpreter(parentSettings);
 				_expressionText = expressionText;
 				_parameters = parameters;
 

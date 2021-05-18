@@ -55,6 +55,14 @@ namespace DynamicExpresso
 
 			_visitors.Add(new DisableReflectionVisitor());
 		}
+
+		/// <summary>
+		/// Create a new interpreter with the settings copied from another interpreter
+		/// </summary>
+		internal Interpreter(ParserSettings settings)
+		{
+			_settings = settings;
+		}
 		#endregion
 
 		#region Properties
