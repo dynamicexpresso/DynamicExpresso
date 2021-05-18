@@ -25,6 +25,8 @@ namespace DynamicExpresso.Parsing
 			_extensionMethods = new HashSet<MethodInfo>();
 
 			AssignmentOperators = AssignmentOperators.All;
+
+			LambdaExpressions = false;
 		}
 
 		public IDictionary<string, ReferenceType> KnownTypes
@@ -61,6 +63,12 @@ namespace DynamicExpresso.Parsing
 		}
 
 		public AssignmentOperators AssignmentOperators
+		{
+			get;
+			set;
+		}
+
+		public bool LambdaExpressions
 		{
 			get;
 			set;

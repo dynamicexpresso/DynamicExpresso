@@ -23,6 +23,10 @@ namespace DynamicExpresso
 		/// </summary>
 		CaseInsensitive = 8,
 		/// <summary>
+		/// Enable parsing of lambda expressions. Disabled by default, because it has a slight performance cost.
+		/// </summary>
+		LambdaExpressions = 16,
+		/// <summary>
 		/// Load all default configurations: PrimitiveTypes + SystemKeywords + CommonTypes
 		/// </summary>
 		Default = PrimitiveTypes | SystemKeywords | CommonTypes,

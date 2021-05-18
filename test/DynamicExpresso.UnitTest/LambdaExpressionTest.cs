@@ -7,10 +7,12 @@ namespace DynamicExpresso.UnitTest
 	[TestFixture]
 	public class LambdaExpressionTest
 	{
+		private const InterpreterOptions _options = InterpreterOptions.Default | InterpreterOptions.LambdaExpressions;
+
 		[Test]
 		public void Where_inferred_parameter_type()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<int> { 1, 10, 19, 21 };
 			target.SetVariable("myList", list);
 
@@ -23,7 +25,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Where_explicit_parameter_type()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<int> { 1, 10, 19, 21 };
 			target.SetVariable("myList", list);
 
@@ -36,7 +38,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Select_inferred_return_type()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<int> { 1, 10, 19, 21 };
 			target.SetVariable("myList", list);
 
@@ -49,7 +51,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Where_select()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<string> { "this", "is", "awesome" };
 			target.SetVariable("myList", list);
 
@@ -62,7 +64,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Select_many_str()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<string> { "ab", "cd" };
 			target.SetVariable("myList", list);
 
@@ -75,7 +77,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Select_many()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new[]{
 				new { Strings = new[] { "ab", "cd" } },
 				new { Strings = new[] { "ef", "gh" } },
@@ -92,7 +94,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Nested_lambda()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<string> { "ab", "cd" };
 			target.SetVariable("myList", list);
 
@@ -105,7 +107,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Sum()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<int> { 1, 2, 3 };
 			target.SetVariable("myList", list);
 
@@ -117,7 +119,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Max()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<int> { 1, 2, 3 };
 			target.SetVariable("myList", list);
 
@@ -129,7 +131,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Sum_string_length()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<string> { "abc", "dfe", "test" };
 			target.SetVariable("myList", list);
 
@@ -141,7 +143,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Parent_scope_variable()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<int> { 1, 2, 3 };
 			target.SetVariable("myList", list);
 			target.SetVariable("increment", 3);
@@ -155,7 +157,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Lambda_with_multiple_params()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<string> { "aaaaa", "bbbb", "ccc", "ddd" };
 			target.SetVariable("myList", list);
 
@@ -168,7 +170,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Two_lambda_parameters()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var list = new List<string> { "aaaaa", "bbbb", "ccc", "ddd" };
 			target.SetVariable("myList", list);
 			var results = target.Eval<Dictionary<string, int>>("myList.ToDictionary(str => str, str => str.Length)");
@@ -180,7 +182,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Zip()
 		{
-			var target = new Interpreter();
+			var target = new Interpreter(_options);
 			var strList = new List<string> { "aa", "bb", "cc", "dd" };
 			var intList = new List<int> { 1, 2, 3 };
 			target.SetVariable("strList", strList);
