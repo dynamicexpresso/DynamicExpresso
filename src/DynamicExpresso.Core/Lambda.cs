@@ -7,11 +7,6 @@ using System.Runtime.ExceptionServices;
 
 namespace DynamicExpresso
 {
-	/// <summary>Dummy type used to indicate we want the generic type to be inferred</summary>
-	internal class InferredType
-	{
-	}
-
 	/// <summary>
 	/// Represents a lambda expression that can be invoked. This class is thread safe.
 	/// </summary>

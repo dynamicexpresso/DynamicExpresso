@@ -70,7 +70,7 @@ namespace DynamicExpresso.Parsing
 			int errorPos = _token.pos;
 			var expression = ParseExpressionSegment();
 
-			if (returnType != typeof(void) && returnType != typeof(InferredType))
+			if (returnType != typeof(void) && returnType != typeof(object))
 			{
 				return GenerateConversion(expression, returnType, errorPos);
 			}
@@ -1659,7 +1659,7 @@ namespace DynamicExpresso.Parsing
 					method.PromotedParameters.Select(p => p.Type).ToArray());
 
 				var genericArgs = methodInfo.GetGenericArguments()
-					.Select(p => actualGenericArgs.TryGetValue(p.Name, out var typ) ? typ : typeof(InferredType))
+					.Select(p => actualGenericArgs.TryGetValue(p.Name, out var typ) ? typ : typeof(object))
 					.ToArray();
 
 				return methodInfo.MakeGenericMethod(genericArgs);
