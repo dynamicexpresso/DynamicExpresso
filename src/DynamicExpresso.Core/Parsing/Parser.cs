@@ -838,13 +838,62 @@ namespace DynamicExpresso.Parsing
 				throw new UnknownIdentifierException(_token.text, _token.pos);
 
 			NextToken();
-			var args = ParseArgumentList();
+
+			var args = new Expression[0];
+			if (_token.id == TokenId.OpenParen)
+				args = ParseArgumentList();
+			else
+			{
+				// no aguments: expect an object initializer
+				ValidateToken(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected);
+			}
 
 			var constructor = newType.GetConstructor(args.Select(p => p.Type).ToArray());
 			if (constructor == null)
 				throw CreateParseException(_token.pos, ErrorMessages.NoApplicableConstructor, newType);
 
-			return Expression.MemberInit(Expression.New(constructor, args));
+			var memberBindings = new MemberBinding[0];
+			if (_token.id == TokenId.OpenCurlyBracket)
+				memberBindings = ParseObjectInitializer(newType);
+
+			return Expression.MemberInit(Expression.New(constructor, args), memberBindings);
+		}
+
+        private MemberBinding[] ParseObjectInitializer(Type newType)
+		{
+			ValidateToken(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected);
+			NextToken();
+			var bindings = ParseMemberInitializerList(newType);
+			ValidateToken(TokenId.CloseCurlyBracket, ErrorMessages.CloseCurlyBracketExpected);
+			NextToken();
+			return bindings;
+		}
+
+		private MemberBinding[] ParseMemberInitializerList(Type newType)
+		{
+			var bindingList = new List<MemberBinding>();
+			while (true)
+			{
+				if (_token.id == TokenId.CloseCurlyBracket) break;
+				ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
+
+				var propertyOrFieldName = _token.text;
+				var member = FindPropertyOrField(newType, propertyOrFieldName, false);
+				if (member == null)
+					throw CreateParseException(_token.pos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(newType));
+
+				NextToken();
+
+				ValidateToken(TokenId.Equal, ErrorMessages.EqualExpected);
+				NextToken();
+
+				var value = ParseExpressionSegment();
+				bindingList.Add(Expression.Bind(member, value));
+
+				if (_token.id != TokenId.Comma) break;
+				NextToken();
+			}
+			return bindingList.ToArray();
 		}
 
 		private Expression ParseLambdaInvocation(LambdaExpression lambda, int errorPos)
@@ -2172,6 +2221,14 @@ namespace DynamicExpresso.Parsing
 				case ']':
 					NextChar();
 					t = TokenId.CloseBracket;
+					break;
+				case '{':
+					NextChar();
+					t = TokenId.OpenCurlyBracket;
+					break;
+				case '}':
+					NextChar();
+					t = TokenId.CloseCurlyBracket;
 					break;
 				case '|':
 					NextChar();

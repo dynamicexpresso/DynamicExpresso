@@ -50,5 +50,73 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.Throws<UnknownIdentifierException>(() => target.Parse("new unkkeyword()"));
 		}
+
+		[Test]
+		public void Empty_object_initializer()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(MyClass));
+
+			Assert.AreEqual(new MyClass() { }, target.Eval("new MyClass() {}"));
+			Assert.AreEqual(new MyClass("test") { }, target.Eval("new MyClass(\"test\") {}"));
+			Assert.AreEqual(new MyClass { }, target.Eval("new MyClass{}"));
+		}
+
+		[Test]
+		public void Object_initializer()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(MyClass));
+
+			// each member initializer can end with a comma, even if there's nothing afterwards
+			Assert.AreEqual(new MyClass { StrProp = "test", }, target.Eval("new MyClass { StrProp = \"test\", }"));
+			Assert.AreEqual(new MyClass { StrProp = "test" }, target.Eval("new MyClass { StrProp = \"test\" }"));
+
+			Assert.AreEqual(new MyClass("test") { IntField = 5, }, target.Eval("new MyClass(\"test\") { IntField = 5, }"));
+			Assert.AreEqual(new MyClass("test") { IntField = 5 }, target.Eval("new MyClass(\"test\") { IntField = 5 }"));
+
+			Assert.AreEqual(new MyClass() { StrProp = "test", IntField = 5, }, target.Eval("new MyClass() { StrProp = \"test\", IntField = 5, }"));
+			Assert.AreEqual(new MyClass() { StrProp = "test", IntField = 5 }, target.Eval("new MyClass() { StrProp = \"test\", IntField = 5 }"));
+		}
+
+		[Test]
+		public void Object_initializer_syntax_error()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(MyClass));
+
+			Assert.Throws<ParseException>(() => target.Parse("new MyClass() { StrProp }"));
+			Assert.Throws<ParseException>(() => target.Parse("new MyClass() { StrProp = }"));
+			Assert.Throws<ArgumentException>(() => target.Parse("new MyClass() { StrProp = 5 }")); // type mismatch
+			Assert.Throws<ArgumentException>(() => target.Parse("new MyClass() { ReadOnlyProp = 5 }")); // read only prop
+			Assert.Throws<ParseException>(() => target.Parse("new MyClass() { UnkProp = 5 }")); // unknown property
+		}
+
+		private class MyClass
+		{
+			public int IntField;
+			public string StrProp { get; set; }
+			public int ReadOnlyProp { get; }
+
+			public MyClass()
+            {
+            }
+
+			public MyClass(string strValue)
+			{
+				StrProp = strValue;
+			}
+
+			public override bool Equals(object obj)
+            {
+                return Equals(obj as MyClass);
+            }
+			public bool Equals(MyClass p)
+			{
+				if (p is null) return false;
+				if (ReferenceEquals(this, p)) return true;
+				return IntField == p.IntField && StrProp == p.StrProp && ReadOnlyProp == p.ReadOnlyProp;
+			}
+		}
 	}
 }
