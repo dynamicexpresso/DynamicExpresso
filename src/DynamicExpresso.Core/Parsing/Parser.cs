@@ -639,6 +639,23 @@ namespace DynamicExpresso.Parsing
 		{
 			ValidateToken(TokenId.IntegerLiteral);
 			var text = _token.text;
+
+			var isUnsigned = false;
+			var isLong = false;
+			var numberEnd = text.Length - 1;
+			for (; numberEnd >= 0; numberEnd--)
+			{
+				var chr = text[numberEnd];
+				if (chr == 'U' || chr == 'u')
+					isUnsigned = true;
+				else if (chr == 'L' || chr == 'l')
+					isLong = true;
+				else
+					break;
+			}
+
+			text = text.Substring(0, numberEnd + 1);
+
 			if (text[0] != '-')
 			{
 				if (!ulong.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out ulong value))
@@ -646,11 +663,11 @@ namespace DynamicExpresso.Parsing
 
 				NextToken();
 
-				if (value <= int.MaxValue)
+				if (!isUnsigned && !isLong && value <= int.MaxValue)
 					return CreateLiteral((int)value);
-				if (value <= uint.MaxValue)
+				if (!isLong && value <= uint.MaxValue)
 					return CreateLiteral((uint)value);
-				if (value <= long.MaxValue)
+				if (!isUnsigned && value <= long.MaxValue)
 					return CreateLiteral((long)value);
 
 				return CreateLiteral(value);
@@ -662,7 +679,7 @@ namespace DynamicExpresso.Parsing
 
 				NextToken();
 
-				if (value >= int.MinValue && value <= int.MaxValue)
+				if (!isLong && value >= int.MinValue && value <= int.MaxValue)
 					return CreateLiteral((int)value);
 
 				return CreateLiteral(value);
@@ -688,6 +705,9 @@ namespace DynamicExpresso.Parsing
 			}
 			else
 			{
+				if (last == 'D' || last == 'd')
+					text = text.Substring(0, text.Length - 1);
+
 				if (double.TryParse(text, ParseLiteralDoubleNumberStyle, ParseCulture, out double d))
 					value = d;
 			}
@@ -2276,10 +2296,24 @@ namespace DynamicExpresso.Parsing
 							} while (char.IsDigit(_parseChar));
 						}
 
-						if (_parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm')
+						if (_parseChar == 'D' || _parseChar == 'd' || _parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm')
 						{
 							t = TokenId.RealLiteral;
 							NextChar();
+						}
+
+						// 'U' | 'u' | 'L' | 'l' | 'UL' | 'Ul' | 'uL' | 'ul' | 'LU' | 'Lu' | 'lU' | 'lu'
+						if (_parseChar == 'U' || _parseChar == 'u')
+						{
+							NextChar();
+							if (_parseChar == 'L' || _parseChar == 'l')
+								NextChar();
+						}
+						else if (_parseChar == 'L' || _parseChar == 'l')
+						{
+							NextChar();
+							if (_parseChar == 'U' || _parseChar == 'u')
+								NextChar();
 						}
 
 						break;

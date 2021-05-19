@@ -277,7 +277,10 @@ Some operators, like the assignment operator, can be disabled for security reaso
 			<td>Constants</td><td><code>true  false  null</code></td>
 		</tr>
 		<tr>
-			<td>Numeric</td><td><code>f  m</code></td>
+			<td>Real literal suffixes</td><td><code>d  f  m</code></td>
+		</tr>
+		<tr>
+			<td>Integer literal suffixes</td><td><code>u l ul lu</code></td>
 		</tr>
 		<tr>
 			<td>String/char</td><td><code>""  ''</code></td>
