@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System;
 using System.Dynamic;
 using System.Linq.Expressions;
+using System.Collections.Generic;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -105,6 +106,15 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.BAR", new Parameter("dyn", dyn)));
 		}
 
+	    [Test]
+		public void Get_value_of_a_nested_array()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new int[] {42};
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			Assert.AreEqual(dyn.Sub[0], interpreter.Eval("dyn.Sub[0]"));
+		}
+
 		[Test]
 		public void Test_With_Standard_Object()
 		{
@@ -137,6 +147,16 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(myInstance.MyMethod(), expression.Compile().DynamicInvoke());
 		}
 
+		[Test]
+		public void Test_With_Dynamic_Object_By_Index_Access()
+		{
+			DynamicIndexAccess globals = new DynamicIndexAccess();
+			Interpreter interpreter = new Interpreter()
+				.SetVariable("Values", new DynamicIndexAccess());
+			
+			Assert.AreEqual(globals.Values["Hello"], interpreter.Eval<string>("Values[\"Hello\"]"));
+		}
+
 		public class TestDynamicClass : DynamicObject
 		{
 			public string RealProperty { get; set; }
@@ -152,6 +172,35 @@ namespace DynamicExpresso.UnitTest
 			public override bool TryGetMember(GetMemberBinder binder, out object result)
 			{
 				throw new Exception("This should not be called");
+			}
+		}
+
+		public class DynamicIndexAccess : DynamicObject 
+		{
+			public dynamic Values 
+			{ 
+				get 
+				{ 
+					return _values; 
+				}
+			}
+			private readonly IReadOnlyDictionary<string, object> _values;
+
+			public DynamicIndexAccess()
+			{
+				var values = new Dictionary<string, object>();
+				values.Add("Hello", "Hello World!");
+				_values = values;
+			}
+
+			public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object result)
+			{
+				return _values.TryGetValue((string)indexes[0], out result);
+			}
+
+			public override bool TryGetMember(GetMemberBinder binder, out object result)
+			{
+				return _values.TryGetValue(binder.Name, out result);
 			}
 		}
 	}

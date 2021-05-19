@@ -1155,6 +1155,18 @@ namespace DynamicExpresso.Parsing
 			return Expression.Dynamic(binderM, typeof(object), argsDynamic);
 		}
 
+		private static Expression ParseDynamicIndex(Type type, Expression instance, Expression[] args)
+        {
+            var argsDynamic = args.ToList();
+            argsDynamic.Insert(0, instance);
+            var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetIndex(
+                Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+                type,
+                argsDynamic.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
+                );
+            return Expression.Dynamic(binder, typeof(object), argsDynamic);
+        }
+
 		private Expression[] ParseArgumentList()
 		{
 			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
@@ -1199,6 +1211,9 @@ namespace DynamicExpresso.Parsing
 
 				return Expression.ArrayAccess(expr, args);
 			}
+
+			if (IsDynamicType(expr.Type) || IsDynamicExpression(expr))
+                return ParseDynamicIndex(expr.Type, expr, args);
 
 			var applicableMethods = FindIndexer(expr.Type, args);
 			if (applicableMethods.Length == 0)
