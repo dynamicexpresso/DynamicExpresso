@@ -90,6 +90,10 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ArgumentException>(() => target.Parse("new MyClass() { StrProp = 5 }")); // type mismatch
 			Assert.Throws<ArgumentException>(() => target.Parse("new MyClass() { ReadOnlyProp = 5 }")); // read only prop
 			Assert.Throws<ParseException>(() => target.Parse("new MyClass() { UnkProp = 5 }")); // unknown property
+			Assert.Throws<ParseException>(() => target.Parse("new MyClass() { StrProp ")); // no close bracket
+			Assert.Throws<ParseException>(() => target.Parse("new MyClass() StrProp }")); // no open bracket
+			Assert.Throws<ParseException>(() => target.Parse("new MyClass() {{IntField = 5}}")); // multiple bracket
+			Assert.Throws<ParseException>(() => target.Parse("new MyClass() {5}")); // no field name
 		}
 
 		private class MyClass
@@ -99,8 +103,8 @@ namespace DynamicExpresso.UnitTest
 			public int ReadOnlyProp { get; }
 
 			public MyClass()
-            {
-            }
+			{
+			}
 
 			public MyClass(string strValue)
 			{
@@ -108,14 +112,21 @@ namespace DynamicExpresso.UnitTest
 			}
 
 			public override bool Equals(object obj)
-            {
-                return Equals(obj as MyClass);
-            }
+			{
+				return Equals(obj as MyClass);
+			}
+
 			public bool Equals(MyClass p)
 			{
 				if (p is null) return false;
 				if (ReferenceEquals(this, p)) return true;
 				return IntField == p.IntField && StrProp == p.StrProp && ReadOnlyProp == p.ReadOnlyProp;
+			}
+
+			// remove compilation warning
+			public override int GetHashCode()
+			{
+				return 0;
 			}
 		}
 	}
