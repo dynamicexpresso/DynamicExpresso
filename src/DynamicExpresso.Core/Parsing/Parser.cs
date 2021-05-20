@@ -859,7 +859,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.MemberInit(Expression.New(constructor, args), memberBindings);
 		}
 
-        private MemberBinding[] ParseObjectInitializer(Type newType)
+		private MemberBinding[] ParseObjectInitializer(Type newType)
 		{
 			ValidateToken(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected);
 			NextToken();
