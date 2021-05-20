@@ -36,7 +36,9 @@
 		Bar,
 		DoubleBar,
 		Equal,
-		Caret
+		Caret,
+		OpenCurlyBracket,
+		CloseCurlyBracket
 	}
 
 }

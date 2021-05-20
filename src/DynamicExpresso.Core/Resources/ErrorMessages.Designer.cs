@@ -173,7 +173,18 @@ namespace DynamicExpresso.Resources {
                 return ResourceManager.GetString("CloseParenOrOperatorExpected", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;=&apos; expected.
+        /// </summary>
+        internal static string EqualExpected
+        {
+            get
+            {
+                return ResourceManager.GetString("EqualExpected", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to &apos;:&apos; expected.
         /// </summary>
@@ -371,7 +382,29 @@ namespace DynamicExpresso.Resources {
                 return ResourceManager.GetString("OpenParenExpected", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{&apos; expected.
+        /// </summary>
+        internal static string OpenCurlyBracketExpected
+        {
+            get
+            {
+                return ResourceManager.GetString("OpenCurlyBracketExpected", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;}&apos; expected.
+        /// </summary>
+        internal static string CloseCurlyBracketExpected
+        {
+            get
+            {
+                return ResourceManager.GetString("CloseCurlyBracketExpected", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Syntax error.
         /// </summary>
