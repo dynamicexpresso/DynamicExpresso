@@ -111,6 +111,12 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			Assert.Throws<ParseException>(() => target.Eval("45.5M456F"));
+			Assert.Throws<ParseException>(() => target.Eval("45df"));
+			Assert.Throws<ParseException>(() => target.Eval("45md"));
+			Assert.Throws<ParseException>(() => target.Eval("45uu"));
+			Assert.Throws<ParseException>(() => target.Eval("45ud"));
+			Assert.Throws<ParseException>(() => target.Eval("45du"));
+			Assert.Throws<ParseException>(() => target.Eval("45ull"));
 		}
 
 		[Test]
@@ -119,6 +125,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			Assert.Throws<ParseException>(() => target.Eval("45.5x"));
+			Assert.Throws<ParseException>(() => target.Eval("45G"));
 		}
 
 		[Test]
@@ -300,9 +307,25 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(typeof(string), target.Parse("\"some string\"").ReturnType);
 			Assert.AreEqual(typeof(string), target.Parse("\"\"").ReturnType);
 			Assert.AreEqual(typeof(int), target.Parse("234").ReturnType);
+			Assert.AreEqual(typeof(int), target.Parse("-234").ReturnType);
+			Assert.AreEqual(typeof(uint), target.Parse("123u").ReturnType);
+			Assert.AreEqual(typeof(uint), target.Parse("123U").ReturnType);
+			Assert.AreEqual(typeof(long), target.Parse("-123l").ReturnType);
+			Assert.AreEqual(typeof(long), target.Parse("123l").ReturnType);
+			Assert.AreEqual(typeof(long), target.Parse("123L").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123UL").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123Ul").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123uL").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123ul").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123LU").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123Lu").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123lU").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123lu").ReturnType);
 			Assert.AreEqual(typeof(double), target.Parse("234.54").ReturnType);
 			Assert.AreEqual(typeof(double), target.Parse(".9").ReturnType);
 			Assert.AreEqual(typeof(double), target.Parse("-.9").ReturnType);
+			Assert.AreEqual(typeof(double), target.Parse("234d").ReturnType);
+			Assert.AreEqual(typeof(double), target.Parse("234D").ReturnType);
 			Assert.AreEqual(typeof(float), target.Parse("4.5f").ReturnType);
 			Assert.AreEqual(typeof(float), target.Parse("4.5F").ReturnType);
 			Assert.AreEqual(typeof(float), target.Parse(".5f").ReturnType);

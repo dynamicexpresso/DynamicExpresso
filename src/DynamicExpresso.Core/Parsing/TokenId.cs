@@ -37,6 +37,8 @@
 		DoubleBar,
 		Equal,
 		Caret,
+		OpenCurlyBracket,
+		CloseCurlyBracket,
 		LambdaArrow
 	}
 
