@@ -4,6 +4,7 @@ using System;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Collections.Generic;
+using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -113,6 +114,21 @@ namespace DynamicExpresso.UnitTest
 			dyn.Sub = new int[] {42};
 			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
 			Assert.AreEqual(dyn.Sub[0], interpreter.Eval("dyn.Sub[0]"));
+		}
+
+		[Test]
+		public void Get_value_of_a_nested_array_error()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new int[] {42};
+			dyn.Bar = 123;
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Bar[0]")); // use index for a property that is not an array
+			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Sub[\"hello\"]")); // use as an index an invalid type (e.g. string)
+			Assert.Throws<ParseException>(() => interpreter.Eval("dyn.Sub[0"));// pass some invalid syntax
+			Assert.Throws<ParseException>(() => interpreter.Eval("dyn.Sub 0]")); // pass some invalid syntax
+			Assert.Throws<ParseException>(() => interpreter.Eval("dyn.Sub[[0]]")); // pass some invalid syntax
+			Assert.Throws<IndexOutOfRangeException>(() => interpreter.Eval("dyn.Sub[1]")); // get an out of bound element
 		}
 
 		[Test]
