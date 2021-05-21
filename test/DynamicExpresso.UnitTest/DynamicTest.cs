@@ -106,7 +106,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.BAR", new Parameter("dyn", dyn)));
 		}
 
-	    [Test]
+		[Test]
 		public void Get_value_of_a_nested_array()
 		{
 			dynamic dyn = new ExpandoObject();
