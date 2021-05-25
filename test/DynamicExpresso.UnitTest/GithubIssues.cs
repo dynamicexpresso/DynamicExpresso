@@ -1,6 +1,8 @@
 ﻿using DynamicExpresso.Exceptions;
 using NUnit.Framework;
+using System;
 using System.Linq;
+using System.Reflection;
 
 // ReSharper disable SpecifyACultureInStringConversionExplicitly
 
@@ -110,5 +112,87 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("e", 2);
 			Assert.AreEqual(10000000003, interpreter.Eval("@Var1+@Var2+e"));
 		}
+
+		private delegate bool GFunction(string arg = null);
+
+		static bool GetGFunction1(string arg = null)
+		{
+			return arg != null;
+		}
+
+		[Test]
+		public void GitHub_Issue_144_1()
+		{
+			// GetGFunction1 is defined outside the test function
+			GFunction gFunc1 = GetGFunction1;
+
+			Assert.True(gFunc1.Method.GetParameters()[0].HasDefaultValue);
+
+			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance;
+			var invokeMethod1 = (MethodInfo)gFunc1.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke")[0];
+			Assert.True(invokeMethod1.GetParameters()[0].HasDefaultValue);
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("GFunction", gFunc1);
+			interpreter.SetVariable("arg", "arg");
+
+			Assert.True((bool)interpreter.Eval("GFunction(arg)"));
+			Assert.False((bool)interpreter.Eval("GFunction()"));
+		}
+
+
+#if NETCOREAPP2_1_OR_GREATER
+
+		[Test]
+		public void GitHub_Issue_144_2()
+		{
+			// GetGFunction2 is defined inside the test function
+			static bool GetGFunction2(string arg = null)
+			{
+				return arg != null;
+			}
+
+			GFunction gFunc2 = GetGFunction2;
+			Assert.False(gFunc2.Method.GetParameters()[0].HasDefaultValue); // should be true!
+
+			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance;
+			var invokeMethod2 = (MethodInfo)gFunc2.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke")[0];
+			Assert.True(invokeMethod2.GetParameters()[0].HasDefaultValue);
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("GFunction", gFunc2);
+			interpreter.SetVariable("arg", "arg");
+
+			Assert.True((bool)interpreter.Eval("GFunction(arg)"));
+			Assert.False((bool)interpreter.Eval("GFunction()"));
+		}
+
+		[Test]
+		public void GitHub_Issue_144_3()
+		{
+			// GetGFunction2 is defined inside the test function
+			static bool GetGFunction2(string arg = null)
+			{
+				return arg == null;
+			}
+
+			GFunction gFunc1 = GetGFunction1;
+			GFunction gFunc2 = GetGFunction2;
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("GFunction", gFunc1);
+			interpreter.SetFunction("GFunction", gFunc2);
+			interpreter.SetVariable("arg", "arg");
+
+			// ambiguous call
+			Assert.Throws<ParseException>(() => interpreter.Eval("GFunction(arg)"));
+
+			// there should be an ambiguous call exception, but GFunction1 is used
+			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true 
+			// and     gFunc2.Method.GetParameters()[0].HasDefaultValue == false
+			Assert.False((bool)interpreter.Eval("GFunction()"));
+		}
+
+#endif
 	}
 }

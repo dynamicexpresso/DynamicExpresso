@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
@@ -931,7 +931,22 @@ namespace DynamicExpresso.Parsing
 			var args = ParseArgumentList();
 
 			// find the best delegates that can be used with the provided arguments
-			var applicableMethods = FindBestMethod(methodGroup.Overloads.Select(_ => _.Method), args);
+			var flags = BindingFlags.Public | BindingFlags.Instance;
+			var candidates = methodGroup.Overloads
+				.Select(_ => new
+				{
+					Delegate = _,
+					Method = _.Method,
+					InvokeMethods = _.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke").Cast<MethodInfo>(),
+				})
+				.ToList();
+
+			var applicableMethods = FindBestMethod(candidates.SelectMany(_ => _.InvokeMethods), args);
+
+			// no method found: retry with the delegate's method
+			// (the parameters might be different, e.g. params array, default value, etc)
+			if (applicableMethods.Length == 0)
+				applicableMethods = FindBestMethod(candidates.Select(_ => _.Method), args);
 
 			if (applicableMethods.Length == 0)
 				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
@@ -940,8 +955,8 @@ namespace DynamicExpresso.Parsing
 				throw CreateParseException(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
 
 			var applicableMethod = applicableMethods[0];
-			var delegateExp = Expression.Constant(methodGroup.Overloads.Single(_ => _.Method == applicableMethod.MethodBase));
-			return Expression.Invoke(delegateExp, applicableMethod.PromotedParameters);
+			var usedDeledate = candidates.Single(_ => new[] { _.Method }.Concat(_.InvokeMethods).Any(m => m == applicableMethod.MethodBase)).Delegate;
+			return Expression.Invoke(Expression.Constant(usedDeledate), applicableMethod.PromotedParameters);
 		}
 
 		private Expression ParseDelegateInvocation(Expression delegateExp, int errorPos)

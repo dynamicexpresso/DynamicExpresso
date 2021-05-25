@@ -210,6 +210,12 @@ namespace DynamicExpresso.UnitTest
 			var del = methodInfo.CreateDelegate(Expression.GetDelegateType(types.ToArray()));
 			target.SetFunction(methodInfo.Name, del);
 
+			Assert.IsNotNull(del.Method.GetParameters()[0].GetCustomAttribute<ParamArrayAttribute>());
+
+			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance;
+			var invokeMethod = (MethodInfo)(del.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke")[0]);
+			Assert.IsNull(invokeMethod.GetParameters()[0].GetCustomAttribute<ParamArrayAttribute>()); // should be not null!
+
 			// the imported Sum function can be called with any parameters
 			Assert.AreEqual(6, target.Eval<int>("Sum(1, 2, 3)"));
 		}
