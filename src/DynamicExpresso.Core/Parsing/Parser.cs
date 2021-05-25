@@ -274,7 +274,7 @@ namespace DynamicExpresso.Parsing
 				//			op.text, ref left, ref right, op.pos);
 				//}
 
-				if((IsNullableType(left.Type) || IsNullableType(right.Type)) && (GetNonNullableType(left.Type) == right.Type || GetNonNullableType(right.Type) == left.Type))
+				if ((IsNullableType(left.Type) || IsNullableType(right.Type)) && (GetNonNullableType(left.Type) == right.Type || GetNonNullableType(right.Type) == left.Type))
 				{
 					left = GenerateNullableTypeConversion(left);
 					right = GenerateNullableTypeConversion(right);
@@ -499,7 +499,7 @@ namespace DynamicExpresso.Parsing
 					NextToken();
 					expr = ParseMemberAccess(null, expr);
 				}
-				else if(_token.id == TokenId.QuestionDot)
+				else if (_token.id == TokenId.QuestionDot)
 				{
 					NextToken();
 					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, ParseMemberAccess(null, expr), _token.pos);
@@ -1227,6 +1227,18 @@ namespace DynamicExpresso.Parsing
 			return Expression.Dynamic(binderM, typeof(object), argsDynamic);
 		}
 
+		private static Expression ParseDynamicIndex(Type type, Expression instance, Expression[] args)
+		{
+			var argsDynamic = args.ToList();
+			argsDynamic.Insert(0, instance);
+			var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetIndex(
+				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+				type,
+				argsDynamic.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
+				);
+			return Expression.Dynamic(binder, typeof(object), argsDynamic);
+		}
+
 		private Expression[] ParseArgumentList()
 		{
 			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
@@ -1272,6 +1284,9 @@ namespace DynamicExpresso.Parsing
 				return Expression.ArrayAccess(expr, args);
 			}
 
+			if (IsDynamicType(expr.Type) || IsDynamicExpression(expr))
+				return ParseDynamicIndex(expr.Type, expr, args);
+
 			var applicableMethods = FindIndexer(expr.Type, args);
 			if (applicableMethods.Length == 0)
 			{
@@ -1285,7 +1300,7 @@ namespace DynamicExpresso.Parsing
 						GetTypeName(expr.Type));
 			}
 
-			var indexer = (IndexerData) applicableMethods[0];
+			var indexer = (IndexerData)applicableMethods[0];
 			return Expression.Property(expr, indexer.Indexer, indexer.PromotedParameters);
 		}
 
@@ -1437,7 +1452,7 @@ namespace DynamicExpresso.Parsing
 				{
 					IEnumerable<MethodData> methods = members.
 							OfType<PropertyInfo>().
-							Select(p => (MethodData) new IndexerData(p));
+							Select(p => (MethodData)new IndexerData(p));
 
 					var applicableMethods = FindBestMethod(methods, args);
 					if (applicableMethods.Length > 0)
@@ -2248,11 +2263,13 @@ namespace DynamicExpresso.Parsing
 					{
 						NextChar();
 						t = TokenId.QuestionDot;
-					} else if(_parseChar == '?')
+					}
+					else if (_parseChar == '?')
 					{
 						NextChar();
 						t = TokenId.QuestionQuestion;
-					} else
+					}
+					else
 					{
 						t = TokenId.Question;
 					}

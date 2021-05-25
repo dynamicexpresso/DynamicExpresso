@@ -50,7 +50,7 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 - Full suite of unit tests
 - Good performance compared to other similar projects
 - Partial support of generic, params array and extension methods (only with implicit generic arguments detection)
-- Partial support of `dynamic` (`ExpandoObject` for get properties and method invocation, see #72)
+- Partial support of `dynamic` (`ExpandoObject` for get properties, method invocation and indexes(#142), see #72. `DynamicObject` for get properties and indexes, see #142)
 - Case insensitive expressions (default is case sensitive)
 - Ability to discover identifiers (variables, types, parameters) of a given expression
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
@@ -385,7 +385,7 @@ Not every C# syntaxes are supported. Here some examples of NOT supported feature
 - Explicit generic invocation (like `method<type>(arg)`) 
 - Lambda/delegate declaration (delegate and lamda are only supported as variables or parameters or as a return type of the expression)
 - Array/list/dictionary element assignment (set indexer operator)
-- Other operations on `dynamic` objects (only property and method invocation now are supported)
+- Other operations on `dynamic` objects (only property, method invocation and index now are supported)
 
 ## Exceptions
 If there is an error during the parsing always an exception of type `ParseException` is throwed. 
