@@ -654,7 +654,7 @@ namespace DynamicExpresso.Parsing
 					isUnsigned = true;
 				else if (chr == 'L' || chr == 'l')
 					isLong = true;
-			    else
+				else
 					break;
 			}
 
@@ -728,8 +728,8 @@ namespace DynamicExpresso.Parsing
 					if (float.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out float f))
 						value = f;
 				}
-                else
-                {
+				else
+				{
 					if (double.TryParse(text, ParseLiteralDoubleNumberStyle, ParseCulture, out double d))
 						value = d;
 				}
@@ -2373,15 +2373,15 @@ namespace DynamicExpresso.Parsing
 					{
 						//RealLiteral if DefaultNumberType settings is set to real type
 						if (_defaultNumberType == DefaultNumberType.Single || _defaultNumberType == DefaultNumberType.Double || _defaultNumberType == DefaultNumberType.Decimal)
-                        {
+						{
 							t = TokenId.RealLiteral;
-                        }
-                        else
-                        {
+						}
+						else
+						{
 							//IntegerLiteral by default
 							t = TokenId.IntegerLiteral;
 						}
-							
+
 						do
 						{
 							NextChar();

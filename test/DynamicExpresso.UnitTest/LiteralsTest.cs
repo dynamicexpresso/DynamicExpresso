@@ -34,6 +34,8 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(0, target.Eval("0"));
 			Assert.AreEqual(0.0, target.Eval("0.0"));
 			Assert.AreEqual(45, target.Eval("45"));
+			Assert.AreEqual(45, target.Eval("45u"));
+			Assert.AreEqual(-45u, target.Eval("-45u"));
 			Assert.AreEqual(-565, target.Eval("-565"));
 			Assert.AreEqual(23423423423434, target.Eval("23423423423434"));
 			Assert.AreEqual(45.5, target.Eval("45.5"));
@@ -87,6 +89,8 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(0L, target.Eval("0"));
 			Assert.AreEqual(0.0, target.Eval("0.0"));
 			Assert.AreEqual(45L, target.Eval("45"));
+			Assert.AreEqual(45L, target.Eval("45u"));
+			Assert.AreEqual(-45L, target.Eval("-45u"));
 			Assert.AreEqual(23423423423434L, target.Eval("23423423423434"));
 			Assert.AreEqual(45.5, target.Eval("45.5"));
 			Assert.AreEqual(-0.5, target.Eval("-0.5"));
