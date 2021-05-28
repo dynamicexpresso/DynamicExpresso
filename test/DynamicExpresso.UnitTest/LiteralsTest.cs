@@ -78,6 +78,16 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Numeric_Literals_DefaultTypes()
+		{
+			var target = new Interpreter();
+
+			Assert.IsInstanceOf(typeof(System.Int32), target.Eval("81"));
+			Assert.IsInstanceOf(typeof(System.Double), target.Eval("81.5"));
+			Assert.IsInstanceOf(typeof(System.Int64), target.Eval("23423423423434"));
+		}
+
+		[Test]
 		public void Numeric_Literals_DefaultLong()
 		{
 			var target = new Interpreter();

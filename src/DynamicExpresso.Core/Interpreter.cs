@@ -1,4 +1,4 @@
-﻿using DynamicExpresso.Parsing;
+using DynamicExpresso.Parsing;
 using DynamicExpresso.Reflection;
 using DynamicExpresso.Visitors;
 using System;
@@ -107,9 +107,11 @@ namespace DynamicExpresso
 		/// Allow to set de default numeric type when no suffix is specified (Int by default, Double if real number)
 		/// </summary>
 		/// <param name="defaultNumberType"></param>
-		public void SetDefaultNumberType(DefaultNumberType defaultNumberType)
+		/// <returns></returns>
+		public Interpreter SetDefaultNumberType(DefaultNumberType defaultNumberType)
 		{
 			_settings.DefaultNumberType = defaultNumberType;
+			return this;
 		}
 
 		/// <summary>
