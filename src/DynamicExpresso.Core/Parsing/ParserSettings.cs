@@ -9,7 +9,7 @@ namespace DynamicExpresso.Parsing
 		private readonly Dictionary<string, Identifier> _identifiers;
 		private readonly Dictionary<string, ReferenceType> _knownTypes;
 		private readonly HashSet<MethodInfo> _extensionMethods;
-
+		
 		public ParserSettings(bool caseInsensitive)
 		{
 			CaseInsensitive = caseInsensitive;
@@ -25,6 +25,8 @@ namespace DynamicExpresso.Parsing
 			_extensionMethods = new HashSet<MethodInfo>();
 
 			AssignmentOperators = AssignmentOperators.All;
+
+			DefaultNumberType = DefaultNumberType.Default;
 		}
 
 		public IDictionary<string, ReferenceType> KnownTypes
@@ -46,6 +48,12 @@ namespace DynamicExpresso.Parsing
 		{
 			get;
 			private set;
+		}
+
+		public DefaultNumberType DefaultNumberType
+		{
+			get;
+			set;
 		}
 
 		public StringComparison KeyComparison
