@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
@@ -44,12 +44,16 @@ namespace DynamicExpresso.Parsing
 		private readonly BindingFlags _bindingCase;
 		private readonly MemberFilter _memberFilterCase;
 
+		private readonly DefaultNumberType _defaultNumberType;
+
 		private Parser(ParserArguments arguments)
 		{
 			_arguments = arguments;
 
 			_bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
 			_memberFilterCase = arguments.Settings.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
+
+			_defaultNumberType = arguments.Settings.DefaultNumberType;
 
 			_expressionText = arguments.ExpressionText ?? string.Empty;
 			_expressionTextLength = _expressionText.Length;
@@ -759,6 +763,9 @@ namespace DynamicExpresso.Parsing
 
 			text = text.Substring(0, numberEnd + 1);
 
+			// No suffix find, verify if DefaultNumberType.Long is specified
+			if (_defaultNumberType == DefaultNumberType.Long) isLong = true;
+
 			if (text[0] != '-')
 			{
 				if (!ulong.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out ulong value))
@@ -806,13 +813,29 @@ namespace DynamicExpresso.Parsing
 				if (decimal.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out decimal dc))
 					value = dc;
 			}
+			else if (last == 'D' || last == 'd')
+			{
+				if (double.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDoubleNumberStyle, ParseCulture, out double d))
+					value = d;
+			}
 			else
 			{
-				if (last == 'D' || last == 'd')
-					text = text.Substring(0, text.Length - 1);
-
-				if (double.TryParse(text, ParseLiteralDoubleNumberStyle, ParseCulture, out double d))
-					value = d;
+				// No suffix find, use DefaultNumberType settigns if specified (Double default)
+				if (_defaultNumberType == DefaultNumberType.Decimal)
+				{
+					if (decimal.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out decimal dc))
+						value = dc;
+				}
+				else if (_defaultNumberType == DefaultNumberType.Single)
+				{
+					if (float.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out float f))
+						value = f;
+				}
+				else
+				{
+					if (double.TryParse(text, ParseLiteralDoubleNumberStyle, ParseCulture, out double d))
+						value = d;
+				}
 			}
 
 			if (value == null)
@@ -1034,7 +1057,22 @@ namespace DynamicExpresso.Parsing
 			var args = ParseArgumentList();
 
 			// find the best delegates that can be used with the provided arguments
-			var applicableMethods = FindBestMethod(methodGroup.Overloads.Select(_ => _.Method), args);
+			var flags = BindingFlags.Public | BindingFlags.Instance;
+			var candidates = methodGroup.Overloads
+				.Select(_ => new
+				{
+					Delegate = _,
+					Method = _.Method,
+					InvokeMethods = _.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke").Cast<MethodInfo>(),
+				})
+				.ToList();
+
+			var applicableMethods = FindBestMethod(candidates.SelectMany(_ => _.InvokeMethods), args);
+
+			// no method found: retry with the delegate's method
+			// (the parameters might be different, e.g. params array, default value, etc)
+			if (applicableMethods.Length == 0)
+				applicableMethods = FindBestMethod(candidates.Select(_ => _.Method), args);
 
 			if (applicableMethods.Length == 0)
 				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
@@ -1043,8 +1081,8 @@ namespace DynamicExpresso.Parsing
 				throw CreateParseException(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
 
 			var applicableMethod = applicableMethods[0];
-			var delegateExp = Expression.Constant(methodGroup.Overloads.Single(_ => _.Method == applicableMethod.MethodBase));
-			return Expression.Invoke(delegateExp, applicableMethod.PromotedParameters);
+			var usedDeledate = candidates.Single(_ => new[] { _.Method }.Concat(_.InvokeMethods).Any(m => m == applicableMethod.MethodBase)).Delegate;
+			return Expression.Invoke(Expression.Constant(usedDeledate), applicableMethod.PromotedParameters);
 		}
 
 		private Expression ParseDelegateInvocation(Expression delegateExp, int errorPos)
@@ -2536,7 +2574,17 @@ namespace DynamicExpresso.Parsing
 
 					if (char.IsDigit(_parseChar))
 					{
-						t = TokenId.IntegerLiteral;
+						//RealLiteral if DefaultNumberType settings is set to real type
+						if (_defaultNumberType == DefaultNumberType.Single || _defaultNumberType == DefaultNumberType.Double || _defaultNumberType == DefaultNumberType.Decimal)
+						{
+							t = TokenId.RealLiteral;
+						}
+						else
+						{
+							//IntegerLiteral by default
+							t = TokenId.IntegerLiteral;
+						}
+
 						do
 						{
 							NextChar();

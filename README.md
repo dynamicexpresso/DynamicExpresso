@@ -1,4 +1,4 @@
-# Dynamic Expresso
+﻿# Dynamic Expresso
 
 [![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
 [![Build Status](https://public-davideicardi.visualstudio.com/dynamic-expresso/_apis/build/status/dynamic-expresso-CI?branchName=master)](https://public-davideicardi.visualstudio.com/dynamic-expresso/_build?definitionId=4
@@ -389,6 +389,22 @@ var detectedIdentifiers = target.DetectIdentifiers("x + y");
 
 CollectionAssert.AreEqual(new[] { "x", "y" }, 
 			  detectedIdentifiers.UnknownIdentifiers.ToArray());
+```
+
+## Default number type
+In C #, numbers are usually interpreted as integers or doubles if they have decimal places.
+
+In some cases it may be useful to be able to configure the default type of numbers if no particular suffix is ​​specified: for example in financial calculations, where usually numbers are interpreted as decimal type.
+
+In these cases you can set the default number type using `Interpreter.SetDefaultNumberType`  method.
+
+```csharp
+var target = new Interpreter();
+
+target.SetDefaultNumberType(DefaultNumberType.Decimal);
+
+Assert.IsInstanceOf(typeof(System.Decimal), target.Eval("45"));
+Assert.AreEqual(10M/3M, target.Eval("10/3")); // 3.33333333333 instead of 3
 ```
 
 ## Limitations

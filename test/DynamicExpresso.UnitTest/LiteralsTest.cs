@@ -34,6 +34,8 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(0, target.Eval("0"));
 			Assert.AreEqual(0.0, target.Eval("0.0"));
 			Assert.AreEqual(45, target.Eval("45"));
+			Assert.AreEqual(45, target.Eval("45u"));
+			Assert.AreEqual(-45u, target.Eval("-45u"));
 			Assert.AreEqual(-565, target.Eval("-565"));
 			Assert.AreEqual(23423423423434, target.Eval("23423423423434"));
 			Assert.AreEqual(45.5, target.Eval("45.5"));
@@ -52,6 +54,229 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(+.201, target.Eval("+.201"));
 			Assert.AreEqual(2e+201, target.Eval("2e+201"));
 			Assert.AreEqual(2e+20, target.Eval("2e+20"));
+
+			// f suffix (single)
+			Assert.AreEqual(4f, target.Eval("4f"));
+			Assert.AreEqual(45F, target.Eval("45F"));
+			Assert.AreEqual(45.8f, target.Eval("45.8f"));
+			Assert.AreEqual(45.8F, target.Eval("45.8F"));
+			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
+			Assert.AreEqual(.2f, target.Eval(".2f"));
+			Assert.AreEqual(.2F, target.Eval(".2F"));
+			Assert.AreEqual(-.2f, target.Eval("-.2f"));
+			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+
+			// m suffix (decimal)
+			Assert.AreEqual(5M, target.Eval("5M"));
+			Assert.AreEqual(254m, target.Eval("254m"));
+			Assert.AreEqual(45.232M, target.Eval("45.232M"));
+			Assert.AreEqual(45.232m, target.Eval("45.232m"));
+			Assert.AreEqual(.022M, target.Eval(".022M"));
+			Assert.AreEqual(.022m, target.Eval(".022m"));
+			Assert.AreEqual(-.022m, target.Eval("-.022m"));
+			Assert.AreEqual(-.022M, target.Eval("-.022M"));
+		}
+
+		[Test]
+		public void Numeric_Literals_DefaultTypes()
+		{
+			var target = new Interpreter();
+
+			Assert.IsInstanceOf(typeof(System.Int32), target.Eval("81"));
+			Assert.IsInstanceOf(typeof(System.Double), target.Eval("81.5"));
+			Assert.IsInstanceOf(typeof(System.Int64), target.Eval("23423423423434"));
+		}
+
+		[Test]
+		public void Numeric_Literals_DefaultLong()
+		{
+			var target = new Interpreter();
+			
+			target.SetDefaultNumberType(DefaultNumberType.Long);
+
+			Assert.IsInstanceOf(typeof(System.Int64), target.Eval("45"));
+
+			Assert.AreEqual(0L, target.Eval("0"));
+			Assert.AreEqual(0.0, target.Eval("0.0"));
+			Assert.AreEqual(45L, target.Eval("45"));
+			Assert.AreEqual(45L, target.Eval("45u"));
+			Assert.AreEqual(-45L, target.Eval("-45u"));
+			Assert.AreEqual(23423423423434L, target.Eval("23423423423434"));
+			Assert.AreEqual(45.5, target.Eval("45.5"));
+			Assert.AreEqual(-0.5, target.Eval("-0.5"));
+			Assert.AreEqual(.2, target.Eval(".2"));
+			Assert.AreEqual(-.2, target.Eval("-.2"));
+			Assert.AreEqual(+.2, target.Eval("+.2"));
+			Assert.AreEqual(.02, target.Eval(".02"));
+			Assert.AreEqual(-.02, target.Eval("-.02"));
+			Assert.AreEqual(+.02, target.Eval("+.02"));
+			Assert.AreEqual(.20, target.Eval(".20"));
+			Assert.AreEqual(-.20, target.Eval("-.20"));
+			Assert.AreEqual(+.20, target.Eval("+.20"));
+			Assert.AreEqual(.201, target.Eval(".201"));
+			Assert.AreEqual(-.201, target.Eval("-.201"));
+			Assert.AreEqual(+.201, target.Eval("+.201"));
+			Assert.AreEqual(2e+201, target.Eval("2e+201"));
+			Assert.AreEqual(2e+20, target.Eval("2e+20"));
+
+			// f suffix (single)
+			Assert.AreEqual(4f, target.Eval("4f"));
+			Assert.AreEqual(45F, target.Eval("45F"));
+			Assert.AreEqual(45.8f, target.Eval("45.8f"));
+			Assert.AreEqual(45.8F, target.Eval("45.8F"));
+			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
+			Assert.AreEqual(.2f, target.Eval(".2f"));
+			Assert.AreEqual(.2F, target.Eval(".2F"));
+			Assert.AreEqual(-.2f, target.Eval("-.2f"));
+			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+
+			// m suffix (decimal)
+			Assert.AreEqual(5M, target.Eval("5M"));
+			Assert.AreEqual(254m, target.Eval("254m"));
+			Assert.AreEqual(45.232M, target.Eval("45.232M"));
+			Assert.AreEqual(45.232m, target.Eval("45.232m"));
+			Assert.AreEqual(.022M, target.Eval(".022M"));
+			Assert.AreEqual(.022m, target.Eval(".022m"));
+			Assert.AreEqual(-.022m, target.Eval("-.022m"));
+			Assert.AreEqual(-.022M, target.Eval("-.022M"));
+		}
+
+		[Test]
+		public void Numeric_Literals_DefaultSingle()
+		{
+			var target = new Interpreter();
+
+			target.SetDefaultNumberType(DefaultNumberType.Single);
+
+			Assert.IsInstanceOf(typeof(System.Single), target.Eval("45"));
+			Assert.AreEqual(10F / 3f, target.Eval("10/3"));
+
+			Assert.AreEqual(0F, target.Eval("0"));
+			Assert.AreEqual(0.0F, target.Eval("0.0"));
+			Assert.AreEqual(45F, target.Eval("45"));
+			Assert.AreEqual(-565F, target.Eval("-565"));
+			Assert.AreEqual(23423423423434F, target.Eval("23423423423434"));
+			Assert.AreEqual(45.5F, target.Eval("45.5"));
+			Assert.AreEqual(-0.5F, target.Eval("-0.5"));
+			Assert.AreEqual(.2F, target.Eval(".2"));
+			Assert.AreEqual(-.2F, target.Eval("-.2"));
+			Assert.AreEqual(+.2F, target.Eval("+.2"));
+			Assert.AreEqual(.02F, target.Eval(".02"));
+			Assert.AreEqual(-.02F, target.Eval("-.02"));
+			Assert.AreEqual(+.02F, target.Eval("+.02"));
+			Assert.AreEqual(.20F, target.Eval(".20"));
+			Assert.AreEqual(-.20F, target.Eval("-.20"));
+			Assert.AreEqual(+.20F, target.Eval("+.20"));
+			Assert.AreEqual(.201F, target.Eval(".201"));
+			Assert.AreEqual(-.201F, target.Eval("-.201"));
+			Assert.AreEqual(+.201F, target.Eval("+.201"));
+
+			// f suffix (single)
+			Assert.AreEqual(4f, target.Eval("4f"));
+			Assert.AreEqual(45F, target.Eval("45F"));
+			Assert.AreEqual(45.8f, target.Eval("45.8f"));
+			Assert.AreEqual(45.8F, target.Eval("45.8F"));
+			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
+			Assert.AreEqual(.2f, target.Eval(".2f"));
+			Assert.AreEqual(.2F, target.Eval(".2F"));
+			Assert.AreEqual(-.2f, target.Eval("-.2f"));
+			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+
+			// m suffix (decimal)
+			Assert.AreEqual(5M, target.Eval("5M"));
+			Assert.AreEqual(254m, target.Eval("254m"));
+			Assert.AreEqual(45.232M, target.Eval("45.232M"));
+			Assert.AreEqual(45.232m, target.Eval("45.232m"));
+			Assert.AreEqual(.022M, target.Eval(".022M"));
+			Assert.AreEqual(.022m, target.Eval(".022m"));
+			Assert.AreEqual(-.022m, target.Eval("-.022m"));
+			Assert.AreEqual(-.022M, target.Eval("-.022M"));
+		}
+
+		[Test]
+		public void Numeric_Literals_DefaultDouble()
+		{
+			var target = new Interpreter();
+
+			target.SetDefaultNumberType(DefaultNumberType.Double);
+
+			Assert.IsInstanceOf(typeof(System.Double), target.Eval("45"));
+			Assert.AreEqual(10D / 3D, target.Eval("10/3"));
+
+			Assert.AreEqual(0D, target.Eval("0"));
+			Assert.AreEqual(0.0D, target.Eval("0.0"));
+			Assert.AreEqual(45D, target.Eval("45"));
+			Assert.AreEqual(-565D, target.Eval("-565"));
+			Assert.AreEqual(23423423423434D, target.Eval("23423423423434"));
+			Assert.AreEqual(45.5D, target.Eval("45.5"));
+			Assert.AreEqual(-0.5D, target.Eval("-0.5"));
+			Assert.AreEqual(.2D, target.Eval(".2"));
+			Assert.AreEqual(-.2D, target.Eval("-.2"));
+			Assert.AreEqual(+.2D, target.Eval("+.2"));
+			Assert.AreEqual(.02D, target.Eval(".02"));
+			Assert.AreEqual(-.02D, target.Eval("-.02"));
+			Assert.AreEqual(+.02D, target.Eval("+.02"));
+			Assert.AreEqual(.20D, target.Eval(".20"));
+			Assert.AreEqual(-.20D, target.Eval("-.20"));
+			Assert.AreEqual(+.20D, target.Eval("+.20"));
+			Assert.AreEqual(.201D, target.Eval(".201"));
+			Assert.AreEqual(-.201D, target.Eval("-.201"));
+			Assert.AreEqual(+.201D, target.Eval("+.201"));
+			Assert.AreEqual(2e+201, target.Eval("2e+201"));
+			Assert.AreEqual(2e+20, target.Eval("2e+20"));
+
+			// f suffix (single)
+			Assert.AreEqual(4f, target.Eval("4f"));
+			Assert.AreEqual(45F, target.Eval("45F"));
+			Assert.AreEqual(45.8f, target.Eval("45.8f"));
+			Assert.AreEqual(45.8F, target.Eval("45.8F"));
+			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
+			Assert.AreEqual(.2f, target.Eval(".2f"));
+			Assert.AreEqual(.2F, target.Eval(".2F"));
+			Assert.AreEqual(-.2f, target.Eval("-.2f"));
+			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+
+			// m suffix (decimal)
+			Assert.AreEqual(5M, target.Eval("5M"));
+			Assert.AreEqual(254m, target.Eval("254m"));
+			Assert.AreEqual(45.232M, target.Eval("45.232M"));
+			Assert.AreEqual(45.232m, target.Eval("45.232m"));
+			Assert.AreEqual(.022M, target.Eval(".022M"));
+			Assert.AreEqual(.022m, target.Eval(".022m"));
+			Assert.AreEqual(-.022m, target.Eval("-.022m"));
+			Assert.AreEqual(-.022M, target.Eval("-.022M"));
+		}
+
+		[Test]
+		public void Numeric_Literals_DefaultDecimal()
+		{
+			var target = new Interpreter();
+
+			target.SetDefaultNumberType(DefaultNumberType.Decimal);
+
+			Assert.IsInstanceOf(typeof(System.Decimal), target.Eval("45"));
+			Assert.AreEqual(10M/3M, target.Eval("10/3"));
+
+			Assert.AreEqual(0M, target.Eval("0"));
+			Assert.AreEqual(0.0M, target.Eval("0.0"));
+			Assert.AreEqual(45M, target.Eval("45"));
+			Assert.AreEqual(-565M, target.Eval("-565"));
+			Assert.AreEqual(23423423423434M, target.Eval("23423423423434"));
+			Assert.AreEqual(45.5M, target.Eval("45.5"));
+			Assert.AreEqual(-0.5M, target.Eval("-0.5"));
+			Assert.AreEqual(.2M, target.Eval(".2"));
+			Assert.AreEqual(-.2M, target.Eval("-.2"));
+			Assert.AreEqual(+.2M, target.Eval("+.2"));
+			Assert.AreEqual(.02M, target.Eval(".02"));
+			Assert.AreEqual(-.02M, target.Eval("-.02"));
+			Assert.AreEqual(+.02M, target.Eval("+.02"));
+			Assert.AreEqual(.20M, target.Eval(".20"));
+			Assert.AreEqual(-.20M, target.Eval("-.20"));
+			Assert.AreEqual(+.20M, target.Eval("+.20"));
+			Assert.AreEqual(.201M, target.Eval(".201"));
+			Assert.AreEqual(-.201M, target.Eval("-.201"));
+			Assert.AreEqual(+.201M, target.Eval("+.201"));
+			
 
 			// f suffix (single)
 			Assert.AreEqual(4f, target.Eval("4f"));
