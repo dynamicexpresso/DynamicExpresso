@@ -8,7 +8,7 @@
     <Company>davideicardi.com</Company>
     <Description>C# expression interpreter/evaluator</Description>
     <Copyright>Davide Icardi</Copyright>
-    <PackageTags>dynamic expresso expression linq eval</PackageTags>
+    <PackageTags>dynamic expression linq eval script</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IncludeSymbols>True</IncludeSymbols>
     <IncludeSource>True</IncludeSource>

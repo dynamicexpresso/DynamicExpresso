@@ -472,9 +472,11 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - IronJS, IronRuby, IronPython
 - paxScript.NET http://eco148-88394.innterhost.net/paxscriptnet/
 
-## Developer notes
+## Continuos Integration
 
-I have setup a continuous integration environment with Visual Studio Online Team Services.
+I have setup a continuous integration environment with Github Actions, see `.github/workflows` folder.
+
+## Compiling and run tests
 
 To compile the solution you can run:
 
@@ -490,7 +492,7 @@ To run unit tests:
 
 or run unit tests for a specific project with a specific framework:
 
-	dotnet test ./test/DynamicExpresso.UnitTest/DynamicExpresso.UnitTest.csproj -f netcoreapp2.0
+	dotnet test ./test/DynamicExpresso.UnitTest/DynamicExpresso.UnitTest.csproj -f netcoreapp3.1
 
 Add `--logger:trx` to generate test results for VSTS.
 
