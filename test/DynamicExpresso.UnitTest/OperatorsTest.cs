@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using DynamicExpresso.Exceptions;
 using NUnit.Framework;
 
@@ -129,6 +132,34 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("ciao " + 1981, target.Eval("\"ciao \" + 1981"));
 			Assert.AreEqual(1981 + "ciao ", target.Eval("1981 + \"ciao \""));
 		}
+
+        [Test]
+        public void String_Concatenation_check_string_method()
+        {
+            MethodInfo expectedMethod = typeof(string)
+                .GetMethod(nameof(String.Concat), new[] {typeof(string), typeof(string)});
+            
+            Interpreter interpreter = new Interpreter();
+
+            string expressionText = "\"ciao \" + 1981";
+
+            Lambda lambda = interpreter.Parse(expressionText);
+            
+            MethodCallExpression methodCallExpression = lambda.Expression as MethodCallExpression;
+            
+            Assert.IsNotNull(methodCallExpression);
+            Assert.AreEqual(expectedMethod, methodCallExpression.Method);
+        }
+
+        [Test]
+        public void String_Concatenation_with_null()
+        {
+            Interpreter interpreter = new Interpreter();
+
+            string expressionText = "\"ciao \" + null";
+
+            Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
+        }
 
 		[Test]
 		public void Numeric_Expression()
