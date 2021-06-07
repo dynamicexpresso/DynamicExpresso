@@ -2115,19 +2115,26 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression GenerateStringConcat(Expression left, Expression right)
 		{
-			var rightObj =
-				right.Type != typeof(string)
-				? Expression.Call(right, _toStringMethod)
-				: right;
-			var leftObj =
-				left.Type != typeof(string)
-				? Expression.Call(left, _toStringMethod)
-				: left;
+			var leftObj = GenerateStringConcatOperand(left);
+			var rightObj = GenerateStringConcatOperand(right);
 
 			return Expression.Call(
 					null,
 					_concatMethod,
 					new[] { leftObj, rightObj });
+		}
+
+		private static Expression GenerateStringConcatOperand(Expression expression)
+		{
+			if (expression is ConstantExpression constantExpression &&
+			    constantExpression.Value == null)
+			{
+				return Expression.ConvertChecked(constantExpression, typeof(string));
+			}
+
+			return expression.Type != typeof(string)
+				? Expression.Call(expression, _toStringMethod)
+				: expression;
 		}
 
 		private static MethodInfo GetStaticMethod(string methodName, Expression left, Expression right)
