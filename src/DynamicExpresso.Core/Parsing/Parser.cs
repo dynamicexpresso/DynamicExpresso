@@ -1713,6 +1713,10 @@ namespace DynamicExpresso.Parsing
 				{
 					if (parameterType.IsGenericParameter)
 					{
+						// an interpreter expression can only be matched to a parameter of type Func
+						if (currentArgument is InterpreterExpression)
+							return false;
+
 						promotedArgs.Add(currentArgument);
 						continue;
 					}
@@ -1786,25 +1790,16 @@ namespace DynamicExpresso.Parsing
 
 		private static MethodInfo MakeGenericMethod(MethodData method)
 		{
-			try
-			{
-				var methodInfo = (MethodInfo)method.MethodBase;
-				var actualGenericArgs = ExtractActualGenericArguments(
-					method.Parameters.Select(p => p.ParameterType).ToArray(),
-					method.PromotedParameters.Select(p => p.Type).ToArray());
+			var methodInfo = (MethodInfo)method.MethodBase;
+			var actualGenericArgs = ExtractActualGenericArguments(
+				method.Parameters.Select(p => p.ParameterType).ToArray(),
+				method.PromotedParameters.Select(p => p.Type).ToArray());
 
-				var genericArgs = methodInfo.GetGenericArguments()
-					.Select(p => actualGenericArgs.TryGetValue(p.Name, out var typ) ? typ : typeof(object))
-					.ToArray();
+			var genericArgs = methodInfo.GetGenericArguments()
+				.Select(p => actualGenericArgs.TryGetValue(p.Name, out var typ) ? typ : typeof(object))
+				.ToArray();
 
-				return methodInfo.MakeGenericMethod(genericArgs);
-			}
-			catch (IndexOutOfRangeException)
-			{
-				// can happen if a parameter is a generic type, and the promoted parameter 
-				// doesn't have the same number of generic parameters
-				return null;
-			}
+			return methodInfo.MakeGenericMethod(genericArgs);
 		}
 
 		private static Dictionary<string, Type> ExtractActualGenericArguments(
@@ -1855,8 +1850,11 @@ namespace DynamicExpresso.Parsing
 				}
 			}
 
-			if (expr is InterpreterExpression)
+			if (expr is InterpreterExpression ie)
 			{
+				if (!ie.IsCompatibleWithDelegate(type))
+					return null;
+
 				return expr;
 			}
 
@@ -2743,6 +2741,13 @@ namespace DynamicExpresso.Parsing
 				var lambdaExpr = _interpreter.ParseAsExpression(delegateType, _expressionText, _parameters.Select(p => p.Name).ToArray());
 				_type = lambdaExpr.Type;
 				return lambdaExpr;
+			}
+
+			internal bool IsCompatibleWithDelegate(Type target)
+			{
+				return target.IsGenericType
+					&& target.BaseType == typeof(MulticastDelegate)
+					&& target.GetGenericArguments().Length == _parameters.Count + 1;
 			}
 		}
 

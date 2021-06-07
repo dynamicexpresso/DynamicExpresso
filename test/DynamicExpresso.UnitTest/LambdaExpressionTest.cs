@@ -123,6 +123,34 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Lambda_candidate_is_generic_parameter()
+		{
+			var target = new Interpreter(_options).Reference(typeof(ExtensionMethodExt));
+			var str = "cd";
+			target.SetVariable("str", str);
+
+			var result = target.Eval<char>("str.MySingleOrDefault(c => c == 'd')");
+			Assert.AreEqual(str.SingleOrDefault(c => c == 'd'), result);
+		}
+
+		[Test]
+		public void Lambda_candidate_with_multiple_parameters()
+		{
+			var target = new Interpreter(_options).Reference(typeof(ExtensionMethodExt));
+			var str = "cd";
+			target.SetVariable("str", str);
+
+			var result = target.Eval<char>("str.WithSeveralParams((c) => c == 'd')");
+			Assert.AreEqual('d', result);
+
+			result = target.Eval<char>("str.WithSeveralParams((c, i) => c == 'd')");
+			Assert.AreEqual('d', result);
+
+			result = target.Eval<char>("str.WithSeveralParams((c, i, str) => c == 'd')");
+			Assert.AreEqual('d', result);
+		}
+
+		[Test]
 		public void Sum()
 		{
 			var target = new Interpreter(_options);
@@ -209,6 +237,38 @@ namespace DynamicExpresso.UnitTest
 			
 			Assert.AreEqual(3, results.Count());
 			Assert.AreEqual(strList.Zip(intList, (str, i) => str + i), results);
+		}
+	}
+
+	/// <summary>
+	/// Ensure that a lambda expression is matched to a parameter of type delegate 
+	/// (so the 1st overload shouldn't be considered during resolution)
+	/// </summary>
+	internal static class ExtensionMethodExt
+	{
+		public static TSource MySingleOrDefault<TSource>(this IEnumerable<TSource> source, TSource defaultValue)
+		{
+			return source.SingleOrDefault();
+		}
+
+		public static TSource MySingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
+		{
+			return source.SingleOrDefault(predicate);
+		}
+
+		public static TSource WithSeveralParams<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
+		{
+			return source.SingleOrDefault(predicate);
+		}
+
+		public static TSource WithSeveralParams<TSource>(this IEnumerable<TSource> source, Func<TSource, int, bool> predicate)
+		{
+			return source.SingleOrDefault(_ => predicate(_, 0));
+		}
+
+		public static TSource WithSeveralParams<TSource>(this IEnumerable<TSource> source, Func<TSource, int, string, bool> predicate)
+		{
+			return source.SingleOrDefault(_ => predicate(_, 0, string.Empty));
 		}
 	}
 }
