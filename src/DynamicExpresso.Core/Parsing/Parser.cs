@@ -514,9 +514,8 @@ namespace DynamicExpresso.Parsing
 						return ParseLambdaInvocation(lambda, tokenPos);
 
 					if (expr is MethodGroupExpression methodGroup)
-						return ParseMethodGroupInvocation(methodGroup, tokenPos);
-
-					if (typeof(Delegate).IsAssignableFrom(expr.Type))
+						expr = ParseMethodGroupInvocation(methodGroup, tokenPos);
+					else if (typeof(Delegate).IsAssignableFrom(expr.Type))
 						expr = ParseDelegateInvocation(expr, tokenPos);
 					else
 						throw CreateParseException(tokenPos, ErrorMessages.InvalidMethodCall, GetTypeName(expr.Type));

@@ -140,6 +140,19 @@ namespace DynamicExpresso.UnitTest
 			Assert.False((bool)interpreter.Eval("GFunction()"));
 		}
 
+		[Test]
+		public void GitHub_Issue_148()
+		{
+			Func<object[], double, double, object[]> subArray = (entries, skipFirst, skipLast) => entries.Take(entries.Length - (int)skipLast).Skip((int)skipFirst).ToArray();
+
+			var target = new Interpreter();
+
+			target.SetVariable("arr1", new object[] { 1d, 2d, 3d });
+			target.SetFunction("SubArray", subArray);
+
+			Assert.AreEqual(2, target.Eval("SubArray(arr1, 1, 1).First()"));
+		}
+
 
 #if NETCOREAPP2_1_OR_GREATER
 
