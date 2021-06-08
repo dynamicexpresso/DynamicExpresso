@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     container: gittools/gitversion:5.3.5-linux-alpine.3.10-x64-netcoreapp3.1
     steps:
-      - run: |
-          GITVERSION=$(/tools/dotnet-gitversion "/github/workflow" /output json /showvariable FullSemVer)
-          echo $GITVERSION
+    - uses: actions/checkout@v2
+    - run: |
+        GITVERSION=$(/tools/dotnet-gitversion /output json /showvariable FullSemVer)
+        echo $GITVERSION
   build:
     runs-on: ubuntu-latest
     needs: version
