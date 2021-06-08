@@ -13,7 +13,7 @@
     <IncludeSymbols>True</IncludeSymbols>
     <IncludeSource>True</IncludeSource>
     <PackageProjectUrl>https://github.com/davideicardi/DynamicExpresso</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/davideicardi/DynamicExpresso#license</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/davideicardi/DynamicExpresso.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <VersionPrefix>0.0.1</VersionPrefix>

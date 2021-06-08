@@ -492,7 +492,7 @@ To run unit tests:
 
 or run unit tests for a specific project with a specific framework:
 
-	dotnet test ./test/DynamicExpresso.UnitTest/DynamicExpresso.UnitTest.csproj -f netcoreapp3.1
+	dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f netcoreapp3.1
 
 Add `--logger:trx` to generate test results for VSTS.
 
