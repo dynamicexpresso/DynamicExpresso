@@ -9,7 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    needs: version
     steps:
     - uses: actions/checkout@v2
       with:
