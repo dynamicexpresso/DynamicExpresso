@@ -12,7 +12,7 @@ jobs:
     container: gittools/gitversion:5.3.5-linux-alpine.3.10-x64-netcoreapp3.1
     steps:
       - run: |
-          GITVERSION=$(/tools/dotnet-gitversion /github/workspace /output json /showvariable FullSemVer)
+          GITVERSION=$(/tools/dotnet-gitversion /output json /showvariable FullSemVer)
           echo $GITVERSION
   build:
     runs-on: ubuntu-latest
