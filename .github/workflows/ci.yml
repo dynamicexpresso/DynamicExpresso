@@ -29,6 +29,6 @@ jobs:
         GITVERSION=$(dotnet-gitversion /output json /showvariable FullSemVer)
         echo "::set-output name=PROJECT_VERSION::$GITVERSION"
     - run: dotnet restore DynamicExpresso.sln
-    - run: dotnet build DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.PROJECT_VERSION}}
+    - run: dotnet build DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}}
     - run: dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f netcoreapp3.1
     - run: dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f netcoreapp5.0
