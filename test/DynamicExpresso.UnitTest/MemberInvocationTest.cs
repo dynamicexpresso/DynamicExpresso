@@ -412,6 +412,17 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.MethodWithOptionalNullParam(y, z), target.Eval("x.MethodWithOptionalNullParam(y, z)", parameters));
 		}
 
+		[Test]
+		public void Chaining_Methods()
+		{
+			var x = new MyTestService();
+
+			var target = new Interpreter();
+			target.SetVariable("x", x);
+
+			Assert.AreEqual(x.HelloWorld().ToUpper(), target.Eval("x.HelloWorld().ToUpper()"));
+		}
+
 		private interface MyTestInterface
 		{
 		}
