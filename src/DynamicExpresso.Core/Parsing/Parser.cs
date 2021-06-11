@@ -5,9 +5,11 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using DynamicExpresso.Exceptions;
 using DynamicExpresso.Resources;
+using Microsoft.CSharp.RuntimeBinder;
 
 // Code based on the Dynamic.cs file of the DynamicQuery sample by Microsoft
 // http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx
@@ -107,12 +109,13 @@ namespace DynamicExpresso.Parsing
 				if (!_arguments.Settings.AssignmentOperators.HasFlag(AssignmentOperators.AssignmentEqual))
 					throw new AssignmentOperatorDisabledException("=", _token.pos);
 
+
 				if (!IsWritable(left))
 					throw CreateParseException(_token.pos, ErrorMessages.ExpressionMustBeWritable);
 
 				NextToken();
-
 				var right = ParseAssignment();
+
 				var promoted = PromoteExpression(right, left.Type, true);
 				if (promoted == null)
 					throw CreateParseException(_token.pos, ErrorMessages.CannotConvertValue,
@@ -445,6 +448,9 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GenerateUnary(ExpressionType unaryType, Expression expr)
 		{
+			if (IsDynamicExpression(expr))
+				return GenerateUnaryDynamic(unaryType, expr);
+
 			// find the overloaded unary operator
 			string opName;
 			switch (unaryType)
@@ -465,6 +471,19 @@ namespace DynamicExpresso.Parsing
 
 			// if no operator was found, the default Linq resolution will occur
 			return Expression.MakeUnary(unaryType, expr, null, operatorMethod);
+		}
+
+		private Expression GenerateUnaryDynamic(ExpressionType unaryType, Expression expr)
+		{
+			var binder = Microsoft.CSharp.RuntimeBinder.Binder.UnaryOperation(
+				CSharpBinderFlags.None,
+				unaryType,
+				typeof(Parser),
+				new CSharpArgumentInfo[] {
+				CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)}
+				);
+
+			return Expression.Dynamic(binder, typeof(object), expr);
 		}
 
 		private MethodData FindUnaryOperator(string operatorName, Expression expr)
@@ -843,6 +862,9 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GenerateConditional(Expression test, Expression expr1, Expression expr2, int errorPos)
 		{
+			if (IsDynamicExpression(test))
+				return GenerateConditionalDynamic(test, expr1, expr2,errorPos);
+
 			if (test.Type != typeof(bool))
 				throw CreateParseException(errorPos, ErrorMessages.FirstExprMustBeBool);
 			if (expr1.Type != expr2.Type)
@@ -868,6 +890,21 @@ namespace DynamicExpresso.Parsing
 				}
 			}
 			return Expression.Condition(test, expr1, expr2);
+		}
+
+		private Expression GenerateConditionalDynamic(Expression test, Expression expr1, Expression expr2, int errorPos)
+		{
+			var binder = Microsoft.CSharp.RuntimeBinder.Binder.Convert(
+				CSharpBinderFlags.None,
+				typeof(bool),
+				typeof(Parser)
+				);
+
+			var boolTest = Expression.Dynamic(binder, typeof(bool), test);
+			var casted = Expression.Convert(boolTest, typeof(bool));
+
+			return GenerateConditional(casted, expr1, expr2, errorPos);
+
 		}
 
 		private Expression ParseNew()
@@ -1846,6 +1883,7 @@ namespace DynamicExpresso.Parsing
 					}
 				case ExpressionType.Parameter:
 					return true;
+				
 			}
 
 			return false;
@@ -1965,6 +2003,8 @@ namespace DynamicExpresso.Parsing
 			return GenerateBinary(ExpressionType.GreaterThan, left, right);
 		}
 
+		
+
 		private Expression GenerateGreaterThanEqual(Expression left, Expression right)
 		{
 			if (left.Type == typeof(string))
@@ -2004,6 +2044,10 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GenerateBinary(ExpressionType binaryType, Expression left, Expression right)
 		{
+
+			if (IsDynamicExpression(left) || IsDynamicExpression(right))
+				return GenerateBinaryDynamic(binaryType, left, right);
+
 			// find the overloaded binary operator
 			string opName;
 
@@ -2041,6 +2085,21 @@ namespace DynamicExpresso.Parsing
 
 			// if no operator was found, the default Linq resolution will occur
 			return Expression.MakeBinary(binaryType, left, right, liftToNull, operatorMethod);
+		}
+
+		private static Expression GenerateBinaryDynamic(ExpressionType binaryType,Expression left, Expression right)
+		{
+
+			var binder = Microsoft.CSharp.RuntimeBinder.Binder.BinaryOperation(
+				CSharpBinderFlags.None,
+				binaryType,
+				typeof(Parser),
+				new CSharpArgumentInfo[] {
+				CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
+				CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)}
+				);
+
+			return Expression.Dynamic(binder, typeof(object), left, right);
 		}
 
 		private MethodData FindBinaryOperator(string operatorName, Expression left, Expression right)
