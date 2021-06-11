@@ -894,14 +894,8 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GenerateConditionalDynamic(Expression test, Expression expr1, Expression expr2, int errorPos)
 		{
-			var binder = Microsoft.CSharp.RuntimeBinder.Binder.Convert(
-				CSharpBinderFlags.None,
-				typeof(bool),
-				typeof(Parser)
-				);
 
-			var boolTest = Expression.Dynamic(binder, typeof(bool), test);
-			var casted = Expression.Convert(boolTest, typeof(bool));
+			var casted = Expression.Convert(test, typeof(bool));
 
 			return GenerateConditional(casted, expr1, expr2, errorPos);
 
