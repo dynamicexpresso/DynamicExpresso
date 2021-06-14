@@ -164,7 +164,6 @@ namespace DynamicExpresso.UnitTest
 			expressionText = "\"ciao \" + someFunc()";
 			Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
 			
-			
 			Func<Object> someFuncObject = () => null;
 			interpreter.SetFunction("someFuncObject", someFuncObject);
 			expressionText = "\"ciao \" + someFuncObject()";
