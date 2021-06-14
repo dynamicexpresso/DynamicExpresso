@@ -173,6 +173,33 @@ namespace DynamicExpresso.UnitTest
 			expressionText = "someFunc() + \"123\" + null + \"678\" + someFuncObject()";
 			Assert.AreEqual("123678", interpreter.Eval(expressionText));
 		}
+		
+		private class MyClass
+		{
+			public override string ToString()
+			{
+				return "MyClassStr";
+			}
+		}
+
+		private class MyClassNullToString : MyClass
+		{
+			public override string ToString()
+			{
+				return null;
+			}
+		}
+
+		[Test]
+		public void String_Concatenation_with_overridden_ToString()
+		{
+			Interpreter interpreter = new Interpreter()
+				.SetVariable("myClass", new MyClass())
+				.SetVariable("myClassNullToString", new MyClassNullToString());
+		
+			Assert.AreEqual("ciao MyClassStr", interpreter.Eval("\"ciao \" + myClass"));
+			Assert.AreEqual("ciao ", interpreter.Eval("\"ciao \" + myClassNullToString"));
+		}
 
 		[Test]
 		public void Numeric_Expression()
