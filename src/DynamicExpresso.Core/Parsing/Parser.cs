@@ -1346,7 +1346,7 @@ namespace DynamicExpresso.Parsing
 
 		private static bool IsNullableType(Type type)
 		{
-			return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+			return Nullable.GetUnderlyingType(type) != null;
 		}
 
 		private static bool IsDynamicType(Type type)
@@ -2126,25 +2126,25 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression ToStringOrNull(Expression expression)
 		{
-			var nullConstant = Expression.Constant(null);
+			var nullableExpression = IsNullableType(expression.Type) ?
+				expression :
+				GenerateNullableTypeConversion(expression);
+
+			var expressionTypeNullConstant = Expression.Constant(null, nullableExpression.Type);
+			var stringNullConstant = Expression.Constant(null, typeof(string));
+
 			Expression condition = Expression.Equal(
-				expression,
-				nullConstant);
+				nullableExpression,
+				expressionTypeNullConstant);
 
 			return Expression.Condition(
 				condition,
-				Expression.ConvertChecked(nullConstant, typeof(String)),
+				stringNullConstant,
 				Expression.Call(expression, _toStringMethod));
 		}
 
 		private static Expression GenerateStringConcatOperand(Expression expression)
 		{
-			if (expression is ConstantExpression constantExpression &&
-			    constantExpression.Value == null)
-			{
-				return Expression.ConvertChecked(constantExpression, typeof(string));
-			}
-
 			return expression.Type != typeof(string)
 				? ToStringOrNull(expression)
 				: expression;
@@ -2536,12 +2536,13 @@ namespace DynamicExpresso.Parsing
 		{
 			var exprType = expr.Type;
 
-			if (exprType.IsGenericType && exprType.GetGenericTypeDefinition() == typeof(Nullable<>))
+			if (IsNullableType(exprType) ||
+			    !exprType.IsValueType)
 			{
 				return expr;
 			}
 
-			var conversionType = typeof(Nullable<>).MakeGenericType(expr.Type);
+			var conversionType = typeof(Nullable<>).MakeGenericType(exprType);
 			return Expression.ConvertChecked(expr, conversionType);
 		}
 
