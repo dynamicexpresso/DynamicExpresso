@@ -47,7 +47,7 @@ jobs:
     - name: Restore packages
       run: dotnet restore DynamicExpresso.sln
     - name: Build
-      run: dotnet build DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}}
+      run: dotnet build DynamicExpresso.sln --no-restore -c Release
     - name: Test .net 4.6.1
       run: dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f net461
     - name: Test .net 4.5
