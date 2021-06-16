@@ -40,19 +40,10 @@ jobs:
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: '0' # all
     - name: Setup .NET Core 5.0
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '5.0.x'
-    - name: Setup gitversion
-      run: dotnet tool install --global GitVersion.Tool
-    - name: Calculate version
-      id: calc_version
-      run: |
-        GITVERSION=$(dotnet-gitversion /output json /showvariable FullSemVer)
-        echo "::set-output name=PROJECT_VERSION::$GITVERSION"
     - name: Restore packages
       run: dotnet restore DynamicExpresso.sln
     - name: Build
