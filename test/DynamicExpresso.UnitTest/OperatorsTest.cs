@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using DynamicExpresso.Exceptions;
 using NUnit.Framework;
 
@@ -74,8 +77,8 @@ namespace DynamicExpresso.UnitTest
 			object a = "string value";
 			object b = 64;
 			var target = new Interpreter()
-													.SetVariable("a", a, typeof(object))
-													.SetVariable("b", b, typeof(object));
+				.SetVariable("a", a, typeof(object))
+				.SetVariable("b", b, typeof(object));
 
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 			Assert.AreEqual(a is string, target.Eval("a is string"));
@@ -92,8 +95,8 @@ namespace DynamicExpresso.UnitTest
 			object a = "string value";
 			object b = 64;
 			var target = new Interpreter()
-													.SetVariable("a", a, typeof(object))
-													.SetVariable("b", b, typeof(object));
+				.SetVariable("a", a, typeof(object))
+				.SetVariable("b", b, typeof(object));
 
 			// ReSharper disable once TryCastAlwaysSucceeds
 			Assert.AreEqual(a as string, target.Eval("a as string"));
@@ -128,6 +131,73 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual("ciao " + 1981, target.Eval("\"ciao \" + 1981"));
 			Assert.AreEqual(1981 + "ciao ", target.Eval("1981 + \"ciao \""));
+		}
+
+		[Test]
+		public void String_Concatenation_check_string_method()
+		{
+			MethodInfo expectedMethod = typeof(string)
+				.GetMethod(nameof(String.Concat), new[] {typeof(string), typeof(string)});
+            
+			Interpreter interpreter = new Interpreter();
+
+			string expressionText = "\"ciao \" + 1981";
+
+			Lambda lambda = interpreter.Parse(expressionText);
+            
+			MethodCallExpression methodCallExpression = lambda.Expression as MethodCallExpression;
+            
+			Assert.IsNotNull(methodCallExpression);
+			Assert.AreEqual(expectedMethod, methodCallExpression.Method);
+		}
+
+		[Test]
+		public void String_Concatenation_with_null()
+		{
+			Interpreter interpreter = new Interpreter();
+			
+			string expressionText = "\"ciao \" + null";
+			Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
+			
+			Func<String> someFunc = () => null;
+			interpreter.SetFunction("someFunc", someFunc);
+			expressionText = "\"ciao \" + someFunc()";
+			Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
+			
+			Func<Object> someFuncObject = () => null;
+			interpreter.SetFunction("someFuncObject", someFuncObject);
+			expressionText = "\"ciao \" + someFuncObject()";
+			Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
+
+			expressionText = "someFunc() + \"123\" + null + \"678\" + someFuncObject()";
+			Assert.AreEqual("123678", interpreter.Eval(expressionText));
+		}
+		
+		private class MyClass
+		{
+			public override string ToString()
+			{
+				return "MyClassStr";
+			}
+		}
+
+		private class MyClassNullToString : MyClass
+		{
+			public override string ToString()
+			{
+				return null;
+			}
+		}
+
+		[Test]
+		public void String_Concatenation_with_overridden_ToString()
+		{
+			Interpreter interpreter = new Interpreter()
+				.SetVariable("myClass", new MyClass())
+				.SetVariable("myClassNullToString", new MyClassNullToString());
+		
+			Assert.AreEqual("ciao MyClassStr", interpreter.Eval("\"ciao \" + myClass"));
+			Assert.AreEqual("ciao ", interpreter.Eval("\"ciao \" + myClassNullToString"));
 		}
 
 		[Test]
@@ -411,7 +481,7 @@ namespace DynamicExpresso.UnitTest
 		public void Implicit_conversion_operator_for_lambda()
 		{
 			var target = new Interpreter()
-					.SetVariable("x", new TypeWithImplicitConversion(10));
+				.SetVariable("x", new TypeWithImplicitConversion(10));
 
 			var func = target.ParseAsDelegate<Func<int>>("x");
 			var val = func();
@@ -546,7 +616,7 @@ namespace DynamicExpresso.UnitTest
 			public static bool operator ==(ClassWithOverloadedBinaryOperators instance, string value)
 			{
 				return ReferenceEquals(instance, null) == false
-					&& instance._value.ToString().Equals(value);
+				       && instance._value.ToString().Equals(value);
 			}
 
 			public static bool operator !=(ClassWithOverloadedBinaryOperators instance, string value)
