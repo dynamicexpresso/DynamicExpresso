@@ -37,12 +37,17 @@ jobs:
       run: dotnet build DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}}
     - name: Test .net core 5.0
       run: dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f netcoreapp5.0
-    - name: Setup nuget source
-      run: dotnet nuget add source --name github "https://nuget.pkg.github.com/davideicardi/index.json"
+    - name: Setup nuget sources
+      run: |
+        dotnet nuget add source --name github "https://nuget.pkg.github.com/davideicardi/index.json"
+        dotnet nuget add source --name official "https://api.nuget.org/v3/index.json"
     - name: Pack
       run: dotnet pack DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
-    - name: Publish snapshot
+    - name: Publish github package
       run: dotnet nuget push "src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish official
+      if: ${{ github.event.inputs.isSnapshot != 'true' }}
+      run: dotnet nuget push "src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.nupkg" --source "official" --api-key ${{ secrets.NUGET_KEY }}
 
   # publish:
   #   runs-on: ubuntu-latest
