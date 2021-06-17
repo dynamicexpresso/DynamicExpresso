@@ -24,6 +24,9 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '5.0.x'
+        source-url: https://nuget.pkg.github.com/davideicardi/index.json
+      env:
+          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     - name: Setup gitversion
       run: dotnet tool install --global GitVersion.Tool
     - name: Calculate version
@@ -38,11 +41,11 @@ jobs:
     - name: Test .net core 5.0
       run: dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f netcoreapp5.0
     - name: Setup nuget source
-      run: dotnet nuget add source --username davideicardi --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/davideicardi/index.json"
+      run: dotnet nuget add source --username davideicardi --name github "https://nuget.pkg.github.com/davideicardi/index.json"
     - name: Pack
       run: dotnet pack DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}}
     - name: Publish snapshot
-      run: dotnet nuget push "src/DynamicExpresso.Core/bin/Release/*.nupkg" --source "github"
+      run: dotnet nuget push "src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.nupkg;src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.symbols.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
 
   # publish:
   #   runs-on: ubuntu-latest
