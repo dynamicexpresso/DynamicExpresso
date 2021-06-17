@@ -41,7 +41,7 @@ jobs:
     - name: Test .net core 5.0
       run: dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f netcoreapp5.0
     - name: Setup nuget source
-      run: dotnet nuget add source --username davideicardi --name github "https://nuget.pkg.github.com/davideicardi/index.json"
+      run: dotnet nuget add source --name github "https://nuget.pkg.github.com/davideicardi/index.json"
     - name: Pack
       run: dotnet pack DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}}
     - name: Publish snapshot
