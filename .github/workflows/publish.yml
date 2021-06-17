@@ -1,0 +1,48 @@
+name: Publish packages
+on:
+  release: # on new releases
+    types: [created]
+  workflow_dispatch: # manual event
+    inputs:
+      ref:
+        description: 'The branch, tag or SHA to checkout'
+        required: true
+        default: 'master'
+      isSnapshot:
+        description: 'Is snapshot release? Set to false if this is an official release'
+        required: true
+        default: 'true'
+jobs:
+  publish-nuget:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        ref: "${{ github.event.inputs.ref }}"
+        fetch-depth: '0' # all
+    - name: Setup .NET Core 5.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.x'
+    - name: Setup gitversion
+      run: dotnet tool install --global GitVersion.Tool
+    - name: Calculate version
+      id: calc_version
+      run: |
+        GITVERSION=$(dotnet-gitversion /output json /showvariable FullSemVer)
+        echo "::set-output name=PROJECT_VERSION::$GITVERSION"
+    - name: Restore packages
+      run: dotnet restore DynamicExpresso.sln
+    - name: Build
+      run: dotnet build DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}}
+    - name: Test .net core 5.0
+      run: dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f netcoreapp5.0
+    - name: Setup nuget sources
+      run: dotnet nuget add source --name github "https://nuget.pkg.github.com/davideicardi/index.json"
+    - name: Pack
+      run: dotnet pack DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+    - name: Publish to github
+      run: dotnet nuget push "src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+    - name: Publish to nuget.org
+      if: ${{ github.event.inputs.isSnapshot != 'true' }}
+      run: dotnet nuget push "src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.nupkg" --source "nuget.org" --api-key ${{ secrets.NUGET_KEY }}

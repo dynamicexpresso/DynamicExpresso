@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp3.1;net461;net45</TargetFrameworks>
+		<TargetFrameworks>netcoreapp5.0;netcoreapp3.1;net461;net45</TargetFrameworks>
 
-		<IsPackable>false</IsPackable>		
+		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -19,5 +19,5 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\src\DynamicExpresso.Core\DynamicExpresso.Core.csproj" />
 	</ItemGroup>
-	
+
 </Project>
