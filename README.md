@@ -473,7 +473,10 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 ## Continuos Integration
 
-I have setup a continuous integration environment with Github Actions, see `.github/workflows` folder.
+A continuous integration pipeline is configured using Github Actions, see `.github/workflows` folder.
+
+Whenever a new [Release](https://github.com/davideicardi/DynamicExpresso/releases) is created, Nuget packages are published. For snapshot releases packages are published only to Github.
+For official releases packages are published to both GitHub and Nuget.
 
 ## Compiling and run tests
 
