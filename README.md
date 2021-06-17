@@ -1,8 +1,7 @@
 ﻿# Dynamic Expresso
 
 [![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
-[![Build Status](https://public-davideicardi.visualstudio.com/dynamic-expresso/_apis/build/status/dynamic-expresso-CI?branchName=master)](https://public-davideicardi.visualstudio.com/dynamic-expresso/_build?definitionId=4
-)
+[![.NET CI](https://github.com/davideicardi/DynamicExpresso/actions/workflows/ci.yml/badge.svg)](https://github.com/davideicardi/DynamicExpresso/actions/workflows/ci.yml)
 
 Available platforms: .NET Core 2.0, .NET 4.5, .NET 4.6.1
 
@@ -472,9 +471,14 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - IronJS, IronRuby, IronPython
 - paxScript.NET http://eco148-88394.innterhost.net/paxscriptnet/
 
-## Developer notes
+## Continuos Integration
 
-I have setup a continuous integration environment with Visual Studio Online Team Services.
+A continuous integration pipeline is configured using Github Actions, see `.github/workflows` folder.
+
+Whenever a new [Release](https://github.com/davideicardi/DynamicExpresso/releases) is created, Nuget packages are published. For snapshot releases packages are published only to Github.
+For official releases packages are published to both GitHub and Nuget.
+
+## Compiling and run tests
 
 To compile the solution you can run:
 
@@ -490,7 +494,7 @@ To run unit tests:
 
 or run unit tests for a specific project with a specific framework:
 
-	dotnet test ./test/DynamicExpresso.UnitTest/DynamicExpresso.UnitTest.csproj -f netcoreapp2.0
+	dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f netcoreapp3.1
 
 Add `--logger:trx` to generate test results for VSTS.
 
