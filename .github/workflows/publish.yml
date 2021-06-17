@@ -40,9 +40,9 @@ jobs:
     - name: Setup nuget source
       run: dotnet nuget add source --name github "https://nuget.pkg.github.com/davideicardi/index.json"
     - name: Pack
-      run: dotnet pack DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}}
+      run: dotnet pack DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
     - name: Publish snapshot
-      run: dotnet nuget push "src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.nupkg;src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.symbols.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+      run: dotnet nuget push "src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
 
   # publish:
   #   runs-on: ubuntu-latest
