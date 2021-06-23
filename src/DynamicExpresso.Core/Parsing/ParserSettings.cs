@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -10,9 +10,11 @@ namespace DynamicExpresso.Parsing
 		private readonly Dictionary<string, ReferenceType> _knownTypes;
 		private readonly HashSet<MethodInfo> _extensionMethods;
 		
-		public ParserSettings(bool caseInsensitive)
+		public ParserSettings(bool caseInsensitive,bool lateBindObject)
 		{
 			CaseInsensitive = caseInsensitive;
+
+			LateBindObject = lateBindObject;
 
 			KeyComparer = CaseInsensitive ? StringComparer.InvariantCultureIgnoreCase : StringComparer.InvariantCulture;
 
@@ -27,6 +29,8 @@ namespace DynamicExpresso.Parsing
 			AssignmentOperators = AssignmentOperators.All;
 
 			DefaultNumberType = DefaultNumberType.Default;
+
+			
 		}
 
 		public IDictionary<string, ReferenceType> KnownTypes
@@ -45,6 +49,12 @@ namespace DynamicExpresso.Parsing
 		}
 
 		public bool CaseInsensitive
+		{
+			get;
+			private set;
+		}
+
+		public bool LateBindObject
 		{
 			get;
 			private set;
@@ -73,5 +83,7 @@ namespace DynamicExpresso.Parsing
 			get;
 			set;
 		}
+
+		
 	}
 }

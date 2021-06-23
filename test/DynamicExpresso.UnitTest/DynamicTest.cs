@@ -1,4 +1,4 @@
-﻿using Microsoft.CSharp.RuntimeBinder;
+using Microsoft.CSharp.RuntimeBinder;
 using NUnit.Framework;
 using System;
 using System.Dynamic;
@@ -241,6 +241,43 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(dyn.Foo % 500, interpreter.Eval("dyn.Foo % 500"));
 			Assert.AreEqual(500 % dyn.Foo, interpreter.Eval("500 % dyn.Foo"));
 		}
+
+		public class ClassWithObjectProperties
+        {
+			public object Foo => 100;
+			public object Bar() => 100;
+        }
+
+		[Test]
+		public void ObjectLateBinding()
+		{
+			
+
+			var classWithObjectProperties = new ClassWithObjectProperties();
+						
+
+			Assert.Throws<ParseException>(() => {
+
+				var noLateBindingInterpreter = new Interpreter();
+				var noLateBindingDel = noLateBindingInterpreter.ParseAsDelegate<Func<ClassWithObjectProperties, int>>("d.Foo+d.Bar()", new[] { "d" });
+				var noLateBindingResult = noLateBindingDel.Invoke(classWithObjectProperties);
+
+			});
+
+
+			var lateBindingInterpreter = new Interpreter(InterpreterOptions.Default|InterpreterOptions.LateBindObject);
+			var lateBindingInterpreterDel = lateBindingInterpreter.ParseAsDelegate<Func<ClassWithObjectProperties, int>>("d.Foo+d.Bar()", new[] { "d" });
+			var lateBindingResult = lateBindingInterpreterDel.Invoke(classWithObjectProperties);
+			Assert.AreEqual((dynamic)classWithObjectProperties.Foo + (dynamic)classWithObjectProperties.Bar(), lateBindingResult);
+
+
+			lateBindingInterpreter.SetVariable("d", classWithObjectProperties);
+			var evalResult = lateBindingInterpreter.Eval("d.Foo+d.Bar()");
+			Assert.IsTrue(evalResult.GetType() == typeof(int));
+			Assert.AreEqual((dynamic)classWithObjectProperties.Foo + (dynamic)classWithObjectProperties.Bar(), evalResult);
+
+		}
+	
 
 		[Test]
 		public void Bitwise_with_dynamic_properties()
