@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
@@ -56,7 +56,9 @@ namespace DynamicExpresso
 
 		internal void AddOverload(Delegate overload)
 		{
-			_overloads.Add(overload);
+			// don't register the same overload twice
+			if (_overloads.IndexOf(overload) == -1)
+				_overloads.Add(overload);
 		}
 	}
 }
