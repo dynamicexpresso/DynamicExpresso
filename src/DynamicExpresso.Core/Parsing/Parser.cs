@@ -1518,9 +1518,11 @@ namespace DynamicExpresso.Parsing
 			return typeof(IDynamicMetaObjectProvider).IsAssignableFrom(type);
 		}
 
-		private static bool IsDynamicExpression(Expression instance)
+		private bool IsDynamicExpression(Expression instance)
 		{
-			return instance != null && instance.NodeType == ExpressionType.Dynamic;
+			return instance != null &&
+				(instance.NodeType == ExpressionType.Dynamic ||
+				(_arguments.Settings.LateBindObject && instance.Type == typeof(object)));
 		}
 
 		private static Type GetNonNullableType(Type type)

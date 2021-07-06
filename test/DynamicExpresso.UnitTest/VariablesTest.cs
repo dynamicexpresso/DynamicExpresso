@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using DynamicExpresso.Exceptions;
@@ -135,6 +135,17 @@ namespace DynamicExpresso.UnitTest
 		{
 			Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
 			var target = new Interpreter()
+									.SetFunction("pow", pow);
+
+			Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
+		}
+
+		[Test]
+		public void Keywords_with_same_overload_twice()
+		{
+			Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
+			var target = new Interpreter()
+									.SetFunction("pow", pow)
 									.SetFunction("pow", pow);
 
 			Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));

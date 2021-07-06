@@ -35,7 +35,9 @@ namespace DynamicExpresso
 		{
 			var caseInsensitive = options.HasFlag(InterpreterOptions.CaseInsensitive);
 
-			_settings = new ParserSettings(caseInsensitive);
+			var lateBindObject = options.HasFlag(InterpreterOptions.LateBindObject);
+
+			_settings = new ParserSettings(caseInsensitive, lateBindObject);
 
 			if ((options & InterpreterOptions.SystemKeywords) == InterpreterOptions.SystemKeywords)
 			{

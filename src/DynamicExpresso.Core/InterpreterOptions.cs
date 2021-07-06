@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DynamicExpresso
 {
@@ -23,9 +23,13 @@ namespace DynamicExpresso
 		/// </summary>
 		CaseInsensitive = 8,
 		/// <summary>
+		/// Allow treating expressions of type Object as dynamic
+		/// </summary>		
+		LateBindObject = 16,
+		/// <summary>
 		/// Enable parsing of lambda expressions. Disabled by default, because it has a slight performance cost.
 		/// </summary>
-		LambdaExpressions = 16,
+		LambdaExpressions = 32,
 		/// <summary>
 		/// Load all default configurations: PrimitiveTypes + SystemKeywords + CommonTypes
 		/// </summary>
