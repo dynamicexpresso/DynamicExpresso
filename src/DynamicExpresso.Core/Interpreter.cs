@@ -57,7 +57,7 @@ namespace DynamicExpresso
 
 			if ((options & InterpreterOptions.LambdaExpressions) == InterpreterOptions.LambdaExpressions)
 			{
-				EnableLambdaExpressions(true);
+				_settings.LambdaExpressions = true;
 			}
 
 			_visitors.Add(new DisableReflectionVisitor());
@@ -138,19 +138,6 @@ namespace DynamicExpresso
 		public Interpreter EnableAssignment(AssignmentOperators assignmentOperators)
 		{
 			_settings.AssignmentOperators = assignmentOperators;
-
-			return this;
-		}
-
-		/// <summary>
-		/// Allows to enable/disable lambda expressions parsing. 
-		/// Parsing lambda expressions has a slight performance cost, which is why they're not enabled by default.
-		/// </summary>
-		/// <param name="enableLambdaExpressions"></param>
-		/// <returns></returns>
-		public Interpreter EnableLambdaExpressions(bool enableLambdaExpressions)
-		{
-			_settings.LambdaExpressions = enableLambdaExpressions;
 
 			return this;
 		}
