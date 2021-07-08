@@ -115,15 +115,15 @@ namespace DynamicExpresso.Parsing
 			// MSDN C# "Operator precedence and associativity"
 			// https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/
 
-			if (_arguments.Settings.LambdaExpressions)
-			{
-				var lambdaExpr = ParseLambdaExpression();
-				if (lambdaExpr != null)
-					return lambdaExpr;
-			}
-
 			try
 			{
+				if (_arguments.Settings.LambdaExpressions)
+				{
+					var lambdaExpr = ParseLambdaExpression();
+					if (lambdaExpr != null)
+						return lambdaExpr;
+				}
+
 				return ParseAssignment();
 			}
 			catch (InvalidOperationException ex)
@@ -169,7 +169,7 @@ namespace DynamicExpresso.Parsing
 				var lambdaBodyExp = _expressionText.Substring(startExpr, _token.pos - startExpr);
 				return new InterpreterExpression(_arguments.Settings, lambdaBodyExp, parameters);
 			}
-			catch (Exception)
+			catch (ParseException)
 			{
 				// not a lambda, return to the saved position
 				SetTextPos(originalPos);

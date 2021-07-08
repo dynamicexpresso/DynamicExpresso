@@ -1,4 +1,4 @@
-﻿# Dynamic Expresso
+# Dynamic Expresso
 
 [![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
 [![.NET CI](https://github.com/davideicardi/DynamicExpresso/actions/workflows/ci.yml/badge.svg)](https://github.com/davideicardi/DynamicExpresso/actions/workflows/ci.yml)
@@ -335,8 +335,8 @@ Dynamic Expresso has partial supports of lambda expressions. For example, you ca
 
 ```csharp
 var x = new string[] { "this", "is", "awesome" };
-var target = new Interpreter()
-	.EnableLambdaExpressions(true) // enable lambda expressions
+var options = InterpreterOptions.Default | InterpreterOptions.LambdaExpressions; // enable lambda expressions
+var target = new Interpreter(options)
 	.SetVariable("x", x);
 
 var results = target.Eval<IEnumerable<string>>("x.Where(str => str.Length > 5).Select(str => str.ToUpper())");
@@ -344,14 +344,13 @@ Assert.AreEqual(new[] { "AWESOME" }, results);
 ```
 
 Note that parsing lambda expressions is disabled by default, because it has a slight performance cost.
-To enable them, you must call the `.EnableLambdaExpressions(true)` method.
+To enable them, you must set `InterpreterOptions.LambdaExpressions` flag.
 
 It's also possible to create a delegate directly from a lambda expression:
 
 ```csharp
-
-var target = new Interpreter()
-	.EnableLambdaExpressions(true) // enable lambda expressions
+var options = InterpreterOptions.Default | InterpreterOptions.LambdaExpressions; // enable lambda expressions
+var target = new Interpreter(options)
 	.SetVariable("increment", 3); // access a variable from the lambda expression
 
 var myFunc = target.Eval<Func<int, string, string>>("(i, str) => str.ToUpper() + (i + increment)");
