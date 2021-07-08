@@ -344,7 +344,7 @@ Assert.AreEqual(new[] { "AWESOME" }, results);
 ```
 
 Note that parsing lambda expressions is disabled by default, because it has a slight performance cost.
-To enable them, you must set `InterpreterOptions.LambdaExpressions` flag.
+To enable them, you must set the `InterpreterOptions.LambdaExpressions` flag.
 
 It's also possible to create a delegate directly from a lambda expression:
 
