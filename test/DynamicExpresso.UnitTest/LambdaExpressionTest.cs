@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -68,6 +68,14 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter(_options);
 			var lambda = target.Eval<Func<string, string>>("str => str.ToUpper()");
 			Assert.AreEqual("TEST", lambda.Invoke("test"));
+		}
+
+		[Test]
+		public void Lambda_expression_no_arguments()
+		{
+			var target = new Interpreter(_options);
+			var lambda = target.Eval<Func<int>>("() => 5 + 6");
+			Assert.AreEqual(11, lambda.Invoke());
 		}
 
 		[Test]
@@ -234,7 +242,7 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("strList", strList);
 			target.SetVariable("intList", intList);
 			var results = target.Eval<IEnumerable<string>>("strList.Zip(intList, (str, i) => str + i)");
-			
+
 			Assert.AreEqual(3, results.Count());
 			Assert.AreEqual(strList.Zip(intList, (str, i) => str + i), results);
 		}

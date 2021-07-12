@@ -185,7 +185,7 @@ namespace DynamicExpresso.Parsing
 			if (hasOpenParen)
 				NextToken();
 
-			var parameters = ParseLambdaParameters();
+			var parameters = _token.id != TokenId.CloseParen ? ParseLambdaParameters() : new Parameter[0];
 			if (hasOpenParen)
 			{
 				ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
