@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
-using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso
 {
@@ -72,9 +71,9 @@ namespace DynamicExpresso
 		public object Invoke(IEnumerable<Parameter> parameters)
 		{
 			var args = (from usedParameter in UsedParameters
-				from actualParameter in parameters
-				where usedParameter.Name.Equals(actualParameter.Name, _parserArguments.Settings.KeyComparison)
-				select actualParameter.Value)
+						from actualParameter in parameters
+						where usedParameter.Name.Equals(actualParameter.Name, _parserArguments.Settings.KeyComparison)
+						select actualParameter.Value)
 				.ToArray();
 
 			return InvokeWithUsedParameters(args);
@@ -154,6 +153,18 @@ namespace DynamicExpresso
 		public Expression<TDelegate> LambdaExpression<TDelegate>()
 		{
 			return Expression.Lambda<TDelegate>(_expression, DeclaredParameters.Select(p => p.Expression).ToArray());
+		}
+
+		internal LambdaExpression LambdaExpression(Type delegateType)
+		{
+			var types = delegateType.GetGenericArguments();
+
+			// return type
+			types[types.Length - 1] = _expression.Type;
+
+			var genericType = delegateType.GetGenericTypeDefinition();
+			var inferredDelegateType = genericType.MakeGenericType(types);
+			return Expression.Lambda(inferredDelegateType, _expression, DeclaredParameters.Select(p => p.Expression).ToArray());
 		}
 	}
 }

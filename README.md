@@ -1,4 +1,4 @@
-﻿# Dynamic Expresso
+# Dynamic Expresso
 
 [![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
 [![.NET CI](https://github.com/davideicardi/DynamicExpresso/actions/workflows/ci.yml/badge.svg)](https://github.com/davideicardi/DynamicExpresso/actions/workflows/ci.yml)
@@ -50,6 +50,7 @@ Source code and symbols (.pdb files) for debugging are available on [Symbol Sour
 - Good performance compared to other similar projects
 - Partial support of generic, params array and extension methods (only with implicit generic arguments detection)
 - Partial support of `dynamic` (`ExpandoObject` for get properties, method invocation and indexes(#142), see #72. `DynamicObject` for get properties and indexes, see #142)
+- Partial support of lambda expressions (disabled by default, because it has a slight performance penalty)
 - Case insensitive expressions (default is case sensitive)
 - Ability to discover identifiers (variables, types, parameters) of a given expression
 - Small footprint, generated expressions are managed classes, can be unloaded and can be executed in a single appdomain
@@ -329,6 +330,33 @@ Assert.AreEqual(x.Count(), target.Eval("x.Count()"));
 - Generics, only partially supported (only implicit, you cannot invoke an explicit generic method)
 - Params array (see C# `params` keyword)
 
+### Lambda expressions
+Dynamic Expresso has partial supports of lambda expressions. For example, you can use any Linq method:
+
+```csharp
+var x = new string[] { "this", "is", "awesome" };
+var options = InterpreterOptions.Default | InterpreterOptions.LambdaExpressions; // enable lambda expressions
+var target = new Interpreter(options)
+	.SetVariable("x", x);
+
+var results = target.Eval<IEnumerable<string>>("x.Where(str => str.Length > 5).Select(str => str.ToUpper())");
+Assert.AreEqual(new[] { "AWESOME" }, results);
+```
+
+Note that parsing lambda expressions is disabled by default, because it has a slight performance cost.
+To enable them, you must set the `InterpreterOptions.LambdaExpressions` flag.
+
+It's also possible to create a delegate directly from a lambda expression:
+
+```csharp
+var options = InterpreterOptions.Default | InterpreterOptions.LambdaExpressions; // enable lambda expressions
+var target = new Interpreter(options)
+	.SetVariable("increment", 3); // access a variable from the lambda expression
+
+var myFunc = target.Eval<Func<int, string, string>>("(i, str) => str.ToUpper() + (i + increment)");
+Assert.AreEqual("TEST8", lambda.Invoke(5, "test"));
+```
+
 ### Case sensitive/insensitive
 By default all expressions are considered case sensitive (`VARX` is different than `varx`, as in C#).
 There is an option to use a case insensitive parser. For example:
@@ -343,6 +371,8 @@ var parameters = new[] {
 Assert.AreEqual(x, target.Eval("x", parameters));
 Assert.AreEqual(x, target.Eval("X", parameters));
 ```
+
+
 
 ## Identifiers detection
 Sometimes you need to check which identifiers (variables, types, parameters) are used in expression before parsing it.

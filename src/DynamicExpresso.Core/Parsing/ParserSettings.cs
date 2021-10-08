@@ -27,10 +27,10 @@ namespace DynamicExpresso.Parsing
 			_extensionMethods = new HashSet<MethodInfo>();
 
 			AssignmentOperators = AssignmentOperators.All;
-
+      
 			DefaultNumberType = DefaultNumberType.Default;
-
-			
+      
+			LambdaExpressions = false;
 		}
 
 		public IDictionary<string, ReferenceType> KnownTypes
@@ -84,6 +84,10 @@ namespace DynamicExpresso.Parsing
 			set;
 		}
 
-		
+		public bool LambdaExpressions
+		{
+			get;
+			set;
+		}
 	}
 }
