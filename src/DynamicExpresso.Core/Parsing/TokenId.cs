@@ -38,7 +38,8 @@
 		Equal,
 		Caret,
 		OpenCurlyBracket,
-		CloseCurlyBracket
+		CloseCurlyBracket,
+		LambdaArrow
 	}
 
 }
