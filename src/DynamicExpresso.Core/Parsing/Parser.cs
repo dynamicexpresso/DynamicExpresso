@@ -2304,8 +2304,18 @@ namespace DynamicExpresso.Parsing
 			return Expression.MakeBinary(binaryType, left, right, liftToNull, operatorMethod);
 		}
 
-		private static Expression GenerateBinaryDynamic(ExpressionType binaryType,Expression left, Expression right)
+		private Expression GenerateBinaryDynamic(ExpressionType binaryType,Expression left, Expression right)
 		{
+			//binary binder for dynamic type does not support AndAlso and OrElse as valid operations
+			if (binaryType == ExpressionType.AndAlso || binaryType == ExpressionType.OrElse)
+			{
+				if (IsDynamicExpression(left))
+					left = Expression.Convert(left, typeof(bool));
+				if (IsDynamicExpression(right))
+					right = Expression.Convert(right, typeof(bool));
+
+				return Expression.MakeBinary(binaryType, left, right);
+			}
 
 			var binder = Microsoft.CSharp.RuntimeBinder.Binder.BinaryOperation(
 				CSharpBinderFlags.None,

@@ -218,6 +218,62 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void AndAlso_with_dynamic_properties()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = 500;
+			dyn.Bar = 100;
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", (object)dyn);
+
+			Assert.AreEqual(dyn.Foo == 500 && dyn.Bar == 100, interpreter.Eval("dyn.Foo == 500 && dyn.Bar == 100"));
+			Assert.AreEqual(dyn.Foo == 500 && dyn.Bar != 100, interpreter.Eval("dyn.Foo == 500 && dyn.Bar != 100"));
+			Assert.AreEqual(dyn.Foo != 500 && dyn.Bar == 100, interpreter.Eval("dyn.Foo != 500 && dyn.Bar == 100"));
+			Assert.AreEqual(dyn.Foo != 500 && dyn.Bar != 100, interpreter.Eval("dyn.Foo != 500 && dyn.Bar != 100"));
+
+			//check non dynamic right side
+			Assert.AreEqual(dyn.Foo == 500 && 100 == 100, interpreter.Eval("dyn.Foo == 500 && 100 == 100"));
+			Assert.AreEqual(dyn.Foo == 500 && 100 != 100, interpreter.Eval("dyn.Foo == 500 && 100 != 100"));
+			Assert.AreEqual(dyn.Foo != 500 && 100 == 100, interpreter.Eval("dyn.Foo != 500 && 100 == 100"));
+			Assert.AreEqual(dyn.Foo != 500 && 100 != 100, interpreter.Eval("dyn.Foo != 500 && 100 != 100"));
+
+			//check non dynamic left side
+			Assert.AreEqual(100 == 100 && dyn.Foo == 500, interpreter.Eval("100 == 100 && dyn.Foo == 500"));
+			Assert.AreEqual(100 != 100 && dyn.Foo == 500, interpreter.Eval("100 != 100 && dyn.Foo == 500"));
+			Assert.AreEqual(100 == 100 && dyn.Foo != 500, interpreter.Eval("100 == 100 && dyn.Foo != 500"));
+			Assert.AreEqual(100 != 100 && dyn.Foo != 500, interpreter.Eval("100 != 100 && dyn.Foo != 500"));
+		}
+
+		[Test]
+		public void OrElse_with_dynamic_properties()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = 500;
+			dyn.Bar = 100;
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", (object)dyn);
+
+			Assert.AreEqual(dyn.Foo == 500 || dyn.Bar == 100, interpreter.Eval("dyn.Foo == 500 || dyn.Bar == 100"));
+			Assert.AreEqual(dyn.Foo == 500 || dyn.Bar != 100, interpreter.Eval("dyn.Foo == 500 || dyn.Bar != 100"));
+			Assert.AreEqual(dyn.Foo != 500 || dyn.Bar == 100, interpreter.Eval("dyn.Foo != 500 || dyn.Bar == 100"));
+			Assert.AreEqual(dyn.Foo != 500 || dyn.Bar != 100, interpreter.Eval("dyn.Foo != 500 || dyn.Bar != 100"));
+
+			//check non dynamic right side
+			Assert.AreEqual(dyn.Foo == 500 || 100 == 100, interpreter.Eval("dyn.Foo == 500 || 100 == 100"));
+			Assert.AreEqual(dyn.Foo == 500 || 100 != 100, interpreter.Eval("dyn.Foo == 500 || 100 != 100"));
+			Assert.AreEqual(dyn.Foo != 500 || 100 == 100, interpreter.Eval("dyn.Foo != 500 || 100 == 100"));
+			Assert.AreEqual(dyn.Foo != 500 || 100 != 100, interpreter.Eval("dyn.Foo != 500 || 100 != 100"));
+
+			//check non dynamic left side
+			Assert.AreEqual(100 == 100 || dyn.Foo == 500, interpreter.Eval("100 == 100 || dyn.Foo == 500"));
+			Assert.AreEqual(100 != 100 || dyn.Foo == 500, interpreter.Eval("100 != 100 || dyn.Foo == 500"));
+			Assert.AreEqual(100 == 100 || dyn.Foo != 500, interpreter.Eval("100 == 100 || dyn.Foo != 500"));
+			Assert.AreEqual(100 != 100 || dyn.Foo != 500, interpreter.Eval("100 != 100 || dyn.Foo != 500"));
+		}
+
+		[Test]
 		public void Math_with_dynamic_properties()
 		{
 			dynamic dyn = new ExpandoObject();
