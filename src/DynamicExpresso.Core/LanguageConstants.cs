@@ -1,4 +1,4 @@
-﻿using DynamicExpresso.Parsing;
+using DynamicExpresso.Parsing;
 using System;
 using System.Linq.Expressions;
 
@@ -35,9 +35,15 @@ namespace DynamicExpresso
 						new ReferenceType("string", typeof(string)),
 						new ReferenceType("char", typeof(char)),
 						new ReferenceType("bool", typeof(bool)),
+						new ReferenceType("sbyte", typeof(sbyte)),
 						new ReferenceType("byte", typeof(byte)),
+						new ReferenceType("short", typeof(short)),
+						new ReferenceType("ushort", typeof(ushort)),
 						new ReferenceType("int", typeof(int)),
+						new ReferenceType("uint", typeof(uint)),
 						new ReferenceType("long", typeof(long)),
+						new ReferenceType("ulong", typeof(ulong)),
+						new ReferenceType("float", typeof(float)),
 						new ReferenceType("double", typeof(double)),
 						new ReferenceType("decimal", typeof(decimal))
 				};
