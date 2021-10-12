@@ -1,4 +1,4 @@
-﻿namespace DynamicExpresso.Parsing
+namespace DynamicExpresso.Parsing
 {
 	internal enum TokenId
 	{
@@ -26,6 +26,7 @@
 		GreaterThan,
 		Question,
 		OpenBracket,
+		QuestionOpenBracket,
 		CloseBracket,
 		ExclamationEqual,
 		Amphersand,

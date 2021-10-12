@@ -72,6 +72,24 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void GitHub_Issue_65_Part2()
+		{
+			var interpreter = new Interpreter();
+
+			var x = new
+			{
+				var1 = "hallo",
+				var2 = (string)null
+			};
+
+			interpreter.SetVariable("x", x);
+			Assert.AreEqual(x.var1?[2], interpreter.Eval("x.var1?[2]"));
+			Assert.AreEqual(x.var2?[2], interpreter.Eval("x.var2?[2]"));
+			Assert.AreEqual(x.var1?[2] == 'l', interpreter.Eval("x.var1?[2] == 'l'"));
+			Assert.AreEqual(x.var2?[2] == null, interpreter.Eval("x.var2?[2] == null"));
+		}
+
+		[Test]
 		public void GitHub_Issue_88()
 		{
 			var interpreter = new Interpreter();
