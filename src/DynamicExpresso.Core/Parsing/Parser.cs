@@ -929,6 +929,8 @@ namespace DynamicExpresso.Parsing
 				return ParseNew();
 			if (_token.text == ParserConstants.KeywordTypeof)
 				return ParseTypeof();
+			if (_token.text == ParserConstants.KeywordDefault)
+				return ParseDefaultOperator();
 
 			if (_arguments.TryGetIdentifier(_token.text, out Expression keywordExpression))
 			{
@@ -986,6 +988,24 @@ namespace DynamicExpresso.Parsing
 				throw CreateParseException(errorPos, ErrorMessages.TypeofRequiresAType);
 
 			return constExp;
+		}
+
+		private Expression ParseDefaultOperator()
+		{
+			NextToken();
+
+			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
+			NextToken();
+			ValidateToken(TokenId.Identifier);
+
+			var name = _token.text;
+			if (_arguments.TryGetKnownType(name, out var type))
+				type = ParseFullType(type);
+
+			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+			NextToken();
+
+			return Expression.Default(type);
 		}
 
 		private Expression GenerateConditional(Expression test, Expression expr1, Expression expr2, int errorPos)
