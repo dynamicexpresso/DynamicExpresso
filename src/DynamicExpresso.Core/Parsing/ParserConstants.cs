@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 
 namespace DynamicExpresso.Parsing
 {
@@ -10,12 +10,14 @@ namespace DynamicExpresso.Parsing
 		public const string KeywordIs = "is";
 		public const string KeywordNew = "new";
 		public const string KeywordTypeof = "typeof";
+		public const string KeywordDefault = "default";
 
 		public static readonly string[] ReservedKeywords = {
 				KeywordAs,
 				KeywordIs,
 				KeywordNew,
-				KeywordTypeof
+				KeywordTypeof,
+				KeywordDefault
 			};
 	}
 }
