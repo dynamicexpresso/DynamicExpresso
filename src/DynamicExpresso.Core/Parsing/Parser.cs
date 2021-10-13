@@ -655,6 +655,15 @@ namespace DynamicExpresso.Parsing
 				{
 					expr = ParseElementAccess(expr);
 				}
+				else if (_token.id == TokenId.QuestionOpenBracket)
+				{
+					// ?[ operator changes value types to nullable types
+					var elementAccess = ParseElementAccess(expr);
+					if (elementAccess.Type.IsValueType)
+						elementAccess = PromoteExpression(elementAccess, typeof(Nullable<>).MakeGenericType(elementAccess.Type), true);
+
+					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
+				}
 				else if (_token.id == TokenId.OpenParen)
 				{
 					if (expr is LambdaExpression lambda)
@@ -1488,7 +1497,8 @@ namespace DynamicExpresso.Parsing
 		private Expression ParseElementAccess(Expression expr)
 		{
 			var errorPos = _token.pos;
-			ValidateToken(TokenId.OpenBracket, ErrorMessages.OpenParenExpected);
+			// expected tokens: either [ or ?[
+			ValidateToken(new[] { TokenId.OpenBracket, TokenId.QuestionOpenBracket }, ErrorMessages.OpenParenExpected);
 			NextToken();
 			var args = ParseArguments();
 			ValidateToken(TokenId.CloseBracket, ErrorMessages.CloseBracketOrCommaExpected);
@@ -2605,6 +2615,11 @@ namespace DynamicExpresso.Parsing
 						NextChar();
 						t = TokenId.QuestionDot;
 					}
+					else if (_parseChar == '[')
+					{
+						NextChar();
+						t = TokenId.QuestionOpenBracket;
+					}
 					else if (_parseChar == '?')
 					{
 						NextChar();
@@ -2797,6 +2812,12 @@ namespace DynamicExpresso.Parsing
 		private void ValidateToken(TokenId t, string errorMessage)
 		{
 			if (_token.id != t)
+				throw CreateParseException(_token.pos, errorMessage);
+		}
+
+		private void ValidateToken(IList<TokenId> t, string errorMessage)
+		{
+			if (!t.Contains(_token.id))
 				throw CreateParseException(_token.pos, errorMessage);
 		}
 
