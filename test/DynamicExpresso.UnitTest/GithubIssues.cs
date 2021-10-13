@@ -215,12 +215,12 @@ namespace DynamicExpresso.UnitTest
 
 			var str = "str";
 
-			interpreter.SetVariable("str", str, typeof(string));
+			interpreter.SetVariable("str", str);
 			Assert.AreEqual(str?.Length, interpreter.Eval("str?.Length"));
 			Assert.AreEqual(str?.Length == 3, interpreter.Eval<bool>("str?.Length == 3"));
 
 			str = null;
-			interpreter.SetVariable("str", str, typeof(string));
+			interpreter.SetVariable("str", str);
 			Assert.AreEqual(str?.Length, interpreter.Eval("str?.Length"));
 			Assert.AreEqual(str?.Length == 0, interpreter.Eval<bool>("str?.Length == 0"));
 		}
