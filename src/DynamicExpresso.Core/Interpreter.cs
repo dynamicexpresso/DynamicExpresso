@@ -206,6 +206,17 @@ namespace DynamicExpresso
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="value"></param>
+		/// <returns></returns>
+		public Interpreter SetVariable<T>(string name, T value)
+		{
+			return SetVariable(name, value, typeof(T));
+		}
+
+		/// <summary>
+		/// Allow the specified variable to be used in a parsed expression.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <param name="value"></param>
 		/// <param name="type"></param>
 		/// <returns></returns>
 		public Interpreter SetVariable(string name, object value, Type type)

@@ -649,7 +649,13 @@ namespace DynamicExpresso.Parsing
 				else if (_token.id == TokenId.QuestionDot)
 				{
 					NextToken();
-					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, ParseMemberAccess(null, expr), _token.pos);
+
+					// ?. operator changes value types to nullable types
+					var memberAccess = ParseMemberAccess(null, expr);
+					if (memberAccess.Type.IsValueType)
+						memberAccess = PromoteExpression(memberAccess, typeof(Nullable<>).MakeGenericType(memberAccess.Type), true);
+
+					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
 				}
 				else if (_token.id == TokenId.OpenBracket)
 				{
