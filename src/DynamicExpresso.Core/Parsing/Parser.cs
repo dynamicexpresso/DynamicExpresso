@@ -963,7 +963,7 @@ namespace DynamicExpresso.Parsing
 			{
 				return ParseTypeKeyword(knownType);
 			}
-			
+
 			// Working context implementation
 			//if (it != null)
 			//    return ParseMemberAccess(null, it);
@@ -2120,7 +2120,7 @@ namespace DynamicExpresso.Parsing
 					}
 				case ExpressionType.Parameter:
 					return true;
-				
+
 			}
 
 			return false;
@@ -2186,11 +2186,11 @@ namespace DynamicExpresso.Parsing
 				var promoteMethodParam = methodParamType.IsGenericType && methodParamType.ContainsGenericParameters;
 				var promoteOtherMethodParam = otherMethodParamType.IsGenericType && otherMethodParamType.ContainsGenericParameters;
 
-				if (promoteMethodParam) 
+				if (promoteMethodParam)
 					methodParamType = method.PromotedParameters[i].Type;
 				if (promoteOtherMethodParam)
 					otherMethodParamType = otherMethod.PromotedParameters[i].Type;
-				
+
 				var c = CompareConversions(args[i].Type, methodParamType, otherMethodParamType);
 				if (c < 0)
 					return false;
@@ -2256,7 +2256,7 @@ namespace DynamicExpresso.Parsing
 			return GenerateBinary(ExpressionType.GreaterThan, left, right);
 		}
 
-		
+
 
 		private Expression GenerateGreaterThanEqual(Expression left, Expression right)
 		{
@@ -2859,7 +2859,7 @@ namespace DynamicExpresso.Parsing
 		}
 
 		/// <summary>
-		/// Expression that wraps over an interpreter. This is used when parsing a lambda expression 
+		/// Expression that wraps over an interpreter. This is used when parsing a lambda expression
 		/// definition, because we don't know the parameters type before resolution.
 		/// </summary>
 		private class InterpreterExpression : Expression
