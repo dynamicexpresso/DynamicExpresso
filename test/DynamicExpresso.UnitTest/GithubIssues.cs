@@ -219,7 +219,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ParseException>(() => interpreter.Eval("GFunction(arg)"));
 
 			// there should be an ambiguous call exception, but GFunction1 is used
-			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true
+			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true 
 			// and     gFunc2.Method.GetParameters()[0].HasDefaultValue == false
 			Assert.False((bool)interpreter.Eval("GFunction()"));
 		}
@@ -241,30 +241,6 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("str", str);
 			Assert.AreEqual(str?.Length, interpreter.Eval("str?.Length"));
 			Assert.AreEqual(str?.Length == 0, interpreter.Eval<bool>("str?.Length == 0"));
-		}
-
-		[Test]
-		public void GitHub_Issue_169()
-		{
-			var interpreter = new Interpreter();
-
-			var obj = new
-			{
-				value = (int?) 10,
-				array = new int?[]{ 10 },
-				nullArray = (int?[]) null,
-			};
-
-			interpreter.SetVariable("obj", obj);
-			Assert.AreEqual(obj.value, interpreter.Eval("obj?.value"));
-			Assert.AreEqual(obj.array[0], interpreter.Eval("obj?.array?[0]"));
-			Assert.IsNull(interpreter.Eval("obj?.nullArray?[0]"));
-
-			obj = null;
-			interpreter.SetVariable("obj", obj);
-			Assert.IsNull(interpreter.Eval("obj?.value"));
-			Assert.IsNull(interpreter.Eval("obj?.array?[0]"));
-			Assert.IsNull(interpreter.Eval("obj?.nullArray?[0]"));
 		}
 	}
 }
