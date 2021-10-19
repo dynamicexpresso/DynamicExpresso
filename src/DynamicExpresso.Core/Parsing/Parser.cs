@@ -651,10 +651,7 @@ namespace DynamicExpresso.Parsing
 					NextToken();
 
 					// ?. operator changes value types to nullable types
-					var memberAccess = ParseMemberAccess(null, expr);
-					if (memberAccess.Type.IsValueType)
-						memberAccess = PromoteExpression(memberAccess, typeof(Nullable<>).MakeGenericType(memberAccess.Type), true);
-
+					var memberAccess = GenerateNullableTypeConversion(ParseMemberAccess(null, expr));
 					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
 				}
 				else if (_token.id == TokenId.OpenBracket)
@@ -664,10 +661,7 @@ namespace DynamicExpresso.Parsing
 				else if (_token.id == TokenId.QuestionOpenBracket)
 				{
 					// ?[ operator changes value types to nullable types
-					var elementAccess = ParseElementAccess(expr);
-					if (elementAccess.Type.IsValueType)
-						elementAccess = PromoteExpression(elementAccess, typeof(Nullable<>).MakeGenericType(elementAccess.Type), true);
-
+					var elementAccess = GenerateNullableTypeConversion(ParseElementAccess(expr));
 					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
 				}
 				else if (_token.id == TokenId.OpenParen)
