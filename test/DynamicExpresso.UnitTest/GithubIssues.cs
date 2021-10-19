@@ -330,5 +330,19 @@ namespace DynamicExpresso.UnitTest
 			// must throw, because scope.ValueInt is not a nullable type
 			Assert.Throws<ParseException>(() => interpreter.Eval<bool>("scope.ArrInt[0].HasValue"));
 		}
+
+		[Test]
+		public void GitHub_Issue_169_quatro()
+		{
+			var interpreter = new Interpreter();
+
+			interpreter.SetVariable("x", (int?)null);
+			var result = interpreter.Eval<string>("x?.ToString()");
+			Assert.IsNull(result);
+
+			interpreter.SetVariable("x", (int?)56);
+			result = interpreter.Eval<string>("x?.ToString()");
+			Assert.AreEqual("56", result);
+		}
 	}
 }

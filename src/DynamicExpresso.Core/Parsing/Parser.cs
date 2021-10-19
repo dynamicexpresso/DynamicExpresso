@@ -652,7 +652,9 @@ namespace DynamicExpresso.Parsing
 
 					// ?. operator changes value types to nullable types
 					var memberAccess = GenerateNullableTypeConversion(ParseMemberAccess(null, expr));
-					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
+					var nullExpr = ParserConstants.NullLiteralExpression;
+					CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
+					expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
 				}
 				else if (_token.id == TokenId.OpenBracket)
 				{
@@ -662,7 +664,9 @@ namespace DynamicExpresso.Parsing
 				{
 					// ?[ operator changes value types to nullable types
 					var elementAccess = GenerateNullableTypeConversion(ParseElementAccess(expr));
-					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
+					var nullExpr = ParserConstants.NullLiteralExpression;
+					CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
+					expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
 				}
 				else if (_token.id == TokenId.OpenParen)
 				{
