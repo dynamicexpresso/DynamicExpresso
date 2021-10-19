@@ -652,7 +652,7 @@ namespace DynamicExpresso.Parsing
 
 					// ?. operator changes value types to nullable types
 					var memberAccess = ParseMemberAccess(null, expr);
-					if (memberAccess.Type.IsValueType)
+					if (memberAccess.Type.IsValueType && Nullable.GetUnderlyingType(memberAccess.Type) == null)
 						memberAccess = PromoteExpression(memberAccess, typeof(Nullable<>).MakeGenericType(memberAccess.Type), true);
 
 					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
@@ -665,7 +665,7 @@ namespace DynamicExpresso.Parsing
 				{
 					// ?[ operator changes value types to nullable types
 					var elementAccess = ParseElementAccess(expr);
-					if (elementAccess.Type.IsValueType)
+					if (elementAccess.Type.IsValueType && Nullable.GetUnderlyingType(elementAccess.Type) == null)
 						elementAccess = PromoteExpression(elementAccess, typeof(Nullable<>).MakeGenericType(elementAccess.Type), true);
 
 					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
