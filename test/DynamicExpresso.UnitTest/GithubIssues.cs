@@ -219,7 +219,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ParseException>(() => interpreter.Eval("GFunction(arg)"));
 
 			// there should be an ambiguous call exception, but GFunction1 is used
-			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true
+			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true 
 			// and     gFunc2.Method.GetParameters()[0].HasDefaultValue == false
 			Assert.False((bool)interpreter.Eval("GFunction()"));
 		}
