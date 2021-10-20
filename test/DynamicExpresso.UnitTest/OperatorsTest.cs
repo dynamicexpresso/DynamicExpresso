@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq;
+using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using DynamicExpresso.Exceptions;
@@ -68,7 +68,38 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
+			Assert.Throws<ParseException>(() => target.Eval("typeof(int??)"));
+			Assert.Throws<ParseException>(() => target.Eval("typeof(string?)"));
+
 			Assert.AreEqual(typeof(string), target.Eval("typeof(string)"));
+			Assert.AreEqual(typeof(int), target.Eval("typeof(int)"));
+			Assert.AreEqual(typeof(int?), target.Eval("typeof(int?)"));
+		}
+
+		[Test]
+		public void Typeof_Operator_Arrays()
+		{
+			var target = new Interpreter();
+
+			Assert.AreEqual(typeof(int[]), target.Eval("typeof(int[])"));
+			Assert.AreEqual(typeof(int?[]), target.Eval("typeof(int?[])"));
+			Assert.AreEqual(typeof(int?[,,][][,]), target.Eval("typeof(int?[,,][][,])"));
+		}
+
+		[Test]
+		public void Typeof_Operator_Generics()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(IEnumerable<>), "IEnumerable");
+			target.Reference(typeof(Dictionary<,>), "Dictionary");
+
+			Assert.AreEqual(typeof(IEnumerable<int>), target.Eval("typeof(IEnumerable<int>)"));
+			Assert.AreEqual(typeof(IEnumerable<IEnumerable<int?[]>>), target.Eval("typeof(IEnumerable<IEnumerable<int?[]>>)"));
+			Assert.AreEqual(typeof(IEnumerable<>), target.Eval("typeof(IEnumerable<>)"));
+
+			Assert.AreEqual(typeof(Dictionary<int, string>[,]), target.Eval("typeof(Dictionary<int,string>[,])"));
+			Assert.AreEqual(typeof(Dictionary<int, IEnumerable<int[]>>), target.Eval("typeof(Dictionary<int, IEnumerable<int[]>>)"));
+			Assert.AreEqual(typeof(Dictionary<,>), target.Eval("typeof(Dictionary<,>)"));
 		}
 
 		[Test]
