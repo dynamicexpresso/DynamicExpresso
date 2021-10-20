@@ -252,4 +252,7 @@
   <data name="EqualExpected" xml:space="preserve">
     <value>'=' expected</value>
   </data>
+  <data name="CloseTypeArgumentListExpected" xml:space="preserve">
+    <value>'&gt;' expected</value>
+  </data>
 </root>

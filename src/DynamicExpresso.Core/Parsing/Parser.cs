@@ -1022,6 +1022,8 @@ namespace DynamicExpresso.Parsing
 			var name = _token.text;
 			if (_arguments.TryGetKnownType(name, out var type))
 				type = ParseFullType(type);
+			else
+				throw new UnknownIdentifierException(_token.text, _token.pos);
 
 			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
 			NextToken();
@@ -1212,8 +1214,98 @@ namespace DynamicExpresso.Parsing
 				if (!type.IsValueType || IsNullableType(type))
 					throw CreateParseException(errorPos, ErrorMessages.TypeHasNoNullableForm, GetTypeName(type));
 				type = typeof(Nullable<>).MakeGenericType(type);
+				type = ParseFullType(type);
+			}
+			else if (_token.id == TokenId.OpenBracket)
+			{
+				type = ParseArrayRankSpecifier(type);
+			}
+			else if (_token.id == TokenId.LessThan)
+			{
+				type = ParseTypeArgumentList(type);
+				type = ParseFullType(type);
+			}
+
+			return type;
+		}
+
+		private Type ParseArrayRankSpecifier(Type type)
+		{
+			ValidateToken(TokenId.OpenBracket);
+
+			// An array type of the form T[R][R1]...[Rn] is an array with rank R and an element type T[R1]...[Rn]
+			// => we need to parse all rank specifiers in one pass, and create the array from right to left
+			var ranks = new Stack<int>();
+			while (_token.id == TokenId.OpenBracket)
+			{
+				NextToken();
+				var rank = 1;
+				while (_token.id == TokenId.Comma)
+				{
+					rank++;
+					NextToken();
+				}
+
+				ValidateToken(TokenId.CloseBracket, ErrorMessages.CloseBracketOrCommaExpected);
+				ranks.Push(rank);
 				NextToken();
 			}
+
+			while (ranks.Count > 0)
+			{
+				var rank = ranks.Pop();
+				type = rank == 1 ? type.MakeArrayType() : type.MakeArrayType(rank);
+			}
+
+			return type;
+		}
+
+		private Type ParseTypeArgumentList(Type type)
+		{
+			ValidateToken(TokenId.LessThan);
+			NextToken();
+
+			if (_token.id == TokenId.Identifier)
+				type = ParseTypeArguments(type);
+			else
+				type = ParseUnboundType(type);
+
+			ValidateToken(TokenId.GreaterThan, ErrorMessages.CloseTypeArgumentListExpected);
+			return type;
+		}
+
+		private Type ParseTypeArguments(Type type)
+		{
+			var genericArguments = new List<Type>();
+			while (true)
+			{
+				ValidateToken(TokenId.Identifier);
+				var name = _token.text;
+				if (_arguments.TryGetKnownType(name, out var genericArgument))
+					genericArgument = ParseFullType(genericArgument);
+				else
+					throw new UnknownIdentifierException(_token.text, _token.pos);
+
+				genericArguments.Add(genericArgument);
+				if (_token.id != TokenId.Comma) break;
+				NextToken();
+			}
+
+			type = type.MakeGenericType(genericArguments.ToArray());
+			return type;
+		}
+
+		private Type ParseUnboundType(Type type)
+		{
+			var rank = 1;
+			while (_token.id == TokenId.Comma)
+			{
+				rank++;
+				NextToken();
+			}
+
+			if (rank != type.GetGenericArguments().Length)
+				throw new ArgumentException($"The number of generic arguments provided doesn't equal the arity of the generic type definition.");
 
 			return type;
 		}
