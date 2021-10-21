@@ -242,5 +242,107 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(str?.Length, interpreter.Eval("str?.Length"));
 			Assert.AreEqual(str?.Length == 0, interpreter.Eval<bool>("str?.Length == 0"));
 		}
+
+		[Test]
+		public void GitHub_Issue_164_bis()
+		{
+			var interpreter = new Interpreter();
+
+			var lambda = interpreter.Parse("Scope?.ValueInt", new Parameter("Scope", typeof(Scope)));
+
+			var result = lambda.Invoke((Scope)null);
+			Assert.IsNull(result);
+
+			result = lambda.Invoke(new Scope { ValueInt = 5 });
+			Assert.AreEqual(5, result);
+
+			interpreter.SetVariable("scope", new Scope { ValueInt = 5 });
+			var resultNullableBool = interpreter.Eval<bool>("scope?.ValueInt?.HasValue");
+			Assert.IsTrue(resultNullableBool);
+
+			// must throw, because scope.ValueInt is not a nullable type
+			Assert.Throws<ParseException>(() => interpreter.Eval<bool>("scope.ValueInt.HasValue"));
+		}
+
+		private class Scope
+		{
+			public int ValueInt { get; set; }
+			public int? Value { get; set; }
+
+			public int[] ArrInt { get; set; }
+			public int?[] Arr { get; set; }
+		}
+
+		[Test]
+		public void GitHub_Issue_169()
+		{
+			var interpreter = new Interpreter();
+
+			var lambda = interpreter.Parse("Scope?.Value", new Parameter("Scope", typeof(Scope)));
+
+			var result = lambda.Invoke((Scope)null);
+			Assert.IsNull(result);
+
+			result = lambda.Invoke(new Scope());
+			Assert.IsNull(result);
+
+			result = lambda.Invoke(new Scope { Value = null });
+			Assert.IsNull(result);
+
+			result = lambda.Invoke(new Scope { Value = 5 });
+			Assert.AreEqual(5, result);
+		}
+
+		[Test]
+		public void GitHub_Issue_169_bis()
+		{
+			var interpreter = new Interpreter();
+
+			var lambda = interpreter.Parse("Scope?.Arr?[0]", new Parameter("Scope", typeof(Scope)));
+
+			var result = lambda.Invoke(new Scope());
+			Assert.IsNull(result);
+
+			result = lambda.Invoke(new Scope { Arr = null });
+			Assert.IsNull(result);
+
+			result = lambda.Invoke(new Scope { Arr = new int?[] { 5 } });
+			Assert.AreEqual(5, result);
+		}
+
+		[Test]
+		public void GitHub_Issue_169_ter()
+		{
+			var interpreter = new Interpreter();
+
+			var lambda = interpreter.Parse("Scope?.ArrInt?[0]", new Parameter("Scope", typeof(Scope)));
+
+			var result = lambda.Invoke(new Scope());
+			Assert.IsNull(result);
+
+			result = lambda.Invoke(new Scope { ArrInt = new int[] { 5 } });
+			Assert.AreEqual(5, result);
+
+			interpreter.SetVariable("scope", new Scope { ArrInt = new int[] { 5 } });
+			var resultNullableBool = interpreter.Eval<bool>("scope?.ArrInt?[0].HasValue");
+			Assert.IsTrue(resultNullableBool);
+
+			// must throw, because scope.ValueInt is not a nullable type
+			Assert.Throws<ParseException>(() => interpreter.Eval<bool>("scope.ArrInt[0].HasValue"));
+		}
+
+		[Test]
+		public void GitHub_Issue_169_quatro()
+		{
+			var interpreter = new Interpreter();
+
+			interpreter.SetVariable("x", (int?)null);
+			var result = interpreter.Eval<string>("x?.ToString()");
+			Assert.IsNull(result);
+
+			interpreter.SetVariable("x", (int?)56);
+			result = interpreter.Eval<string>("x?.ToString()");
+			Assert.AreEqual("56", result);
+		}
 	}
 }
