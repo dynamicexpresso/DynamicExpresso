@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using DynamicExpresso.Exceptions;
 using NUnit.Framework;
 
@@ -77,6 +77,31 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(new MyClass() { StrProp = "test", IntField = 5, }, target.Eval("new MyClass() { StrProp = \"test\", IntField = 5, }"));
 			Assert.AreEqual(new MyClass() { StrProp = "test", IntField = 5 }, target.Eval("new MyClass() { StrProp = \"test\", IntField = 5 }"));
+		}
+
+		[Test]
+		public void Constructor_invocation_generics()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Tuple<>));
+			target.Reference(typeof(Tuple<,>));
+			target.Reference(typeof(Tuple<,,>));
+			Assert.AreEqual(1, target.Eval("new Tuple<int>(1).Item1"));
+			Assert.AreEqual("My str item", target.Eval("new Tuple<int, string>(5, \"My str item\").Item2"));
+			Assert.AreEqual(3, target.Eval("new Tuple<int, int, int>(1, 2, 3).Item3"));
+		}
+
+		[Test]
+		public void Constructor_invocation_named_generics()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Tuple<,>), "Tuple");
+			Assert.AreEqual("My str item", target.Eval("new Tuple<int, string>(5, \"My str item\").Item2"));
+
+			target.Reference(typeof(Tuple<>), "Tuple1");
+			target.Reference(typeof(Tuple<,,>), "Tuple3");
+			Assert.AreEqual(1, target.Eval("new Tuple1<int>(1).Item1"));
+			Assert.AreEqual(3, target.Eval("new Tuple3<int, int, int>(1, 2, 3).Item3"));
 		}
 
 		[Test]
