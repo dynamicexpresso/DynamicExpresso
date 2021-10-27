@@ -92,6 +92,18 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Constructor_invocation_named_generics_with_arity()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Tuple<>), "Toto`1");
+			target.Reference(typeof(Tuple<,>), "Toto`2");
+			target.Reference(typeof(Tuple<,,>), "Toto`3");
+			Assert.AreEqual(1, target.Eval("new Toto<int>(1).Item1"));
+			Assert.AreEqual("My str item", target.Eval("new Toto<int, string>(5, \"My str item\").Item2"));
+			Assert.AreEqual(3, target.Eval("new Toto<int, int, int>(1, 2, 3).Item3"));
+		}
+
+		[Test]
 		public void Constructor_invocation_named_generics()
 		{
 			var target = new Interpreter();
