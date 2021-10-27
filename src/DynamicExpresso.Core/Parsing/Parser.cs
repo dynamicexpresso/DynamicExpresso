@@ -646,27 +646,33 @@ namespace DynamicExpresso.Parsing
 					NextToken();
 					expr = ParseMemberAccess(null, expr);
 				}
-				else if (_token.id == TokenId.QuestionDot)
+				// special case for ?. and ?[ operators
+				else if (_token.id == TokenId.Question && (_parseChar == '.' || _parseChar == '['))
 				{
 					NextToken();
 
-					// ?. operator changes value types to nullable types
-					var memberAccess = GenerateNullableTypeConversion(ParseMemberAccess(null, expr));
-					var nullExpr = ParserConstants.NullLiteralExpression;
-					CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
-					expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
+					if (_token.id == TokenId.Dot)
+					{
+						NextToken();
+
+						// ?. operator changes value types to nullable types
+						var memberAccess = GenerateNullableTypeConversion(ParseMemberAccess(null, expr));
+						var nullExpr = ParserConstants.NullLiteralExpression;
+						CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
+						expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
+					}
+					else if (_token.id == TokenId.OpenBracket)
+					{
+						// ?[ operator changes value types to nullable types
+						var elementAccess = GenerateNullableTypeConversion(ParseElementAccess(expr));
+						var nullExpr = ParserConstants.NullLiteralExpression;
+						CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
+						expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
+					}
 				}
 				else if (_token.id == TokenId.OpenBracket)
 				{
 					expr = ParseElementAccess(expr);
-				}
-				else if (_token.id == TokenId.QuestionOpenBracket)
-				{
-					// ?[ operator changes value types to nullable types
-					var elementAccess = GenerateNullableTypeConversion(ParseElementAccess(expr));
-					var nullExpr = ParserConstants.NullLiteralExpression;
-					CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
-					expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
 				}
 				else if (_token.id == TokenId.OpenParen)
 				{
@@ -1014,6 +1020,8 @@ namespace DynamicExpresso.Parsing
 			var name = _token.text;
 			if (_arguments.TryGetKnownType(name, out var type))
 				type = ParseFullType(type);
+			else
+				throw new UnknownIdentifierException(_token.text, _token.pos);
 
 			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
 			NextToken();
@@ -1204,8 +1212,98 @@ namespace DynamicExpresso.Parsing
 				if (!type.IsValueType || IsNullableType(type))
 					throw CreateParseException(errorPos, ErrorMessages.TypeHasNoNullableForm, GetTypeName(type));
 				type = typeof(Nullable<>).MakeGenericType(type);
+				type = ParseFullType(type);
+			}
+			else if (_token.id == TokenId.OpenBracket)
+			{
+				type = ParseArrayRankSpecifier(type);
+			}
+			else if (_token.id == TokenId.LessThan)
+			{
+				type = ParseTypeArgumentList(type);
+				type = ParseFullType(type);
+			}
+
+			return type;
+		}
+
+		private Type ParseArrayRankSpecifier(Type type)
+		{
+			ValidateToken(TokenId.OpenBracket);
+
+			// An array type of the form T[R][R1]...[Rn] is an array with rank R and an element type T[R1]...[Rn]
+			// => we need to parse all rank specifiers in one pass, and create the array from right to left
+			var ranks = new Stack<int>();
+			while (_token.id == TokenId.OpenBracket)
+			{
+				NextToken();
+				var rank = 1;
+				while (_token.id == TokenId.Comma)
+				{
+					rank++;
+					NextToken();
+				}
+
+				ValidateToken(TokenId.CloseBracket, ErrorMessages.CloseBracketOrCommaExpected);
+				ranks.Push(rank);
 				NextToken();
 			}
+
+			while (ranks.Count > 0)
+			{
+				var rank = ranks.Pop();
+				type = rank == 1 ? type.MakeArrayType() : type.MakeArrayType(rank);
+			}
+
+			return type;
+		}
+
+		private Type ParseTypeArgumentList(Type type)
+		{
+			ValidateToken(TokenId.LessThan);
+			NextToken();
+
+			if (_token.id == TokenId.Identifier)
+				type = ParseTypeArguments(type);
+			else
+				type = ParseUnboundType(type);
+
+			ValidateToken(TokenId.GreaterThan, ErrorMessages.CloseTypeArgumentListExpected);
+			return type;
+		}
+
+		private Type ParseTypeArguments(Type type)
+		{
+			var genericArguments = new List<Type>();
+			while (true)
+			{
+				ValidateToken(TokenId.Identifier);
+				var name = _token.text;
+				if (_arguments.TryGetKnownType(name, out var genericArgument))
+					genericArgument = ParseFullType(genericArgument);
+				else
+					throw new UnknownIdentifierException(_token.text, _token.pos);
+
+				genericArguments.Add(genericArgument);
+				if (_token.id != TokenId.Comma) break;
+				NextToken();
+			}
+
+			type = type.MakeGenericType(genericArguments.ToArray());
+			return type;
+		}
+
+		private Type ParseUnboundType(Type type)
+		{
+			var rank = 1;
+			while (_token.id == TokenId.Comma)
+			{
+				rank++;
+				NextToken();
+			}
+
+			if (rank != type.GetGenericArguments().Length)
+				throw new ArgumentException($"The number of generic arguments provided doesn't equal the arity of the generic type definition.");
 
 			return type;
 		}
@@ -1501,8 +1599,7 @@ namespace DynamicExpresso.Parsing
 		private Expression ParseElementAccess(Expression expr)
 		{
 			var errorPos = _token.pos;
-			// expected tokens: either [ or ?[
-			ValidateToken(new[] { TokenId.OpenBracket, TokenId.QuestionOpenBracket }, ErrorMessages.OpenParenExpected);
+			ValidateToken(TokenId.OpenBracket, ErrorMessages.OpenParenExpected);
 			NextToken();
 			var args = ParseArguments();
 			ValidateToken(TokenId.CloseBracket, ErrorMessages.CloseBracketOrCommaExpected);
@@ -2614,17 +2711,7 @@ namespace DynamicExpresso.Parsing
 					break;
 				case '?':
 					NextChar();
-					if (_parseChar == '.')
-					{
-						NextChar();
-						t = TokenId.QuestionDot;
-					}
-					else if (_parseChar == '[')
-					{
-						NextChar();
-						t = TokenId.QuestionOpenBracket;
-					}
-					else if (_parseChar == '?')
+					if (_parseChar == '?')
 					{
 						NextChar();
 						t = TokenId.QuestionQuestion;
@@ -2816,12 +2903,6 @@ namespace DynamicExpresso.Parsing
 		private void ValidateToken(TokenId t, string errorMessage)
 		{
 			if (_token.id != t)
-				throw CreateParseException(_token.pos, errorMessage);
-		}
-
-		private void ValidateToken(IList<TokenId> t, string errorMessage)
-		{
-			if (!t.Contains(_token.id))
 				throw CreateParseException(_token.pos, errorMessage);
 		}
 
