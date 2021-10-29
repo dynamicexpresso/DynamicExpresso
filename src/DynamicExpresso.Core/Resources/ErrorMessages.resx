@@ -244,7 +244,7 @@
     <value>Ambiguous invocation of delegate (multiple overloads found)</value>
   </data>
   <data name="CloseCurlyBracketExpected" xml:space="preserve">
-    <value>'}' expected</value>
+    <value>'}}' expected</value>
   </data>
   <data name="OpenCurlyBracketExpected" xml:space="preserve">
     <value>'{{' expected</value>
