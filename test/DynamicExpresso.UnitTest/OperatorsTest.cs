@@ -103,6 +103,18 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Typeof_Operator_Generics_Arity()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Tuple<>));
+			target.Reference(typeof(Tuple<,>));
+			target.Reference(typeof(Tuple<,,>));
+			Assert.AreEqual(typeof(Tuple<>), target.Eval("typeof(Tuple<>)"));
+			Assert.AreEqual(typeof(Tuple<,>), target.Eval("typeof(Tuple<,>)"));
+			Assert.AreEqual(typeof(Tuple<,,>), target.Eval("typeof(Tuple<,,>)"));
+		}
+
+		[Test]
 		public void Is_Operator()
 		{
 			object a = "string value";
@@ -118,6 +130,23 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(b is string, target.Eval("b is string"));
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 			Assert.AreEqual(b is int, target.Eval("b is int"));
+		}
+
+		[Test]
+		public void Is_Operator_Generics()
+		{
+			object a = Tuple.Create(1);
+			object b = Tuple.Create(1, 2);
+			var target = new Interpreter()
+				.SetVariable("a", a, typeof(object))
+				.SetVariable("b", b, typeof(object));
+
+			target.Reference(typeof(Tuple<>));
+			target.Reference(typeof(Tuple<,>));
+
+			Assert.AreEqual(true, target.Eval("a is Tuple<int>"));
+			Assert.AreEqual(typeof(bool), target.Parse("a is Tuple<int>").ReturnType);
+			Assert.AreEqual(true, target.Eval("b is Tuple<int,int>"));
 		}
 
 		[Test]
