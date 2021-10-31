@@ -1,7 +1,7 @@
 # Dynamic Expresso
 
 [![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
-[![.NET CI](https://github.com/davideicardi/DynamicExpresso/actions/workflows/ci.yml/badge.svg)](https://github.com/davideicardi/DynamicExpresso/actions/workflows/ci.yml)
+[![.NET CI](https://github.com/dynamicexpresso/DynamicExpresso/actions/workflows/ci.yml/badge.svg)](https://github.com/dynamicexpresso/DynamicExpresso/actions/workflows/ci.yml)
 
 Available platforms: .NET Core 2.0, .NET 4.5, .NET 4.6.1
 
@@ -12,7 +12,7 @@ Using Dynamic Expresso developers can create scriptable applications, execute .N
 
 Statements are written using a subset of C# language specifications. Global variables or parameters can be injected and used inside expressions. It doesn't generate assembly but it creates an expression tree on the fly. 
 
-![dynamic expresso workflow](https://raw.github.com/davideicardi/DynamicExpresso/master/docs/workflow.png "dynamic expresso workflow")
+![dynamic expresso workflow](https://raw.github.com/dynamicexpresso/DynamicExpresso/master/docs/workflow.png "dynamic expresso workflow")
 
 For example you can evaluate math expressions:
 ```csharp
@@ -464,31 +464,34 @@ Here are some possible usage scenarios of Dynamic Expresso:
 - LINQ dynamic query
 
 ## Future roadmap
-See [github open issues and milestones](https://github.com/davideicardi/DynamicExpresso/issues).
+
+See [github open issues and milestones](https://github.com/dynamicexpresso/DynamicExpresso/issues).
 
 ## Help and support
+
 If you need help you can try one of the following:
 
-- [FAQ](https://github.com/davideicardi/DynamicExpresso/wiki/FAQ) wiki page
-- github [official repository](https://github.com/davideicardi/DynamicExpresso)
+- [FAQ](https://github.com/dynamicexpresso/DynamicExpresso/wiki/FAQ) wiki page
+- github [official repository](https://github.com/dynamicexpresso/DynamicExpresso)
 
+## Maintainers
+
+Currently Dynamic Expresso is maintained by @davideicardi and @metoule.
 
 ## Credits
+
 This project is based on two old works:
-- "Converting String expressions to Funcs with FunctionFactory by Matthew Abbott" (http://www.fidelitydesign.net/?p=333) 
-- DynamicQuery - Dynamic LINQ - Visual Studio 2008 sample:
-	- http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx 
+- "Converting String expressions to Funcs with FunctionFactory by Matthew Abbott" (link not more available) 
+- DynamicQuery - Dynamic LINQ - Visual Studio 2008 sample: http://msdn.microsoft.com/en-us/vstudio/bb894665.aspx 
 
-
-Thanks to JetBrain for helping me with a license of Resharper.
-[![JetBrain Resharper](https://github.com//davideicardi/DynamicExpresso/blob/master/docs/jetbrains.png?raw=true)](https://www.jetbrains.com/)
+Thanks to all [contributors](https://github.com/dynamicexpresso/DynamicExpresso/graphs/contributors)!
 
 ## Other resources or similar projects
 Below you can find a list of some similar projects that I have evaluated or that can be interesting to study. 
 For one reason or another none of these projects exactly fit my needs so I decided to write my own interpreter.
 
 - Roslyn Project - Scripting API - https://github.com/dotnet/roslyn/wiki/Scripting-API-Samples
-	- This is the new Microsoft Official Compiler as a service library. I suggest to consider using Roslyin instead of DynamicExpresso whenever possible.
+	- This is the new Microsoft Official Compiler as a service library. I suggest to consider using Roslyin instead of DynamicExpresso for complex scenarios.
 - Mono.CSharp - C# Compiler Service and Runtime Evaulator - http://docs.go-mono.com/index.aspx?link=N%3AMono.CSharp
 - NCalc - Mathematical Expressions Evaluator for .NET - http://ncalc.codeplex.com/
 - David Wynne CSharpEval https://github.com/DavidWynne/CSharpEval
@@ -505,7 +508,7 @@ For one reason or another none of these projects exactly fit my needs so I decid
 
 A continuous integration pipeline is configured using Github Actions, see `.github/workflows` folder.
 
-Whenever a new [Release](https://github.com/davideicardi/DynamicExpresso/releases) is created, Nuget packages are published. For snapshot releases packages are published only to Github.
+Whenever a new [Release](https://github.com/dynamicexpresso/DynamicExpresso/releases) is created, Nuget packages are published. For snapshot releases packages are published only to Github.
 For official releases packages are published to both GitHub and Nuget.
 
 ## Compiling and run tests
@@ -530,4 +533,4 @@ Add `--logger:trx` to generate test results for VSTS.
 
 ## Release notes
 
-See [releases page](https://github.com/davideicardi/DynamicExpresso/releases).
+See [releases page](https://github.com/dynamicexpresso/DynamicExpresso/releases).
