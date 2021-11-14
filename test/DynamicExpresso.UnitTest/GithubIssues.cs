@@ -356,5 +356,14 @@ namespace DynamicExpresso.UnitTest
 			var result = del();
 			Assert.AreEqual(246, result);
 		}
+
+		[Test]
+		public void GitHub_Issue_185_2()
+		{
+			var interpreter = new Interpreter().SetVariable("a", 123L);
+			var del = interpreter.ParseAsDelegate<Func<dynamic>>("a*2");
+			var result = del();
+			Assert.AreEqual(246, result);
+		}
 	}
 }
