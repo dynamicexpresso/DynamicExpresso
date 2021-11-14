@@ -101,7 +101,7 @@ namespace DynamicExpresso.Parsing
 			int errorPos = _token.pos;
 			var expression = ParseExpressionSegment();
 
-			if (returnType != typeof(void) && returnType != typeof(object))
+			if (returnType != typeof(void))
 			{
 				return GenerateConversion(expression, returnType, errorPos);
 			}
