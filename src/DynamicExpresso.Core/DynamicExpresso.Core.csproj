@@ -5,16 +5,16 @@
     <RootNamespace>DynamicExpresso</RootNamespace>
 
     <Authors>Davide Icardi</Authors>
-    <Company>davideicardi.com</Company>
+    <Company>DynamicExpresso</Company>
     <Description>C# expression interpreter/evaluator</Description>
     <Copyright>Davide Icardi</Copyright>
     <PackageTags>dynamic expression linq eval script</PackageTags>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IncludeSymbols>True</IncludeSymbols>
     <IncludeSource>True</IncludeSource>
-    <PackageProjectUrl>https://github.com/davideicardi/DynamicExpresso</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/dynamicexpresso/DynamicExpresso</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/davideicardi/DynamicExpresso.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/dynamicexpresso/DynamicExpresso.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <VersionPrefix>0.0.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
