@@ -1,5 +1,5 @@
-﻿using DynamicExpressoWebShell.Services;
-using Newtonsoft.Json;
+using DynamicExpressoWebShell.Services;
+using System.Text.Json;
 using System;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +24,8 @@ namespace DynamicExpressoWebShell.Controllers
 				//if (result == null)
 				//    return Json(new { success = true, result = "<null>" });
 
-				var prettifyOutput = JsonConvert.SerializeObject(result, Formatting.Indented);
+				var options = new JsonSerializerOptions { WriteIndented = true };
+				var prettifyOutput = JsonSerializer.Serialize(result, options);
 
 				return Json(new { success = true, result = prettifyOutput });
 			}
