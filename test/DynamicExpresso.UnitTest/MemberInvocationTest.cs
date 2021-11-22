@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
@@ -370,7 +370,21 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 			Assert.AreEqual(3, target.Eval("x.OverloadMethodWithParamsArray(2, 3, 1)"));
 		}
-		
+
+
+		[Test]
+		public void Generic_method_with_params()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Utils));
+
+			var listInt = target.Eval<List<int>>("Utils.Array(1, 2, 3)");
+			Assert.AreEqual(new[] { 1, 2, 3 }, listInt);
+
+			// type parameter can't be inferred from usage
+			Assert.Throws<Exception>(() => target.Eval<List<int>>("Utils.Array(1,\"str\", 3)"));
+		}
+
 		[Test]
 		public void Method_with_optional_param()
 		{
@@ -553,6 +567,14 @@ namespace DynamicExpresso.UnitTest
 			public string AMethod()
 			{
 				return "Ciao mondo";
+			}
+		}
+
+		private static class Utils
+		{
+			public static List<T> Array<T>(params T[] array)
+			{
+				return new List<T>(array);
 			}
 		}
 	}
