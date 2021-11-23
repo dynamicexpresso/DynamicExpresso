@@ -1968,13 +1968,13 @@ namespace DynamicExpresso.Parsing
 				method.HasParamsArray = true;
 				var paramsArrayElementType = paramsArrayTypeFound.GetElementType();
 				if (paramsArrayElementType == null)
-					throw new Exception("Type is not an array, element not found");
+					throw CreateParseException(-1, ErrorMessages.ParamsArrayTypeNotAnArray);
 
 				if (paramsArrayElementType.IsGenericParameter)
 				{
 					var actualTypes = paramsArrayPromotedArgument.Select(_ => _.Type).Distinct().ToArray();
 					if (actualTypes.Length != 1)
-						throw new Exception($"The type arguments for method '{method.MethodBase}' cannot be inferred from the usage.");
+						throw CreateParseException(-1, ErrorMessages.MethodTypeParametersCantBeInferred, method.MethodBase);
 
 					paramsArrayElementType = actualTypes[0];
 				}

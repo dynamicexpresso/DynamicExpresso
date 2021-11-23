@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DynamicExpresso.Exceptions;
 using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
@@ -382,7 +383,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(new[] { 1, 2, 3 }, listInt);
 
 			// type parameter can't be inferred from usage
-			Assert.Throws<Exception>(() => target.Eval<List<int>>("Utils.Array(1,\"str\", 3)"));
+			Assert.Throws<ParseException>(() => target.Eval<List<int>>("Utils.Array(1,\"str\", 3)"));
 		}
 
 		[Test]
