@@ -337,11 +337,33 @@ namespace DynamicExpresso.Resources {
                 return ResourceManager.GetString("InvalidMethodCall", resourceCulture);
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid real literal &apos;{0}&apos;.
-        /// </summary>
-        internal static string InvalidRealLiteral {
+
+		/// <summary>
+		/// Looks up a localized string similar to Params array type is not an array, element not found
+		/// </summary>
+		internal static string ParamsArrayTypeNotAnArray
+		{
+			get
+			{
+				return ResourceManager.GetString("ParamsArrayTypeNotAnArray", resourceCulture);
+			}
+		}
+
+		/// <summary>
+		/// Looks up a localized string similar to The type arguments for method '{0}' cannot be inferred from the usage.
+		/// </summary>
+		internal static string MethodTypeParametersCantBeInferred
+		{
+			get
+			{
+				return ResourceManager.GetString("MethodTypeParametersCantBeInferred", resourceCulture);
+			}
+		}
+
+		/// <summary>
+		///   Looks up a localized string similar to Invalid real literal &apos;{0}&apos;.
+		/// </summary>
+		internal static string InvalidRealLiteral {
             get {
                 return ResourceManager.GetString("InvalidRealLiteral", resourceCulture);
             }

@@ -1943,7 +1943,15 @@ namespace DynamicExpresso.Parsing
 
 				if (paramsArrayTypeFound != null)
 				{
-					var promoted = PromoteExpression(currentArgument, paramsArrayTypeFound.GetElementType(), true);
+					var paramsArrayElementType = paramsArrayTypeFound.GetElementType();
+					if (paramsArrayElementType.IsGenericParameter)
+					{
+						paramsArrayPromotedArgument = paramsArrayPromotedArgument ?? new List<Expression>();
+						paramsArrayPromotedArgument.Add(currentArgument);
+						continue;
+					}
+
+					var promoted = PromoteExpression(currentArgument, paramsArrayElementType, true);
 					if (promoted != null)
 					{
 						paramsArrayPromotedArgument = paramsArrayPromotedArgument ?? new List<Expression>();
@@ -1960,7 +1968,17 @@ namespace DynamicExpresso.Parsing
 				method.HasParamsArray = true;
 				var paramsArrayElementType = paramsArrayTypeFound.GetElementType();
 				if (paramsArrayElementType == null)
-					throw new Exception("Type is not an array, element not found");
+					throw CreateParseException(-1, ErrorMessages.ParamsArrayTypeNotAnArray);
+
+				if (paramsArrayElementType.IsGenericParameter)
+				{
+					var actualTypes = paramsArrayPromotedArgument.Select(_ => _.Type).Distinct().ToArray();
+					if (actualTypes.Length != 1)
+						throw CreateParseException(-1, ErrorMessages.MethodTypeParametersCantBeInferred, method.MethodBase);
+
+					paramsArrayElementType = actualTypes[0];
+				}
+
 				promotedArgs.Add(Expression.NewArrayInit(paramsArrayElementType, paramsArrayPromotedArgument));
 			}
 
@@ -2029,6 +2047,16 @@ namespace DynamicExpresso.Parsing
 				{
 					if (!actualType.IsGenericParameter)
 						extractedGenericTypes[requestedType.Name] = actualType;
+				}
+				else if (requestedType.IsArray && actualType.IsArray)
+				{
+					var innerGenericTypes = ExtractActualGenericArguments(
+						new[] { requestedType.GetElementType() },
+						new[] { actualType.GetElementType()
+					});
+
+					foreach (var innerGenericType in innerGenericTypes)
+						extractedGenericTypes[innerGenericType.Key] = innerGenericType.Value;
 				}
 				else if (requestedType.ContainsGenericParameters)
 				{
