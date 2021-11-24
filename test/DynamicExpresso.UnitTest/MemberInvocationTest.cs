@@ -423,6 +423,43 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.HelloWorld().ToUpper(), target.Eval("x.HelloWorld().ToUpper()"));
 		}
 
+		internal static class Utils
+		{
+			public static int GenericVsNonGeneric(int i) => 1;
+			public static int GenericVsNonGeneric<T>(T i) => 2;
+
+			public static int WithParamsArray(params int[] i) => 3;
+			public static int WithParamsArray(int i, params int[] j) => 4;
+			public static int WithParamsArray(int i, int j) => 5;
+		}
+
+		[Test]
+		public void Method_overload_generic_vs_non_generic()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Utils));
+
+			Assert.AreEqual(1, target.Eval("Utils.GenericVsNonGeneric(12345)"));
+			Assert.AreEqual(2, target.Eval("Utils.GenericVsNonGeneric('a')"));
+		}
+
+		[Test]
+		public void Method_overload_params_array()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Utils));
+
+			var arr = new int[] { 2 };
+			target.SetVariable("arr", arr);
+
+			Assert.AreEqual(3, target.Eval("Utils.WithParamsArray(arr)"));
+			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1)"));
+			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1, arr)"));
+			Assert.AreEqual(5, target.Eval("Utils.WithParamsArray(1, 2)"));
+			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1, 2, 3)"));
+			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1, 2, 3, 4)"));
+		}
+
 		private interface MyTestInterface
 		{
 		}
