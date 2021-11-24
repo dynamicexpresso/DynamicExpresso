@@ -255,4 +255,10 @@
   <data name="CloseTypeArgumentListExpected" xml:space="preserve">
     <value>'&gt;' expected</value>
   </data>
+  <data name="MethodTypeParametersCantBeInferred" xml:space="preserve">
+    <value>The type arguments for method '{0}' cannot be inferred from the usage.</value>
+  </data>
+  <data name="ParamsArrayTypeNotAnArray" xml:space="preserve">
+    <value>Params array type is not an array, element not found</value>
+  </data>
 </root>
