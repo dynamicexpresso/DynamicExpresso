@@ -446,6 +446,11 @@ namespace DynamicExpresso.UnitTest
 			public static int WithParamsArray(params int[] i) => 3;
 			public static int WithParamsArray(int i, params int[] j) => 4;
 			public static int WithParamsArray(int i, int j) => 5;
+
+			public static List<T> Array<T>(params T[] array)
+			{
+				return new List<T>(array);
+			}
 		}
 
 		[Test]
@@ -605,14 +610,6 @@ namespace DynamicExpresso.UnitTest
 			public string AMethod()
 			{
 				return "Ciao mondo";
-			}
-		}
-
-		private static class Utils
-		{
-			public static List<T> Array<T>(params T[] array)
-			{
-				return new List<T>(array);
 			}
 		}
 	}
