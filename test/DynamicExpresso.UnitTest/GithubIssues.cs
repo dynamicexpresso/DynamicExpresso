@@ -1,6 +1,8 @@
 using DynamicExpresso.Exceptions;
 using NUnit.Framework;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -344,5 +346,24 @@ namespace DynamicExpresso.UnitTest
 			result = interpreter.Eval<string>("x?.ToString()");
 			Assert.AreEqual("56", result);
 		}
+
+		[Test]
+		public void GitHub_Issue_191()
+		{
+			var interpreter = new Interpreter();
+			interpreter.Reference(typeof(Utils));
+
+			var result = interpreter.Eval<object>("Utils.Select(Utils.Array(\"a\", \"b\"), \"x+x\")");
+			Assert.IsNotNull(result);
+		}
+
+		public class Utils
+		{
+			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);
+			public static List<dynamic> Array(params dynamic[] array) => Array((IEnumerable<dynamic>)array);
+			public static IEnumerable<dynamic> Select<TSource>(IEnumerable<TSource> collection, string expression) =>  new List<dynamic>();
+			public static IEnumerable<dynamic> Select(IEnumerable collection, string expression) => new List<dynamic>();
+		}
+
 	}
 }

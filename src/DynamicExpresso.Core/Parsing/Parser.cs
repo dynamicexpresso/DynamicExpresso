@@ -2296,30 +2296,23 @@ namespace DynamicExpresso.Parsing
 			// check conversion from argument list to parameter list
 			for (int i = 0, m = 0, o = 0; i < args.Length; i++)
 			{
+				var arg = args[i];
 				var methodParam = method.Parameters[m];
 				var otherMethodParam = otherMethod.Parameters[o];
 				var methodParamType = GetParameterType(methodParam);
 				var otherMethodParamType = GetParameterType(otherMethodParam);
 
-				var promoteMethodParam = methodParamType.IsGenericType && methodParamType.ContainsGenericParameters;
-				var promoteOtherMethodParam = otherMethodParamType.IsGenericType && otherMethodParamType.ContainsGenericParameters;
-
-				if (promoteMethodParam)
+				if (arg is InterpreterExpression)
+				{
 					methodParamType = method.PromotedParameters[i].Type;
-				if (promoteOtherMethodParam)
 					otherMethodParamType = otherMethod.PromotedParameters[i].Type;
+				}
 
-				var c = CompareConversions(args[i].Type, methodParamType, otherMethodParamType);
+				var c = CompareConversions(arg.Type, methodParamType, otherMethodParamType);
 				if (c < 0)
 					return false;
 				if (c > 0)
 					better = true;
-
-				// no conversion to param types is better: favor the one without promotion
-				if (!promoteMethodParam && promoteOtherMethodParam)
-					better = true;
-				if (promoteMethodParam && !promoteOtherMethodParam)
-					return false;
 
 				if (!HasParamsArrayType(methodParam)) m++;
 				if (!HasParamsArrayType(otherMethodParam)) o++;
