@@ -1127,12 +1127,23 @@ namespace DynamicExpresso.Parsing
 
 		private Expression ParseLambdaInvocation(LambdaExpression lambda, int errorPos)
 		{
+			return ParseInvocation(lambda, errorPos, ErrorMessages.ArgsIncompatibleWithLambda);
+		}
+
+		private Expression ParseDelegateInvocation(Expression delegateExp, int errorPos)
+		{
+			return ParseInvocation(delegateExp, errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
+		}
+
+		private Expression ParseInvocation(Expression expr, int errorPos, string error)
+		{
 			var args = ParseArgumentList();
 
-			if (!PrepareDelegateInvoke(lambda.Type, ref args))
-				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithLambda);
+			var invokeMethod = FindInvokeMethod(expr.Type);
+			if (invokeMethod == null || !CheckIfMethodIsApplicableAndPrepareIt(invokeMethod, args))
+				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
 
-			return Expression.Invoke(lambda, args);
+			return Expression.Invoke(expr, invokeMethod.PromotedParameters);
 		}
 
 		private Expression ParseMethodGroupInvocation(MethodGroupExpression methodGroup, int errorPos)
@@ -1140,17 +1151,16 @@ namespace DynamicExpresso.Parsing
 			var args = ParseArgumentList();
 
 			// find the best delegates that can be used with the provided arguments
-			var flags = BindingFlags.Public | BindingFlags.Instance;
 			var candidates = methodGroup.Overloads
 				.Select(_ => new
 				{
 					Delegate = _,
 					Method = _.Method,
-					InvokeMethods = _.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke").Cast<MethodInfo>(),
+					InvokeMethod = FindInvokeMethod(_.GetType()),
 				})
 				.ToList();
 
-			var applicableMethods = FindBestMethod(candidates.SelectMany(_ => _.InvokeMethods), args);
+			var applicableMethods = FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
 
 			// no method found: retry with the delegate's method
 			// (the parameters might be different, e.g. params array, default value, etc)
@@ -1164,29 +1174,8 @@ namespace DynamicExpresso.Parsing
 				throw CreateParseException(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
 
 			var applicableMethod = applicableMethods[0];
-			var usedDeledate = candidates.Single(_ => new[] { _.Method }.Concat(_.InvokeMethods).Any(m => m == applicableMethod.MethodBase)).Delegate;
+			var usedDeledate = candidates.Single(_ => new[] { _.Method, _.InvokeMethod?.MethodBase }.Any(m => m == applicableMethod.MethodBase)).Delegate;
 			return Expression.Invoke(Expression.Constant(usedDeledate), applicableMethod.PromotedParameters);
-		}
-
-		private Expression ParseDelegateInvocation(Expression delegateExp, int errorPos)
-		{
-			var args = ParseArgumentList();
-
-			if (!PrepareDelegateInvoke(delegateExp.Type, ref args))
-				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
-
-			return Expression.Invoke(delegateExp, args);
-		}
-
-		private bool PrepareDelegateInvoke(Type type, ref Expression[] args)
-		{
-			var applicableMethods = FindMethods(type, "Invoke", false, args);
-			if (applicableMethods.Length != 1)
-				return false;
-
-			args = applicableMethods[0].PromotedParameters;
-
-			return true;
 		}
 
 		private Type ParseKnownType()
@@ -1795,6 +1784,23 @@ namespace DynamicExpresso.Parsing
 			}
 
 			return new MethodData[0];
+		}
+
+		private MethodData FindInvokeMethod(Type type)
+		{
+			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
+						BindingFlags.Instance | _bindingCase;
+			foreach (var t in SelfAndBaseTypes(type))
+			{
+				var method = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, "Invoke")
+					.Cast<MethodBase>()
+					.SingleOrDefault();
+
+				if (method != null)
+					return MethodData.Gen(method);
+			}
+
+			return null;
 		}
 
 		private MethodData[] FindExtensionMethods(string methodName, Expression[] args)
