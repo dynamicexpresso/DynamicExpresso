@@ -1881,7 +1881,7 @@ namespace DynamicExpresso.Parsing
 
 		private static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
 		{
-			if (method.Parameters.Count(y => !y.HasDefaultValue) > args.Length)
+			if (method.Parameters.Count(y => !y.HasDefaultValue && !HasParamsArrayType(y)) > args.Length)
 				return false;
 
 			var promotedArgs = new List<Expression>();
@@ -1983,7 +1983,14 @@ namespace DynamicExpresso.Parsing
 			}
 
 			// Add default params, if needed.
-			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select(x => Expression.Constant(x.DefaultValue, x.ParameterType)));
+			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select<ParameterInfo, Expression>(x =>
+			{
+				if (x.HasDefaultValue)
+					return Expression.Constant(x.DefaultValue, x.ParameterType);
+				if (HasParamsArrayType(x))
+					return Expression.NewArrayInit(x.ParameterType.GetElementType());
+				throw new Exception("No default value found!");
+			}));
 
 			method.PromotedParameters = promotedArgs.ToArray();
 
@@ -2312,47 +2319,46 @@ namespace DynamicExpresso.Parsing
 
 		private static bool MethodHasPriority(Expression[] args, MethodData method, MethodData otherMethod)
 		{
-			if (method.HasParamsArray == false && otherMethod.HasParamsArray)
-				return true;
-			if (method.HasParamsArray && otherMethod.HasParamsArray == false)
-				return false;
-
-			//if (m1.Parameters.Length > m2.Parameters.Length)
-			//	return true;
-			//else if (m1.Parameters.Length < m2.Parameters.Length)
-			//	return false;
-
 			var better = false;
-			for (var i = 0; i < args.Length; i++)
+
+			// check conversion from argument list to parameter list
+			for (int i = 0, m = 0, o = 0; i < args.Length; i++)
 			{
-				var methodParam = method.Parameters[i];
-				var otherMethodParam = otherMethod.Parameters[i];
+				var arg = args[i];
+				var methodParam = method.Parameters[m];
+				var otherMethodParam = otherMethod.Parameters[o];
 				var methodParamType = GetParameterType(methodParam);
 				var otherMethodParamType = GetParameterType(otherMethodParam);
 
-				var promoteMethodParam = methodParamType.IsGenericType && methodParamType.ContainsGenericParameters;
-				var promoteOtherMethodParam = otherMethodParamType.IsGenericType && otherMethodParamType.ContainsGenericParameters;
-
-				if (promoteMethodParam) 
+				if (arg is InterpreterExpression)
+				{
 					methodParamType = method.PromotedParameters[i].Type;
-				if (promoteOtherMethodParam)
 					otherMethodParamType = otherMethod.PromotedParameters[i].Type;
-				
-				var c = CompareConversions(args[i].Type, methodParamType, otherMethodParamType);
+				}
+
+				var c = CompareConversions(arg.Type, methodParamType, otherMethodParamType);
 				if (c < 0)
 					return false;
 				if (c > 0)
 					better = true;
 
-				// no conversion to param types is better: favor the one without promotion
-				if (!promoteMethodParam && promoteOtherMethodParam)
-					better = true;
-				if (promoteMethodParam && !promoteOtherMethodParam)
-					return false;
-
-				if (HasParamsArrayType(methodParam) || HasParamsArrayType(otherMethodParam))
-					break;
+				if (!HasParamsArrayType(methodParam)) m++;
+				if (!HasParamsArrayType(otherMethodParam)) o++;
 			}
+
+			if (better)
+				return true;
+
+			if (!method.MethodBase.IsGenericMethod && otherMethod.MethodBase.IsGenericMethod)
+				return true;
+
+			if (!method.HasParamsArray && otherMethod.HasParamsArray)
+				return true;
+
+			// if a method has a params parameter, it can have less parameters than the number of arguments
+			if (method.Parameters.Length > otherMethod.Parameters.Length)
+				return true;
+
 			return better;
 		}
 
@@ -3049,6 +3055,11 @@ namespace DynamicExpresso.Parsing
 					MethodBase = method,
 					Parameters = method.GetParameters()
 				};
+			}
+
+			public override string ToString()
+			{
+				return MethodBase.ToString();
 			}
 		}
 
