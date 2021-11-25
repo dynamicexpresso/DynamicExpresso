@@ -1141,7 +1141,7 @@ namespace DynamicExpresso.Parsing
 
 			var invokeMethod = FindInvokeMethod(expr.Type);
 			if (invokeMethod == null || !CheckIfMethodIsApplicableAndPrepareIt(invokeMethod, args))
-				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
+				throw CreateParseException(errorPos, error);
 
 			return Expression.Invoke(expr, invokeMethod.PromotedParameters);
 		}
