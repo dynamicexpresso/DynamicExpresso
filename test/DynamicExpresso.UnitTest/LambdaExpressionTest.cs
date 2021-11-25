@@ -1,3 +1,4 @@
+using DynamicExpresso.Exceptions;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,28 @@ namespace DynamicExpresso.UnitTest
 	public class LambdaExpressionTest
 	{
 		private const InterpreterOptions _options = InterpreterOptions.Default | InterpreterOptions.LambdaExpressions;
+
+		[Test]
+		public void Invalid_Lambda_Should_Produce_a_ParseException()
+		{
+			var target = new Interpreter(_options);
+			var list = new List<string> { "abc", "dfe", "test" };
+			target.SetVariable("list", list);
+
+			Assert.Throws<ParseException>(() => target.Parse("list.Select(str => str.Legnth)") );
+		}
+
+		[Test]
+		public void Check_Lambda_Return_Type()
+		{
+			var target = new Interpreter(_options);
+			var list = new List<string> { "abc", "dfe", "test" };
+			target.SetVariable("list", list);
+
+			var lambda = target.Parse("list.Select(str => str.Length)");
+
+			Assert.AreEqual(typeof(IEnumerable<int>), lambda.ReturnType);
+		}
 
 		[Test]
 		public void Where_inferred_parameter_type()
@@ -249,7 +272,7 @@ namespace DynamicExpresso.UnitTest
 	}
 
 	/// <summary>
-	/// Ensure that a lambda expression is matched to a parameter of type delegate 
+	/// Ensure that a lambda expression is matched to a parameter of type delegate
 	/// (so the 1st overload shouldn't be considered during resolution)
 	/// </summary>
 	internal static class ExtensionMethodExt
