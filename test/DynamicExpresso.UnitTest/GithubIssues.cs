@@ -348,6 +348,27 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void GitHub_Issue_185()
+		{
+			var interpreter = new Interpreter().SetVariable("a", 123L);
+
+			// forcing the return type to object should work
+			// (ie a conversion expression should be emitted from long to object)
+			var del = interpreter.ParseAsDelegate<Func<object>>("a*2");
+			var result = del();
+			Assert.AreEqual(246, result);
+		}
+
+		[Test]
+		public void GitHub_Issue_185_2()
+		{
+			var interpreter = new Interpreter().SetVariable("a", 123L);
+			var del = interpreter.ParseAsDelegate<Func<dynamic>>("a*2");
+			var result = del();
+			Assert.AreEqual(246, result);
+		}
+
+		[Test]
 		public void GitHub_Issue_191()
 		{
 			var interpreter = new Interpreter();
