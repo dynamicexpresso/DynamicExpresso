@@ -36,11 +36,11 @@ jobs:
     - name: Build
       run: dotnet build DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}}
     - name: Test .net core 5.0
-      run: dotnet test DynamicExpresso.sln --no-restore -c Release --verbosity normal -f netcoreapp5.0
+      run: dotnet test DynamicExpresso.sln --no-build --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}} --verbosity normal -f netcoreapp5.0
     - name: Setup nuget sources
       run: dotnet nuget add source --name github "https://nuget.pkg.github.com/davideicardi/index.json"
     - name: Pack
-      run: dotnet pack DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+      run: dotnet pack DynamicExpresso.sln --no-build --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
     - name: Publish to github
       run: dotnet nuget push "src/DynamicExpresso.Core/bin/Release/DynamicExpresso.Core.${{steps.calc_version.outputs.PROJECT_VERSION}}.nupkg" --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
     - name: Publish to nuget.org

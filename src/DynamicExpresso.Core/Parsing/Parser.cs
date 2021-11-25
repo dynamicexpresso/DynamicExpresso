@@ -212,10 +212,8 @@ namespace DynamicExpresso.Parsing
 			ValidateToken(TokenId.Identifier);
 			var name = _token.text;
 
-			if (_arguments.TryGetKnownType(name, out var type))
+			if (TryParseKnownType(name, out var type))
 			{
-				type = ParseFullType(type);
-
 				ValidateToken(TokenId.Identifier);
 				name = _token.text;
 			}
@@ -454,7 +452,7 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 
 				Type knownType;
-				if (!_arguments.TryGetKnownType(_token.text, out knownType))
+				if (!TryParseKnownType(_token.text, out knownType))
 					throw CreateParseException(op.pos, ErrorMessages.TypeIdentifierExpected);
 
 				if (typeOperator == ParserConstants.KeywordIs)
@@ -963,7 +961,7 @@ namespace DynamicExpresso.Parsing
 				return parameterExpression;
 			}
 
-			if (_arguments.TryGetKnownType(_token.text, out Type knownType))
+			if (TryParseKnownType(_token.text, out Type knownType))
 			{
 				return ParseTypeKeyword(knownType);
 			}
@@ -1016,13 +1014,7 @@ namespace DynamicExpresso.Parsing
 			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
 			NextToken();
 			ValidateToken(TokenId.Identifier);
-
-			var name = _token.text;
-			if (_arguments.TryGetKnownType(name, out var type))
-				type = ParseFullType(type);
-			else
-				throw new UnknownIdentifierException(_token.text, _token.pos);
-
+			var type = ParseKnownType();
 			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
 			NextToken();
 
@@ -1075,12 +1067,7 @@ namespace DynamicExpresso.Parsing
 			NextToken();
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
 
-			Type newType;
-			if (!_arguments.TryGetKnownType(_token.text, out newType))
-				throw new UnknownIdentifierException(_token.text, _token.pos);
-
-			NextToken();
-
+			var newType = ParseKnownType();
 			var args = new Expression[0];
 			if (_token.id == TokenId.OpenParen)
 				args = ParseArgumentList();
@@ -1202,26 +1189,71 @@ namespace DynamicExpresso.Parsing
 			return true;
 		}
 
+		private Type ParseKnownType()
+		{
+			var name = _token.text;
+			var errorPos = _token.pos;
+			if (!TryParseKnownType(name, out var type))
+				throw new UnknownIdentifierException(name, errorPos);
+
+			return type;
+		}
+
+		private bool TryParseKnownType(string name, out Type type)
+		{
+			// if the type is unknown, we need to restart parsing 
+			var originalPos = _token.pos;
+			_arguments.TryGetKnownType(name, out type);
+
+			NextToken();
+			if (_token.id == TokenId.LessThan)
+			{
+				var typeArguments = ParseTypeArgumentList();
+				var rank = typeArguments.Count;
+
+				// if no type was registered with the simple name, try the full generic name
+				if (type == null && !_arguments.TryGetKnownType(name + $"`{rank}", out type))
+					return false;
+
+				if (rank != type.GetGenericArguments().Length)
+					throw new ArgumentException($"The number of generic arguments provided doesn't equal the arity of the generic type definition.");
+
+				// there are actual type arguments: instantiate the proper generic type
+				if (typeArguments.All(_ => _ != null))
+					type = type.MakeGenericType(typeArguments.ToArray());
+
+				NextToken();
+			}
+
+			type = ParseTypeModifiers(type);
+			if (type == null)
+			{
+				// type name couldn't be parsed: restore position
+				SetTextPos(originalPos);
+				NextToken();
+
+				return false;
+			}
+
+			return true;
+		}
+
 		// we found a known type identifier, check if it has some modifiers
-		private Type ParseFullType(Type type)
+		private Type ParseTypeModifiers(Type type)
 		{
 			var errorPos = _token.pos;
-			NextToken();
 			if (_token.id == TokenId.Question)
 			{
 				if (!type.IsValueType || IsNullableType(type))
 					throw CreateParseException(errorPos, ErrorMessages.TypeHasNoNullableForm, GetTypeName(type));
 				type = typeof(Nullable<>).MakeGenericType(type);
-				type = ParseFullType(type);
+
+				NextToken();
+				type = ParseTypeModifiers(type);
 			}
 			else if (_token.id == TokenId.OpenBracket)
 			{
 				type = ParseArrayRankSpecifier(type);
-			}
-			else if (_token.id == TokenId.LessThan)
-			{
-				type = ParseTypeArgumentList(type);
-				type = ParseFullType(type);
 			}
 
 			return type;
@@ -1258,42 +1290,39 @@ namespace DynamicExpresso.Parsing
 			return type;
 		}
 
-		private Type ParseTypeArgumentList(Type type)
+		private List<Type> ParseTypeArgumentList()
 		{
 			ValidateToken(TokenId.LessThan);
 			NextToken();
 
+			List<Type> args;
 			if (_token.id == TokenId.Identifier)
-				type = ParseTypeArguments(type);
+				args = ParseTypeArguments();
 			else
-				type = ParseUnboundType(type);
+			{
+				var arity = ParseUnboundTypeArity();
+				args = new List<Type>(new Type[arity]);
+			}
 
 			ValidateToken(TokenId.GreaterThan, ErrorMessages.CloseTypeArgumentListExpected);
-			return type;
+			return args;
 		}
 
-		private Type ParseTypeArguments(Type type)
+		private List<Type> ParseTypeArguments()
 		{
 			var genericArguments = new List<Type>();
 			while (true)
 			{
 				ValidateToken(TokenId.Identifier);
-				var name = _token.text;
-				if (_arguments.TryGetKnownType(name, out var genericArgument))
-					genericArgument = ParseFullType(genericArgument);
-				else
-					throw new UnknownIdentifierException(_token.text, _token.pos);
-
-				genericArguments.Add(genericArgument);
+				genericArguments.Add(ParseKnownType());
 				if (_token.id != TokenId.Comma) break;
 				NextToken();
 			}
 
-			type = type.MakeGenericType(genericArguments.ToArray());
-			return type;
+			return genericArguments;
 		}
 
-		private Type ParseUnboundType(Type type)
+		private int ParseUnboundTypeArity()
 		{
 			var rank = 1;
 			while (_token.id == TokenId.Comma)
@@ -1302,16 +1331,11 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 			}
 
-			if (rank != type.GetGenericArguments().Length)
-				throw new ArgumentException($"The number of generic arguments provided doesn't equal the arity of the generic type definition.");
-
-			return type;
+			return rank;
 		}
 
 		private Expression ParseTypeKeyword(Type type)
 		{
-			type = ParseFullType(type);
-
 			//if (token.id == TokenId.OpenParen)
 			//{
 			//    return ParseTypeConstructor(type, errorPos);
@@ -1857,7 +1881,7 @@ namespace DynamicExpresso.Parsing
 
 		private static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
 		{
-			if (method.Parameters.Count(y => !y.HasDefaultValue) > args.Length)
+			if (method.Parameters.Count(y => !y.HasDefaultValue && !HasParamsArrayType(y)) > args.Length)
 				return false;
 
 			var promotedArgs = new List<Expression>();
@@ -1919,7 +1943,15 @@ namespace DynamicExpresso.Parsing
 
 				if (paramsArrayTypeFound != null)
 				{
-					var promoted = PromoteExpression(currentArgument, paramsArrayTypeFound.GetElementType(), true);
+					var paramsArrayElementType = paramsArrayTypeFound.GetElementType();
+					if (paramsArrayElementType.IsGenericParameter)
+					{
+						paramsArrayPromotedArgument = paramsArrayPromotedArgument ?? new List<Expression>();
+						paramsArrayPromotedArgument.Add(currentArgument);
+						continue;
+					}
+
+					var promoted = PromoteExpression(currentArgument, paramsArrayElementType, true);
 					if (promoted != null)
 					{
 						paramsArrayPromotedArgument = paramsArrayPromotedArgument ?? new List<Expression>();
@@ -1936,12 +1968,29 @@ namespace DynamicExpresso.Parsing
 				method.HasParamsArray = true;
 				var paramsArrayElementType = paramsArrayTypeFound.GetElementType();
 				if (paramsArrayElementType == null)
-					throw new Exception("Type is not an array, element not found");
+					throw CreateParseException(-1, ErrorMessages.ParamsArrayTypeNotAnArray);
+
+				if (paramsArrayElementType.IsGenericParameter)
+				{
+					var actualTypes = paramsArrayPromotedArgument.Select(_ => _.Type).Distinct().ToArray();
+					if (actualTypes.Length != 1)
+						throw CreateParseException(-1, ErrorMessages.MethodTypeParametersCantBeInferred, method.MethodBase);
+
+					paramsArrayElementType = actualTypes[0];
+				}
+
 				promotedArgs.Add(Expression.NewArrayInit(paramsArrayElementType, paramsArrayPromotedArgument));
 			}
 
 			// Add default params, if needed.
-			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select(x => Expression.Constant(x.DefaultValue, x.ParameterType)));
+			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select<ParameterInfo, Expression>(x =>
+			{
+				if (x.HasDefaultValue)
+					return Expression.Constant(x.DefaultValue, x.ParameterType);
+				if (HasParamsArrayType(x))
+					return Expression.NewArrayInit(x.ParameterType.GetElementType());
+				throw new Exception("No default value found!");
+			}));
 
 			method.PromotedParameters = promotedArgs.ToArray();
 
@@ -2005,6 +2054,16 @@ namespace DynamicExpresso.Parsing
 				{
 					if (!actualType.IsGenericParameter)
 						extractedGenericTypes[requestedType.Name] = actualType;
+				}
+				else if (requestedType.IsArray && actualType.IsArray)
+				{
+					var innerGenericTypes = ExtractActualGenericArguments(
+						new[] { requestedType.GetElementType() },
+						new[] { actualType.GetElementType()
+					});
+
+					foreach (var innerGenericType in innerGenericTypes)
+						extractedGenericTypes[innerGenericType.Key] = innerGenericType.Value;
 				}
 				else if (requestedType.ContainsGenericParameters)
 				{
@@ -2260,47 +2319,46 @@ namespace DynamicExpresso.Parsing
 
 		private static bool MethodHasPriority(Expression[] args, MethodData method, MethodData otherMethod)
 		{
-			if (method.HasParamsArray == false && otherMethod.HasParamsArray)
-				return true;
-			if (method.HasParamsArray && otherMethod.HasParamsArray == false)
-				return false;
-
-			//if (m1.Parameters.Length > m2.Parameters.Length)
-			//	return true;
-			//else if (m1.Parameters.Length < m2.Parameters.Length)
-			//	return false;
-
 			var better = false;
-			for (var i = 0; i < args.Length; i++)
+
+			// check conversion from argument list to parameter list
+			for (int i = 0, m = 0, o = 0; i < args.Length; i++)
 			{
-				var methodParam = method.Parameters[i];
-				var otherMethodParam = otherMethod.Parameters[i];
+				var arg = args[i];
+				var methodParam = method.Parameters[m];
+				var otherMethodParam = otherMethod.Parameters[o];
 				var methodParamType = GetParameterType(methodParam);
 				var otherMethodParamType = GetParameterType(otherMethodParam);
 
-				var promoteMethodParam = methodParamType.IsGenericType && methodParamType.ContainsGenericParameters;
-				var promoteOtherMethodParam = otherMethodParamType.IsGenericType && otherMethodParamType.ContainsGenericParameters;
-
-				if (promoteMethodParam) 
+				if (arg is InterpreterExpression)
+				{
 					methodParamType = method.PromotedParameters[i].Type;
-				if (promoteOtherMethodParam)
 					otherMethodParamType = otherMethod.PromotedParameters[i].Type;
-				
-				var c = CompareConversions(args[i].Type, methodParamType, otherMethodParamType);
+				}
+
+				var c = CompareConversions(arg.Type, methodParamType, otherMethodParamType);
 				if (c < 0)
 					return false;
 				if (c > 0)
 					better = true;
 
-				// no conversion to param types is better: favor the one without promotion
-				if (!promoteMethodParam && promoteOtherMethodParam)
-					better = true;
-				if (promoteMethodParam && !promoteOtherMethodParam)
-					return false;
-
-				if (HasParamsArrayType(methodParam) || HasParamsArrayType(otherMethodParam))
-					break;
+				if (!HasParamsArrayType(methodParam)) m++;
+				if (!HasParamsArrayType(otherMethodParam)) o++;
 			}
+
+			if (better)
+				return true;
+
+			if (!method.MethodBase.IsGenericMethod && otherMethod.MethodBase.IsGenericMethod)
+				return true;
+
+			if (!method.HasParamsArray && otherMethod.HasParamsArray)
+				return true;
+
+			// if a method has a params parameter, it can have less parameters than the number of arguments
+			if (method.Parameters.Length > otherMethod.Parameters.Length)
+				return true;
+
 			return better;
 		}
 
@@ -2997,6 +3055,11 @@ namespace DynamicExpresso.Parsing
 					MethodBase = method,
 					Parameters = method.GetParameters()
 				};
+			}
+
+			public override string ToString()
+			{
+				return MethodBase.ToString();
 			}
 		}
 
