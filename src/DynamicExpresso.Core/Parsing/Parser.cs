@@ -1230,6 +1230,10 @@ namespace DynamicExpresso.Parsing
 		// we found a known type identifier, check if it has some modifiers
 		private Type ParseTypeModifiers(Type type)
 		{
+			// type modifiers require the base type to be known
+			if (type == null)
+				return null;
+
 			var errorPos = _token.pos;
 			if (_token.id == TokenId.Question)
 			{
