@@ -261,4 +261,7 @@
   <data name="ParamsArrayTypeNotAnArray" xml:space="preserve">
     <value>Params array type is not an array, element not found</value>
   </data>
+  <data name="AmbiguousConstructorInvocation" xml:space="preserve">
+    <value>Ambiguous invocation of constructor in type '{0}'</value>
+  </data>
 </root>
