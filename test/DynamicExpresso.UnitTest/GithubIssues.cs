@@ -348,6 +348,26 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void GitHub_Issue_197()
+		{
+			var interpreterWithLambdas = new Interpreter(InterpreterOptions.DefaultCaseInsensitive | InterpreterOptions.LambdaExpressions);
+			var interpreterWithoutLambdas = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
+
+			var stringExpression = "booleanValue ? someStringValue : \".\"";
+			var parameters = new List<Parameter>
+			{
+				new Parameter($"someStringValue", typeof(string), $"E33"),
+				new Parameter("booleanValue", typeof(bool), true)
+			};
+
+			var expressionWithoutLambdas = interpreterWithoutLambdas.Parse(stringExpression, typeof(void), parameters.ToArray());
+			Assert.AreEqual("E33", expressionWithoutLambdas.Invoke(parameters.ToArray()));
+
+			var expressionWithLambdas = interpreterWithLambdas.Parse(stringExpression, typeof(void), parameters.ToArray());
+			Assert.AreEqual("E33", expressionWithLambdas.Invoke(parameters.ToArray()));
+		}
+
+		[Test]
 		public void GitHub_Issue_185()
 		{
 			var interpreter = new Interpreter().SetVariable("a", 123L);
