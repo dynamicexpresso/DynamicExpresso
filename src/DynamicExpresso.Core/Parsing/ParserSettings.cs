@@ -6,10 +6,10 @@ namespace DynamicExpresso.Parsing
 {
 	internal class ParserSettings
 	{
-		private readonly Dictionary<string, Identifier> _identifiers;
-		private readonly Dictionary<string, ReferenceType> _knownTypes;
-		private readonly HashSet<MethodInfo> _extensionMethods;
-		
+		private Dictionary<string, Identifier> _identifiers;
+		private Dictionary<string, ReferenceType> _knownTypes;
+		private HashSet<MethodInfo> _extensionMethods;
+
 		public ParserSettings(bool caseInsensitive,bool lateBindObject)
 		{
 			CaseInsensitive = caseInsensitive;
@@ -31,6 +31,19 @@ namespace DynamicExpresso.Parsing
 			DefaultNumberType = DefaultNumberType.Default;
       
 			LambdaExpressions = false;
+		}
+
+		/// <summary>
+		/// Creates a deep copy of the current settings, so that the identifiers/types/methods can be changed
+		/// without impacting the existing settings.
+		/// </summary>
+		internal ParserSettings Clone()
+		{
+			var clone = (ParserSettings)MemberwiseClone();
+			clone._identifiers = new Dictionary<string, Identifier>(_identifiers);
+			clone._knownTypes = new Dictionary<string, ReferenceType>(_knownTypes);
+			clone._extensionMethods = new HashSet<MethodInfo>(_extensionMethods);
+			return clone;
 		}
 
 		public IDictionary<string, ReferenceType> KnownTypes
