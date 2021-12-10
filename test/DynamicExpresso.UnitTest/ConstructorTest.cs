@@ -133,11 +133,20 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ParseException>(() => target.Parse("new MyClass() {5}")); // no field name
 		}
 
+		[Test]
+		public void Ctor_params_array()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(MyClass));
+			Assert.AreEqual(new MyClass(6, 5, 4, 3).MyArr, target.Eval("new MyClass(6, 5, 4, 3).MyArr"));
+		}
+
 		private class MyClass
 		{
 			public int IntField;
 			public string StrProp { get; set; }
 			public int ReadOnlyProp { get; }
+			public int[] MyArr { get; set; }
 
 			public MyClass()
 			{
@@ -146,6 +155,11 @@ namespace DynamicExpresso.UnitTest
 			public MyClass(string strValue)
 			{
 				StrProp = strValue;
+			}
+
+			public MyClass(params int[] intValues)
+			{
+				MyArr = intValues;
 			}
 
 			public override bool Equals(object obj)

@@ -1077,15 +1077,21 @@ namespace DynamicExpresso.Parsing
 				ValidateToken(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected);
 			}
 
-			var constructor = newType.GetConstructor(args.Select(p => p.Type).ToArray());
-			if (constructor == null)
+			var applicableConstructors = FindBestMethod(newType.GetConstructors(), args);
+			if (applicableConstructors.Length == 0)
 				throw CreateParseException(_token.pos, ErrorMessages.NoApplicableConstructor, newType);
+
+			if (applicableConstructors.Length > 1)
+				throw CreateParseException(_token.pos, ErrorMessages.AmbiguousConstructorInvocation, newType);
+
+			var constructor = applicableConstructors[0];
+			var newExpr = Expression.New((ConstructorInfo)constructor.MethodBase, constructor.PromotedParameters);
 
 			var memberBindings = new MemberBinding[0];
 			if (_token.id == TokenId.OpenCurlyBracket)
 				memberBindings = ParseObjectInitializer(newType);
 
-			return Expression.MemberInit(Expression.New(constructor, args), memberBindings);
+			return Expression.MemberInit(newExpr, memberBindings);
 		}
 
 		private MemberBinding[] ParseObjectInitializer(Type newType)

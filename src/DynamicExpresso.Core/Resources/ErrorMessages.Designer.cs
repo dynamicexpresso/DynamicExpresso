@@ -58,12 +58,12 @@ namespace DynamicExpresso.Resources {
             set {
                 resourceCulture = value;
             }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Ambiguous invocation of indexer in type &apos;{0}&apos;.
-        /// </summary>
-        internal static string AmbiguousIndexerInvocation {
+		}
+
+		/// <summary>
+		///   Looks up a localized string similar to Ambiguous invocation of indexer in type &apos;{0}&apos;.
+		/// </summary>
+		internal static string AmbiguousIndexerInvocation {
             get {
                 return ResourceManager.GetString("AmbiguousIndexerInvocation", resourceCulture);
             }
@@ -385,12 +385,23 @@ namespace DynamicExpresso.Resources {
             get {
                 return ResourceManager.GetString("NoApplicableConstructor", resourceCulture);
             }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No applicable indexer exists in type &apos;{0}&apos;.
-        /// </summary>
-        internal static string NoApplicableIndexer {
+		}
+
+		/// <summary>
+		///   Looks up a localized string similar to Ambiguous invocation of constructor in type &apos;{0}&apos;.
+		/// </summary>
+		internal static string AmbiguousConstructorInvocation
+		{
+			get
+			{
+				return ResourceManager.GetString("AmbiguousConstructorInvocation", resourceCulture);
+			}
+		}
+
+		/// <summary>
+		///   Looks up a localized string similar to No applicable indexer exists in type &apos;{0}&apos;.
+		/// </summary>
+		internal static string NoApplicableIndexer {
             get {
                 return ResourceManager.GetString("NoApplicableIndexer", resourceCulture);
             }
