@@ -398,6 +398,19 @@ namespace DynamicExpresso.UnitTest
 			Assert.IsNotNull(result);
 		}
 
+		[Test]
+		public void GitHub_Issue_203()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Utils));
+
+			var list = new[] { 1, 2, 3 };
+
+			var listInt = target.Eval<List<int>>("Utils.Array(list)", new Parameter("list", list));
+			Assert.AreEqual(Utils.Array(list), listInt);
+		}
+
+
 		public class Utils
 		{
 			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);
