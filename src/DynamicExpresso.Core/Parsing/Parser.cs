@@ -167,7 +167,7 @@ namespace DynamicExpresso.Parsing
 				}
 
 				var lambdaBodyExp = _expressionText.Substring(startExpr, _token.pos - startExpr);
-				return new InterpreterExpression(_arguments.Settings, lambdaBodyExp, parameters);
+				return new InterpreterExpression(_arguments, lambdaBodyExp, parameters);
 			}
 			catch (ParseException)
 			{
@@ -3022,11 +3022,18 @@ namespace DynamicExpresso.Parsing
 			private readonly IList<Parameter> _parameters;
 			private Type _type;
 
-			public InterpreterExpression(ParserSettings parentSettings, string expressionText, params Parameter[] parameters)
+			public InterpreterExpression(ParserArguments parserArguments, string expressionText, params Parameter[] parameters)
 			{
-				_interpreter = new Interpreter(parentSettings);
+				_interpreter = new Interpreter(parserArguments.Settings.Clone());
 				_expressionText = expressionText;
 				_parameters = parameters;
+
+				// convert the parent's parameters to variables
+				// note: this doesn't impact the initial settings, because they're cloned
+				foreach (var pe in parserArguments.DeclaredParameters)
+				{
+					_interpreter.SetVariable(pe.Name, pe.Value, pe.Type);
+				}
 
 				// prior to evaluation, we don't know the generic arguments types
 				_type = typeof(Func<>).Assembly.GetType($"System.Func`{parameters.Length + 1}");
