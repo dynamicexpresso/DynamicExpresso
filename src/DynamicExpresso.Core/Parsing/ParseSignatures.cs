@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DynamicExpresso.Parsing
 {
@@ -77,6 +77,31 @@ namespace DynamicExpresso.Parsing
 		{
 			void F(bool x);
 			void F(bool? x);
+		}
+
+		public interface IBitwiseComplementSignatures
+		{
+			void F(int x, int count);
+			void F(uint x, int count);
+			void F(long x, int count);
+			void F(ulong x, int count);
+			void F(int? x, int? count);
+			void F(uint? x, int? count);
+			void F(long? x, int? count);
+			void F(ulong? x, int? count);
+		}
+
+		// the signatures are the same for the left and right shifts
+		public interface IShiftSignatures
+		{
+			void F(int x);
+			void F(uint x);
+			void F(long x);
+			void F(ulong x);
+			void F(int? x);
+			void F(uint? x);
+			void F(long? x);
+			void F(ulong? x);
 		}
 
 		//interface IEnumerableSignatures

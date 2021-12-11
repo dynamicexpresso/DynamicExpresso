@@ -38,6 +38,88 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(-45, target.Eval("-45"));
 			Assert.AreEqual(5, target.Eval("+5"));
 			Assert.AreEqual(false, target.Eval("!true"));
+
+			Assert.AreEqual(~2, target.Eval("~2"));
+			Assert.AreEqual(~2ul, target.Eval("~2ul"));
+		}
+
+		[Test]
+		public void Shift_Operators()
+		{
+			var target = new Interpreter();
+			var x = 0b_1100_1001_0000_0000_0000_0000_0001_0001;
+			target.SetVariable("x", x);
+
+			Assert.AreEqual(x >> 4, target.Eval("x >> 4"));
+			Assert.AreEqual(x << 4, target.Eval("x << 4"));
+
+			// ensure they can be chained
+			Assert.AreEqual(x >> 1 >> 1 >> 1, target.Eval("x >> 1 >> 1 >> 1"));
+			Assert.AreEqual(x << 1 << 1 << 1, target.Eval("x << 1 << 1 << 1"));
+
+			// ensure priority
+			Assert.IsFalse(target.Eval<bool>("1 << 4 < 16"));
+			Assert.IsTrue(target.Eval<bool>("1 << 4 < 17"));
+		}
+
+		[Test]
+		public void Numeric_Logical_And()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Convert));
+
+			var a = 0b_1111_1000;
+			var b = 0b_0001_1100;
+			target.SetVariable("a", a);
+			target.SetVariable("b", b);
+
+			Assert.AreEqual(a & b, target.Eval("a & b"));
+		}
+
+		[Test]
+		public void Numeric_Logical_Or()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Convert));
+
+			var a = 0b_1111_1000;
+			var b = 0b_0001_1100;
+			target.SetVariable("a", a);
+			target.SetVariable("b", b);
+
+			Assert.AreEqual(a | b, target.Eval("a | b"));
+		}
+
+		[Test]
+		public void Numeric_Logical_Xor()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Convert));
+
+			var a = 0b_1111_1000;
+			var b = 0b_0001_1100;
+			target.SetVariable("a", a);
+			target.SetVariable("b", b);
+
+			Assert.AreEqual(a ^ b, target.Eval("a ^ b"));
+		}
+
+		[Test, Ignore("Current operator resolution doesn't lift int to uint")]
+		public void Bitwise_operations_uint_int()
+		{
+			var target = new Interpreter();
+
+			// ensure we can resolve operators between uint and int
+			var x = 0b_1111_1000u;
+			target.SetVariable("x", x);
+
+			Assert.AreEqual(~x, target.Eval<uint>("~x"));
+			Assert.AreEqual(x >> 4, target.Eval<uint>("x >> 4"));
+			Assert.AreEqual(x << 4, target.Eval<uint>("x << 4"));
+
+			Assert.AreEqual(x & 4, target.Eval<uint>("x & 4"));
+			Assert.AreEqual(x | 4, target.Eval<uint>("x | 4"));
+			Assert.AreEqual(x ^ 4, target.Eval<uint>("x ^ 4"));
 		}
 
 		[Test]

@@ -355,7 +355,7 @@ namespace DynamicExpresso.Parsing
 			{
 				var op = _token;
 				NextToken();
-				var right = ParseAdditive();
+				var right = ParseShift();
 				var isEquality = op.id == TokenId.DoubleEqual || op.id == TokenId.ExclamationEqual;
 
 				//if (isEquality && !left.Type.IsValueType && !right.Type.IsValueType)
@@ -442,7 +442,7 @@ namespace DynamicExpresso.Parsing
 		// is, as operators
 		private Expression ParseTypeTesting()
 		{
-			var left = ParseAdditive();
+			var left = ParseShift();
 			while (_token.text == ParserConstants.KeywordIs
 			       || _token.text == ParserConstants.KeywordAs)
 			{
@@ -499,6 +499,39 @@ namespace DynamicExpresso.Parsing
 			return left;
 		}
 
+		// << , >> operators
+		private Expression ParseShift()
+		{
+			var left = ParseAdditive();
+			while (IsShift(out var shiftType))
+			{
+				NextToken();
+				var right = ParseAdditive();
+				CheckAndPromoteOperands(typeof(ParseSignatures.IShiftSignatures), ref left, ref right);
+				left = GenerateBinary(shiftType, left, right);
+			}
+			return left;
+		}
+
+		public bool IsShift(out ExpressionType shiftType)
+		{
+			if (_token.id == TokenId.GreaterThan && _parseChar == '>')
+			{
+				NextToken(); // consume next >
+				shiftType = ExpressionType.RightShift;
+				return true;
+			}
+			else if (_token.id == TokenId.LessThan && _parseChar == '<')
+			{
+				NextToken(); // consume next < 
+				shiftType = ExpressionType.LeftShift;
+				return true;
+			}
+
+			shiftType = ExpressionType.DebugInfo; // dummy expression type
+			return false;
+		}
+
 		// *, /, % operators
 		private Expression ParseMultiplicative()
 		{
@@ -531,12 +564,13 @@ namespace DynamicExpresso.Parsing
 		// +,-, ! unary operators
 		private Expression ParseUnary()
 		{
-			if (_token.id == TokenId.Minus || _token.id == TokenId.Exclamation || _token.id == TokenId.Plus)
+			if (_token.id == TokenId.Minus || _token.id == TokenId.Plus ||
+				_token.id == TokenId.Exclamation || _token.id == TokenId.Tilde)
 			{
 				var op = _token;
 				NextToken();
 				if (_token.id == TokenId.IntegerLiteral ||
-				    _token.id == TokenId.RealLiteral)
+					_token.id == TokenId.RealLiteral)
 				{
 					if (op.id == TokenId.Minus)
 					{
@@ -567,6 +601,11 @@ namespace DynamicExpresso.Parsing
 					CheckAndPromoteOperand(typeof(ParseSignatures.INotSignatures), ref expr);
 					expr = GenerateUnary(ExpressionType.Not, expr);
 				}
+				else if (op.id == TokenId.Tilde)
+				{
+					CheckAndPromoteOperand(typeof(ParseSignatures.IBitwiseComplementSignatures), ref expr);
+					expr = GenerateUnary(ExpressionType.OnesComplement, expr);
+				}
 				return expr;
 			}
 			return ParsePrimary();
@@ -583,6 +622,7 @@ namespace DynamicExpresso.Parsing
 			{
 				case ExpressionType.Negate: opName = "op_UnaryNegation"; break;
 				case ExpressionType.Not: opName = "op_LogicalNot"; break;
+				case ExpressionType.OnesComplement: opName = "op_OnesComplement"; break;
 				default: opName = null; break;
 			}
 
@@ -2486,6 +2526,8 @@ namespace DynamicExpresso.Parsing
 				case ExpressionType.Multiply: opName = "op_Multiply"; break;
 				case ExpressionType.Divide: opName = "op_Division"; break;
 				case ExpressionType.Modulo: opName = "op_Modulus"; break;
+				case ExpressionType.RightShift: opName = "op_RightShift"; break;
+				case ExpressionType.LeftShift: opName = "op_LeftShift"; break;
 				case ExpressionType.Equal: opName = "op_Equality"; liftToNull = false; break;
 				case ExpressionType.NotEqual: opName = "op_Inequality"; liftToNull = false; break;
 				case ExpressionType.GreaterThan: opName = "op_GreaterThan"; liftToNull = false; break;
@@ -2704,6 +2746,10 @@ namespace DynamicExpresso.Parsing
 				case '-':
 					NextChar();
 					t = TokenId.Minus;
+					break;
+				case '~':
+					NextChar();
+					t = TokenId.Tilde;
 					break;
 				case '.':
 					NextChar();
