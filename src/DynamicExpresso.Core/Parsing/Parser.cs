@@ -503,7 +503,7 @@ namespace DynamicExpresso.Parsing
 		private Expression ParseShift()
 		{
 			var left = ParseAdditive();
-			while (IsShift(out var shiftType))
+			while (IsShiftOperator(out var shiftType))
 			{
 				NextToken();
 				var right = ParseAdditive();
@@ -513,14 +513,16 @@ namespace DynamicExpresso.Parsing
 			return left;
 		}
 
-		public bool IsShift(out ExpressionType shiftType)
+		public bool IsShiftOperator(out ExpressionType shiftType)
 		{
+			// >> is not a token, because it conflicts with generics such as List<List<int>>
 			if (_token.id == TokenId.GreaterThan && _parseChar == '>')
 			{
 				NextToken(); // consume next >
 				shiftType = ExpressionType.RightShift;
 				return true;
 			}
+			// << could be a token, but is not for symmetry
 			else if (_token.id == TokenId.LessThan && _parseChar == '<')
 			{
 				NextToken(); // consume next < 
