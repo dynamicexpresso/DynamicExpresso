@@ -258,9 +258,9 @@ namespace DynamicExpresso.UnitTest
 			result = lambda.Invoke(new Scope { ValueInt = 5 });
 			Assert.AreEqual(5, result);
 
-			interpreter.SetVariable("scope", new Scope { ValueInt = 5 });
-			var resultNullableBool = interpreter.Eval<bool>("scope?.ValueInt?.HasValue");
-			Assert.IsTrue(resultNullableBool);
+			var scope = new Scope { Value = 5 };
+			interpreter.SetVariable("scope", scope);
+			Assert.AreEqual(scope?.Value.HasValue, interpreter.Eval<bool>("scope?.Value.HasValue"));
 
 			// must throw, because scope.ValueInt is not a nullable type
 			Assert.Throws<ParseException>(() => interpreter.Eval<bool>("scope.ValueInt.HasValue"));
@@ -396,6 +396,24 @@ namespace DynamicExpresso.UnitTest
 
 			var result = interpreter.Eval<object>("Utils.Select(Utils.Array(\"a\", \"b\"), \"x+x\")");
 			Assert.IsNotNull(result);
+		}
+
+		[Test]
+		public void GitHub_Issue_205_Property_on_nullable()
+		{
+			var interpreter = new Interpreter();
+
+			DateTime? date = DateTime.UtcNow;
+			interpreter.SetVariable("date", date);
+
+			Assert.AreEqual(date?.Day, interpreter.Eval("date?.Day"));
+			Assert.AreEqual(date?.IsDaylightSavingTime(), interpreter.Eval("date?.IsDaylightSavingTime()"));
+
+			date = null;
+			interpreter.SetVariable("date", date);
+
+			Assert.AreEqual(date?.Day, interpreter.Eval("date?.Day"));
+			Assert.AreEqual(date?.IsDaylightSavingTime(), interpreter.Eval("date?.IsDaylightSavingTime()"));
 		}
 
 		public class Utils
