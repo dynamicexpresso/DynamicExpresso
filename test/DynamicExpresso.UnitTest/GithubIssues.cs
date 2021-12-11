@@ -416,6 +416,24 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(date?.IsDaylightSavingTime(), interpreter.Eval("date?.IsDaylightSavingTime()"));
 		}
 
+		[Test]
+		public void GitHub_Issue_205()
+		{
+			var interpreter = new Interpreter();
+
+			var date1 = DateTimeOffset.UtcNow;
+			DateTimeOffset? date2 = null;
+
+			interpreter.SetVariable("date1", date1);
+			interpreter.SetVariable("date2", date2);
+
+			Assert.IsNull(interpreter.Eval("(date1 - date2)?.Days"));
+
+			date2 = date1.AddDays(1);
+			interpreter.SetVariable("date2", date2);
+			Assert.AreEqual(-1, interpreter.Eval("(date1 - date2)?.Days"));
+		}
+
 		public class Utils
 		{
 			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);
