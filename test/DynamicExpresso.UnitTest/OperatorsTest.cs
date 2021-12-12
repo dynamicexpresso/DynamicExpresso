@@ -795,9 +795,7 @@ namespace DynamicExpresso.UnitTest
 			var x = new TypeWithoutOverloadedBinaryOperators(3);
 			target.SetVariable("x", x);
 
-			var y = 5;
-
-			var ex = Assert.Throws<ParseException>(() => target.Parse("x + y", Expression.Parameter(typeof(string), "y")));
+			var ex = Assert.Throws<ParseException>(() => target.Parse("x + y", Expression.Parameter(typeof(int), "y")));
 			Assert.IsInstanceOf<InvalidOperationException>(ex.InnerException);
 		}
 

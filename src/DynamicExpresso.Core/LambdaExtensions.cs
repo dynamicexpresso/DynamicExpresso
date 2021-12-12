@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
 
 namespace DynamicExpresso
 {
@@ -48,10 +50,20 @@ namespace DynamicExpresso
 
 		public static object Eval(this Interpreter interpreter, string expression, params Parameter[] args)
 		{
-			return interpreter
-				.Parse(expression, args.Select(x => x.Expression).ToArray())
-				.Compile()
-				.DynamicInvoke(args.Select(x => x.Value).ToArray());
+			try
+			{
+				return interpreter
+					.Parse(expression, args.Select(x => x.Expression).ToArray())
+					.Compile()
+					.DynamicInvoke(args.Select(x => x.Value).ToArray());
+			}
+			catch (TargetInvocationException exc)
+			{
+				if (exc.InnerException != null)
+					ExceptionDispatchInfo.Capture(exc.InnerException).Throw();
+
+				throw;
+			}
 		}
 
 		public static TReturnType Eval<TReturnType>(this Interpreter interpreter, string expression, params Parameter[] args)

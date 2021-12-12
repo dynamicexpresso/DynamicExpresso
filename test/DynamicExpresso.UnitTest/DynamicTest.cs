@@ -5,6 +5,7 @@ using System.Dynamic;
 using System.Linq.Expressions;
 using System.Collections.Generic;
 using DynamicExpresso.Exceptions;
+using DynamicExpresso;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -70,7 +71,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", dyn);
 
-			Assert.AreEqual(dyn.Foo(), interpreter.Eval("dyn.Foo()"));
+			Assert.AreEqual(dyn.Foo(), LambdaExtensions.Eval(interpreter, "dyn.Foo()"));
 		}
 
 		[Test]
@@ -83,7 +84,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 					.SetVariable("dyn", dyn);
 
-			Assert.AreEqual(dyn.Sub.Foo(), interpreter.Eval("dyn.Sub.Foo()"));
+			Assert.AreEqual(dyn.Sub.Foo(), LambdaExtensions.Eval(interpreter, "dyn.Sub.Foo()"));
 		}
 
 		[Test]

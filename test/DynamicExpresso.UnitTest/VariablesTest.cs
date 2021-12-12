@@ -44,7 +44,7 @@ namespace DynamicExpresso.UnitTest
 											.SetVariable("myk", 23);
 
 			Assert.AreEqual(23, target.Eval("myk"));
-			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
+			Assert.AreEqual(typeof(int), target.Parse("myk").Expression.Type);
 		}
 
 		[Test]
@@ -80,7 +80,7 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(3489, target.Eval("myk"));
 
-			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
+			Assert.AreEqual(typeof(int), target.Parse("myk").Expression.Type);
 		}
 
 		[Test]
@@ -95,7 +95,7 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(3489, target.Eval("myk"));
 
-			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
+			Assert.AreEqual(typeof(int), target.Parse("myk").Expression.Type);
 		}
 
 		[Test]
@@ -106,7 +106,7 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(null, target.Eval("myk"));
 			Assert.AreEqual(true, target.Eval("myk == null"));
-			Assert.AreEqual(typeof(object), target.Parse("myk").ReturnType);
+			Assert.AreEqual(typeof(object), target.Parse("myk").Expression.Type);
 		}
 
 		[Test]
@@ -117,7 +117,7 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(null, target.Eval("myk"));
 			Assert.AreEqual(true, target.Eval("myk == null"));
-			Assert.AreEqual(typeof(string), target.Parse("myk").ReturnType);
+			Assert.AreEqual(typeof(string), target.Parse("myk").Expression.Type);
 		}
 
 		[Test]
@@ -187,7 +187,7 @@ namespace DynamicExpresso.UnitTest
 
 			// ambiguous call: null can either be a string or an object
 			// note: if there's no ambiguous exception, it means that the resolution
-			// lifted the parameters from the string overload, which prevented the int? overload 
+			// lifted the parameters from the string overload, which prevented the int? overload
 			// from being considered
 			Assert.Throws<ParseException>(() => interpreter.Eval("MyFunc(null)"));
 
@@ -205,8 +205,8 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetFunction("MyFunc", ambiguous1);
 			interpreter.SetFunction("MyFunc", ambiguous2);
 
-			// there should be no ambiguous exception: int can implicitly be converted to double, 
-			// but there's a perfect match 
+			// there should be no ambiguous exception: int can implicitly be converted to double,
+			// but there's a perfect match
 			Assert.AreEqual("integer", interpreter.Eval("MyFunc(5)"));
 		}
 
@@ -215,7 +215,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			// import static method with params array 
+			// import static method with params array
 			var methodInfo = typeof(VariablesTest).GetMethod("Sum", BindingFlags.Static | BindingFlags.NonPublic);
 			var types = methodInfo.GetParameters().Select(p => p.ParameterType).Concat(new[] { methodInfo.ReturnType });
 			var del = methodInfo.CreateDelegate(Expression.GetDelegateType(types.ToArray()));

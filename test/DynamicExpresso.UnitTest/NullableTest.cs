@@ -21,19 +21,18 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(Nullable<Int32>));
 			interpreter.SetVariable("b", b, typeof(Nullable<Int32>));
-			var expectedReturnType = typeof(Nullable<Int32>);
 
 			// Addition
-			Verify(interpreter, "a + b", a + b);
+			Verify(interpreter, "a + b", (Nullable<Int32>) a + b);
 
 			// Subtraction
-			Verify(interpreter, "a - b", a - b);
+			Verify(interpreter, "a - b", (Nullable<Int32>) a - b);
 
 			// Division
-			Verify(interpreter, "a / b", a / b);
+			Verify(interpreter, "a / b", (Nullable<Int32>) a / b);
 
 			// Multiplication
-			Verify(interpreter, "a * b", a * b);
+			Verify(interpreter, "a * b", (Nullable<Int32>) a * b);
 		}
 
 		[Test]
@@ -93,19 +92,18 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(Nullable<Double>));
 			interpreter.SetVariable("b", b, typeof(Nullable<Double>));
-			var expectedReturnType = typeof(Nullable<Double>);
 
 			// Addition
-			Verify(interpreter, "a + b", a + b);
+			Verify(interpreter, "a + b", (Nullable<Double>) a + b);
 
 			// Subtraction
-			Verify(interpreter, "a - b", a - b);
+			Verify(interpreter, "a - b", (Nullable<Double>) a - b);
 
 			// Division
-			Verify(interpreter, "a / b", a / b);
+			Verify(interpreter, "a / b", (Nullable<Double>) a / b);
 
 			// Multiplication
-			Verify(interpreter, "a * b", a * b);
+			Verify(interpreter, "a * b", (Nullable<Double>) a * b);
 		}
 
 		[Test]
@@ -117,19 +115,18 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(Int32));
 			interpreter.SetVariable("b", b, typeof(Nullable<Double>));
-			var expectedReturnType = typeof(Nullable<Double>);
 
 			// Addition
-			Verify(interpreter, "a + b", a + b);
+			Verify(interpreter, "a + b", (Nullable<Double>) a + b);
 
 			// Subtraction
-			Verify(interpreter, "a - b", a - b);
+			Verify(interpreter, "a - b", (Nullable<Double>) a - b);
 
 			// Division
-			Verify(interpreter, "a / b", a / b);
+			Verify(interpreter, "a / b", (Nullable<Double>) a / b);
 
 			// Multiplication
-			Verify(interpreter, "a * b", a * b);
+			Verify(interpreter, "a * b", (Nullable<Double>) a * b);
 		}
 
 		[Test]
@@ -141,19 +138,18 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(Nullable<Int32>));
 			interpreter.SetVariable("b", b, typeof(Double));
-			var expectedReturnType = typeof(Nullable<Double>);
 
 			// Addition
-			Verify(interpreter, "a + b", a + b);
+			Verify(interpreter, "a + b", (Nullable<Double>) a + b);
 
 			// Subtraction
-			Verify(interpreter, "a - b", a - b);
+			Verify(interpreter, "a - b", (Nullable<Double>) a - b);
 
 			// Division
-			Verify(interpreter, "a / b", a / b);
+			Verify(interpreter, "a / b", (Nullable<Double>) a / b);
 
 			// Multiplication
-			Verify(interpreter, "a * b", a * b);
+			Verify(interpreter, "a * b", (Nullable<Double>) a * b);
 		}
 
 		[Test]

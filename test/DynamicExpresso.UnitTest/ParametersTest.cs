@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System.Globalization;
 using System.Reflection;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -35,6 +36,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("AB", target.Eval("A + B", parameters));
 		}
 
+		/*
 		[Test]
 		public void Parameters_orders_can_be_different_between_parse_and_invoke()
 		{
@@ -48,18 +50,16 @@ namespace DynamicExpresso.UnitTest
 			var lambda = target.Parse("A + B", parameters);
 
 			Assert.AreEqual("AB", lambda.Invoke(parameters.Reverse()));
-		}
+		}*/
 
 		[Test]
 		public void Expression_Without_Parameters()
 		{
 			var target = new Interpreter();
 
-			var parameters = new Parameter[0];
+			var func = target.Parse("10+5").Compile();
 
-			var exp = target.Parse("10+5", parameters);
-
-			Assert.AreEqual(15, exp.Invoke());
+			Assert.AreEqual(15, func.DynamicInvoke());
 		}
 
 		[Test]
@@ -67,29 +67,22 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var parameters = new[] {
-                            new Parameter("x", 23),
-                            new Parameter("y", 7)
-                            };
+			var exp = target.Parse(
+					"x + y",
+					Expression.Parameter(typeof(int), "x"),
+					Expression.Parameter(typeof(int), "y"))
+				.Compile();
 
-			var exp = target.Parse("x + y", parameters);
-
-			var parametersMismatch = new[] {
-                            new Parameter("x", 546)
-                            };
-
-			Assert.Throws<TargetParameterCountException>(() => exp.Invoke(parametersMismatch));
+			Assert.Throws<TargetParameterCountException>(() => exp.DynamicInvoke(546));
 		}
 
+		/*
 		[Test]
 		public void Invoke_the_lambda_using_different_parameters_values()
 		{
 			var target = new Interpreter();
 
-			var parameters = new[] {
-                            new Parameter("x", typeof(int)),
-                            new Parameter("y", typeof(int))
-                            };
+			var parameters = new[] {Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y")};
 
 			var myFunc = target.Parse("x + y", parameters);
 
@@ -106,22 +99,19 @@ namespace DynamicExpresso.UnitTest
                             };
 
 			Assert.AreEqual(58, myFunc.Invoke(parameters2));
-		}
+		}*/
 
 		[Test]
 		public void Different_parameters_values_With_Args()
 		{
 			var target = new Interpreter();
 
-			var parameters = new[] {
-                            new Parameter("x", typeof(int)),
-                            new Parameter("y", typeof(int))
-                            };
+			var parameters = new[] {Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y")};
 
-			var myFunc = target.Parse("x + y", parameters);
+			var myFunc = target.Parse("x + y", parameters).Compile();
 
-			Assert.AreEqual(30, myFunc.Invoke(23, 7));
-			Assert.AreEqual(30, myFunc.Invoke(32, -2));
+			Assert.AreEqual(30, myFunc.DynamicInvoke(23, 7));
+			Assert.AreEqual(30, myFunc.DynamicInvoke(32, -2));
 		}
 
 		[Test]
@@ -173,6 +163,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x, target.Eval("X", parameters));
 		}
 
+		/*
 		[Test]
 		public void Parameters_cannot_be_parsed_with_one_case_and_invoked_in_another_case()
 		{
@@ -195,7 +186,7 @@ namespace DynamicExpresso.UnitTest
 			var lambda = target.Parse("x", new Parameter("x", x.GetType()));
 
 			Assert.AreEqual(x, lambda.Invoke(new Parameter("X", x)));
-		}
+		}*/
 
 		[Test]
 		public void Complex_parameters()
@@ -281,11 +272,12 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var parameters = new[] {
-                            new Parameter("x", 23),
-                            new Parameter("y", 7),
-                            new Parameter("z", 54),
-                            };
+			var parameters = new[]
+			{
+				Expression.Parameter(typeof(int), "x"),
+				Expression.Parameter(typeof(int), "y"),
+				Expression.Parameter(typeof(int), "z"),
+			};
 
 			var lambda = target.Parse("x + y", parameters);
 
@@ -305,10 +297,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var parameters = new[] {
-                            new Parameter("x", 23),
-                            new Parameter("y", 7),
-                            };
+			var parameters = new[] {Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y"),};
 
 			var lambda = target.Parse("x * y + x * y", parameters);
 
@@ -322,37 +311,32 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var parameters = new[]{
-                            new Parameter("x", typeof(int)),
-                            new Parameter("y", typeof(int))
-                            };
+			var parameters = new[] {Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y")};
 
-			var lambda = target.Parse("y-x", parameters);
+			var lambda = target.Parse("y-x", parameters).Compile();
 
-			Assert.AreEqual(4, lambda.Invoke(1, 5));
+			Assert.AreEqual(4, lambda.DynamicInvoke(1, 5));
 		}
 
+		/*
 		[Test]
 		public void When_lambda_is_invoked_I_can_omit_parameters_not_used()
 		{
 			var target = new Interpreter();
 
-			var parameters = new[]{
-                            new Parameter("x", typeof(int)),
-                            new Parameter("y", typeof(int))
-                            };
+			var parameters = new[] {Expression.Parameter(typeof(int), "x"), Expression.Parameter(typeof(int), "y"),};
 
-			var lambda = target.Parse("y+5", parameters);
+			var lambda = target.Parse("y+5", parameters).Compile();
 
-			Assert.AreEqual(7, lambda.Invoke(new Parameter("y", 2)));
-		}
+			Assert.AreEqual(7, lambda.DynamicInvoke(2));
+		}*/
 
 		[Test]
 		public void When_parsing_an_expression_to_a_delegate_the_delegate_parameters_are_respected_also_if_the_expression_doesnt_use_it()
 		{
 			var target = new Interpreter();
 
-			var myDelegate = target.ParseAsDelegate<TestDelegate>("x + y");
+			var myDelegate = target.Parse<TestDelegate>("x + y").Compile();
 
 			// parameter 'z' is not used but the delegate accept it in any case without problem
 			Assert.AreEqual(3, myDelegate(1, 2, 123123));
