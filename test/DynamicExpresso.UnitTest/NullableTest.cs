@@ -241,45 +241,24 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("c", c, typeof(DateTimeOffset));
 			var expectedReturnType = typeof(bool);
 
-			var expected = a < b;
-			var lambda = interpreter.Parse("a < b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
-
-			expected = a > b;
-			lambda = interpreter.Parse("a > b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
-
-			expected = a == b;
-			lambda = interpreter.Parse("a == b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
-
-			expected = a != b;
-			lambda = interpreter.Parse("a != b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
-
-			expected = b == c;
-			lambda = interpreter.Parse("b == b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
-
-			expected = b != c;
-			lambda = interpreter.Parse("b != c");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
-
-			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(a - b, lambda.Invoke());
-			Assert.AreEqual(typeof(TimeSpan?), lambda.ReturnType);
+			Verify(interpreter, "a < b", a < b);
+			Verify(interpreter, "a > b", a > b);
+			Verify(interpreter, "a == b", a == b);
+			Verify(interpreter, "a != b", a != b);
+			Verify(interpreter, "b == b", b == b);
+			Verify(interpreter, "b != c", b != c);
+			Verify(interpreter, "a - b", a - b);
 
 			b = null;
 			interpreter.SetVariable("b", b, typeof(DateTimeOffset?));
-			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(a - b, lambda.Invoke());
-			Assert.AreEqual(typeof(TimeSpan?), lambda.ReturnType);
+			Verify(interpreter, "a - b", a - b);
+		}
+
+		private static void Verify<T>(Interpreter interpreter, string expression, T expected)
+		{
+			var parsed = interpreter.Parse(expression);
+			Assert.AreEqual(expected, parsed.Compile().DynamicInvoke());
+			Assert.AreEqual(typeof(T), parsed.Expression.Type);
 		}
 	}
 }
