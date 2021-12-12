@@ -402,12 +402,6 @@ namespace DynamicExpresso.Parsing
 				//			op.text, ref left, ref right, op.pos);
 				//}
 
-				if ((IsNullableType(left.Type) || IsNullableType(right.Type)) && (GetNonNullableType(left.Type) == right.Type || GetNonNullableType(right.Type) == left.Type))
-				{
-					left = GenerateNullableTypeConversion(left);
-					right = GenerateNullableTypeConversion(right);
-				}
-
 				CheckAndPromoteOperands(
 					isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
 					ref left,
@@ -641,7 +635,7 @@ namespace DynamicExpresso.Parsing
 				if (_token.id == TokenId.Dot)
 				{
 					NextToken();
-					expr = ParseMemberAccess(null, expr);
+					expr = ParseMemberAccess(expr);
 				}
 				// special case for ?. and ?[ operators
 				else if (_token.id == TokenId.Question && (_parseChar == '.' || _parseChar == '['))
@@ -653,7 +647,8 @@ namespace DynamicExpresso.Parsing
 						NextToken();
 
 						// ?. operator changes value types to nullable types
-						var memberAccess = GenerateNullableTypeConversion(ParseMemberAccess(null, expr));
+						// the member access should be resolved on the underlying type
+						var memberAccess = GenerateNullableTypeConversion(ParseMemberAccess(GenerateGetNullableValue(expr)));
 						var nullExpr = ParserConstants.NullLiteralExpression;
 						CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
 						expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
@@ -661,7 +656,8 @@ namespace DynamicExpresso.Parsing
 					else if (_token.id == TokenId.OpenBracket)
 					{
 						// ?[ operator changes value types to nullable types
-						var elementAccess = GenerateNullableTypeConversion(ParseElementAccess(expr));
+						// the member access should be resolved on the underlying type
+						var elementAccess = GenerateNullableTypeConversion(ParseElementAccess(GenerateGetNullableValue(expr)));
 						var nullExpr = ParserConstants.NullLiteralExpression;
 						CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
 						expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
@@ -689,6 +685,16 @@ namespace DynamicExpresso.Parsing
 				}
 			}
 			return expr;
+		}
+
+		/// <summary>
+		/// Generate a call to the Value property of the Nullable type */
+		/// </summary>
+		private Expression GenerateGetNullableValue(Expression expr)
+		{
+			if (!IsNullableType(expr.Type))
+				return expr;
+			return GeneratePropertyOrFieldExpression(expr.Type, expr, _token.pos, "Value");
 		}
 
 		private Expression ParsePrimaryStart()
@@ -1424,6 +1430,11 @@ namespace DynamicExpresso.Parsing
 			}
 		}
 
+		private Expression ParseMemberAccess(Expression instance)
+		{
+			return ParseMemberAccess(null, instance);
+		}
+
 		private Expression ParseMemberAccess(Type type, Expression instance)
 		{
 			if (instance != null) type = instance.Type;
@@ -1748,6 +1759,12 @@ namespace DynamicExpresso.Parsing
 
 		private void CheckAndPromoteOperands(Type signatures, ref Expression left, ref Expression right)
 		{
+			if ((IsNullableType(left.Type) || IsNullableType(right.Type)) && (GetNonNullableType(left.Type) == right.Type || GetNonNullableType(right.Type) == left.Type))
+			{
+				left = GenerateNullableTypeConversion(left);
+				right = GenerateNullableTypeConversion(right);
+			}
+
 			var args = new[] { left, right };
 
 			args = PrepareOperandArguments(signatures, args);
