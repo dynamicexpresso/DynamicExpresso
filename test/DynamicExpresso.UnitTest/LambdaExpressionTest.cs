@@ -269,6 +269,37 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(3, results.Count());
 			Assert.AreEqual(strList.Zip(intList, (str, i) => str + i), results);
 		}
+
+		[Test]
+		public void Lambda_with_parameter()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var listInt = target.Eval<IEnumerable<int>>("list.Where(n => n > x)", new Parameter("list", new[] { 1, 2, 3 }), new Parameter("x", 1));
+			Assert.AreEqual(new[] { 2, 3 }, listInt);
+
+			// ensure the parameters can be reused with different values
+			listInt = target.Eval<IEnumerable<int>>("list.Where(n => n > x)", new Parameter("list", new[] { 2, 4, 5 }), new Parameter("x", 2));
+			Assert.AreEqual(new[] { 4, 5 }, listInt);
+		}
+
+		[Test]
+		public void Lambda_with_parameter_2()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var listInt = target.Eval<IEnumerable<int>>("list.Select(n => n - 1).Where(n => n > x).Select(n => n + x)", new Parameter("list", new[] { 1, 2, 3 }), new Parameter("x", 1));
+			Assert.AreEqual(new[] { 3 }, listInt);
+		}
+
+		[Test]
+		public void Lambda_with_variable()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			target.SetVariable("list", new[] { 1, 2, 3 });
+			target.SetVariable("x", 1);
+
+			var listInt = target.Eval<IEnumerable<int>>("list.Where(n => n > x)");
+			Assert.AreEqual(new[] { 2, 3 }, listInt);
+		}
 	}
 
 	/// <summary>
