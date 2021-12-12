@@ -12,7 +12,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Expression<Func<double, double>> lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + 5");
+			var lambdaExpression = target.Parse<Func<double, double>>("arg + 5").AsExpression();
 
 			Assert.AreEqual(15, lambdaExpression.Compile()(10));
 		}
@@ -22,11 +22,11 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Expression<Func<double, double>> lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + 5");
+			var lambdaExpression = target.Parse<Func<double, double>>("arg + 5").AsExpression();
 
 			Assert.AreEqual(15, lambdaExpression.Compile()(10));
 
-			lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + .5");
+			lambdaExpression = target.Parse<Func<double, double>>("arg + .5").AsExpression();
 			Assert.AreEqual(10.5, lambdaExpression.Compile()(10));
 		}
 
@@ -35,7 +35,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var lambdaExpression = target.ParseAsExpression<Func<double, double, double>>("arg1 * arg2");
+			var lambdaExpression = target.Parse<Func<double, double, double>>("arg1 * arg2").AsExpression();
 
 			Assert.AreEqual(6, lambdaExpression.Compile()(3, 2));
 			Assert.AreEqual(50, lambdaExpression.Compile()(5, 10));
@@ -46,8 +46,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var argumentNames = new string[] { "x", "y" };
-			var lambdaExpression = target.ParseAsExpression<Func<double, double, double>>("x * y", argumentNames);
+			var argumentNames = new[] { "x", "y" };
+			var lambdaExpression = target.Parse<Func<double, double, double>>("x * y", argumentNames).AsExpression();
 
 			Assert.AreEqual(6, lambdaExpression.Compile()(3, 2));
 			Assert.AreEqual(50, lambdaExpression.Compile()(5, 10));
@@ -58,12 +58,12 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var lambda = target.Parse("Math.Pow(x, y) + 5",
-				new Parameter("x", typeof(double)),
-				new Parameter("y", typeof(double))
+			var parseResult = target.Parse("Math.Pow(x, y) + 5",
+				Expression.Parameter(typeof(double), "x"),
+				Expression.Parameter(typeof(double), "y")
 			);
 
-			Expression<Func<double, double, double>> lambdaExpression = lambda.LambdaExpression<Func<double, double, double>>();
+			var lambdaExpression = parseResult.AsExpression<Func<double, double, double>>();
 
 			Assert.AreEqual(Math.Pow(10, 2) + 5, lambdaExpression.Compile()(10, 2));
 		}
@@ -75,11 +75,9 @@ namespace DynamicExpresso.UnitTest
 
 			// Func delegate has 2 inputs, I just use one
 
-			var lambda = target.Parse("x + 5",
-				new Parameter("x", typeof(double))
-			);
+			var parseResult = target.Parse("x + 5", Expression.Parameter(typeof(double), "x"));
 
-			Assert.Throws<ArgumentException>(() => lambda.LambdaExpression<Func<double, double, double>>());
+			Assert.Throws<ArgumentException>(() => parseResult.AsExpression<Func<double, double, double>>());
 		}
 
 		[Test]
@@ -89,11 +87,9 @@ namespace DynamicExpresso.UnitTest
 
 			// Func delegate takes a string, I pass a double
 
-			var lambda = target.Parse("x + 5",
-				new Parameter("x", typeof(double))
-			);
+			var parseResult = target.Parse("x + 5", Expression.Parameter(typeof(double), "x"));
 
-			Assert.Throws<ArgumentException>(() => lambda.LambdaExpression<Func<string, double>>());
+			Assert.Throws<ArgumentException>(() => parseResult.AsExpression<Func<string, double>>());
 		}
 
 		[Test]
@@ -103,11 +99,9 @@ namespace DynamicExpresso.UnitTest
 
 			// Func delegate returns a string, I return a double
 
-			var lambda = target.Parse("x + 5",
-				new Parameter("x", typeof(double))
-			);
+			var parseResult = target.Parse("x + 5", Expression.Parameter(typeof(double), "x"));
 
-			Assert.Throws<ArgumentException>(() => lambda.LambdaExpression<Func<double, string>>());
+			Assert.Throws<ArgumentException>(() => parseResult.AsExpression<Func<double, string>>());
 		}
 
 	}

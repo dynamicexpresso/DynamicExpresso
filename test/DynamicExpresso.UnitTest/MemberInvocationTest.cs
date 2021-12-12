@@ -108,7 +108,7 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 			var y = new MyTestService();
 			target.SetVariable("y", y);
-			
+
 			Assert.AreEqual(x[1, 2], target.Eval("x[1, 2]"));
 			Assert.AreEqual(y[y.Today, 2], target.Eval("y[y.Today, 2]"));
 			Assert.AreEqual(y[y.Today], target.Eval("y[y.Today]"));
@@ -218,7 +218,7 @@ namespace DynamicExpresso.UnitTest
 			target.Eval("service.VoidMethod()");
 			Assert.AreEqual(1, service.VoidMethodCalls);
 
-			Assert.AreEqual(typeof(void), target.Parse("service.VoidMethod()").ReturnType);
+			Assert.AreEqual(typeof(void), target.Parse("service.VoidMethod()").Expression.Type);
 		}
 
 		[Test]

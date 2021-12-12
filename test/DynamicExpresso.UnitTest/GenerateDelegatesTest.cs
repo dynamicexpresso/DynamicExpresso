@@ -12,11 +12,11 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var func = target.ParseAsDelegate<Func<double, double, double>>("Math.Pow(x, y) + 5", "x", "y");
+			var func = target.Parse<Func<double, double, double>>("Math.Pow(x, y) + 5", "x", "y").Compile();
 
 			Assert.AreEqual(Math.Pow(10, 2) + 5, func(10, 2));
 
-            func = target.ParseAsDelegate<Func<double, double, double>>("Math.Pow(x, y) + .5", "x", "y");
+            func = target.Parse<Func<double, double, double>>("Math.Pow(x, y) + .5", "x", "y").Compile();
             Assert.AreEqual(Math.Pow(10, 2) + .5, func(10, 2));
         }
 
@@ -25,7 +25,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var func = target.ParseAsDelegate<Func<int>>("50");
+			var func = target.Parse<Func<int>>("50").Compile();
 
 			Assert.AreEqual(50, func());
 		}
@@ -35,7 +35,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var func = target.ParseAsDelegate<Func<string, int>>("arg.Length");
+			var func = target.Parse<Func<string, int>>("arg.Length").Compile();
 
 			Assert.AreEqual(4, func("ciao"));
 			Assert.AreEqual(9, func("123456879"));
@@ -47,7 +47,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var argumentName = "val"; // if not specified the delegate parameter is used which is "arg"
-			var func = target.ParseAsDelegate<Func<string, int>>("val.Length", argumentName);
+			var func = target.Parse<Func<string, int>>("val.Length", argumentName).Compile();
 
 			Assert.AreEqual(4, func("ciao"));
 			Assert.AreEqual(9, func("123456879"));
@@ -58,7 +58,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var func = target.ParseAsDelegate<Func<double, double, double>>("arg1 * arg2");
+			var func = target.Parse<Func<double, double, double>>("arg1 * arg2").Compile();
 
 			Assert.AreEqual(6, func(3, 2));
 			Assert.AreEqual(50, func(5, 10));
@@ -70,7 +70,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var argumentNames = new [] { "x", "y" };
-			var func = target.ParseAsDelegate<Func<double, double, double>>("x * y", argumentNames);
+			var func = target.Parse<Func<double, double, double>>("x * y", argumentNames).Compile();
 
 			Assert.AreEqual(6, func(3, 2));
 			Assert.AreEqual(50, func(5, 10));
@@ -81,7 +81,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var func = target.ParseAsDelegate<MyCustomDelegate>("x + y.Length");
+			var func = target.Parse<MyCustomDelegate>("x + y.Length").Compile();
 
 			Assert.AreEqual(7, func(3, "ciao"));
 			Assert.AreEqual(10, func(5, "mondo"));
@@ -95,7 +95,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			// expected a double but I return a string
-			Assert.Throws<ParseException>(() => target.ParseAsDelegate<Func<double>>("\"ciao\""));
+			Assert.Throws<ParseException>(() => target.Parse<Func<double>>("\"ciao\""));
 		}
 	}
 }

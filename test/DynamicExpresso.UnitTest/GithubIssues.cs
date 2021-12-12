@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 
 // ReSharper disable SpecifyACultureInStringConversionExplicitly
@@ -221,7 +222,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ParseException>(() => interpreter.Eval("GFunction(arg)"));
 
 			// there should be an ambiguous call exception, but GFunction1 is used
-			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true 
+			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true
 			// and     gFunc2.Method.GetParameters()[0].HasDefaultValue == false
 			Assert.False((bool)interpreter.Eval("GFunction()"));
 		}
@@ -250,12 +251,12 @@ namespace DynamicExpresso.UnitTest
 		{
 			var interpreter = new Interpreter();
 
-			var lambda = interpreter.Parse("Scope?.ValueInt", new Parameter("Scope", typeof(Scope)));
+			var lambda = interpreter.Parse("Scope?.ValueInt", Expression.Parameter(typeof(Scope), "Scope")).Compile();
 
-			var result = lambda.Invoke((Scope)null);
+			var result = lambda.DynamicInvoke((Scope)null);
 			Assert.IsNull(result);
 
-			result = lambda.Invoke(new Scope { ValueInt = 5 });
+			result = lambda.DynamicInvoke(new Scope { ValueInt = 5 });
 			Assert.AreEqual(5, result);
 
 			interpreter.SetVariable("scope", new Scope { ValueInt = 5 });
@@ -280,18 +281,18 @@ namespace DynamicExpresso.UnitTest
 		{
 			var interpreter = new Interpreter();
 
-			var lambda = interpreter.Parse("Scope?.Value", new Parameter("Scope", typeof(Scope)));
+			var lambda = interpreter.Parse("Scope?.Value", Expression.Parameter(typeof(Scope), "Scope")).Compile();
 
-			var result = lambda.Invoke((Scope)null);
+			var result = lambda.DynamicInvoke((Scope)null);
 			Assert.IsNull(result);
 
-			result = lambda.Invoke(new Scope());
+			result = lambda.DynamicInvoke(new Scope());
 			Assert.IsNull(result);
 
-			result = lambda.Invoke(new Scope { Value = null });
+			result = lambda.DynamicInvoke(new Scope { Value = null });
 			Assert.IsNull(result);
 
-			result = lambda.Invoke(new Scope { Value = 5 });
+			result = lambda.DynamicInvoke(new Scope { Value = 5 });
 			Assert.AreEqual(5, result);
 		}
 
@@ -300,15 +301,15 @@ namespace DynamicExpresso.UnitTest
 		{
 			var interpreter = new Interpreter();
 
-			var lambda = interpreter.Parse("Scope?.Arr?[0]", new Parameter("Scope", typeof(Scope)));
+			var lambda = interpreter.Parse("Scope?.Arr?[0]", Expression.Parameter(typeof(Scope), "Scope")).Compile();
 
-			var result = lambda.Invoke(new Scope());
+			var result = lambda.DynamicInvoke(new Scope());
 			Assert.IsNull(result);
 
-			result = lambda.Invoke(new Scope { Arr = null });
+			result = lambda.DynamicInvoke(new Scope { Arr = null });
 			Assert.IsNull(result);
 
-			result = lambda.Invoke(new Scope { Arr = new int?[] { 5 } });
+			result = lambda.DynamicInvoke(new Scope { Arr = new int?[] { 5 } });
 			Assert.AreEqual(5, result);
 		}
 
@@ -317,12 +318,12 @@ namespace DynamicExpresso.UnitTest
 		{
 			var interpreter = new Interpreter();
 
-			var lambda = interpreter.Parse("Scope?.ArrInt?[0]", new Parameter("Scope", typeof(Scope)));
+			var lambda = interpreter.Parse("Scope?.ArrInt?[0]", Expression.Parameter(typeof(Scope), "Scope")).Compile();
 
-			var result = lambda.Invoke(new Scope());
+			var result = lambda.DynamicInvoke(new Scope());
 			Assert.IsNull(result);
 
-			result = lambda.Invoke(new Scope { ArrInt = new int[] { 5 } });
+			result = lambda.DynamicInvoke(new Scope { ArrInt = new int[] { 5 } });
 			Assert.AreEqual(5, result);
 
 			interpreter.SetVariable("scope", new Scope { ArrInt = new int[] { 5 } });
@@ -354,17 +355,17 @@ namespace DynamicExpresso.UnitTest
 			var interpreterWithoutLambdas = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
 
 			var stringExpression = "booleanValue ? someStringValue : \".\"";
-			var parameters = new List<Parameter>
+			var parameters = new []
 			{
-				new Parameter($"someStringValue", typeof(string), $"E33"),
-				new Parameter("booleanValue", typeof(bool), true)
+				Expression.Parameter(typeof(string), "someStringValue"),
+				Expression.Parameter(typeof(bool), "booleanValue")
 			};
 
-			var expressionWithoutLambdas = interpreterWithoutLambdas.Parse(stringExpression, typeof(void), parameters.ToArray());
-			Assert.AreEqual("E33", expressionWithoutLambdas.Invoke(parameters.ToArray()));
+			var expressionWithoutLambdas = interpreterWithoutLambdas.Parse(stringExpression, typeof(void), parameters.ToArray()).Compile();
+			Assert.AreEqual("E33", expressionWithoutLambdas.DynamicInvoke("E33", true));
 
-			var expressionWithLambdas = interpreterWithLambdas.Parse(stringExpression, typeof(void), parameters.ToArray());
-			Assert.AreEqual("E33", expressionWithLambdas.Invoke(parameters.ToArray()));
+			var expressionWithLambdas = interpreterWithLambdas.Parse(stringExpression, typeof(void), parameters.ToArray()).Compile();
+			Assert.AreEqual("E33", expressionWithLambdas.DynamicInvoke("E33", true));
 		}
 
 		[Test]
@@ -374,7 +375,7 @@ namespace DynamicExpresso.UnitTest
 
 			// forcing the return type to object should work
 			// (ie a conversion expression should be emitted from long to object)
-			var del = interpreter.ParseAsDelegate<Func<object>>("a*2");
+			var del = interpreter.Parse<Func<object>>("a*2").Compile();
 			var result = del();
 			Assert.AreEqual(246, result);
 		}
@@ -383,7 +384,7 @@ namespace DynamicExpresso.UnitTest
 		public void GitHub_Issue_185_2()
 		{
 			var interpreter = new Interpreter().SetVariable("a", 123L);
-			var del = interpreter.ParseAsDelegate<Func<dynamic>>("a*2");
+			var del = interpreter.Parse<Func<dynamic>>("a*2").Compile();
 			var result = del();
 			Assert.AreEqual(246, result);
 		}

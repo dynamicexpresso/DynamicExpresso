@@ -28,9 +28,9 @@ namespace DynamicExpresso.UnitTest
 			var list = new List<string> { "abc", "dfe", "test" };
 			target.SetVariable("list", list);
 
-			var lambda = target.Parse("list.Select(str => str.Length)");
+			var parseResult = target.Parse("list.Select(str => str.Length)");
 
-			Assert.AreEqual(typeof(IEnumerable<int>), lambda.ReturnType);
+			Assert.AreEqual(typeof(IEnumerable<int>), parseResult.Expression.Type);
 		}
 
 		[Test]

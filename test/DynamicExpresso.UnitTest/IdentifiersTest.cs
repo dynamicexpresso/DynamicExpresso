@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Linq.Expressions;
 using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
@@ -29,10 +30,11 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Getting_the_list_of_used_identifiers()
 		{
-			var target = new Interpreter()
-											.SetVariable("x", 23);
+			var target = new Interpreter().SetVariable("x", 23);
 
-			var lambda = target.Parse("x > a || true == b", new Parameter("a", 1), new Parameter("b", false));
+			var lambda = target.Parse("x > a || true == b",
+				Expression.Parameter(typeof(int), "a"),
+				Expression.Parameter(typeof(bool), "b"));
 
 			Assert.AreEqual(2, lambda.Identifiers.Count());
 			Assert.AreEqual("x", lambda.Identifiers.ElementAt(0).Name);

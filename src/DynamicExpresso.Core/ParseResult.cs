@@ -52,4 +52,16 @@ namespace DynamicExpresso
 		/// <value>The identifiers.</value>
 		public IEnumerable<Identifier> Identifiers { get; }
 	}
+
+	public class ParseResult<TDelegate> : ParseResult
+	{
+		public ParseResult(
+			Expression expression,
+			IEnumerable<ParameterExpression> usedParameters,
+			IEnumerable<ParameterExpression> declaredParameters,
+			IEnumerable<ReferenceType> types,
+			IEnumerable<Identifier> identifiers) : base(expression, usedParameters, declaredParameters, types, identifiers)
+		{
+		}
+	}
 }

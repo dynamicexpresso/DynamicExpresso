@@ -169,7 +169,7 @@ namespace DynamicExpresso.UnitTest
 			DynamicIndexAccess globals = new DynamicIndexAccess();
 			Interpreter interpreter = new Interpreter()
 				.SetVariable("Values", new DynamicIndexAccess());
-			
+
 			Assert.AreEqual(globals.Values["Hello"], interpreter.Eval<string>("Values[\"Hello\"]"));
 		}
 
@@ -307,22 +307,22 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void ObjectLateBinding()
 		{
-			
+
 
 			var classWithObjectProperties = new ClassWithObjectProperties();
-						
+
 
 			Assert.Throws<ParseException>(() => {
 
 				var noLateBindingInterpreter = new Interpreter();
-				var noLateBindingDel = noLateBindingInterpreter.ParseAsDelegate<Func<ClassWithObjectProperties, int>>("d.Foo+d.Bar()", new[] { "d" });
+				var noLateBindingDel = noLateBindingInterpreter.Parse<Func<ClassWithObjectProperties, int>>("d.Foo+d.Bar()", "d").Compile();
 				var noLateBindingResult = noLateBindingDel.Invoke(classWithObjectProperties);
 
 			});
 
 
 			var lateBindingInterpreter = new Interpreter(InterpreterOptions.Default|InterpreterOptions.LateBindObject);
-			var lateBindingInterpreterDel = lateBindingInterpreter.ParseAsDelegate<Func<ClassWithObjectProperties, int>>("d.Foo+d.Bar()", new[] { "d" });
+			var lateBindingInterpreterDel = lateBindingInterpreter.Parse<Func<ClassWithObjectProperties, int>>("d.Foo+d.Bar()", "d").Compile();
 			var lateBindingResult = lateBindingInterpreterDel.Invoke(classWithObjectProperties);
 			Assert.AreEqual((dynamic)classWithObjectProperties.Foo + (dynamic)classWithObjectProperties.Bar(), lateBindingResult);
 
@@ -333,7 +333,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual((dynamic)classWithObjectProperties.Foo + (dynamic)classWithObjectProperties.Bar(), evalResult);
 
 		}
-	
+
 
 		[Test]
 		public void Bitwise_with_dynamic_properties()
@@ -352,7 +352,7 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(dyn.Foo ^ 500, interpreter.Eval("dyn.Foo ^ 500"));
 			Assert.AreEqual(500 ^ dyn.Foo, interpreter.Eval("500 ^ dyn.Foo"));
-			
+
 		}
 
 		[Test]
@@ -390,13 +390,13 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		public class DynamicIndexAccess : DynamicObject 
+		public class DynamicIndexAccess : DynamicObject
 		{
-			public dynamic Values 
-			{ 
-				get 
-				{ 
-					return _values; 
+			public dynamic Values
+			{
+				get
+				{
+					return _values;
 				}
 			}
 			private readonly IReadOnlyDictionary<string, object> _values;
