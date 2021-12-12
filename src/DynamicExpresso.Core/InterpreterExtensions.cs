@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
+using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso
 {
@@ -10,11 +14,29 @@ namespace DynamicExpresso
 	public static class InterpreterExtensions
 	{
 		/// <summary>
-		/// Compiles lambda with used parameters.
+		/// Parse a text expression with expected return type.
+		/// </summary>
+		/// <param name="interpreter"></param>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
+		public static ParseResult ParseWithReturnType<TReturnType>(
+			this ExpressionInterpreter interpreter,
+			string expressionText,
+			params ParameterExpression[] parameters)
+		{
+			return interpreter.Parse(expressionText, typeof(TReturnType), parameters);
+		}
+
+		/// <summary>
+		/// Compiles lambda with declared parameters.
 		/// </summary>
 		public static Delegate Compile(this ParseResult parseResult)
 		{
-			return parseResult.LambdaExpression().Compile();
+			var lambdaExpression = Expression.Lambda(parseResult.Expression, parseResult.DeclaredParameters.ToArray());
+
+			return lambdaExpression.Compile();
 		}
 
 		/// <summary>
@@ -22,7 +44,9 @@ namespace DynamicExpresso
 		/// </summary>
 		public static TDelegate Compile<TDelegate>(this ParseResult parseResult)
 		{
-			return parseResult.LambdaExpression<TDelegate>().Compile();
+			var lambdaExpression = Expression.Lambda<TDelegate>(parseResult.Expression, parseResult.DeclaredParameters.ToArray());
+
+			return lambdaExpression.Compile();
 		}
 
 		/// <summary>
@@ -34,35 +58,114 @@ namespace DynamicExpresso
 		}
 
 		/// <summary>
-		/// Convert parse result to a lambda expression with used parameters.
+		/// Convert parse result to expression.
 		/// </summary>
-		public static LambdaExpression LambdaExpression(this ParseResult parseResult)
+		public static Expression<TDelegate> AsExpression<TDelegate>(this ParseResult parseResult)
 		{
-			return Expression.Lambda(parseResult.Expression, parseResult.UsedParameters.Select(_ => _.Expression).ToArray());
+			return Expression.Lambda<TDelegate>(parseResult.Expression, parseResult.DeclaredParameters.ToArray());
 		}
 
 		/// <summary>
-		/// Convert parse result to a lambda expression with declared parameters.
+		/// Convert parse result to expression.
 		/// </summary>
-		public static Expression<TDelegate> LambdaExpression<TDelegate>(this ParseResult parseResult)
+		public static Expression<TDelegate> AsExpression<TDelegate>(this ParseResult<TDelegate> parseResult)
 		{
-			return Expression.Lambda<TDelegate>(parseResult.Expression, parseResult.DeclaredParameters.Select(_ => _.Expression).ToArray());
+			return ((ParseResult)parseResult).AsExpression<TDelegate>();
 		}
 
 		/// <summary>
-		/// Convert parse result to a lambda expression with declared parameters.
+		/// Convert parse result to lambda expression.
 		/// </summary>
-		public static Expression<TDelegate> LambdaExpression<TDelegate>(this ParseResult<TDelegate> parseResult)
+		public static LambdaExpression AsLambdaExpression(this ParseResult parseResult, Type delegateType)
 		{
-			return ((ParseResult)parseResult).LambdaExpression<TDelegate>();
+			return Expression.Lambda(delegateType, parseResult.Expression, parseResult.DeclaredParameters.ToArray());
 		}
 
 		/// <summary>
-		/// Convert parse result to a lambda expression with declared parameters.
+		/// Evaluate expression.
 		/// </summary>
-		public static LambdaExpression LambdaExpression(this ParseResult parseResult, Type delegateType)
+		public static object Eval<T1>(this ExpressionInterpreter interpreter, string expressionText,
+			Func<object, T1> a1)
+			=> interpreter.Eval(expressionText, a1.Value());
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static object Eval<T1, T2>(this ExpressionInterpreter interpreter, string expressionText,
+			Func<object, T1> a1,
+			Func<object, T2> a2)
+			=> interpreter.Eval(expressionText, a1.Value(), a2.Value());
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static object Eval<T1, T2, T3>(this ExpressionInterpreter interpreter, string expressionText,
+			Func<object, T1> a1,
+			Func<object, T2> a2,
+			Func<object, T3> a3)
+			=> interpreter.Eval(expressionText, a1.Value(), a2.Value(), a3.Value());
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static object Eval<T1, T2, T3, T4>(this ExpressionInterpreter interpreter, string expressionText,
+			Func<object, T1> a1,
+			Func<object, T2> a2,
+			Func<object, T3> a3,
+			Func<object, T4> a4)
+			=> interpreter.Eval(expressionText, a1.Value(), a2.Value(), a3.Value(), a4.Value());
+
+		private static Parameter Value<T>(this Func<object, T> parameter)
 		{
-			return Expression.Lambda(delegateType, parseResult.Expression, parseResult.DeclaredParameters.Select(_ => _.Expression).ToArray());
+			return new Parameter(
+				parameter.Method.GetParameters().First().Name,
+				parameter.Method.ReturnType,
+				parameter(default));
+		}
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static object Eval(this ExpressionInterpreter interpreter, string expressionText, params Parameter[] parameters)
+		{
+			return interpreter.Eval(expressionText, typeof(void), parameters.AsEnumerable());
+		}
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static TReturnType Eval<TReturnType>(this ExpressionInterpreter interpreter, string expressionText, params Parameter[] parameters)
+		{
+			return (TReturnType)interpreter.Eval(expressionText, typeof(TReturnType), parameters.AsEnumerable());
+		}
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static object Eval(this ExpressionInterpreter interpreter, string expressionText, Type expressionReturnType, params Parameter[] parameters)
+		{
+			return interpreter.Eval(expressionText, expressionReturnType, parameters.AsEnumerable());
+		}
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static object Eval(this ExpressionInterpreter interpreter, string expressionText, Type expressionReturnType, IEnumerable<Parameter> parameters)
+		{
+			try
+			{
+				return interpreter
+					.Parse(expressionText, expressionReturnType, parameters.Select(x => Expression.Parameter(x.Type, x.Name)))
+					.Compile()
+					.DynamicInvoke(parameters.Select(x => x.Value).ToArray());
+			}
+			catch (TargetInvocationException exc)
+			{
+				if (exc.InnerException != null)
+					ExceptionDispatchInfo.Capture(exc.InnerException).Throw();
+
+				throw;
+			}
 		}
 	}
 }
