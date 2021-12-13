@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework;
 // ReSharper disable ConvertNullableToShortForm
 // ReSharper disable PossibleNullReferenceException
@@ -237,7 +237,7 @@ namespace DynamicExpresso.UnitTest
 
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(DateTimeOffset));
-			interpreter.SetVariable("b", b, typeof(Nullable<DateTimeOffset>));
+			interpreter.SetVariable("b", b, typeof(DateTimeOffset?));
 			interpreter.SetVariable("c", c, typeof(DateTimeOffset));
 			var expectedReturnType = typeof(bool);
 
@@ -270,6 +270,16 @@ namespace DynamicExpresso.UnitTest
 			lambda = interpreter.Parse("b != c");
 			Assert.AreEqual(expected, lambda.Invoke());
 			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(a - b, lambda.Invoke());
+			Assert.AreEqual(typeof(TimeSpan?), lambda.ReturnType);
+
+			b = null;
+			interpreter.SetVariable("b", b, typeof(DateTimeOffset?));
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(a - b, lambda.Invoke());
+			Assert.AreEqual(typeof(TimeSpan?), lambda.ReturnType);
 		}
 	}
 }
