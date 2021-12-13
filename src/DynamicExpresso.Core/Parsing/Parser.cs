@@ -2363,11 +2363,11 @@ namespace DynamicExpresso.Parsing
 				var methodParamType = GetParameterType(methodParam);
 				var otherMethodParamType = GetParameterType(otherMethodParam);
 
-				if (arg is InterpreterExpression)
-				{
+				if (methodParamType.ContainsGenericParameters)
 					methodParamType = method.PromotedParameters[i].Type;
+
+				if (otherMethodParamType.ContainsGenericParameters)
 					otherMethodParamType = otherMethod.PromotedParameters[i].Type;
-				}
 
 				var c = CompareConversions(arg.Type, methodParamType, otherMethodParamType);
 				if (c < 0)
