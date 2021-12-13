@@ -17,6 +17,7 @@ namespace DynamicExpresso.Parsing
 		Plus,
 		Comma,
 		Minus,
+		Tilde,
 		Dot,
 		QuestionQuestion,
 		Slash,
@@ -38,7 +39,7 @@ namespace DynamicExpresso.Parsing
 		Caret,
 		OpenCurlyBracket,
 		CloseCurlyBracket,
-		LambdaArrow
+		LambdaArrow,
 	}
 
 }
