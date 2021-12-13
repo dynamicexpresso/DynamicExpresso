@@ -513,6 +513,11 @@ namespace DynamicExpresso.Parsing
 			return left;
 		}
 
+		/// <summary>
+		/// Returns true if and only if the current token is in fact a shift operator.
+		/// In that case <paramref name="shiftType"/> is set to the proper expression type.
+		/// If the function returns false, <paramref name="shiftType"/> shouldn't be used.
+		/// </summary>
 		public bool IsShiftOperator(out ExpressionType shiftType)
 		{
 			// >> is not a token, because it conflicts with generics such as List<List<int>>
@@ -530,7 +535,8 @@ namespace DynamicExpresso.Parsing
 				return true;
 			}
 
-			shiftType = ExpressionType.DebugInfo; // dummy expression type
+			// dummy expression type that shouldn't be used
+			shiftType = ExpressionType.DebugInfo;
 			return false;
 		}
 
