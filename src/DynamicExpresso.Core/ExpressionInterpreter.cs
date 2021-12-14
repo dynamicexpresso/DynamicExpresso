@@ -388,8 +388,21 @@ namespace DynamicExpresso
 		/// <exception cref="ParseException"></exception>
 		public ParseResult Parse(string expressionText, Type expressionReturnType, params ParameterExpression[] parameters)
 		{
+			return Parse(expressionText, expressionReturnType, parameters.AsEnumerable());
+		}
+
+		/// <summary>
+		/// Parse a text expression.
+		/// </summary>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="expressionReturnType">Expected expression return type</param>
+		/// <param name="parameters">Expression input parameters</param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
+		public ParseResult Parse(string expressionText, Type expressionReturnType, IEnumerable<ParameterExpression> parameters)
+		{
 			if (parameters == null)
-				parameters = new ParameterExpression[0];
+				parameters = Enumerable.Empty<ParameterExpression>();
 
 			var arguments = new ParserArguments(
 				expressionText,

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -83,36 +84,36 @@ namespace DynamicExpresso
 		/// <summary>
 		/// Evaluate expression.
 		/// </summary>
-		public static object Eval<T1>(this ExpressionInterpreter interpreter, string expression,
+		public static object Eval<T1>(this ExpressionInterpreter interpreter, string expressionText,
 			Func<object, T1> a1)
-			=> interpreter.Eval(expression, a1.Value());
+			=> interpreter.Eval(expressionText, a1.Value());
 
 		/// <summary>
 		/// Evaluate expression.
 		/// </summary>
-		public static object Eval<T1, T2>(this ExpressionInterpreter interpreter, string expression,
+		public static object Eval<T1, T2>(this ExpressionInterpreter interpreter, string expressionText,
 			Func<object, T1> a1,
 			Func<object, T2> a2)
-			=> interpreter.Eval(expression, a1.Value(), a2.Value());
+			=> interpreter.Eval(expressionText, a1.Value(), a2.Value());
 
 		/// <summary>
 		/// Evaluate expression.
 		/// </summary>
-		public static object Eval<T1, T2, T3>(this ExpressionInterpreter interpreter, string expression,
+		public static object Eval<T1, T2, T3>(this ExpressionInterpreter interpreter, string expressionText,
 			Func<object, T1> a1,
 			Func<object, T2> a2,
 			Func<object, T3> a3)
-			=> interpreter.Eval(expression, a1.Value(), a2.Value(), a3.Value());
+			=> interpreter.Eval(expressionText, a1.Value(), a2.Value(), a3.Value());
 
 		/// <summary>
 		/// Evaluate expression.
 		/// </summary>
-		public static object Eval<T1, T2, T3, T4>(this ExpressionInterpreter interpreter, string expression,
+		public static object Eval<T1, T2, T3, T4>(this ExpressionInterpreter interpreter, string expressionText,
 			Func<object, T1> a1,
 			Func<object, T2> a2,
 			Func<object, T3> a3,
 			Func<object, T4> a4)
-			=> interpreter.Eval(expression, a1.Value(), a2.Value(), a3.Value(), a4.Value());
+			=> interpreter.Eval(expressionText, a1.Value(), a2.Value(), a3.Value(), a4.Value());
 
 		private static Parameter Value<T>(this Func<object, T> parameter)
 		{
@@ -125,14 +126,38 @@ namespace DynamicExpresso
 		/// <summary>
 		/// Evaluate expression.
 		/// </summary>
-		public static object Eval(this ExpressionInterpreter interpreter, string expression, params Parameter[] args)
+		public static object Eval(this ExpressionInterpreter interpreter, string expressionText, params Parameter[] parameters)
+		{
+			return interpreter.Eval(expressionText, typeof(void), parameters.AsEnumerable());
+		}
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static TReturnType Eval<TReturnType>(this ExpressionInterpreter interpreter, string expressionText, params Parameter[] parameters)
+		{
+			return (TReturnType) interpreter.Eval(expressionText, typeof(TReturnType), parameters.AsEnumerable());
+		}
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static object Eval(this ExpressionInterpreter interpreter, string expressionText, Type expressionReturnType, params Parameter[] parameters)
+		{
+			return interpreter.Eval(expressionText, expressionReturnType, parameters.AsEnumerable());
+		}
+
+		/// <summary>
+		/// Evaluate expression.
+		/// </summary>
+		public static object Eval(this ExpressionInterpreter interpreter, string expressionText, Type expressionReturnType, IEnumerable<Parameter> parameters)
 		{
 			try
 			{
 				return interpreter
-					.Parse(expression, args.Select(x => Expression.Parameter(x.Type, x.Name)).ToArray())
+					.Parse(expressionText, expressionReturnType, parameters.Select(x => Expression.Parameter(x.Type, x.Name)))
 					.Compile()
-					.DynamicInvoke(args.Select(x => x.Value).ToArray());
+					.DynamicInvoke(parameters.Select(x => x.Value).ToArray());
 			}
 			catch (TargetInvocationException exc)
 			{
