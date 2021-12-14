@@ -11,10 +11,10 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(typeof(string), target.Parse("\"ciao\"").Expression.Type);
-			Assert.AreEqual(typeof(int), target.Parse("45").Expression.Type);
-			Assert.AreEqual(typeof(double), target.Parse("45.4").Expression.Type);
-			Assert.AreEqual(typeof(object), target.Parse("null").Expression.Type);
+			Assert.AreEqual(typeof(string), target.Parse("\"ciao\"").ReturnType);
+			Assert.AreEqual(typeof(int), target.Parse("45").ReturnType);
+			Assert.AreEqual(typeof(double), target.Parse("45.4").ReturnType);
+			Assert.AreEqual(typeof(object), target.Parse("null").ReturnType);
 		}
 
 		[Test]
@@ -23,10 +23,10 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			var expressionType = typeof(double);
 
-			var parseResult = target.Parse("213", expressionType);
+			var lambda = target.Parse("213", expressionType);
 
-			Assert.AreEqual(expressionType, parseResult.Expression.Type);
-			Assert.AreEqual((double)213, parseResult.Compile().DynamicInvoke());
+			Assert.AreEqual(expressionType, lambda.ReturnType);
+			Assert.AreEqual((double)213, lambda.Invoke());
 		}
 
 		[Test]
@@ -35,10 +35,10 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			var expressionType = typeof(int);
 
-			var parseResult = target.Parse("213.46", expressionType);
+			var lambda = target.Parse("213.46", expressionType);
 
-			Assert.AreEqual(expressionType, parseResult.Expression.Type);
-			Assert.AreEqual((int)213.46, parseResult.Compile().DynamicInvoke());
+			Assert.AreEqual(expressionType, lambda.ReturnType);
+			Assert.AreEqual((int)213.46, lambda.Invoke());
 		}
 
 		[Test]
@@ -46,13 +46,13 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var parseResult = target.Parse("null", typeof(string));
-			Assert.AreEqual(typeof(string), parseResult.Expression.Type);
-			Assert.IsNull(parseResult.Compile().DynamicInvoke());
+			var lambda = target.Parse("null", typeof(string));
+			Assert.AreEqual(typeof(string), lambda.ReturnType);
+			Assert.IsNull(lambda.Invoke());
 
-			parseResult = target.Parse("null", typeof(TestReferenceType));
-			Assert.AreEqual(typeof(TestReferenceType), parseResult.Expression.Type);
-			Assert.IsNull(parseResult.Compile().DynamicInvoke());
+			lambda = target.Parse("null", typeof(TestReferenceType));
+			Assert.AreEqual(typeof(TestReferenceType), lambda.ReturnType);
+			Assert.IsNull(lambda.Invoke());
 		}
 
 		[Test]
@@ -60,13 +60,13 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var parseResult = target.Parse("null", typeof(int?));
-			Assert.AreEqual(typeof(int?), parseResult.Expression.Type);
-			Assert.IsNull(parseResult.Compile().DynamicInvoke());
+			var lambda = target.Parse("null", typeof(int?));
+			Assert.AreEqual(typeof(int?), lambda.ReturnType);
+			Assert.IsNull(lambda.Invoke());
 
-			parseResult = target.Parse("null", typeof(DateTime?));
-			Assert.AreEqual(typeof(DateTime?), parseResult.Expression.Type);
-			Assert.IsNull(parseResult.Compile().DynamicInvoke());
+			lambda = target.Parse("null", typeof(DateTime?));
+			Assert.AreEqual(typeof(DateTime?), lambda.ReturnType);
+			Assert.IsNull(lambda.Invoke());
 		}
 
 		[Test]
@@ -74,13 +74,13 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var parseResult = target.Parse("null", typeof(int?));
-			Assert.AreEqual(typeof(int?), parseResult.Expression.Type);
-			Assert.IsNull(parseResult.Compile().DynamicInvoke());
+			var lambda = target.Parse("null", typeof(int?));
+			Assert.AreEqual(typeof(int?), lambda.ReturnType);
+			Assert.IsNull(lambda.Invoke());
 
-			parseResult = target.Parse("4651", typeof(int?));
-			Assert.AreEqual(typeof(int?), parseResult.Expression.Type);
-			Assert.AreEqual(4651, parseResult.Compile().DynamicInvoke());
+			lambda = target.Parse("4651", typeof(int?));
+			Assert.AreEqual(typeof(int?), lambda.ReturnType);
+			Assert.AreEqual(4651, lambda.Invoke());
 		}
 
 		[Test]

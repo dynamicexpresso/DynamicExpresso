@@ -131,8 +131,8 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 
 			Assert.AreEqual((int)x, target.Eval("(int)x"));
-			Assert.AreEqual(typeof(int), target.Parse("(int)x").Expression.Type);
-			Assert.AreEqual(typeof(object), target.Parse("(object)x").Expression.Type);
+			Assert.AreEqual(typeof(int), target.Parse("(int)x").ReturnType);
+			Assert.AreEqual(typeof(object), target.Parse("(object)x").ReturnType);
 			Assert.AreEqual((double)84 + 9 * 8, target.Eval("(double)84 + 9 *8"));
 		}
 
@@ -207,7 +207,7 @@ namespace DynamicExpresso.UnitTest
 
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 			Assert.AreEqual(a is string, target.Eval("a is string"));
-			Assert.AreEqual(typeof(bool), target.Parse("a is string").Expression.Type);
+			Assert.AreEqual(typeof(bool), target.Parse("a is string").ReturnType);
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
 			Assert.AreEqual(b is string, target.Eval("b is string"));
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -227,7 +227,7 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(Tuple<,>));
 
 			Assert.AreEqual(true, target.Eval("a is Tuple<int>"));
-			Assert.AreEqual(typeof(bool), target.Parse("a is Tuple<int>").Expression.Type);
+			Assert.AreEqual(typeof(bool), target.Parse("a is Tuple<int>").ReturnType);
 			Assert.AreEqual(true, target.Eval("b is Tuple<int,int>"));
 		}
 
@@ -242,10 +242,10 @@ namespace DynamicExpresso.UnitTest
 
 			// ReSharper disable once TryCastAlwaysSucceeds
 			Assert.AreEqual(a as string, target.Eval("a as string"));
-			Assert.AreEqual(typeof(string), target.Parse("a as string").Expression.Type);
+			Assert.AreEqual(typeof(string), target.Parse("a as string").ReturnType);
 			// ReSharper disable once ExpressionIsAlwaysNull
 			Assert.AreEqual(b as string, target.Eval("b as string"));
-			Assert.AreEqual(typeof(string), target.Parse("b as string").Expression.Type);
+			Assert.AreEqual(typeof(string), target.Parse("b as string").ReturnType);
 		}
 
 		[Test]
@@ -278,13 +278,17 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void String_Concatenation_check_string_method()
 		{
-			var expectedMethod = typeof(string).GetMethod(nameof(string.Concat), new[] {typeof(string), typeof(string)});
-			var interpreter = new Interpreter();
-			var expressionText = "\"ciao \" + 1981";
-			var lambda = interpreter.Parse(expressionText);
+			MethodInfo expectedMethod = typeof(string)
+				.GetMethod(nameof(String.Concat), new[] {typeof(string), typeof(string)});
+            
+			Interpreter interpreter = new Interpreter();
 
-			var methodCallExpression = lambda.Expression as MethodCallExpression;
+			string expressionText = "\"ciao \" + 1981";
 
+			Lambda lambda = interpreter.Parse(expressionText);
+            
+			MethodCallExpression methodCallExpression = lambda.Expression as MethodCallExpression;
+            
 			Assert.IsNotNull(methodCallExpression);
 			Assert.AreEqual(expectedMethod, methodCallExpression.Method);
 		}
@@ -293,15 +297,15 @@ namespace DynamicExpresso.UnitTest
 		public void String_Concatenation_with_null()
 		{
 			Interpreter interpreter = new Interpreter();
-
+			
 			string expressionText = "\"ciao \" + null";
 			Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
-
+			
 			Func<String> someFunc = () => null;
 			interpreter.SetFunction("someFunc", someFunc);
 			expressionText = "\"ciao \" + someFunc()";
 			Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
-
+			
 			Func<Object> someFuncObject = () => null;
 			interpreter.SetFunction("someFuncObject", someFuncObject);
 			expressionText = "\"ciao \" + someFuncObject()";
@@ -310,7 +314,7 @@ namespace DynamicExpresso.UnitTest
 			expressionText = "someFunc() + \"123\" + null + \"678\" + someFuncObject()";
 			Assert.AreEqual("123678", interpreter.Eval(expressionText));
 		}
-
+		
 		private class MyClass
 		{
 			public override string ToString()
@@ -333,7 +337,7 @@ namespace DynamicExpresso.UnitTest
 			Interpreter interpreter = new Interpreter()
 				.SetVariable("myClass", new MyClass())
 				.SetVariable("myClassNullToString", new MyClassNullToString());
-
+		
 			Assert.AreEqual("ciao MyClassStr", interpreter.Eval("\"ciao \" + myClass"));
 			Assert.AreEqual("ciao ", interpreter.Eval("\"ciao \" + myClassNullToString"));
 		}
@@ -477,7 +481,7 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(AssignmentOperators.None, target.AssignmentOperators);
 
-			Assert.Throws<AssignmentOperatorDisabledException>(() => target.Parse("x = 5", Expression.Parameter(typeof(int), "x")));
+			Assert.Throws<AssignmentOperatorDisabledException>(() => target.Parse("x = 5", new Parameter("x", 0)));
 		}
 
 		[Test]
@@ -621,7 +625,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 				.SetVariable("x", new TypeWithImplicitConversion(10));
 
-			var func = target.Parse<Func<int>>("x").Compile();
+			var func = target.ParseAsDelegate<Func<int>>("x");
 			var val = func();
 
 			Assert.AreEqual(10, val);
@@ -865,7 +869,7 @@ namespace DynamicExpresso.UnitTest
 
 			var y = "5";
 
-			var ex = Assert.Throws<ParseException>(() => target.Parse("x == y", Expression.Parameter(typeof(string), "y")));
+			var ex = Assert.Throws<ParseException>(() => target.Parse("x == y", new Parameter("y", y)));
 			Assert.IsInstanceOf<InvalidOperationException>(ex.InnerException);
 		}
 
@@ -877,7 +881,9 @@ namespace DynamicExpresso.UnitTest
 			var x = new TypeWithoutOverloadedBinaryOperators(3);
 			target.SetVariable("x", x);
 
-			var ex = Assert.Throws<ParseException>(() => target.Parse("x + y", Expression.Parameter(typeof(int), "y")));
+			var y = 5;
+
+			var ex = Assert.Throws<ParseException>(() => target.Parse("x + y", new Parameter("y", y)));
 			Assert.IsInstanceOf<InvalidOperationException>(ex.InnerException);
 		}
 

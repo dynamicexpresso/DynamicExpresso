@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso.UnitTest
@@ -112,7 +111,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.Reference(typeof(MyDataContract), "DC");
 
-			Assert.AreEqual(typeof(MyDataContract), target.Parse("new DC(\"davide\")").Expression.Type);
+			Assert.AreEqual(typeof(MyDataContract), target.Parse("new DC(\"davide\")").ReturnType);
 		}
 
 		[Test]
@@ -140,7 +139,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var lambda = target.Parse("Math.Max(a, typeof(string).Name.Length)", Expression.Parameter(typeof(int), "a"));
+			var lambda = target.Parse("Math.Max(a, typeof(string).Name.Length)", new Parameter("a", 1));
 
 			Assert.AreEqual(2, lambda.Types.Count());
 			Assert.AreEqual("Math", lambda.Types.ElementAt(0).Name);

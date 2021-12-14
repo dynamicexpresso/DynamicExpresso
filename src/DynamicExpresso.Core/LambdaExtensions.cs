@@ -48,12 +48,42 @@ namespace DynamicExpresso
 			return Expression.Lambda(delegateType, parseResult.Expression, parseResult.DeclaredParameters.ToArray());
 		}
 
-		public static object Eval(this Interpreter interpreter, string expression, params Parameter[] args)
+		public static object Eval<T1>(this ExpressionInterpreter interpreter, string expression,
+			Expression<Func<object, T1>> a1)
+			=> interpreter.Eval(expression, a1.Value());
+
+		public static object Eval<T1, T2>(this ExpressionInterpreter interpreter, string expression,
+			Expression<Func<object, T1>> a1,
+			Expression<Func<object, T2>> a2)
+			=> interpreter.Eval(expression, a1.Value(), a2.Value());
+
+		public static object Eval<T1, T2, T3>(this ExpressionInterpreter interpreter, string expression,
+			Expression<Func<object, T1>> a1,
+			Expression<Func<object, T2>> a2,
+			Expression<Func<object, T3>> a3)
+			=> interpreter.Eval(expression, a1.Value(), a2.Value(), a3.Value());
+
+		public static object Eval<T1, T2, T3, T4>(this ExpressionInterpreter interpreter, string expression,
+			Expression<Func<object, T1>> a1,
+			Expression<Func<object, T2>> a2,
+			Expression<Func<object, T3>> a3,
+			Expression<Func<object, T4>> a4)
+			=> interpreter.Eval(expression, a1.Value(), a2.Value(), a3.Value(), a4.Value());
+
+		private static Parameter Value<T>(this Expression<Func<object, T>> parameter)
+		{
+			return new Parameter(
+				parameter.Parameters.First().Name,
+				parameter.ReturnType,
+				((ConstantExpression)parameter.Body).Value);
+		}
+
+		public static object Eval(this ExpressionInterpreter interpreter, string expression, params Parameter[] args)
 		{
 			try
 			{
 				return interpreter
-					.Parse(expression, args.Select(x => x.Expression).ToArray())
+					.Parse(expression, args.Select(x => Expression.Parameter(x.Type, x.Name)).ToArray())
 					.Compile()
 					.DynamicInvoke(args.Select(x => x.Value).ToArray());
 			}
@@ -64,11 +94,6 @@ namespace DynamicExpresso
 
 				throw;
 			}
-		}
-
-		public static TReturnType Eval<TReturnType>(this Interpreter interpreter, string expression, params Parameter[] args)
-		{
-			return (TReturnType) Eval(interpreter, expression, args);
 		}
 	}
 }

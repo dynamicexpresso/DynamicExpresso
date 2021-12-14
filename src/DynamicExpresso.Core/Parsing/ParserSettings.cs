@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace DynamicExpresso.Parsing
 {
-	internal class ParserSettings
+	public class ParserSettings
 	{
 		private readonly Dictionary<string, Identifier> _identifiers;
 		private readonly Dictionary<string, ReferenceType> _knownTypes;

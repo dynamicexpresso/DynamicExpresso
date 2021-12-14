@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using DynamicExpresso.Exceptions;
+﻿using DynamicExpresso.Exceptions;
 using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
@@ -15,8 +14,8 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ReflectionNotAllowedException>(() => target.Parse("typeof(double).GetMethods()"));
 			Assert.Throws<ReflectionNotAllowedException>(() => target.Parse("typeof(double).Assembly"));
 
-			Assert.Throws<ReflectionNotAllowedException>(() => target.Parse("x.GetType().GetMethods()", Expression.Parameter(typeof(X), "x")));
-			Assert.Throws<ReflectionNotAllowedException>(() => target.Parse("x.GetType().Assembly", Expression.Parameter(typeof(X), "x")));
+			Assert.Throws<ReflectionNotAllowedException>(() => target.Parse("x.GetType().GetMethods()", new Parameter("x", typeof(X))));
+			Assert.Throws<ReflectionNotAllowedException>(() => target.Parse("x.GetType().Assembly", new Parameter("x", typeof(X))));
 		}
 
 		[Test]

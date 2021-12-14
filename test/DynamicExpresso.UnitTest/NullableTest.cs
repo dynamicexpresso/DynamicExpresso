@@ -21,18 +21,31 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(Nullable<Int32>));
 			interpreter.SetVariable("b", b, typeof(Nullable<Int32>));
+			var expectedReturnType = typeof(Nullable<Int32>);
 
 			// Addition
-			Verify(interpreter, "a + b", (Nullable<Int32>) a + b);
+			var expected = a + b;
+			var lambda = interpreter.Parse("a + b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Subtraction
-			Verify(interpreter, "a - b", (Nullable<Int32>) a - b);
+			expected = a - b;
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Division
-			Verify(interpreter, "a / b", (Nullable<Int32>) a / b);
+			expected = a / b;
+			lambda = interpreter.Parse("a / b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Multiplication
-			Verify(interpreter, "a * b", (Nullable<Int32>) a * b);
+			expected = a * b;
+			lambda = interpreter.Parse("a * b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 		}
 
 		[Test]
@@ -47,16 +60,28 @@ namespace DynamicExpresso.UnitTest
 			var expectedReturnType = typeof(Nullable<Int32>);
 
 			// Addition
-			Verify(interpreter, "a + b", a + b);
+			var expected = a + b;
+			var lambda = interpreter.Parse("a + b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Subtraction
-			Verify(interpreter, "a - b", a - b);
+			expected = a - b;
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Division
-			Verify(interpreter, "a / b", a / b);
+			expected = a / b;
+			lambda = interpreter.Parse("a / b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Multiplication
-			Verify(interpreter, "a * b", a * b);
+			expected = a * b;
+			lambda = interpreter.Parse("a * b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 		}
 
 		[Test]
@@ -71,16 +96,28 @@ namespace DynamicExpresso.UnitTest
 			var expectedReturnType = typeof(Nullable<Int32>);
 
 			// Addition
-			Verify(interpreter, "a + b", a + b);
+			var expected = a + b;
+			var lambda = interpreter.Parse("a + b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Subtraction
-			Verify(interpreter, "a - b", a - b);
+			expected = a - b;
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Division
-			Verify(interpreter, "a / b", a / b);
+			expected = a / b;
+			lambda = interpreter.Parse("a / b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Multiplication
-			Verify(interpreter, "a * b", a * b);
+			expected = a * b;
+			lambda = interpreter.Parse("a * b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 		}
 
 		[Test]
@@ -92,18 +129,31 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(Nullable<Double>));
 			interpreter.SetVariable("b", b, typeof(Nullable<Double>));
+			var expectedReturnType = typeof(Nullable<Double>);
 
 			// Addition
-			Verify(interpreter, "a + b", (Nullable<Double>) a + b);
+			var expected = a + b;
+			var lambda = interpreter.Parse("a + b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Subtraction
-			Verify(interpreter, "a - b", (Nullable<Double>) a - b);
+			expected = a - b;
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Division
-			Verify(interpreter, "a / b", (Nullable<Double>) a / b);
+			expected = a / b;
+			lambda = interpreter.Parse("a / b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Multiplication
-			Verify(interpreter, "a * b", (Nullable<Double>) a * b);
+			expected = a * b;
+			lambda = interpreter.Parse("a * b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 		}
 
 		[Test]
@@ -115,18 +165,31 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(Int32));
 			interpreter.SetVariable("b", b, typeof(Nullable<Double>));
+			var expectedReturnType = typeof(Nullable<Double>);
 
 			// Addition
-			Verify(interpreter, "a + b", (Nullable<Double>) a + b);
+			var expected = a + b;
+			var lambda = interpreter.Parse("a + b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Subtraction
-			Verify(interpreter, "a - b", (Nullable<Double>) a - b);
+			expected = a - b;
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Division
-			Verify(interpreter, "a / b", (Nullable<Double>) a / b);
+			expected = a / b;
+			lambda = interpreter.Parse("a / b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Multiplication
-			Verify(interpreter, "a * b", (Nullable<Double>) a * b);
+			expected = a * b;
+			lambda = interpreter.Parse("a * b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 		}
 
 		[Test]
@@ -138,18 +201,31 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("a", a, typeof(Nullable<Int32>));
 			interpreter.SetVariable("b", b, typeof(Double));
+			var expectedReturnType = typeof(Nullable<Double>);
 
 			// Addition
-			Verify(interpreter, "a + b", (Nullable<Double>) a + b);
+			var expected = a + b;
+			var lambda = interpreter.Parse("a + b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Subtraction
-			Verify(interpreter, "a - b", (Nullable<Double>) a - b);
+			expected = a - b;
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Division
-			Verify(interpreter, "a / b", (Nullable<Double>) a / b);
+			expected = a / b;
+			lambda = interpreter.Parse("a / b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
 			// Multiplication
-			Verify(interpreter, "a * b", (Nullable<Double>) a * b);
+			expected = a * b;
+			lambda = interpreter.Parse("a * b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 		}
 
 		[Test]
@@ -165,24 +241,45 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("c", c, typeof(DateTimeOffset));
 			var expectedReturnType = typeof(bool);
 
-			Verify(interpreter, "a < b", a < b);
-			Verify(interpreter, "a > b", a > b);
-			Verify(interpreter, "a == b", a == b);
-			Verify(interpreter, "a != b", a != b);
-			Verify(interpreter, "b == b", b == b);
-			Verify(interpreter, "b != c", b != c);
-      Verify(interpreter, "a - b", a - b);
-      
-      b = null;
-			interpreter.SetVariable("b", b, typeof(DateTimeOffset?));
-			Verify(interpreter, "a - b", (TimeSpan?) null);
-		}
+			var expected = a < b;
+			var lambda = interpreter.Parse("a < b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
 
-		private static void Verify<T>(Interpreter interpreter, string expression, T expected)
-		{
-			var parsed = interpreter.Parse(expression);
-			Assert.AreEqual(expected, parsed.Compile().DynamicInvoke());
-			Assert.AreEqual(typeof(T), parsed.Expression.Type);
+			expected = a > b;
+			lambda = interpreter.Parse("a > b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			expected = a == b;
+			lambda = interpreter.Parse("a == b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			expected = a != b;
+			lambda = interpreter.Parse("a != b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			expected = b == c;
+			lambda = interpreter.Parse("b == b");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			expected = b != c;
+			lambda = interpreter.Parse("b != c");
+			Assert.AreEqual(expected, lambda.Invoke());
+			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(a - b, lambda.Invoke());
+			Assert.AreEqual(typeof(TimeSpan?), lambda.ReturnType);
+
+			b = null;
+			interpreter.SetVariable("b", b, typeof(DateTimeOffset?));
+			lambda = interpreter.Parse("a - b");
+			Assert.AreEqual(a - b, lambda.Invoke());
+			Assert.AreEqual(typeof(TimeSpan?), lambda.ReturnType);
 		}
 	}
 }

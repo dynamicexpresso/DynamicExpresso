@@ -36,7 +36,7 @@ namespace DynamicExpresso.UnitTest
 
 		public IEnumerable<T> Where(IEnumerable<T> values, string expression)
 		{
-			var predicate = _interpreter.Parse<Func<T, bool>>(expression, "x").Compile();
+			var predicate = _interpreter.ParseAsDelegate<Func<T, bool>>(expression, "x");
 
 			return values.Where(predicate);
 		}

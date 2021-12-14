@@ -91,7 +91,7 @@ namespace DynamicExpresso.UnitTest
 		public void Numeric_Literals_DefaultLong()
 		{
 			var target = new Interpreter();
-
+			
 			target.SetDefaultNumberType(DefaultNumberType.Long);
 
 			Assert.IsInstanceOf(typeof(System.Int64), target.Eval("45"));
@@ -276,7 +276,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(.201M, target.Eval(".201"));
 			Assert.AreEqual(-.201M, target.Eval("-.201"));
 			Assert.AreEqual(+.201M, target.Eval("+.201"));
-
+			
 
 			// f suffix (single)
 			Assert.AreEqual(4f, target.Eval("4f"));
@@ -529,37 +529,37 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(typeof(string), target.Parse("\"some string\"").Expression.Type);
-			Assert.AreEqual(typeof(string), target.Parse("\"\"").Expression.Type);
-			Assert.AreEqual(typeof(int), target.Parse("234").Expression.Type);
-			Assert.AreEqual(typeof(int), target.Parse("-234").Expression.Type);
-			Assert.AreEqual(typeof(uint), target.Parse("123u").Expression.Type);
-			Assert.AreEqual(typeof(uint), target.Parse("123U").Expression.Type);
-			Assert.AreEqual(typeof(long), target.Parse("-123l").Expression.Type);
-			Assert.AreEqual(typeof(long), target.Parse("123l").Expression.Type);
-			Assert.AreEqual(typeof(long), target.Parse("123L").Expression.Type);
-			Assert.AreEqual(typeof(ulong), target.Parse("123UL").Expression.Type);
-			Assert.AreEqual(typeof(ulong), target.Parse("123Ul").Expression.Type);
-			Assert.AreEqual(typeof(ulong), target.Parse("123uL").Expression.Type);
-			Assert.AreEqual(typeof(ulong), target.Parse("123ul").Expression.Type);
-			Assert.AreEqual(typeof(ulong), target.Parse("123LU").Expression.Type);
-			Assert.AreEqual(typeof(ulong), target.Parse("123Lu").Expression.Type);
-			Assert.AreEqual(typeof(ulong), target.Parse("123lU").Expression.Type);
-			Assert.AreEqual(typeof(ulong), target.Parse("123lu").Expression.Type);
-			Assert.AreEqual(typeof(double), target.Parse("234.54").Expression.Type);
-			Assert.AreEqual(typeof(double), target.Parse(".9").Expression.Type);
-			Assert.AreEqual(typeof(double), target.Parse("-.9").Expression.Type);
-			Assert.AreEqual(typeof(double), target.Parse("234d").Expression.Type);
-			Assert.AreEqual(typeof(double), target.Parse("234D").Expression.Type);
-			Assert.AreEqual(typeof(float), target.Parse("4.5f").Expression.Type);
-			Assert.AreEqual(typeof(float), target.Parse("4.5F").Expression.Type);
-			Assert.AreEqual(typeof(float), target.Parse(".5f").Expression.Type);
-			Assert.AreEqual(typeof(float), target.Parse(".5F").Expression.Type);
-			Assert.AreEqual(typeof(decimal), target.Parse("234.48m").Expression.Type);
-			Assert.AreEqual(typeof(decimal), target.Parse("234.48M").Expression.Type);
-			Assert.AreEqual(typeof(decimal), target.Parse(".48m").Expression.Type);
-			Assert.AreEqual(typeof(decimal), target.Parse(".48M").Expression.Type);
-			Assert.AreEqual(typeof(object), target.Parse("null").Expression.Type);
+			Assert.AreEqual(typeof(string), target.Parse("\"some string\"").ReturnType);
+			Assert.AreEqual(typeof(string), target.Parse("\"\"").ReturnType);
+			Assert.AreEqual(typeof(int), target.Parse("234").ReturnType);
+			Assert.AreEqual(typeof(int), target.Parse("-234").ReturnType);
+			Assert.AreEqual(typeof(uint), target.Parse("123u").ReturnType);
+			Assert.AreEqual(typeof(uint), target.Parse("123U").ReturnType);
+			Assert.AreEqual(typeof(long), target.Parse("-123l").ReturnType);
+			Assert.AreEqual(typeof(long), target.Parse("123l").ReturnType);
+			Assert.AreEqual(typeof(long), target.Parse("123L").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123UL").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123Ul").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123uL").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123ul").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123LU").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123Lu").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123lU").ReturnType);
+			Assert.AreEqual(typeof(ulong), target.Parse("123lu").ReturnType);
+			Assert.AreEqual(typeof(double), target.Parse("234.54").ReturnType);
+			Assert.AreEqual(typeof(double), target.Parse(".9").ReturnType);
+			Assert.AreEqual(typeof(double), target.Parse("-.9").ReturnType);
+			Assert.AreEqual(typeof(double), target.Parse("234d").ReturnType);
+			Assert.AreEqual(typeof(double), target.Parse("234D").ReturnType);
+			Assert.AreEqual(typeof(float), target.Parse("4.5f").ReturnType);
+			Assert.AreEqual(typeof(float), target.Parse("4.5F").ReturnType);
+			Assert.AreEqual(typeof(float), target.Parse(".5f").ReturnType);
+			Assert.AreEqual(typeof(float), target.Parse(".5F").ReturnType);
+			Assert.AreEqual(typeof(decimal), target.Parse("234.48m").ReturnType);
+			Assert.AreEqual(typeof(decimal), target.Parse("234.48M").ReturnType);
+			Assert.AreEqual(typeof(decimal), target.Parse(".48m").ReturnType);
+			Assert.AreEqual(typeof(decimal), target.Parse(".48M").ReturnType);
+			Assert.AreEqual(typeof(object), target.Parse("null").ReturnType);
 
 			Assert.AreEqual((45.5).GetType(), target.Eval("45.5").GetType());
 			Assert.AreEqual((45.8f).GetType(), target.Eval("45.8f").GetType());

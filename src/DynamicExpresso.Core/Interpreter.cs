@@ -1,10 +1,9 @@
 using DynamicExpresso.Parsing;
-using DynamicExpresso.Visitors;
+using DynamicExpresso.Reflection;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using DynamicExpresso.Reflection;
+using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso
 {
@@ -14,15 +13,14 @@ namespace DynamicExpresso
 	/// </summary>
 	public class Interpreter
 	{
-		private readonly ParserSettings _settings;
-		private readonly ISet<ExpressionVisitor> _visitors = new HashSet<ExpressionVisitor>();
+		private readonly InterpreterSettings _settings;
 
 		#region Constructors
+
 		/// <summary>
 		/// Creates a new Interpreter using InterpreterOptions.Default.
 		/// </summary>
-		public Interpreter()
-			: this(InterpreterOptions.Default)
+		public Interpreter() : this(InterpreterOptions.Default)
 		{
 		}
 
@@ -32,34 +30,7 @@ namespace DynamicExpresso
 		/// <param name="options"></param>
 		public Interpreter(InterpreterOptions options)
 		{
-			var caseInsensitive = options.HasFlag(InterpreterOptions.CaseInsensitive);
-
-			var lateBindObject = options.HasFlag(InterpreterOptions.LateBindObject);
-
-			_settings = new ParserSettings(caseInsensitive, lateBindObject);
-
-			if ((options & InterpreterOptions.SystemKeywords) == InterpreterOptions.SystemKeywords)
-			{
-				SetIdentifiers(LanguageConstants.Literals);
-			}
-
-			if ((options & InterpreterOptions.PrimitiveTypes) == InterpreterOptions.PrimitiveTypes)
-			{
-				Reference(LanguageConstants.PrimitiveTypes);
-				Reference(LanguageConstants.CSharpPrimitiveTypes);
-			}
-
-			if ((options & InterpreterOptions.CommonTypes) == InterpreterOptions.CommonTypes)
-			{
-				Reference(LanguageConstants.CommonTypes);
-			}
-
-			if ((options & InterpreterOptions.LambdaExpressions) == InterpreterOptions.LambdaExpressions)
-			{
-				_settings.LambdaExpressions = true;
-			}
-
-			_visitors.Add(new DisableReflectionVisitor());
+			_settings = new InterpreterSettings(options);
 		}
 
 		/// <summary>
@@ -67,52 +38,30 @@ namespace DynamicExpresso
 		/// </summary>
 		internal Interpreter(ParserSettings settings)
 		{
-			_settings = settings;
+			_settings = new InterpreterSettings(settings);
 		}
+
 		#endregion
 
 		#region Properties
-		public bool CaseInsensitive
-		{
-			get
-			{
-				return _settings.CaseInsensitive;
-			}
-		}
+
+		public bool CaseInsensitive { get { return _settings.CaseInsensitive; } }
 
 		/// <summary>
 		/// Gets a list of registeres types. Add types by using the Reference method.
 		/// </summary>
-		public IEnumerable<ReferenceType> ReferencedTypes
-		{
-			get
-			{
-				return _settings.KnownTypes
-					.Select(p => p.Value)
-					.ToList();
-			}
-		}
+		public IEnumerable<ReferenceType> ReferencedTypes { get { return _settings.ReferencedTypes; } }
 
 		/// <summary>
 		/// Gets a list of known identifiers. Add identifiers using SetVariable, SetFunction or SetExpression methods.
 		/// </summary>
-		public IEnumerable<Identifier> Identifiers
-		{
-			get
-			{
-				return _settings.Identifiers
-					.Select(p => p.Value)
-					.ToList();
-			}
-		}
+		public IEnumerable<Identifier> Identifiers { get { return _settings.Identifiers; } }
 
 		/// <summary>
 		/// Gets the available assignment operators.
 		/// </summary>
-		public AssignmentOperators AssignmentOperators
-		{
-			get { return _settings.AssignmentOperators; }
-		}
+		public AssignmentOperators AssignmentOperators { get { return _settings.AssignmentOperators; } }
+
 		#endregion
 
 		#region Options
@@ -124,7 +73,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetDefaultNumberType(DefaultNumberType defaultNumberType)
 		{
-			_settings.DefaultNumberType = defaultNumberType;
+			_settings.SetDefaultNumberType(defaultNumberType);
 			return this;
 		}
 
@@ -136,17 +85,14 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter EnableAssignment(AssignmentOperators assignmentOperators)
 		{
-			_settings.AssignmentOperators = assignmentOperators;
-
+			_settings.EnableAssignment(assignmentOperators);
 			return this;
 		}
 		#endregion
 
 		#region Visitors
-		public ISet<ExpressionVisitor> Visitors
-		{
-			get { return _visitors; }
-		}
+
+		public ISet<ExpressionVisitor> Visitors { get { return _settings.Visitors; } }
 
 		/// <summary>
 		/// Enable reflection expression (like x.GetType().GetMethod() or typeof(double).Assembly) by removing the DisableReflectionVisitor.
@@ -154,15 +100,14 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter EnableReflection()
 		{
-			var visitor = Visitors.FirstOrDefault(p => p is DisableReflectionVisitor);
-			if (visitor != null)
-				Visitors.Remove(visitor);
-
+			_settings.EnableReflection();
 			return this;
 		}
+
 		#endregion
 
 		#region Register identifiers
+
 		/// <summary>
 		/// Allow the specified function delegate to be called from a parsed expression.
 		/// </summary>
@@ -171,18 +116,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetFunction(string name, Delegate value)
 		{
-			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException(nameof(name));
-
-			if (_settings.Identifiers.TryGetValue(name, out var identifier) && identifier is FunctionIdentifier fIdentifier)
-			{
-				fIdentifier.AddOverload(value);
-			}
-			else
-			{
-				SetIdentifier(new FunctionIdentifier(name, value));
-			}
-
+			_settings.SetFunction(name, value);
 			return this;
 		}
 
@@ -194,10 +128,8 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetVariable(string name, object value)
 		{
-			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException(nameof(name));
-
-			return SetExpression(name, Expression.Constant(value));
+			_settings.SetVariable(name, value);
+			return this;
 		}
 
 		/// <summary>
@@ -208,7 +140,8 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetVariable<T>(string name, T value)
 		{
-			return SetVariable(name, value, typeof(T));
+			_settings.SetVariable(name, value);
+			return this;
 		}
 
 		/// <summary>
@@ -220,12 +153,8 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetVariable(string name, object value, Type type)
 		{
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
-			if (string.IsNullOrWhiteSpace(name))
-				throw new ArgumentNullException(nameof(name));
-
-			return SetExpression(name, Expression.Constant(value, type));
+			_settings.SetVariable(name, value, type);
+			return this;
 		}
 
 		/// <summary>
@@ -237,7 +166,8 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetExpression(string name, Expression expression)
 		{
-			return SetIdentifier(new Identifier(name, expression));
+			_settings.SetExpression(name, expression);
+			return this;
 		}
 
 		/// <summary>
@@ -248,9 +178,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetIdentifiers(IEnumerable<Identifier> identifiers)
 		{
-			foreach (var i in identifiers)
-				SetIdentifier(i);
-
+			_settings.SetIdentifiers(identifiers);
 			return this;
 		}
 
@@ -262,14 +190,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter SetIdentifier(Identifier identifier)
 		{
-			if (identifier == null)
-				throw new ArgumentNullException(nameof(identifier));
-
-			if (LanguageConstants.ReservedKeywords.Contains(identifier.Name))
-				throw new InvalidOperationException($"{identifier.Name} is a reserved word");
-
-			_settings.Identifiers[identifier.Name] = identifier;
-
+			_settings.SetIdentifier(identifier);
 			return this;
 		}
 		#endregion
@@ -283,10 +204,8 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter Reference(Type type)
 		{
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
-
-			return Reference(type, type.Name);
+			_settings.Reference(type);
+			return this;
 		}
 
 		/// <summary>
@@ -297,12 +216,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter Reference(IEnumerable<ReferenceType> types)
 		{
-			if (types == null)
-				throw new ArgumentNullException(nameof(types));
-
-			foreach (var t in types)
-				Reference(t);
-
+			_settings.Reference(types);
 			return this;
 		}
 
@@ -315,7 +229,8 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter Reference(Type type, string typeName)
 		{
-			return Reference(new ReferenceType(typeName, type));
+			_settings.Reference(type, typeName);
+			return this;
 		}
 
 		/// <summary>
@@ -326,62 +241,163 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public Interpreter Reference(ReferenceType type)
 		{
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
-
-			_settings.KnownTypes[type.Name] = type;
-
-			foreach (var extensionMethod in type.ExtensionMethods)
-			{
-				_settings.ExtensionMethods.Add(extensionMethod);
-			}
-
+			_settings.Reference(type);
 			return this;
 		}
 		#endregion
 
 		#region Parse
 
-		public ParseResult<TDelegate> Parse<TDelegate>(string expressionText, params string[] parametersNames)
-		{
-			var delegateInfo = ReflectionExtensions.GetDelegateInfo(typeof(TDelegate), parametersNames);
-			var parseResult = Parse(
-				expressionText,
-				delegateInfo.ReturnType,
-				delegateInfo.Parameters.Select(x => x.Expression).ToArray());
-
-			return new ParseResult<TDelegate>(
-				expression: parseResult.Expression,
-				usedParameters: parseResult.UsedParameters,
-				declaredParameters: parseResult.DeclaredParameters,
-				types: parseResult.Types,
-				identifiers: parseResult.Identifiers);
-		}
-
-		public ParseResult Parse(string expressionText, params ParameterExpression[] parameters)
+		/// <summary>
+		/// Parse a text expression and returns a Lambda class that can be used to invoke it.
+		/// </summary>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
+		public Lambda Parse(string expressionText, params Parameter[] parameters)
 		{
 			return Parse(expressionText, typeof(void), parameters);
 		}
 
-		public ParseResult Parse(string expressionText, Type expressionReturnType, params ParameterExpression[] parameters)
+		/// <summary>
+		/// Parse a text expression and returns a Lambda class that can be used to invoke it.
+		/// If the expression cannot be converted to the type specified in the expressionType parameter
+		/// an exception is throw.
+		/// </summary>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="expressionType">The expected return type. Use void or object type if there isn't an expected return type.</param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
+		public Lambda Parse(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
-			if (parameters == null)
-				parameters = new ParameterExpression[0];
+			return ParseAsLambda(expressionText, expressionType, parameters);
+		}
 
+		[Obsolete("Use ParseAsDelegate<TDelegate>(string, params string[])")]
+		public TDelegate Parse<TDelegate>(string expressionText, params string[] parametersNames)
+		{
+			return ParseAsDelegate<TDelegate>(expressionText, parametersNames);
+		}
+
+		/// <summary>
+		/// Parse a text expression and convert it into a delegate.
+		/// </summary>
+		/// <typeparam name="TDelegate">Delegate to use</typeparam>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="parametersNames">Names of the parameters. If not specified the parameters names defined inside the delegate are used.</param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
+		public TDelegate ParseAsDelegate<TDelegate>(string expressionText, params string[] parametersNames)
+		{
+			var lambda = ParseAs<TDelegate>(expressionText, parametersNames);
+			return lambda.Compile<TDelegate>();
+		}
+
+		/// <summary>
+		/// Parse a text expression and convert it into a lambda expression.
+		/// </summary>
+		/// <typeparam name="TDelegate">Delegate to use</typeparam>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="parametersNames">Names of the parameters. If not specified the parameters names defined inside the delegate are used.</param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
+		public Expression<TDelegate> ParseAsExpression<TDelegate>(string expressionText, params string[] parametersNames)
+		{
+			var lambda = ParseAs<TDelegate>(expressionText, parametersNames);
+			return lambda.LambdaExpression<TDelegate>();
+		}
+
+		internal LambdaExpression ParseAsExpression(Type delegateType, string expressionText, params string[] parametersNames)
+		{
+			var delegateInfo = ReflectionExtensions.GetDelegateInfo(delegateType, parametersNames);
+
+			// return type is object means that we have no information beforehand
+			// => we force it to typeof(void) so that no conversion expression is emitted by the parser
+			//    and the actual expression type is preserved
+			var returnType = delegateInfo.ReturnType;
+			if (returnType == typeof(object))
+				returnType = typeof(void);
+
+			var lambda = ParseAsLambda(expressionText, returnType, delegateInfo.Parameters);
+			return lambda.LambdaExpression(delegateType);
+		}
+
+		public Lambda ParseAs<TDelegate>(string expressionText, params string[] parametersNames)
+		{
+			return ParseAs(typeof(TDelegate), expressionText, parametersNames);
+		}
+
+		internal Lambda ParseAs(Type delegateType, string expressionText, params string[] parametersNames)
+		{
+			var delegateInfo = ReflectionExtensions.GetDelegateInfo(delegateType, parametersNames);
+
+			return ParseAsLambda(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
+		}
+		#endregion
+
+		#region Eval
+		/// <summary>
+		/// Parse and invoke the specified expression.
+		/// </summary>
+		/// <param name="expressionText"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public object Eval(string expressionText, params Parameter[] parameters)
+		{
+			return Eval(expressionText, typeof(void), parameters);
+		}
+
+		/// <summary>
+		/// Parse and invoke the specified expression.
+		/// </summary>
+		/// <param name="expressionText"></param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public T Eval<T>(string expressionText, params Parameter[] parameters)
+		{
+			return (T)Eval(expressionText, typeof(T), parameters);
+		}
+
+		/// <summary>
+		/// Parse and invoke the specified expression.
+		/// </summary>
+		/// <param name="expressionText"></param>
+		/// <param name="expressionType">The return type of the expression. Use void or object if you don't know the expected return type.</param>
+		/// <param name="parameters"></param>
+		/// <returns></returns>
+		public object Eval(string expressionText, Type expressionType, params Parameter[] parameters)
+		{
+			return Parse(expressionText, expressionType, parameters).Invoke(parameters);
+		}
+		#endregion
+
+		#region Detection
+		public IdentifiersInfo DetectIdentifiers(string expression)
+		{
+			var detector = new Detector(_settings.ParserSettings);
+
+			return detector.DetectIdentifiers(expression);
+		}
+		#endregion
+
+		#region Private methods
+
+		private Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
+		{
 			var arguments = new ParserArguments(
-				expressionText,
-				_settings,
-				expressionReturnType,
-				parameters.Select(x => new Parameter(x)));
+												expressionText,
+												_settings.ParserSettings,
+												expressionType,
+												parameters);
 
-			var expression = Visitors.Aggregate(Parser.Parse(arguments), (current, visitor) => visitor.Visit(current));
+			var expression = Parser.Parse(arguments);
 
-			var lambda = new ParseResult(
-				expression: expression,
-				usedParameters: arguments.UsedParameters.Select(x => x.Expression),
-				declaredParameters: arguments.DeclaredParameters.Select(x => x.Expression),
-				types: arguments.UsedTypes,
-				identifiers: arguments.UsedIdentifiers);
+			foreach (var visitor in Visitors)
+				expression = visitor.Visit(expression);
+
+			var lambda = new Lambda(expression, arguments);
 
 #if TEST_DetectIdentifiers
 			AssertDetectIdentifiers(lambda);
@@ -389,19 +405,6 @@ namespace DynamicExpresso
 
 			return lambda;
 		}
-
-		#endregion
-
-		#region Detection
-		public IdentifiersInfo DetectIdentifiers(string expression)
-		{
-			var detector = new Detector(_settings);
-
-			return detector.DetectIdentifiers(expression);
-		}
-		#endregion
-
-		#region Private methods
 
 #if TEST_DetectIdentifiers
 		private void AssertDetectIdentifiers(Lambda lambda)

@@ -38,6 +38,11 @@ namespace DynamicExpresso
 			Expression = System.Linq.Expressions.Expression.Parameter(type, name);
 		}
 
+		public static Parameter Is<T>(string name, T value)
+		{
+			return new Parameter(name, typeof(T), value);
+		}
+
 		public string Name { get; private set; }
 		public Type Type { get; private set; }
 		public object Value { get; private set; }

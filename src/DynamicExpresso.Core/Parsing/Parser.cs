@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using DynamicExpresso.Exceptions;
 using DynamicExpresso.Resources;
@@ -1018,7 +1019,7 @@ namespace DynamicExpresso.Parsing
 			{
 				return ParseTypeKeyword(knownType);
 			}
-
+			
 			// Working context implementation
 			//if (it != null)
 			//    return ParseMemberAccess(null, it);
@@ -1249,7 +1250,7 @@ namespace DynamicExpresso.Parsing
 
 		private bool TryParseKnownType(string name, out Type type)
 		{
-			// if the type is unknown, we need to restart parsing
+			// if the type is unknown, we need to restart parsing 
 			var originalPos = _token.pos;
 			_arguments.TryGetKnownType(name, out type);
 
@@ -2354,7 +2355,7 @@ namespace DynamicExpresso.Parsing
 					}
 				case ExpressionType.Parameter:
 					return true;
-
+				
 			}
 
 			return false;
@@ -2489,7 +2490,7 @@ namespace DynamicExpresso.Parsing
 			return GenerateBinary(ExpressionType.GreaterThan, left, right);
 		}
 
-
+		
 
 		private Expression GenerateGreaterThanEqual(Expression left, Expression right)
 		{
@@ -3082,7 +3083,7 @@ namespace DynamicExpresso.Parsing
 		}
 
 		/// <summary>
-		/// Expression that wraps over an interpreter. This is used when parsing a lambda expression
+		/// Expression that wraps over an interpreter. This is used when parsing a lambda expression 
 		/// definition, because we don't know the parameters type before resolution.
 		/// </summary>
 		private class InterpreterExpression : Expression
@@ -3121,9 +3122,9 @@ namespace DynamicExpresso.Parsing
 
 			internal LambdaExpression EvalAs(Type delegateType)
 			{
-				var parsed = _interpreter.Parse(_expressionText, delegateType, _parameters.Select(p => p.Expression).ToArray());
-				_type = parsed.Expression.Type;
-				return parsed.AsLambdaExpression(delegateType);
+				var lambdaExpr = _interpreter.ParseAsExpression(delegateType, _expressionText, _parameters.Select(p => p.Name).ToArray());
+				_type = lambdaExpr.Type;
+				return lambdaExpr;
 			}
 
 			internal bool IsCompatibleWithDelegate(Type target)
