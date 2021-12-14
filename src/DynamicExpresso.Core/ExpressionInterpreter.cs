@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using DynamicExpresso.Exceptions;
 using DynamicExpresso.Reflection;
 using DynamicExpresso.Visitors;
 
@@ -342,6 +343,13 @@ namespace DynamicExpresso
 
 		#region Parse
 
+		/// <summary>
+		/// Parse a text expression and convert it into a ParseResult with Delegate type info.
+		/// </summary>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="parametersNames"></param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
 		public ParseResult<TDelegate> Parse<TDelegate>(string expressionText, params string[] parametersNames)
 		{
 			var delegateInfo = ReflectionExtensions.GetDelegateInfo(typeof(TDelegate), parametersNames);
@@ -358,11 +366,26 @@ namespace DynamicExpresso
 				identifiers: parseResult.Identifiers);
 		}
 
+		/// <summary>
+		/// Parse a text expression.
+		/// </summary>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="parameters">Expression input parameters</param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
 		public ParseResult Parse(string expressionText, params ParameterExpression[] parameters)
 		{
 			return Parse(expressionText, typeof(void), parameters);
 		}
 
+		/// <summary>
+		/// Parse a text expression.
+		/// </summary>
+		/// <param name="expressionText">Expression statement</param>
+		/// <param name="expressionReturnType">Expected expression return type</param>
+		/// <param name="parameters">Expression input parameters</param>
+		/// <returns></returns>
+		/// <exception cref="ParseException"></exception>
 		public ParseResult Parse(string expressionText, Type expressionReturnType, params ParameterExpression[] parameters)
 		{
 			if (parameters == null)
