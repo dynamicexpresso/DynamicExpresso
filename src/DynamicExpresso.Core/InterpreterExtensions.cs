@@ -84,43 +84,42 @@ namespace DynamicExpresso
 		/// Evaluate expression.
 		/// </summary>
 		public static object Eval<T1>(this ExpressionInterpreter interpreter, string expression,
-			Expression<Func<object, T1>> a1)
+			Func<object, T1> a1)
 			=> interpreter.Eval(expression, a1.Value());
 
 		/// <summary>
 		/// Evaluate expression.
 		/// </summary>
 		public static object Eval<T1, T2>(this ExpressionInterpreter interpreter, string expression,
-			Expression<Func<object, T1>> a1,
-			Expression<Func<object, T2>> a2)
+			Func<object, T1> a1,
+			Func<object, T2> a2)
 			=> interpreter.Eval(expression, a1.Value(), a2.Value());
 
 		/// <summary>
 		/// Evaluate expression.
 		/// </summary>
 		public static object Eval<T1, T2, T3>(this ExpressionInterpreter interpreter, string expression,
-			Expression<Func<object, T1>> a1,
-			Expression<Func<object, T2>> a2,
-			Expression<Func<object, T3>> a3)
+			Func<object, T1> a1,
+			Func<object, T2> a2,
+			Func<object, T3> a3)
 			=> interpreter.Eval(expression, a1.Value(), a2.Value(), a3.Value());
 
 		/// <summary>
 		/// Evaluate expression.
 		/// </summary>
 		public static object Eval<T1, T2, T3, T4>(this ExpressionInterpreter interpreter, string expression,
-			Expression<Func<object, T1>> a1,
-			Expression<Func<object, T2>> a2,
-			Expression<Func<object, T3>> a3,
-			Expression<Func<object, T4>> a4)
+			Func<object, T1> a1,
+			Func<object, T2> a2,
+			Func<object, T3> a3,
+			Func<object, T4> a4)
 			=> interpreter.Eval(expression, a1.Value(), a2.Value(), a3.Value(), a4.Value());
 
-		private static Parameter Value<T>(this Expression<Func<object, T>> parameter)
+		private static Parameter Value<T>(this Func<object, T> parameter)
 		{
-			var objectMember = Expression.Convert(parameter.Body, typeof(object));
-			var getterLambda = Expression.Lambda<Func<object>>(objectMember);
-			var getter = getterLambda.Compile();
-
-			return new Parameter(parameter.Parameters.First().Name, parameter.ReturnType, getter());
+			return new Parameter(
+				parameter.Method.GetParameters().First().Name,
+				parameter.Method.ReturnType,
+				parameter(default));
 		}
 
 		/// <summary>
