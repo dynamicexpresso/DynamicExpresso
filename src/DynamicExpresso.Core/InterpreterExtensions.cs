@@ -9,7 +9,7 @@ namespace DynamicExpresso
 	/// <summary>
 	/// Lambda extensions.
 	/// </summary>
-	public static class LambdaExtensions
+	public static class InterpreterExtensions
 	{
 		/// <summary>
 		/// Compiles lambda with declared parameters.
@@ -72,10 +72,11 @@ namespace DynamicExpresso
 
 		private static Parameter Value<T>(this Expression<Func<object, T>> parameter)
 		{
-			return new Parameter(
-				parameter.Parameters.First().Name,
-				parameter.ReturnType,
-				((ConstantExpression)parameter.Body).Value);
+			var objectMember = Expression.Convert(parameter.Body, typeof(object));
+			var getterLambda = Expression.Lambda<Func<object>>(objectMember);
+			var getter = getterLambda.Compile();
+
+			return new Parameter(parameter.Parameters.First().Name, parameter.ReturnType, getter());
 		}
 
 		public static object Eval(this ExpressionInterpreter interpreter, string expression, params Parameter[] args)

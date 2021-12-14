@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using DynamicExpresso.Reflection;
+using DynamicExpresso.Visitors;
 
 namespace DynamicExpresso
 {
@@ -13,14 +14,15 @@ namespace DynamicExpresso
 	/// </summary>
 	public class ExpressionInterpreter
 	{
-		private readonly InterpreterSettings _settings;
+		private readonly ParserSettings _settings;
+		private readonly ISet<ExpressionVisitor> _visitors = new HashSet<ExpressionVisitor>();
 
 		#region Constructors
-
 		/// <summary>
 		/// Creates a new ExpressionInterpreter using InterpreterOptions.Default.
 		/// </summary>
-		public ExpressionInterpreter() : this(InterpreterOptions.Default)
+		public ExpressionInterpreter()
+			: this(InterpreterOptions.Default)
 		{
 		}
 
@@ -30,7 +32,34 @@ namespace DynamicExpresso
 		/// <param name="options"></param>
 		public ExpressionInterpreter(InterpreterOptions options)
 		{
-			_settings = new InterpreterSettings(options);
+			var caseInsensitive = options.HasFlag(InterpreterOptions.CaseInsensitive);
+
+			var lateBindObject = options.HasFlag(InterpreterOptions.LateBindObject);
+
+			_settings = new ParserSettings(caseInsensitive, lateBindObject);
+
+			if ((options & InterpreterOptions.SystemKeywords) == InterpreterOptions.SystemKeywords)
+			{
+				SetIdentifiers(LanguageConstants.Literals);
+			}
+
+			if ((options & InterpreterOptions.PrimitiveTypes) == InterpreterOptions.PrimitiveTypes)
+			{
+				Reference(LanguageConstants.PrimitiveTypes);
+				Reference(LanguageConstants.CSharpPrimitiveTypes);
+			}
+
+			if ((options & InterpreterOptions.CommonTypes) == InterpreterOptions.CommonTypes)
+			{
+				Reference(LanguageConstants.CommonTypes);
+			}
+
+			if ((options & InterpreterOptions.LambdaExpressions) == InterpreterOptions.LambdaExpressions)
+			{
+				_settings.LambdaExpressions = true;
+			}
+
+			_visitors.Add(new DisableReflectionVisitor());
 		}
 
 		/// <summary>
@@ -38,30 +67,52 @@ namespace DynamicExpresso
 		/// </summary>
 		internal ExpressionInterpreter(ParserSettings settings)
 		{
-			_settings = new InterpreterSettings(settings);
+			_settings = settings;
 		}
-
 		#endregion
 
 		#region Properties
-
-		public bool CaseInsensitive { get { return _settings.CaseInsensitive; } }
+		public bool CaseInsensitive
+		{
+			get
+			{
+				return _settings.CaseInsensitive;
+			}
+		}
 
 		/// <summary>
 		/// Gets a list of registeres types. Add types by using the Reference method.
 		/// </summary>
-		public IEnumerable<ReferenceType> ReferencedTypes { get { return _settings.ReferencedTypes; } }
+		public IEnumerable<ReferenceType> ReferencedTypes
+		{
+			get
+			{
+				return _settings.KnownTypes
+					.Select(p => p.Value)
+					.ToList();
+			}
+		}
 
 		/// <summary>
 		/// Gets a list of known identifiers. Add identifiers using SetVariable, SetFunction or SetExpression methods.
 		/// </summary>
-		public IEnumerable<Identifier> Identifiers { get { return _settings.Identifiers; } }
+		public IEnumerable<Identifier> Identifiers
+		{
+			get
+			{
+				return _settings.Identifiers
+					.Select(p => p.Value)
+					.ToList();
+			}
+		}
 
 		/// <summary>
 		/// Gets the available assignment operators.
 		/// </summary>
-		public AssignmentOperators AssignmentOperators { get { return _settings.AssignmentOperators; } }
-
+		public AssignmentOperators AssignmentOperators
+		{
+			get { return _settings.AssignmentOperators; }
+		}
 		#endregion
 
 		#region Options
@@ -73,7 +124,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter SetDefaultNumberType(DefaultNumberType defaultNumberType)
 		{
-			_settings.SetDefaultNumberType(defaultNumberType);
+			_settings.DefaultNumberType = defaultNumberType;
 			return this;
 		}
 
@@ -85,15 +136,17 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter EnableAssignment(AssignmentOperators assignmentOperators)
 		{
-			_settings.EnableAssignment(assignmentOperators);
+			_settings.AssignmentOperators = assignmentOperators;
+
 			return this;
 		}
-
 		#endregion
 
 		#region Visitors
-
-		public ISet<ExpressionVisitor> Visitors { get { return _settings.Visitors; } }
+		public ISet<ExpressionVisitor> Visitors
+		{
+			get { return _visitors; }
+		}
 
 		/// <summary>
 		/// Enable reflection expression (like x.GetType().GetMethod() or typeof(double).Assembly) by removing the DisableReflectionVisitor.
@@ -101,14 +154,15 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter EnableReflection()
 		{
-			_settings.EnableReflection();
+			var visitor = Visitors.FirstOrDefault(p => p is DisableReflectionVisitor);
+			if (visitor != null)
+				Visitors.Remove(visitor);
+
 			return this;
 		}
-
 		#endregion
 
 		#region Register identifiers
-
 		/// <summary>
 		/// Allow the specified function delegate to be called from a parsed expression.
 		/// </summary>
@@ -117,7 +171,18 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter SetFunction(string name, Delegate value)
 		{
-			_settings.SetFunction(name, value);
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException(nameof(name));
+
+			if (_settings.Identifiers.TryGetValue(name, out var identifier) && identifier is FunctionIdentifier fIdentifier)
+			{
+				fIdentifier.AddOverload(value);
+			}
+			else
+			{
+				SetIdentifier(new FunctionIdentifier(name, value));
+			}
+
 			return this;
 		}
 
@@ -129,8 +194,10 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter SetVariable(string name, object value)
 		{
-			_settings.SetVariable(name, value);
-			return this;
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException(nameof(name));
+
+			return SetExpression(name, Expression.Constant(value));
 		}
 
 		/// <summary>
@@ -141,8 +208,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter SetVariable<T>(string name, T value)
 		{
-			_settings.SetVariable(name, value);
-			return this;
+			return SetVariable(name, value, typeof(T));
 		}
 
 		/// <summary>
@@ -154,8 +220,12 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter SetVariable(string name, object value, Type type)
 		{
-			_settings.SetVariable(name, value, type);
-			return this;
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException(nameof(name));
+
+			return SetExpression(name, Expression.Constant(value, type));
 		}
 
 		/// <summary>
@@ -167,8 +237,7 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter SetExpression(string name, Expression expression)
 		{
-			_settings.SetVariable(name, expression);
-			return this;
+			return SetIdentifier(new Identifier(name, expression));
 		}
 
 		/// <summary>
@@ -179,7 +248,9 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter SetIdentifiers(IEnumerable<Identifier> identifiers)
 		{
-			_settings.SetIdentifiers(identifiers);
+			foreach (var i in identifiers)
+				SetIdentifier(i);
+
 			return this;
 		}
 
@@ -191,10 +262,82 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public ExpressionInterpreter SetIdentifier(Identifier identifier)
 		{
-			_settings.SetIdentifier(identifier);
+			if (identifier == null)
+				throw new ArgumentNullException(nameof(identifier));
+
+			if (LanguageConstants.ReservedKeywords.Contains(identifier.Name))
+				throw new InvalidOperationException($"{identifier.Name} is a reserved word");
+
+			_settings.Identifiers[identifier.Name] = identifier;
+
+			return this;
+		}
+		#endregion
+
+		#region Register referenced types
+		/// <summary>
+		/// Allow the specified type to be used inside an expression. The type will be available using its name.
+		/// If the type contains method extensions methods they will be available inside expressions.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public ExpressionInterpreter Reference(Type type)
+		{
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
+
+			return Reference(type, type.Name);
+		}
+
+		/// <summary>
+		/// Allow the specified type to be used inside an expression.
+		/// See Reference(Type, string) method.
+		/// </summary>
+		/// <param name="types"></param>
+		/// <returns></returns>
+		public ExpressionInterpreter Reference(IEnumerable<ReferenceType> types)
+		{
+			if (types == null)
+				throw new ArgumentNullException(nameof(types));
+
+			foreach (var t in types)
+				Reference(t);
+
 			return this;
 		}
 
+		/// <summary>
+		/// Allow the specified type to be used inside an expression by using a custom alias.
+		/// If the type contains extensions methods they will be available inside expressions.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="typeName">Public name that must be used in the expression.</param>
+		/// <returns></returns>
+		public ExpressionInterpreter Reference(Type type, string typeName)
+		{
+			return Reference(new ReferenceType(typeName, type));
+		}
+
+		/// <summary>
+		/// Allow the specified type to be used inside an expression by using a custom alias.
+		/// If the type contains extensions methods they will be available inside expressions.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public ExpressionInterpreter Reference(ReferenceType type)
+		{
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
+
+			_settings.KnownTypes[type.Name] = type;
+
+			foreach (var extensionMethod in type.ExtensionMethods)
+			{
+				_settings.ExtensionMethods.Add(extensionMethod);
+			}
+
+			return this;
+		}
 		#endregion
 
 		#region Parse
@@ -227,11 +370,11 @@ namespace DynamicExpresso
 
 			var arguments = new ParserArguments(
 				expressionText,
-				_settings.ParserSettings,
+				_settings,
 				expressionReturnType,
 				parameters.Select(x => new Parameter(x)));
 
-			var expression = _settings.Visitors.Aggregate(Parser.Parse(arguments), (current, visitor) => visitor.Visit(current));
+			var expression = Visitors.Aggregate(Parser.Parse(arguments), (current, visitor) => visitor.Visit(current));
 
 			var lambda = new ParseResult(
 				expression: expression,
@@ -253,7 +396,7 @@ namespace DynamicExpresso
 
 		public IdentifiersInfo DetectIdentifiers(string expression)
 		{
-			var detector = new Detector(_settings.ParserSettings);
+			var detector = new Detector(_settings);
 
 			return detector.DetectIdentifiers(expression);
 		}
