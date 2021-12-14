@@ -446,6 +446,44 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(-1, interpreter.Eval("(date1 - date2)?.Days"));
 		}
 
+		[Test]
+		public void GitHub_Issue_212()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var list = new Parameter("list", new[] { 1, 2, 3 });
+			var value1 = new Parameter("value", 1);
+			var value2 = new Parameter("value", 2);
+			var expression = "list.Where(x => x > value)";
+			var lambda = target.Parse(expression, list, value1);
+			var result = lambda.Invoke(list, value2);
+			Assert.AreEqual(new[] { 3 }, result);
+		}
+
+		[Test]
+		public void GitHub_Issue_212_bis()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var list = new Parameter("list", new[] { 1, 2, 3 });
+			var value1 = new Parameter("value", 1);
+			var value2 = new Parameter("value", 2);
+			var expression = "list.Where(x => x > value)";
+			var lambda = target.Parse(expression, (new[] { list, value1 }).Select(p => new Parameter(p.Name, p.Type)).ToArray());
+			var result = lambda.Invoke(list, value1);
+			Assert.AreEqual(new[] { 2, 3 }, result);
+		}
+
+		[Test]
+		public void GitHub_Issue_200_capture()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var list = new List<string> { "ab", "cdc" };
+			target.SetVariable("myList", list);
+
+			// the str parameter is captured, and can be used in the nested lambda
+			var results = target.Eval("myList.Select(str => str.Select(c => str.Length))");
+			Assert.AreEqual(new[] { new[] { 2, 2 }, new[] { 3, 3, 3 } }, results);
+		}
+
 		public class Utils
 		{
 			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);

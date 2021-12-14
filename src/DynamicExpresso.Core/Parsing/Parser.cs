@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using DynamicExpresso.Exceptions;
+using DynamicExpresso.Reflection;
 using DynamicExpresso.Resources;
 using Microsoft.CSharp.RuntimeBinder;
 
@@ -3095,15 +3096,19 @@ namespace DynamicExpresso.Parsing
 
 			public InterpreterExpression(ParserArguments parserArguments, string expressionText, params Parameter[] parameters)
 			{
-				_interpreter = new Interpreter(parserArguments.Settings.Clone());
+				var settings = parserArguments.Settings.Clone();
+				_interpreter = new Interpreter(settings);
 				_expressionText = expressionText;
 				_parameters = parameters;
 
-				// convert the parent's parameters to variables
-				// note: this doesn't impact the initial settings, because they're cloned
+				var dict = settings._capturedVariables;
+				var captured = Constant(dict);
+				var indexerProp = dict.GetType().GetProperty("Item");
 				foreach (var pe in parserArguments.DeclaredParameters)
 				{
-					_interpreter.SetVariable(pe.Name, pe.Value, pe.Type);
+					var indexer = Property(captured, indexerProp, new Expression[] { Constant(pe.Name) });
+					var getExpr = Convert(indexer, pe.Type);
+					_interpreter.SetExpression(pe.Name, getExpr);
 				}
 
 				// prior to evaluation, we don't know the generic arguments types
@@ -3122,7 +3127,21 @@ namespace DynamicExpresso.Parsing
 
 			internal LambdaExpression EvalAs(Type delegateType)
 			{
-				var lambdaExpr = _interpreter.ParseAsExpression(delegateType, _expressionText, _parameters.Select(p => p.Name).ToArray());
+				var parametersNames = _parameters.Select(p => p.Name).ToArray();
+				var delegateInfo = ReflectionExtensions.GetDelegateInfo(delegateType, parametersNames);
+
+				// return type is object means that we have no information beforehand
+				// => we force it to typeof(void) so that no conversion expression is emitted by the parser
+				//    and the actual expression type is preserved
+				var returnType = delegateInfo.ReturnType;
+				if (returnType == typeof(object))
+					returnType = typeof(void);
+
+				var lambda = _interpreter.ParseAsLambda(_expressionText, returnType, delegateInfo.Parameters);
+
+
+
+				var lambdaExpr = lambda.LambdaExpression(delegateType);
 				_type = lambdaExpr.Type;
 				return lambdaExpr;
 			}

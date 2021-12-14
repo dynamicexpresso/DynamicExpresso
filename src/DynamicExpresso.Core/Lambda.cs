@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -24,11 +24,22 @@ namespace DynamicExpresso
 			if (parserArguments == null)
 				throw new ArgumentNullException("parserArguments");
 
-			_expression = expression;
 			_parserArguments = parserArguments;
 
+			var dict = _parserArguments.Settings._capturedVariables;
+			var captured = Expression.Constant(dict);
+			var indexerProp = dict.GetType().GetProperty("Item");
+			var exprs = _parserArguments.DeclaredParameters.Select(p =>
+			{
+				var indexer = Expression.Property(captured, indexerProp, new Expression[] { Expression.Constant(p.Name) });
+				return Expression.Assign(indexer, Expression.Convert(p.Expression, typeof(object))) as Expression;
+			}).ToList();
+
+			exprs.Add(expression);
+			_expression = Expression.Block(exprs);
+
 			// Note: I always compile the generic lambda. Maybe in the future this can be a setting because if I generate a typed delegate this compilation is not required.
-			var lambdaExpression = Expression.Lambda(_expression, _parserArguments.UsedParameters.Select(p => p.Expression).ToArray());
+			var lambdaExpression = Expression.Lambda(_expression, _parserArguments.DeclaredParameters.Select(p => p.Expression).ToArray());
 			_delegate = lambdaExpression.Compile();
 		}
 
@@ -70,7 +81,7 @@ namespace DynamicExpresso
 
 		public object Invoke(IEnumerable<Parameter> parameters)
 		{
-			var args = (from usedParameter in UsedParameters
+			var args = (from usedParameter in DeclaredParameters
 						from actualParameter in parameters
 						where usedParameter.Name.Equals(actualParameter.Name, _parserArguments.Settings.KeyComparison)
 						select actualParameter.Value)

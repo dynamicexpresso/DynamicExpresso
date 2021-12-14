@@ -403,21 +403,6 @@ namespace DynamicExpresso
 			return lambda.LambdaExpression<TDelegate>();
 		}
 
-		internal LambdaExpression ParseAsExpression(Type delegateType, string expressionText, params string[] parametersNames)
-		{
-			var delegateInfo = ReflectionExtensions.GetDelegateInfo(delegateType, parametersNames);
-
-			// return type is object means that we have no information beforehand
-			// => we force it to typeof(void) so that no conversion expression is emitted by the parser
-			//    and the actual expression type is preserved
-			var returnType = delegateInfo.ReturnType;
-			if (returnType == typeof(object))
-				returnType = typeof(void);
-
-			var lambda = ParseAsLambda(expressionText, returnType, delegateInfo.Parameters);
-			return lambda.LambdaExpression(delegateType);
-		}
-
 		public Lambda ParseAs<TDelegate>(string expressionText, params string[] parametersNames)
 		{
 			return ParseAs(typeof(TDelegate), expressionText, parametersNames); 
@@ -478,7 +463,7 @@ namespace DynamicExpresso
 
 		#region Private methods
 
-		private Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
+		internal Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
 		{
 			var arguments = new ParserArguments(
 												expressionText,
