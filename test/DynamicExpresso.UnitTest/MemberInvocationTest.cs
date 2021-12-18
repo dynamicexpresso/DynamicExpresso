@@ -449,6 +449,7 @@ namespace DynamicExpresso.UnitTest
 
 			public static int WithParamsArray2(string str, Exception e) => 6;
 			public static int WithParamsArray2(string str, Exception e, params string[] args) => 7;
+			public static int WithParamsArray2(string str, Exception e, params int[] args) => 8;
 
 
 			public static List<T> Array<T>(params T[] array)
@@ -492,10 +493,13 @@ namespace DynamicExpresso.UnitTest
 
 			var str = "str";
 			var e = new Exception();
+			var intg = 4;
 			target.SetVariable("str", str);
 			target.SetVariable("e", e);
+			target.SetVariable("intg", intg);
 			Assert.AreEqual(6, target.Eval("Utils.WithParamsArray2(str, e)"));
 			Assert.AreEqual(7, target.Eval("Utils.WithParamsArray2(str, e, str, str)"));
+			Assert.AreEqual(8, target.Eval("Utils.WithParamsArray2(str, e, intg, intg)"));
 		}
 
 		private interface MyTestInterface
