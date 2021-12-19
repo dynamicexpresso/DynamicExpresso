@@ -446,6 +446,21 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(-1, interpreter.Eval("(date1 - date2)?.Days"));
 		}
 
+		[Test]
+		public void GitHub_Issue_207()
+		{
+			var interpreter = new Interpreter(InterpreterOptions.Default ^ InterpreterOptions.DetectUsedParameters);
+			var parameter = new Parameter("x", typeof(int));
+			var expression = interpreter.Parse("x + 1", parameter).Expression;
+
+			var lambda = interpreter
+				.SetExpression("value", expression)
+				.Parse("value + 1", parameter);
+
+			var result = lambda.Invoke(1);
+			Assert.AreEqual(3, result);
+		}
+
 		public class Utils
 		{
 			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);

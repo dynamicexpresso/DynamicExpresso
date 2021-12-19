@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -10,53 +10,20 @@ namespace DynamicExpresso
 	/// <summary>
 	/// Represents a lambda expression that can be invoked. This class is thread safe.
 	/// </summary>
-	public class Lambda
+	public class Lambda : ParseResult
 	{
-		private readonly Expression _expression;
-		private readonly ParserArguments _parserArguments;
+		private readonly bool _caseInsensitive;
+		private readonly StringComparison _keyComparison;
 
-		private readonly Delegate _delegate;
+		private Delegate _delegate;
 
-		internal Lambda(Expression expression, ParserArguments parserArguments)
+		internal Lambda(Expression expression, ParserArguments parserArguments) : base(expression, parserArguments)
 		{
-			if (expression == null)
-				throw new ArgumentNullException("expression");
-			if (parserArguments == null)
-				throw new ArgumentNullException("parserArguments");
-
-			_expression = expression;
-			_parserArguments = parserArguments;
-
-			// Note: I always compile the generic lambda. Maybe in the future this can be a setting because if I generate a typed delegate this compilation is not required.
-			var lambdaExpression = Expression.Lambda(_expression, _parserArguments.UsedParameters.Select(p => p.Expression).ToArray());
-			_delegate = lambdaExpression.Compile();
+			_caseInsensitive = parserArguments.Settings.CaseInsensitive;
+			_keyComparison = parserArguments.Settings.KeyComparison;
 		}
 
-		public Expression Expression { get { return _expression; } }
-		public bool CaseInsensitive { get { return _parserArguments.Settings.CaseInsensitive; } }
-		public string ExpressionText { get { return _parserArguments.ExpressionText; } }
-		public Type ReturnType { get { return _delegate.Method.ReturnType; } }
-
-		/// <summary>
-		/// Gets the parameters actually used in the expression parsed.
-		/// </summary>
-		/// <value>The used parameters.</value>
-		[Obsolete("Use UsedParameters or DeclaredParameters")]
-		public IEnumerable<Parameter> Parameters { get { return _parserArguments.UsedParameters; } }
-
-		/// <summary>
-		/// Gets the parameters actually used in the expression parsed.
-		/// </summary>
-		/// <value>The used parameters.</value>
-		public IEnumerable<Parameter> UsedParameters { get { return _parserArguments.UsedParameters; } }
-		/// <summary>
-		/// Gets the parameters declared when parsing the expression.
-		/// </summary>
-		/// <value>The declared parameters.</value>
-		public IEnumerable<Parameter> DeclaredParameters { get { return _parserArguments.DeclaredParameters; } }
-
-		public IEnumerable<ReferenceType> Types { get { return _parserArguments.UsedTypes; } }
-		public IEnumerable<Identifier> Identifiers { get { return _parserArguments.UsedIdentifiers; } }
+		public bool CaseInsensitive => _caseInsensitive;
 
 		public object Invoke()
 		{
@@ -72,7 +39,7 @@ namespace DynamicExpresso
 		{
 			var args = (from usedParameter in UsedParameters
 						from actualParameter in parameters
-						where usedParameter.Name.Equals(actualParameter.Name, _parserArguments.Settings.KeyComparison)
+						where usedParameter.Name.Equals(actualParameter.Name, _keyComparison)
 						select actualParameter.Value)
 				.ToArray();
 
@@ -110,6 +77,9 @@ namespace DynamicExpresso
 
 		private object InvokeWithUsedParameters(object[] orderedArgs)
 		{
+			if (_delegate == null)
+				_delegate = this.Compile();
+
 			try
 			{
 				return _delegate.DynamicInvoke(orderedArgs);
@@ -121,50 +91,6 @@ namespace DynamicExpresso
 
 				throw;
 			}
-		}
-
-		public override string ToString()
-		{
-			return ExpressionText;
-		}
-
-		/// <summary>
-		/// Generate the given delegate by compiling the lambda expression.
-		/// </summary>
-		/// <typeparam name="TDelegate">The delegate to generate. Delegate parameters must match the one defined when creating the expression, see UsedParameters.</typeparam>
-		public TDelegate Compile<TDelegate>()
-		{
-			var lambdaExpression = LambdaExpression<TDelegate>();
-			return lambdaExpression.Compile();
-		}
-
-		[Obsolete("Use Compile<TDelegate>()")]
-		public TDelegate Compile<TDelegate>(IEnumerable<Parameter> parameters)
-		{
-			var lambdaExpression = Expression.Lambda<TDelegate>(_expression, parameters.Select(p => p.Expression).ToArray());
-			return lambdaExpression.Compile();
-		}
-
-		/// <summary>
-		/// Generate a lambda expression.
-		/// </summary>
-		/// <returns>The lambda expression.</returns>
-		/// <typeparam name="TDelegate">The delegate to generate. Delegate parameters must match the one defined when creating the expression, see UsedParameters.</typeparam>
-		public Expression<TDelegate> LambdaExpression<TDelegate>()
-		{
-			return Expression.Lambda<TDelegate>(_expression, DeclaredParameters.Select(p => p.Expression).ToArray());
-		}
-
-		internal LambdaExpression LambdaExpression(Type delegateType)
-		{
-			var types = delegateType.GetGenericArguments();
-
-			// return type
-			types[types.Length - 1] = _expression.Type;
-
-			var genericType = delegateType.GetGenericTypeDefinition();
-			var inferredDelegateType = genericType.MakeGenericType(types);
-			return Expression.Lambda(inferredDelegateType, _expression, DeclaredParameters.Select(p => p.Expression).ToArray());
 		}
 	}
 }

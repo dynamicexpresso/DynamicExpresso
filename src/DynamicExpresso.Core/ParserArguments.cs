@@ -1,4 +1,4 @@
-﻿using DynamicExpresso.Parsing;
+using DynamicExpresso.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,6 +39,9 @@ namespace DynamicExpresso
 					throw new DuplicateParameterException(pe.Name);
 				}
 			}
+
+			if (!Settings.DetectUsedParameters)
+				_usedParameters = new HashSet<Parameter>(_declaredParameters.Values);
 		}
 
 		public ParserSettings Settings { get; private set;}

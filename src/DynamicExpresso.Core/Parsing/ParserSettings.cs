@@ -31,6 +31,8 @@ namespace DynamicExpresso.Parsing
 			DefaultNumberType = DefaultNumberType.Default;
 
 			LambdaExpressions = false;
+
+			DetectUsedParameters = false;
 		}
 
 		private ParserSettings(ParserSettings other) : this(other.CaseInsensitive, other.LateBindObject)
@@ -42,6 +44,7 @@ namespace DynamicExpresso.Parsing
 			AssignmentOperators = other.AssignmentOperators;
 			DefaultNumberType = other.DefaultNumberType;
 			LambdaExpressions = other.LambdaExpressions;
+			DetectUsedParameters = other.DetectUsedParameters;
 		}
 
 		/// <summary>
@@ -101,6 +104,12 @@ namespace DynamicExpresso.Parsing
 		}
 
 		public bool LambdaExpressions
+		{
+			get;
+			set;
+		}
+
+		public bool DetectUsedParameters
 		{
 			get;
 			set;

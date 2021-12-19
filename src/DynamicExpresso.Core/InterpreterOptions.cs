@@ -31,12 +31,16 @@ namespace DynamicExpresso
 		/// </summary>
 		LambdaExpressions = 32,
 		/// <summary>
-		/// Load all default configurations: PrimitiveTypes + SystemKeywords + CommonTypes
+		/// Detect which parameters are actually used in the expression, to minimise the compiled lambda signature.
 		/// </summary>
-		Default = PrimitiveTypes | SystemKeywords | CommonTypes,
+		DetectUsedParameters = 64,
 		/// <summary>
-		/// Load all default configurations: PrimitiveTypes + SystemKeywords + CommonTypes + CaseInsensitive
+		/// Load all default configurations: PrimitiveTypes + SystemKeywords + CommonTypes + DetectUsedParameters
 		/// </summary>
-		DefaultCaseInsensitive = PrimitiveTypes | SystemKeywords | CommonTypes | CaseInsensitive,
+		Default = PrimitiveTypes | SystemKeywords | CommonTypes | DetectUsedParameters,
+		/// <summary>
+		/// Load all default configurations: PrimitiveTypes + SystemKeywords + CommonTypes + DetectUsedParameters + CaseInsensitive
+		/// </summary>
+		DefaultCaseInsensitive = PrimitiveTypes | SystemKeywords | CommonTypes | DetectUsedParameters | CaseInsensitive,
 	}
 }
