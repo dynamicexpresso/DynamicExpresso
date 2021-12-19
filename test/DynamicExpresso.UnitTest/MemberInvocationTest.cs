@@ -447,6 +447,11 @@ namespace DynamicExpresso.UnitTest
 			public static int WithParamsArray(int i, params int[] j) => 4;
 			public static int WithParamsArray(int i, int j) => 5;
 
+			public static int WithParamsArray2(string str, Exception e) => 6;
+			public static int WithParamsArray2(string str, Exception e, params string[] args) => 7;
+			public static int WithParamsArray2(string str, Exception e, params int[] args) => 8;
+
+
 			public static List<T> Array<T>(params T[] array)
 			{
 				return new List<T>(array);
@@ -478,6 +483,23 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(5, target.Eval("Utils.WithParamsArray(1, 2)"));
 			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1, 2, 3)"));
 			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1, 2, 3, 4)"));
+		}
+
+		[Test]
+		public void Method_overload_params_array_2()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Utils));
+
+			var str = "str";
+			var e = new Exception();
+			var intg = 4;
+			target.SetVariable("str", str);
+			target.SetVariable("e", e);
+			target.SetVariable("intg", intg);
+			Assert.AreEqual(6, target.Eval("Utils.WithParamsArray2(str, e)"));
+			Assert.AreEqual(7, target.Eval("Utils.WithParamsArray2(str, e, str, str)"));
+			Assert.AreEqual(8, target.Eval("Utils.WithParamsArray2(str, e, intg, intg)"));
 		}
 
 		private interface MyTestInterface
