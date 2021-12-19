@@ -257,7 +257,7 @@ namespace DynamicExpresso.UnitTest
 		private static void Verify<T>(Interpreter interpreter, string expression, T expected)
 		{
 			var parsed = interpreter.Parse(expression);
-			Assert.AreEqual(expected, parsed.Compile().DynamicInvoke());
+			Assert.AreEqual(expected, parsed.Invoke());
 			Assert.AreEqual(typeof(T), parsed.Expression.Type);
 		}
 	}
