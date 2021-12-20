@@ -14,13 +14,13 @@ namespace DynamicExpresso
 	{
 		private readonly bool _caseInsensitive;
 		private readonly StringComparison _keyComparison;
-
-		private Delegate _delegate;
+		private readonly Lazy<Delegate> _delegate;
 
 		internal Lambda(Expression expression, ParserArguments parserArguments) : base(expression, parserArguments)
 		{
 			_caseInsensitive = parserArguments.Settings.CaseInsensitive;
 			_keyComparison = parserArguments.Settings.KeyComparison;
+			_delegate = new Lazy<Delegate>(() => this.Compile());
 		}
 
 		public bool CaseInsensitive => _caseInsensitive;
@@ -77,12 +77,9 @@ namespace DynamicExpresso
 
 		private object InvokeWithUsedParameters(object[] orderedArgs)
 		{
-			if (_delegate == null)
-				_delegate = this.Compile();
-
 			try
 			{
-				return _delegate.DynamicInvoke(orderedArgs);
+				return _delegate.Value.DynamicInvoke(orderedArgs);
 			}
 			catch (TargetInvocationException exc)
 			{
