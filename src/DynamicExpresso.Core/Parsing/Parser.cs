@@ -2179,6 +2179,8 @@ namespace DynamicExpresso.Parsing
 				var ce = (ConstantExpression)expr;
 				if (ce == ParserConstants.NullLiteralExpression)
 				{
+					if (type.ContainsGenericParameters)
+						return null;
 					if (!type.IsValueType || IsNullableType(type))
 						return Expression.Constant(null, type);
 				}
