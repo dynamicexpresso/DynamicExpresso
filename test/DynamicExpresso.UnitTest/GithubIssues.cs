@@ -446,12 +446,29 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(-1, interpreter.Eval("(date1 - date2)?.Days"));
 		}
 
+		[Test]
+		public void GitHub_Issue_217()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(Utils));
+			target.Reference(typeof(IEnumerable<>));
+
+			Assert.AreEqual(1, Utils.Any((IEnumerable<object>)null));
+			Assert.AreEqual(2, Utils.Any((IEnumerable)null));
+			Assert.AreEqual(2, Utils.Any(null));
+			Assert.AreEqual(1, target.Eval("Utils.Any(list)", new Parameter("list", typeof(IEnumerable<object>), null)));
+			Assert.AreEqual(2, target.Eval("Utils.Any(list)", new Parameter("list", typeof(IEnumerable), null)));
+			Assert.AreEqual(2, target.Eval("Utils.Any(null)"));
+		}
+
 		public class Utils
 		{
 			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);
 			public static List<dynamic> Array(params dynamic[] array) => Array((IEnumerable<dynamic>)array);
 			public static IEnumerable<dynamic> Select<TSource>(IEnumerable<TSource> collection, string expression) =>  new List<dynamic>();
 			public static IEnumerable<dynamic> Select(IEnumerable collection, string expression) => new List<dynamic>();
+			public static int Any<T>(IEnumerable<T> collection) => 1;
+			public static int Any(IEnumerable collection) => 2;
 		}
 
 	}
