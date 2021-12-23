@@ -29,7 +29,7 @@ namespace DynamicExpresso
 		public Expression Expression { get { return _expression; } }
 		public bool CaseInsensitive { get { return _parserArguments.Settings.CaseInsensitive; } }
 		public string ExpressionText { get { return _parserArguments.ExpressionText; } }
-		public Type ReturnType { get { return _delegate.Value.Method.ReturnType; } }
+		public Type ReturnType { get { return Expression.Type; } }
 
 		/// <summary>
 		/// Gets the parameters actually used in the expression parsed.
