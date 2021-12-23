@@ -2068,8 +2068,13 @@ namespace DynamicExpresso.Parsing
 			{
 				if (x.HasDefaultValue)
 					return Expression.Constant(x.DefaultValue, x.ParameterType);
+
 				if (HasParamsArrayType(x))
+				{
+					method.HasParamsArray = true;
 					return Expression.NewArrayInit(x.ParameterType.GetElementType());
+				}
+
 				throw new Exception("No default value found!");
 			}));
 
@@ -2173,6 +2178,8 @@ namespace DynamicExpresso.Parsing
 				var ce = (ConstantExpression)expr;
 				if (ce == ParserConstants.NullLiteralExpression)
 				{
+					if (type.ContainsGenericParameters)
+						return null;
 					if (!type.IsValueType || IsNullableType(type))
 						return Expression.Constant(null, type);
 				}
@@ -2437,7 +2444,7 @@ namespace DynamicExpresso.Parsing
 				return true;
 
 			// if a method has a params parameter, it can have less parameters than the number of arguments
-			if (method.Parameters.Length > otherMethod.Parameters.Length)
+			if (method.HasParamsArray && otherMethod.HasParamsArray && method.Parameters.Length > otherMethod.Parameters.Length)
 				return true;
 
 			return better;
