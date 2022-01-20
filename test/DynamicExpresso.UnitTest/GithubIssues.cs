@@ -409,8 +409,8 @@ namespace DynamicExpresso.UnitTest
 			var listInt = target.Eval<List<int>>("Utils.Array(list)", new Parameter("list", list));
 			Assert.AreEqual(Utils.Array(list), listInt);
 		}
-    
-    [Test]
+
+		[Test]
 		public void GitHub_Issue_205_Property_on_nullable()
 		{
 			var interpreter = new Interpreter();
@@ -461,15 +461,56 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(2, target.Eval("Utils.Any(null)"));
 		}
 
-		public class Utils
+		[Test]
+		public void GitHub_Issue_221_Case_insensitivity()
+		{
+			var interpreter = new Interpreter(InterpreterOptions.LambdaExpressions | InterpreterOptions.DefaultCaseInsensitive)
+				.Reference(typeof(DateTimeOffset))
+				.Reference(typeof(GithubIssuesTestExtensionsMethods))
+				.SetFunction("Now", (Func<DateTimeOffset>)(() => DateTimeOffset.UtcNow))
+				.SetVariable("List", new List<DateTimeOffset> { DateTimeOffset.UtcNow.AddDays(5) })
+				.SetVariable("DateInThePast", DateTimeOffset.UtcNow.AddDays(-5));
+
+			// actual case
+			Assert.IsTrue(interpreter.Eval<bool>("List.Any(x => x > Now())"));
+			Assert.IsTrue(interpreter.Eval<bool>("List.Any(x => x is DateTimeOffset)"));
+			Assert.IsFalse(interpreter.Eval<bool>("DateInThePast.IsInFuture()"));
+
+			// case insensivity outside lambda expressions
+			Assert.IsFalse(interpreter.Eval<bool>("dateinthepast > now()")); // identifier
+			Assert.IsTrue(interpreter.Eval<bool>("dateinthepast is datetimeoffset)")); // known type
+			Assert.IsFalse(interpreter.Eval<bool>("dateinthepast.isinfuture()")); // extension method
+
+			// ensure the case insensitivity option is also used in the lambda expression
+			Assert.IsTrue(interpreter.Eval<bool>("list.Any(x => x > now())")); // identifier
+			Assert.IsTrue(interpreter.Eval<bool>("list.Any(x => x is datetimeoffset)")); // known type
+			Assert.IsTrue(interpreter.Eval<bool>("list.Any(x => x.isinfuture())")); // extension method
+		}
+
+		[Test]
+		public void GitHub_Issue_221_Reflection_not_allowed()
+		{
+			var interpreter = new Interpreter(InterpreterOptions.LambdaExpressions | InterpreterOptions.Default)
+				.SetVariable("list", new List<Type> { typeof(double) });
+
+			Assert.Throws<ReflectionNotAllowedException>(() => interpreter.Parse("typeof(double).GetMethods()"));
+			Assert.Throws<ReflectionNotAllowedException>(() => interpreter.Parse("list.SelectMany(t => t.GetMethods())"));
+		}
+
+
+		public static class Utils
 		{
 			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);
 			public static List<dynamic> Array(params dynamic[] array) => Array((IEnumerable<dynamic>)array);
-			public static IEnumerable<dynamic> Select<TSource>(IEnumerable<TSource> collection, string expression) =>  new List<dynamic>();
+			public static IEnumerable<dynamic> Select<TSource>(IEnumerable<TSource> collection, string expression) => new List<dynamic>();
 			public static IEnumerable<dynamic> Select(IEnumerable collection, string expression) => new List<dynamic>();
 			public static int Any<T>(IEnumerable<T> collection) => 1;
 			public static int Any(IEnumerable collection) => 2;
 		}
+	}
 
+	internal static class GithubIssuesTestExtensionsMethods
+	{
+		public static bool IsInFuture(this DateTimeOffset date) => date > DateTimeOffset.UtcNow;
 	}
 }
