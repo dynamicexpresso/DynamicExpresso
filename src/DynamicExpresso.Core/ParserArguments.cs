@@ -111,7 +111,8 @@ namespace DynamicExpresso
 
 		public IEnumerable<MethodInfo> GetExtensionMethods(string methodName)
 		{
-			return Settings.ExtensionMethods.Where(p => p.Name == methodName);
+			var comparer = Settings.KeyComparer;
+			return Settings.ExtensionMethods.Where(p => comparer.Equals(p.Name, methodName));
 		}
 	}
 }

@@ -37,8 +37,8 @@ namespace DynamicExpresso.Parsing
 
 		private ParserSettings(ParserSettings other) : this(other.CaseInsensitive, other.LateBindObject)
 		{
-			_knownTypes = new Dictionary<string, ReferenceType>(other._knownTypes);
-			_identifiers = new Dictionary<string, Identifier>(other._identifiers);
+			_knownTypes = new Dictionary<string, ReferenceType>(other._knownTypes, other._knownTypes.Comparer);
+			_identifiers = new Dictionary<string, Identifier>(other._identifiers, other._identifiers.Comparer);
 			_extensionMethods = new HashSet<MethodInfo>(other._extensionMethods);
 
 			AssignmentOperators = other.AssignmentOperators;
