@@ -221,11 +221,40 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ParseException>(() => interpreter.Eval("GFunction(arg)"));
 
 			// there should be an ambiguous call exception, but GFunction1 is used
-			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true 
+			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true
 			// and     gFunc2.Method.GetParameters()[0].HasDefaultValue == false
 			Assert.False((bool)interpreter.Eval("GFunction()"));
 		}
 
+		[Test]
+		public void Github_Issue_159()
+		{
+			// GetGFunction2 is defined inside the test function
+			static bool GetGFunction2(string arg = null)
+			{
+				return arg == null;
+			}
+
+			GFunction gFunc1 = GetGFunction1;
+			GFunction gFunc2 = GetGFunction2;
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("GFunction", gFunc1);
+			interpreter.SetFunction("GFunction", gFunc2);
+			interpreter.SetVariable("arg", "arg");
+
+			// ambiguous call
+			var exception = Assert.Throws<ParseException>(() => interpreter.Eval("GFunction(arg)"));
+			Assert.AreEqual("Ambiguous invocation of delegate (multiple overloads found) (at index 0).", exception.Message);
+
+			interpreter = new Interpreter();
+			interpreter.SetIdentifier(new FunctionIdentifier("GFunction", gFunc1));
+			interpreter.SetIdentifier(new FunctionIdentifier("GFunction", gFunc2));
+			interpreter.SetVariable("arg", "arg");
+
+			// normal call
+			Assert.False((bool)interpreter.Eval("GFunction(arg)"));
+		}
 #endif
 
 		[Test]
@@ -496,7 +525,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ReflectionNotAllowedException>(() => interpreter.Parse("typeof(double).GetMethods()"));
 			Assert.Throws<ReflectionNotAllowedException>(() => interpreter.Parse("list.SelectMany(t => t.GetMethods())"));
 		}
-
 
 		public static class Utils
 		{

@@ -22,13 +22,13 @@ namespace DynamicExpresso
 		}
 	}
 
-	internal class FunctionIdentifier : Identifier
+	public class FunctionIdentifier : Identifier
 	{
-		internal FunctionIdentifier(string name, Delegate value) : base(name, new MethodGroupExpression(value))
+		public FunctionIdentifier(string name, Delegate value) : base(name, new MethodGroupExpression(value))
 		{
 		}
 
-		internal void AddOverload(Delegate overload)
+		public void AddOverload(Delegate overload)
 		{
 			((MethodGroupExpression)Expression).AddOverload(overload);
 		}

@@ -524,7 +524,7 @@ namespace DynamicExpresso.Parsing
 			// << could be a token, but is not for symmetry
 			else if (_token.id == TokenId.LessThan && _parseChar == '<')
 			{
-				NextToken(); // consume next < 
+				NextToken(); // consume next <
 				shiftType = ExpressionType.LeftShift;
 				return true;
 			}
@@ -1019,7 +1019,7 @@ namespace DynamicExpresso.Parsing
 			{
 				return ParseTypeKeyword(knownType);
 			}
-			
+
 			// Working context implementation
 			//if (it != null)
 			//    return ParseMemberAccess(null, it);
@@ -1228,7 +1228,7 @@ namespace DynamicExpresso.Parsing
 				applicableMethods = FindBestMethod(candidates.Select(_ => _.Method), args);
 
 			if (applicableMethods.Length == 0)
-				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
+				throw CreateParseException(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
 
 			if (applicableMethods.Length > 1)
 				throw CreateParseException(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
@@ -1250,7 +1250,7 @@ namespace DynamicExpresso.Parsing
 
 		private bool TryParseKnownType(string name, out Type type)
 		{
-			// if the type is unknown, we need to restart parsing 
+			// if the type is unknown, we need to restart parsing
 			var originalPos = _token.pos;
 			_arguments.TryGetKnownType(name, out type);
 
@@ -2362,7 +2362,7 @@ namespace DynamicExpresso.Parsing
 					}
 				case ExpressionType.Parameter:
 					return true;
-				
+
 			}
 
 			return false;
@@ -2497,7 +2497,7 @@ namespace DynamicExpresso.Parsing
 			return GenerateBinary(ExpressionType.GreaterThan, left, right);
 		}
 
-		
+
 
 		private Expression GenerateGreaterThanEqual(Expression left, Expression right)
 		{
@@ -3090,7 +3090,7 @@ namespace DynamicExpresso.Parsing
 		}
 
 		/// <summary>
-		/// Expression that wraps over an interpreter. This is used when parsing a lambda expression 
+		/// Expression that wraps over an interpreter. This is used when parsing a lambda expression
 		/// definition, because we don't know the parameters type before resolution.
 		/// </summary>
 		private class InterpreterExpression : Expression
