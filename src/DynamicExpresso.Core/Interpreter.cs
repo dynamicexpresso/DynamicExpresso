@@ -273,6 +273,50 @@ namespace DynamicExpresso
 
 			return this;
 		}
+
+		/// <summary>
+		/// Remove <paramref name="name"/> from the list of known identifiers.
+		/// </summary>
+		/// <param name="name"></param>>
+		/// <returns></returns>
+		public Interpreter UnsetFunction(string name)
+		{
+			return UnsetIdentifier(name);
+		}
+
+		/// <summary>
+		/// Remove <paramref name="name"/> from the list of known identifiers.
+		/// </summary>
+		/// <param name="name"></param>>
+		/// <returns></returns>
+		public Interpreter UnsetVariable(string name)
+		{
+			return UnsetIdentifier(name);
+		}
+
+		/// <summary>
+		/// Remove <paramref name="name"/> from the list of known identifiers.
+		/// </summary>
+		/// <param name="name"></param>>
+		/// <returns></returns>
+		public Interpreter UnsetExpression(string name)
+		{
+			return UnsetIdentifier(name);
+		}
+
+		/// <summary>
+		/// Remove <paramref name="name"/> from the list of known identifiers.
+		/// </summary>
+		/// <param name="name"></param>
+		/// <returns></returns>
+		public Interpreter UnsetIdentifier(string name)
+		{
+			if (string.IsNullOrWhiteSpace(name))
+				throw new ArgumentNullException(nameof(name));
+
+			_settings.Identifiers.Remove(name);
+			return this;
+		}
 		#endregion
 
 		#region Register referenced types

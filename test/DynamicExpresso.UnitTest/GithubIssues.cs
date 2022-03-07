@@ -190,6 +190,22 @@ namespace DynamicExpresso.UnitTest
 		}
 
 
+		[Test]
+		public void GitHub_Issue_159_unset_identifier()
+		{
+			Func<int> f1 = () => 1;
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("f", f1);
+
+			Assert.AreEqual(1, interpreter.Eval("f()"));
+
+			// calls to f should lead to an unknown identifier exception
+			interpreter.UnsetFunction("f");
+			Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("f()"));
+		}
+
+
 #if NETCOREAPP2_1_OR_GREATER
 
 		[Test]
