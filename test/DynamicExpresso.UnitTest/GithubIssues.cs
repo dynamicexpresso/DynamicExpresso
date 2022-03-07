@@ -173,6 +173,22 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(2, target.Eval("SubArray(arr1, 1, 1).First()"));
 		}
 
+		[Test]
+		public void GitHub_Issue_159_ambiguous_call()
+		{
+			Func<double?, int> f1 = d => 1;
+			Func<string, int> f2 = o => 2;
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("f", f1);
+			interpreter.SetFunction("f", f2);
+
+			// we should properly throw an ambiguous invocation exception (multiple matching overloads found)
+			// and not an Argument list incompatible with delegate expression (no matching overload found)
+			var exc = Assert.Throws<ParseException>(() => interpreter.Eval("f(null)"));
+			StringAssert.StartsWith("Ambiguous invocation of delegate (multiple overloads found)", exc.Message);
+		}
+
 
 #if NETCOREAPP2_1_OR_GREATER
 

@@ -1952,9 +1952,14 @@ namespace DynamicExpresso.Parsing
 				ToArray();
 			if (applicable.Length > 1)
 			{
-				return applicable.
-					Where(m => applicable.All(n => m == n || MethodHasPriority(args, m, n))).
-					ToArray();
+				var bestCandidates = applicable
+					.Where(m => applicable.All(n => m == n || MethodHasPriority(args, m, n)))
+					.ToArray();
+
+				// bestCandidates.Length == 0 means that no applicable method has priority
+				// we don't return bestCandidates to prevent callers from thinking no method was found
+				if (bestCandidates.Length > 0)
+					return bestCandidates;
 			}
 
 			return applicable;
