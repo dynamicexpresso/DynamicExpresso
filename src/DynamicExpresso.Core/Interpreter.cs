@@ -166,6 +166,8 @@ namespace DynamicExpresso
 		#region Register identifiers
 		/// <summary>
 		/// Allow the specified function delegate to be called from a parsed expression.
+		/// Overloads can be added (ie. multiple delegates can be registered with the same name).
+		/// A delegate will replace any delegate with the exact same signature that is already registered.
 		/// </summary>
 		/// <param name="name"></param>
 		/// <param name="value"></param>

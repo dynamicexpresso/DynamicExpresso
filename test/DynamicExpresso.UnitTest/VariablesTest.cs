@@ -152,6 +152,20 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Replace_same_overload_signature()
+		{
+			Func<double, int> f1 = d => 1;
+			Func<double, int> f2 = d => 2;
+
+			var target = new Interpreter()
+									.SetFunction("f", f1)
+									.SetFunction("f", f2);
+
+			// f2 should override the f1 registration, because both delegates have the same signature
+			Assert.AreEqual(2, target.Eval("f(0d)"));
+		}
+
+		[Test]
 		public void Keywords_with_invalid_delegate_call()
 		{
 			Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
