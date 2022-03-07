@@ -81,7 +81,7 @@ namespace DynamicExpresso
 			{
 				var p = param[i];
 				var q = oParam[i];
-				if (p.ParameterType != q.ParameterType)
+				if (p.ParameterType != q.ParameterType || p.HasDefaultValue != q.HasDefaultValue)
 					return false;
 			}
 

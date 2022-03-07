@@ -1220,12 +1220,12 @@ namespace DynamicExpresso.Parsing
 				})
 				.ToList();
 
-			var applicableMethods = FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
+			var applicableMethods = FindBestMethod(candidates.Select(_ => _.Method), args);
 
 			// no method found: retry with the delegate's method
 			// (the parameters might be different, e.g. params array, default value, etc)
 			if (applicableMethods.Length == 0)
-				applicableMethods = FindBestMethod(candidates.Select(_ => _.Method), args);
+				applicableMethods = FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
 
 			if (applicableMethods.Length == 0)
 				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
