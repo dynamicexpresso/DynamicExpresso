@@ -173,6 +173,38 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(2, target.Eval("SubArray(arr1, 1, 1).First()"));
 		}
 
+		[Test]
+		public void GitHub_Issue_159_ambiguous_call()
+		{
+			Func<double?, int> f1 = d => 1;
+			Func<string, int> f2 = o => 2;
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("f", f1);
+			interpreter.SetFunction("f", f2);
+
+			// we should properly throw an ambiguous invocation exception (multiple matching overloads found)
+			// and not an Argument list incompatible with delegate expression (no matching overload found)
+			var exc = Assert.Throws<ParseException>(() => interpreter.Eval("f(null)"));
+			StringAssert.StartsWith("Ambiguous invocation of delegate (multiple overloads found)", exc.Message);
+		}
+
+
+		[Test]
+		public void GitHub_Issue_159_unset_identifier()
+		{
+			Func<int> f1 = () => 1;
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("f", f1);
+
+			Assert.AreEqual(1, interpreter.Eval("f()"));
+
+			// calls to f should lead to an unknown identifier exception
+			interpreter.UnsetFunction("f");
+			Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("f()"));
+		}
+
 
 #if NETCOREAPP2_1_OR_GREATER
 
@@ -186,7 +218,6 @@ namespace DynamicExpresso.UnitTest
 			}
 
 			GFunction gFunc2 = GetGFunction2;
-			Assert.False(gFunc2.Method.GetParameters()[0].HasDefaultValue); // should be true!
 
 			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance;
 			var invokeMethod2 = (MethodInfo)gFunc2.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke")[0];
@@ -204,7 +235,7 @@ namespace DynamicExpresso.UnitTest
 		public void GitHub_Issue_144_3()
 		{
 			// GetGFunction2 is defined inside the test function
-			static bool GetGFunction2(string arg = null)
+			static bool GetGFunction2(string arg)
 			{
 				return arg == null;
 			}
@@ -220,7 +251,7 @@ namespace DynamicExpresso.UnitTest
 			// ambiguous call
 			Assert.Throws<ParseException>(() => interpreter.Eval("GFunction(arg)"));
 
-			// there should be an ambiguous call exception, but GFunction1 is used
+			// GFunction1 is used
 			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true 
 			// and     gFunc2.Method.GetParameters()[0].HasDefaultValue == false
 			Assert.False((bool)interpreter.Eval("GFunction()"));
