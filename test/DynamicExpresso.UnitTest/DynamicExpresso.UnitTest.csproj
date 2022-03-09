@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netcoreapp5.0;netcoreapp3.1;net462</TargetFrameworks>
+		<TargetFrameworks>net5.0;netcoreapp3.1;net462</TargetFrameworks>
 
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
@@ -10,10 +10,6 @@
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
 		<PackageReference Include="NUnit" Version="3.9.0" />
 		<PackageReference Include="NUnit3TestAdapter" Version="3.9.0" />
-	</ItemGroup>
-
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('net4')) ">
-		<Reference Include="Microsoft.CSharp" />
 	</ItemGroup>
 
 	<ItemGroup>
