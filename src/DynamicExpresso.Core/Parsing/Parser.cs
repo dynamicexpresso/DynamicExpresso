@@ -1024,12 +1024,12 @@ namespace DynamicExpresso.Parsing
 
 			try
 			{
-				if (_arguments.TryGetIdentifier("this", out var thisKeywordExpression))
+				if (_arguments.TryGetIdentifier(LanguageConstants.This, out var thisKeywordExpression))
 				{
 					return ParseMemberAccess(thisKeywordExpression);
 				}
 
-				if (_arguments.TryGetParameters("this", out var thisParameterExpression))
+				if (_arguments.TryGetParameters(LanguageConstants.This, out var thisParameterExpression))
 				{
 					return ParseMemberAccess(thisParameterExpression);
 				}
