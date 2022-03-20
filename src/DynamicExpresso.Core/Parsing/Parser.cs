@@ -1034,7 +1034,7 @@ namespace DynamicExpresso.Parsing
 					return ParseMemberAccess(thisParameterExpression);
 				}
 			}
-			catch
+			catch(ParseException)
 			{
 				// ignore
 			}
