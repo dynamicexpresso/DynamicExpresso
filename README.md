@@ -3,7 +3,7 @@
 [![NuGet version](https://badge.fury.io/nu/DynamicExpresso.Core.svg)](http://badge.fury.io/nu/DynamicExpresso.Core)
 [![.NET CI](https://github.com/dynamicexpresso/DynamicExpresso/actions/workflows/ci.yml/badge.svg)](https://github.com/dynamicexpresso/DynamicExpresso/actions/workflows/ci.yml)
 
-Supported platforms: .NET Core 3.1, .NET Core 5.0 and above, .NET 4.5, .NET 4.6.1
+Supported platforms: .NET Core 3.1, .NET Core 5.0 and above, .NET 4.6.2
 
 Dynamic Expresso is an interpreter for simple C# statements written in .NET Standard 2.0.
 Dynamic Expresso embeds its own parsing logic, really interprets C# statements by converting it to .NET lambda expressions or delegates.

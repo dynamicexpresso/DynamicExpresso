@@ -14,28 +14,22 @@ namespace DynamicExpresso
 	{
 		private readonly Expression _expression;
 		private readonly ParserArguments _parserArguments;
-
-		private readonly Delegate _delegate;
+		private readonly Lazy<Delegate> _delegate;
 
 		internal Lambda(Expression expression, ParserArguments parserArguments)
 		{
-			if (expression == null)
-				throw new ArgumentNullException("expression");
-			if (parserArguments == null)
-				throw new ArgumentNullException("parserArguments");
+			_expression = expression ?? throw new ArgumentNullException(nameof(expression));
+			_parserArguments = parserArguments ?? throw new ArgumentNullException(nameof(parserArguments));
 
-			_expression = expression;
-			_parserArguments = parserArguments;
-
-			// Note: I always compile the generic lambda. Maybe in the future this can be a setting because if I generate a typed delegate this compilation is not required.
-			var lambdaExpression = Expression.Lambda(_expression, _parserArguments.UsedParameters.Select(p => p.Expression).ToArray());
-			_delegate = lambdaExpression.Compile();
+			// Note: I always lazy compile the generic lambda. Maybe in the future this can be a setting because if I generate a typed delegate this compilation is not required.
+			_delegate = new Lazy<Delegate>(() =>
+				Expression.Lambda(_expression, _parserArguments.UsedParameters.Select(p => p.Expression).ToArray()).Compile());
 		}
 
 		public Expression Expression { get { return _expression; } }
 		public bool CaseInsensitive { get { return _parserArguments.Settings.CaseInsensitive; } }
 		public string ExpressionText { get { return _parserArguments.ExpressionText; } }
-		public Type ReturnType { get { return _delegate.Method.ReturnType; } }
+		public Type ReturnType { get { return Expression.Type; } }
 
 		/// <summary>
 		/// Gets the parameters actually used in the expression parsed.
@@ -112,7 +106,7 @@ namespace DynamicExpresso
 		{
 			try
 			{
-				return _delegate.DynamicInvoke(orderedArgs);
+				return _delegate.Value.DynamicInvoke(orderedArgs);
 			}
 			catch (TargetInvocationException exc)
 			{

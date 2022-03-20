@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <RootNamespace>DynamicExpresso</RootNamespace>
 
     <Authors>Davide Icardi</Authors>
@@ -19,11 +19,6 @@
     <VersionPrefix>0.0.1</VersionPrefix>
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>
-
-
-  <ItemGroup Condition=" $(TargetFramework.StartsWith('net4')) ">
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
 
   <ItemGroup Condition=" $(TargetFramework.StartsWith('netstandard2')) ">
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

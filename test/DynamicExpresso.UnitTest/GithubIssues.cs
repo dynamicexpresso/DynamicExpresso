@@ -173,6 +173,38 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(2, target.Eval("SubArray(arr1, 1, 1).First()"));
 		}
 
+		[Test]
+		public void GitHub_Issue_159_ambiguous_call()
+		{
+			Func<double?, int> f1 = d => 1;
+			Func<string, int> f2 = o => 2;
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("f", f1);
+			interpreter.SetFunction("f", f2);
+
+			// we should properly throw an ambiguous invocation exception (multiple matching overloads found)
+			// and not an Argument list incompatible with delegate expression (no matching overload found)
+			var exc = Assert.Throws<ParseException>(() => interpreter.Eval("f(null)"));
+			StringAssert.StartsWith("Ambiguous invocation of delegate (multiple overloads found)", exc.Message);
+		}
+
+
+		[Test]
+		public void GitHub_Issue_159_unset_identifier()
+		{
+			Func<int> f1 = () => 1;
+
+			var interpreter = new Interpreter();
+			interpreter.SetFunction("f", f1);
+
+			Assert.AreEqual(1, interpreter.Eval("f()"));
+
+			// calls to f should lead to an unknown identifier exception
+			interpreter.UnsetFunction("f");
+			Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("f()"));
+		}
+
 
 #if NETCOREAPP2_1_OR_GREATER
 
@@ -186,7 +218,6 @@ namespace DynamicExpresso.UnitTest
 			}
 
 			GFunction gFunc2 = GetGFunction2;
-			Assert.False(gFunc2.Method.GetParameters()[0].HasDefaultValue); // should be true!
 
 			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance;
 			var invokeMethod2 = (MethodInfo)gFunc2.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke")[0];
@@ -204,7 +235,7 @@ namespace DynamicExpresso.UnitTest
 		public void GitHub_Issue_144_3()
 		{
 			// GetGFunction2 is defined inside the test function
-			static bool GetGFunction2(string arg = null)
+			static bool GetGFunction2(string arg)
 			{
 				return arg == null;
 			}
@@ -220,7 +251,7 @@ namespace DynamicExpresso.UnitTest
 			// ambiguous call
 			Assert.Throws<ParseException>(() => interpreter.Eval("GFunction(arg)"));
 
-			// there should be an ambiguous call exception, but GFunction1 is used
+			// GFunction1 is used
 			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true 
 			// and     gFunc2.Method.GetParameters()[0].HasDefaultValue == false
 			Assert.False((bool)interpreter.Eval("GFunction()"));
@@ -409,8 +440,8 @@ namespace DynamicExpresso.UnitTest
 			var listInt = target.Eval<List<int>>("Utils.Array(list)", new Parameter("list", list));
 			Assert.AreEqual(Utils.Array(list), listInt);
 		}
-    
-    [Test]
+
+		[Test]
 		public void GitHub_Issue_205_Property_on_nullable()
 		{
 			var interpreter = new Interpreter();
@@ -461,15 +492,56 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(2, target.Eval("Utils.Any(null)"));
 		}
 
-		public class Utils
+		[Test]
+		public void GitHub_Issue_221_Case_insensitivity()
+		{
+			var interpreter = new Interpreter(InterpreterOptions.LambdaExpressions | InterpreterOptions.DefaultCaseInsensitive)
+				.Reference(typeof(DateTimeOffset))
+				.Reference(typeof(GithubIssuesTestExtensionsMethods))
+				.SetFunction("Now", (Func<DateTimeOffset>)(() => DateTimeOffset.UtcNow))
+				.SetVariable("List", new List<DateTimeOffset> { DateTimeOffset.UtcNow.AddDays(5) })
+				.SetVariable("DateInThePast", DateTimeOffset.UtcNow.AddDays(-5));
+
+			// actual case
+			Assert.IsTrue(interpreter.Eval<bool>("List.Any(x => x > Now())"));
+			Assert.IsTrue(interpreter.Eval<bool>("List.Any(x => x is DateTimeOffset)"));
+			Assert.IsFalse(interpreter.Eval<bool>("DateInThePast.IsInFuture()"));
+
+			// case insensivity outside lambda expressions
+			Assert.IsFalse(interpreter.Eval<bool>("dateinthepast > now()")); // identifier
+			Assert.IsTrue(interpreter.Eval<bool>("dateinthepast is datetimeoffset)")); // known type
+			Assert.IsFalse(interpreter.Eval<bool>("dateinthepast.isinfuture()")); // extension method
+
+			// ensure the case insensitivity option is also used in the lambda expression
+			Assert.IsTrue(interpreter.Eval<bool>("list.Any(x => x > now())")); // identifier
+			Assert.IsTrue(interpreter.Eval<bool>("list.Any(x => x is datetimeoffset)")); // known type
+			Assert.IsTrue(interpreter.Eval<bool>("list.Any(x => x.isinfuture())")); // extension method
+		}
+
+		[Test]
+		public void GitHub_Issue_221_Reflection_not_allowed()
+		{
+			var interpreter = new Interpreter(InterpreterOptions.LambdaExpressions | InterpreterOptions.Default)
+				.SetVariable("list", new List<Type> { typeof(double) });
+
+			Assert.Throws<ReflectionNotAllowedException>(() => interpreter.Parse("typeof(double).GetMethods()"));
+			Assert.Throws<ReflectionNotAllowedException>(() => interpreter.Parse("list.SelectMany(t => t.GetMethods())"));
+		}
+
+
+		public static class Utils
 		{
 			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);
 			public static List<dynamic> Array(params dynamic[] array) => Array((IEnumerable<dynamic>)array);
-			public static IEnumerable<dynamic> Select<TSource>(IEnumerable<TSource> collection, string expression) =>  new List<dynamic>();
+			public static IEnumerable<dynamic> Select<TSource>(IEnumerable<TSource> collection, string expression) => new List<dynamic>();
 			public static IEnumerable<dynamic> Select(IEnumerable collection, string expression) => new List<dynamic>();
 			public static int Any<T>(IEnumerable<T> collection) => 1;
 			public static int Any(IEnumerable collection) => 2;
 		}
+	}
 
+	internal static class GithubIssuesTestExtensionsMethods
+	{
+		public static bool IsInFuture(this DateTimeOffset date) => date > DateTimeOffset.UtcNow;
 	}
 }

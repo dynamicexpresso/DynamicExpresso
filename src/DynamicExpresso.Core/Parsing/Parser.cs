@@ -1220,12 +1220,12 @@ namespace DynamicExpresso.Parsing
 				})
 				.ToList();
 
-			var applicableMethods = FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
+			var applicableMethods = FindBestMethod(candidates.Select(_ => _.Method), args);
 
 			// no method found: retry with the delegate's method
 			// (the parameters might be different, e.g. params array, default value, etc)
 			if (applicableMethods.Length == 0)
-				applicableMethods = FindBestMethod(candidates.Select(_ => _.Method), args);
+				applicableMethods = FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
 
 			if (applicableMethods.Length == 0)
 				throw CreateParseException(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
@@ -1952,9 +1952,14 @@ namespace DynamicExpresso.Parsing
 				ToArray();
 			if (applicable.Length > 1)
 			{
-				return applicable.
-					Where(m => applicable.All(n => m == n || MethodHasPriority(args, m, n))).
-					ToArray();
+				var bestCandidates = applicable
+					.Where(m => applicable.All(n => m == n || MethodHasPriority(args, m, n)))
+					.ToArray();
+
+				// bestCandidates.Length == 0 means that no applicable method has priority
+				// we don't return bestCandidates to prevent callers from thinking no method was found
+				if (bestCandidates.Length > 0)
+					return bestCandidates;
 			}
 
 			return applicable;

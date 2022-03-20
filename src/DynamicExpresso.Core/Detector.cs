@@ -1,13 +1,20 @@
-﻿using DynamicExpresso.Parsing;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using DynamicExpresso.Parsing;
 
 namespace DynamicExpresso
 {
 	internal class Detector
 	{
 		private readonly ParserSettings _settings;
+
+		private static readonly string Type = @"\b(?<type>[a-zA-Z_]\w*)\b";
+		private static readonly string Id = @"\b(?<id>[a-zA-Z_]\w*)\b";
+		private static readonly Regex LambdaDetectionRegex = new Regex($@"(\((((?<withtype>({Type}\s+)?{Id}))(\s*,\s*)?)+\)|(?<withtype>{Id}))\s*=>", RegexOptions.Compiled);
+
 		private static readonly Regex IdentifiersDetectionRegex = new Regex(@"([^\.]|^)\b(?<id>[a-zA-Z_]\w*)\b", RegexOptions.Compiled);
 
 		private static readonly Regex StringDetectionRegex = new Regex(@"(?<!\\)?"".*?(?<!\\)""", RegexOptions.Compiled);
@@ -26,6 +33,41 @@ namespace DynamicExpresso
 			var knownIdentifiers = new HashSet<Identifier>();
 			var knownTypes = new HashSet<ReferenceType>();
 
+			// find lambda parameters
+			var lambdaParameters = new Dictionary<string, Identifier>();
+			foreach (Match match in LambdaDetectionRegex.Matches(expression))
+			{
+				var withtypes = match.Groups["withtype"].Captures;
+				var types = match.Groups["type"].Captures;
+				var identifiers = match.Groups["id"].Captures;
+
+				// match identifier with its type
+				var t = 0;
+				for (var i = 0; i < withtypes.Count; i++)
+				{
+					var withtype = withtypes[i].Value;
+					var identifier = identifiers[i].Value;
+					var type = typeof(object);
+					if (withtype != identifier)
+					{
+						var typeName = types[t].Value;
+						if (_settings.KnownTypes.TryGetValue(typeName, out ReferenceType knownType))
+							type = knownType.Type;
+
+						t++;
+					}
+
+					// there might be several lambda parameters with the same name;
+					// in that case, we ignore the detected type
+					if (lambdaParameters.TryGetValue(identifier, out Identifier already) && already.Expression.Type != type)
+						type = typeof(object);
+
+					var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
+					lambdaParameters[identifier] = new Identifier(identifier, Expression.Constant(defaultValue, type));
+				}
+			}
+
+
 			foreach (Match match in IdentifiersDetectionRegex.Matches(expression))
 			{
 				var identifier = match.Groups["id"].Value;
@@ -35,6 +77,8 @@ namespace DynamicExpresso
 
 				if (_settings.Identifiers.TryGetValue(identifier, out Identifier knownIdentifier))
 					knownIdentifiers.Add(knownIdentifier);
+				else if (lambdaParameters.TryGetValue(identifier, out Identifier knownLambdaParam))
+					knownIdentifiers.Add(knownLambdaParam);
 				else if (_settings.KnownTypes.TryGetValue(identifier, out ReferenceType knownType))
 					knownTypes.Add(knownType);
 				else
