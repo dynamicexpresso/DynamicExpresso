@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
@@ -7,6 +6,16 @@ namespace DynamicExpresso.UnitTest
 	[TestFixture]
 	public class IdentifiersTest
 	{
+		class Customer
+		{
+			public string Name { get; set; }
+
+			public string GetName()
+			{
+				return Name;
+			}
+		}
+
 		[Test]
 		public void Default_identifiers_are_saved_inside_the_interpreter()
 		{
@@ -44,33 +53,32 @@ namespace DynamicExpresso.UnitTest
 		public void This_identifier_variable()
 		{
 			const string Name = "John";
-			var context = new KeyValuePair<string, string>(nameof(Name), Name);
 
 			var interpreter = new Interpreter();
 
-			interpreter.SetVariable("this", context);
+			interpreter.SetVariable("this", new Customer {Name = Name});
 
-			Assert.AreEqual(Name, interpreter.Eval("this.Value"));
-			Assert.AreEqual(nameof(Name), interpreter.Eval("this.Key"));
+			Assert.AreEqual(Name, interpreter.Eval("this.Name"));
+			Assert.AreEqual(Name, interpreter.Eval("this.GetName()"));
 
-			Assert.AreEqual(Name, interpreter.Eval("Value"));
-			Assert.AreEqual(nameof(Name), interpreter.Eval("Key"));
+			Assert.AreEqual(Name, interpreter.Eval("Name"));
+			Assert.AreEqual(Name, interpreter.Eval("GetName()"));
 		}
 
 		[Test]
 		public void This_identifier_parameter()
 		{
 			const string Name = "John";
-			var context = new KeyValuePair<string, string>(nameof(Name), Name);
-			var parameter = new Parameter("this", context.GetType());
 
+			var context = new Customer {Name = Name};
+			var parameter = new Parameter("this", context.GetType());
 			var interpreter = new Interpreter();
 
-			Assert.AreEqual(Name, interpreter.Parse("this.Value", parameter).Invoke(context));
-			Assert.AreEqual(nameof(Name), interpreter.Parse("this.Key", parameter).Invoke(context));
+			Assert.AreEqual(Name, interpreter.Parse("this.Name", parameter).Invoke(context));
+			Assert.AreEqual(Name, interpreter.Parse("this.GetName()", parameter).Invoke(context));
 
-			Assert.AreEqual(Name, interpreter.Parse("Value", parameter).Invoke(context));
-			Assert.AreEqual(nameof(Name), interpreter.Parse("Key", parameter).Invoke(context));
+			Assert.AreEqual(Name, interpreter.Parse("Name", parameter).Invoke(context));
+			Assert.AreEqual(Name, interpreter.Parse("GetName()", parameter).Invoke(context));
 		}
 	}
 }
