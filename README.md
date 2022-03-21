@@ -125,7 +125,7 @@ class Customer { public string Name { get; set; } }
 
 var target = new Interpreter();
 
-// 'this' is treated as a special identifier and could by accessed implicitly 
+// 'this' is treated as a special identifier and can be accessed implicitly 
 target.SetVariable("this", new Customer { Name = "John" });
 
 // explicit context reference via 'this' variable
@@ -322,6 +322,7 @@ The following character escape sequences are supported inside string or char lit
 - `\v` - Vertical quote (character 11)
 
 ### Type's members invocation
+
 Any standard .NET method, field, property or constructor can be invoked.
 ```csharp
 var service = new MyTestService();
@@ -331,14 +332,14 @@ var target = new Interpreter()
   .SetVariable("x", service)
   .SetVariable("this", context);
 
-Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()"));
-Assert.AreEqual(x.AProperty, target.Eval("x.AProperty"));
-Assert.AreEqual(x.AField, target.Eval("x.AField"));
+Assert.AreEqual(service.HelloWorld(), target.Eval("x.HelloWorld()"));
+Assert.AreEqual(service.AProperty, target.Eval("x.AProperty"));
+Assert.AreEqual(service.AField, target.Eval("x.AField"));
 
 // implicit context reference
-Assert.AreEqual(x.HelloWorld(), target.Eval("GetContextId()"));
-Assert.AreEqual(x.AProperty, target.Eval("ContextName"));
-Assert.AreEqual(x.AField, target.Eval("ContextField"));
+Assert.AreEqual(context.GetContextId(), target.Eval("GetContextId()"));
+Assert.AreEqual(context.ContextName, target.Eval("ContextName"));
+Assert.AreEqual(context.ContextField, target.Eval("ContextField"));
 ```
 ```csharp
 var target = new Interpreter();
