@@ -1019,12 +1019,31 @@ namespace DynamicExpresso.Parsing
 			{
 				return ParseTypeKeyword(knownType);
 			}
-			
+
+			var token = _token;
+
+			try
+			{
+				if (_arguments.TryGetIdentifier(LanguageConstants.This, out var thisKeywordExpression))
+				{
+					return ParseMemberAccess(thisKeywordExpression);
+				}
+
+				if (_arguments.TryGetParameters(LanguageConstants.This, out var thisParameterExpression))
+				{
+					return ParseMemberAccess(thisParameterExpression);
+				}
+			}
+			catch(ParseException)
+			{
+				// ignore
+			}
+
 			// Working context implementation
 			//if (it != null)
 			//    return ParseMemberAccess(null, it);
 
-			throw new UnknownIdentifierException(_token.text, _token.pos);
+			throw new UnknownIdentifierException(token.text, token.pos);
 		}
 
 		// Working context implementation

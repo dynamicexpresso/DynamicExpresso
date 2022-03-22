@@ -6,6 +6,8 @@ namespace DynamicExpresso
 {
 	public static class LanguageConstants
 	{
+		public const string This = "this";
+
 		public static readonly ReferenceType[] PrimitiveTypes = {
             new ReferenceType(typeof(object)),
             new ReferenceType(typeof(bool)),

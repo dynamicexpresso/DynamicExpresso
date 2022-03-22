@@ -116,6 +116,25 @@ Assert.AreEqual(30, myFunc.Invoke(23, 7));
 Assert.AreEqual(30, myFunc.Invoke(32, -2));
 ```
 
+### Special identifiers
+
+Either a variable or a parameter with name `this` can be referenced implicitly.
+
+```csharp
+class Customer { public string Name { get; set; } }
+
+var target = new Interpreter();
+
+// 'this' is treated as a special identifier and can be accessed implicitly 
+target.SetVariable("this", new Customer { Name = "John" });
+
+// explicit context reference via 'this' variable
+Assert.AreEqual("John", target.Eval("this.Name"));
+
+// 'this' variable is referenced implicitly
+Assert.AreEqual("John", target.Eval("Name"));
+```
+
 ### Built-in types and custom types
 Currently predefined types available are:
 
@@ -303,14 +322,24 @@ The following character escape sequences are supported inside string or char lit
 - `\v` - Vertical quote (character 11)
 
 ### Type's members invocation
+
 Any standard .NET method, field, property or constructor can be invoked.
 ```csharp
-var x = new MyTestService();
-var target = new Interpreter().SetVariable("x", x);
+var service = new MyTestService();
+var context = new MyTestContext();
 
-Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()"));
-Assert.AreEqual(x.AProperty, target.Eval("x.AProperty"));
-Assert.AreEqual(x.AField, target.Eval("x.AField"));
+var target = new Interpreter()
+  .SetVariable("x", service)
+  .SetVariable("this", context);
+
+Assert.AreEqual(service.HelloWorld(), target.Eval("x.HelloWorld()"));
+Assert.AreEqual(service.AProperty, target.Eval("x.AProperty"));
+Assert.AreEqual(service.AField, target.Eval("x.AField"));
+
+// implicit context reference
+Assert.AreEqual(context.GetContextId(), target.Eval("GetContextId()"));
+Assert.AreEqual(context.ContextName, target.Eval("ContextName"));
+Assert.AreEqual(context.ContextField, target.Eval("ContextField"));
 ```
 ```csharp
 var target = new Interpreter();
