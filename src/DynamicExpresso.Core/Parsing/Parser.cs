@@ -28,6 +28,7 @@ namespace DynamicExpresso.Parsing
 
 		private const NumberStyles ParseLiteralNumberStyle = NumberStyles.AllowLeadingSign;
 		private const NumberStyles ParseLiteralUnsignedNumberStyle = NumberStyles.AllowLeadingSign;
+		private const NumberStyles ParseLiteralHexNumberStyle = NumberStyles.HexNumber;
 		private const NumberStyles ParseLiteralDecimalNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint;
 		private const NumberStyles ParseLiteralDoubleNumberStyle = NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent;
 		private static readonly CultureInfo ParseCulture = CultureInfo.InvariantCulture;
@@ -877,12 +878,31 @@ namespace DynamicExpresso.Parsing
 
 			text = text.Substring(0, numberEnd + 1);
 
-			// No suffix find, verify if DefaultNumberType.Long is specified
+			// No suffix found, verify if DefaultNumberType.Long is specified
 			if (_defaultNumberType == DefaultNumberType.Long) isLong = true;
 
 			if (text[0] != '-')
 			{
-				if (!ulong.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out ulong value))
+				ulong value;
+				if (text.StartsWith("0x") || text.StartsWith("0X"))
+				{
+					var hex = text.Substring(2);
+					if (!ulong.TryParse(hex, ParseLiteralHexNumberStyle, ParseCulture, out value))
+						throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
+				}
+				else if (text.StartsWith("0b") || text.StartsWith("0B"))
+				{
+					var binary = text.Substring(2);
+					try
+					{
+						value = Convert.ToUInt64(binary, 2);
+					}
+					catch (FormatException ex)
+					{
+						throw WrapWithParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, ex, text);
+					}
+				}
+				else if (!ulong.TryParse(text, ParseLiteralUnsignedNumberStyle, ParseCulture, out value))
 					throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
 
 				NextToken();
@@ -2990,12 +3010,39 @@ namespace DynamicExpresso.Parsing
 							t = TokenId.IntegerLiteral;
 						}
 
+						// binary and hexadecimal integer literals
+						var canBeRealLiteral = true;
+						if (_parseChar == '0')
+						{
+							NextChar();
+							if (_parseChar == 'x' || _parseChar == 'X')
+							{
+								canBeRealLiteral = false;
+								do
+								{
+									NextChar();
+								} while (char.IsDigit(_parseChar) || (_parseChar >= 'a' && _parseChar <= 'f') || (_parseChar >= 'A' && _parseChar <= 'F'));
+							}
+							else if (_parseChar == 'b' || _parseChar == 'B')
+							{
+								canBeRealLiteral = false;
+								do
+								{
+									NextChar();
+								} while (_parseChar == '0' || _parseChar == '1');
+							}
+							else
+							{
+								PreviousChar();
+							}
+						}
+
 						do
 						{
 							NextChar();
 						} while (char.IsDigit(_parseChar));
 
-						if (_parseChar == '.')
+						if (canBeRealLiteral && _parseChar == '.')
 						{
 							NextChar();
 							if (char.IsDigit(_parseChar))
@@ -3013,7 +3060,7 @@ namespace DynamicExpresso.Parsing
 							}
 						}
 
-						if (_parseChar == 'E' || _parseChar == 'e')
+						if (canBeRealLiteral && (_parseChar == 'E' || _parseChar == 'e'))
 						{
 							t = TokenId.RealLiteral;
 							NextChar();
@@ -3026,7 +3073,7 @@ namespace DynamicExpresso.Parsing
 							} while (char.IsDigit(_parseChar));
 						}
 
-						if (_parseChar == 'D' || _parseChar == 'd' || _parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm')
+						if (canBeRealLiteral && (_parseChar == 'D' || _parseChar == 'd' || _parseChar == 'F' || _parseChar == 'f' || _parseChar == 'M' || _parseChar == 'm'))
 						{
 							t = TokenId.RealLiteral;
 							NextChar();
@@ -3035,12 +3082,14 @@ namespace DynamicExpresso.Parsing
 						// 'U' | 'u' | 'L' | 'l' | 'UL' | 'Ul' | 'uL' | 'ul' | 'LU' | 'Lu' | 'lU' | 'lu'
 						if (_parseChar == 'U' || _parseChar == 'u')
 						{
+							t = TokenId.IntegerLiteral;
 							NextChar();
 							if (_parseChar == 'L' || _parseChar == 'l')
 								NextChar();
 						}
 						else if (_parseChar == 'L' || _parseChar == 'l')
 						{
+							t = TokenId.IntegerLiteral;
 							NextChar();
 							if (_parseChar == 'U' || _parseChar == 'u')
 								NextChar();
@@ -3089,9 +3138,9 @@ namespace DynamicExpresso.Parsing
 				throw CreateParseException(_token.pos, ErrorMessages.SyntaxError);
 		}
 
-		private static Exception WrapWithParseException(int pos, string msg, Exception ex)
+		private static Exception WrapWithParseException(int pos, string format, Exception ex, params object[] args)
 		{
-			return new ParseException(msg, pos, ex);
+			return new ParseException(string.Format(format, args), pos, ex);
 		}
 
 		private static Exception CreateParseException(int pos, string format, params object[] args)
