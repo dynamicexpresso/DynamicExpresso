@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using System.Threading;
 using System.Globalization;
 using DynamicExpresso.Exceptions;
@@ -351,6 +351,34 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.Throws<ParseException>(() => target.Eval("45.5x"));
 			Assert.Throws<ParseException>(() => target.Eval("45G"));
+		}
+
+		[Test]
+		public void Binary_Literals()
+		{
+			var target = new Interpreter();
+
+			Assert.AreEqual(0b101ul, target.Eval("0b101ul"));
+			Assert.AreEqual(0B1111L, target.Eval("0B1111l"));
+			Assert.AreEqual(6, target.Eval("4 + 0b10"));
+
+			Assert.Throws<ParseException>(() => target.Eval("0b12"));
+			Assert.Throws<ParseException>(() => target.Eval("0b10.10"));
+			Assert.Throws<ParseException>(() => target.Eval("0b10d"));
+			Assert.Throws<ParseException>(() => target.Eval("0b10e"));
+		}
+
+		[Test]
+		public void Hexadecimal_Literals()
+		{
+			var target = new Interpreter();
+
+			Assert.AreEqual(0x012EFul, target.Eval("0x012EFul"));
+			Assert.AreEqual(0XAAe2L, target.Eval("0XAAe2l"));
+			Assert.AreEqual(165, target.Eval("4 + 0xA1"));
+
+			Assert.Throws<ParseException>(() => target.Eval("0x1Gl"));
+			Assert.Throws<ParseException>(() => target.Eval("0x12.12"));
 		}
 
 		[Test]
