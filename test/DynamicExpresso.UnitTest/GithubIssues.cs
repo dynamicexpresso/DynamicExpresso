@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 // ReSharper disable SpecifyACultureInStringConversionExplicitly
 
@@ -528,7 +529,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ReflectionNotAllowedException>(() => interpreter.Parse("list.SelectMany(t => t.GetMethods())"));
 		}
 
-
 		public static class Utils
 		{
 			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);
@@ -537,6 +537,22 @@ namespace DynamicExpresso.UnitTest
 			public static IEnumerable<dynamic> Select(IEnumerable collection, string expression) => new List<dynamic>();
 			public static int Any<T>(IEnumerable<T> collection) => 1;
 			public static int Any(IEnumerable collection) => 2;
+		}
+
+		[Test]
+		public void GitHub_Issue_235()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(RegexOptions));
+			target.Reference(typeof(DateTimeKind));
+
+			var result = target.Eval<RegexOptions>("RegexOptions.Compiled | RegexOptions.Singleline");
+			Assert.True(result.HasFlag(RegexOptions.Compiled));
+			Assert.True(result.HasFlag(RegexOptions.Singleline));
+
+			// DateTimeKind doesn't have the Flags attribute: the bitwise operation returns an integer
+			var result2 = target.Eval<DateTimeKind>("DateTimeKind.Local | DateTimeKind.Utc");
+			Assert.AreEqual((DateTimeKind)3, result2);
 		}
 	}
 

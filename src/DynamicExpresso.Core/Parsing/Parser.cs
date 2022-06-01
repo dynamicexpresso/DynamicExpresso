@@ -2562,9 +2562,13 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GenerateBinary(ExpressionType binaryType, Expression left, Expression right)
 		{
-
 			if (IsDynamicExpression(left) || IsDynamicExpression(right))
 				return GenerateBinaryDynamic(binaryType, left, right);
+
+			// enum bitwise operations are not resolved properly by Linq
+			var bitwiseOps = new[] { ExpressionType.Or, ExpressionType.And };
+			if (left.Type.IsEnum && right.Type == left.Type && bitwiseOps.Contains(binaryType))
+				return GenerateBinaryEnums(binaryType, left, right);
 
 			// find the overloaded binary operator
 			string opName;
@@ -2607,7 +2611,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.MakeBinary(binaryType, left, right, liftToNull, operatorMethod);
 		}
 
-		private Expression GenerateBinaryDynamic(ExpressionType binaryType,Expression left, Expression right)
+		private Expression GenerateBinaryDynamic(ExpressionType binaryType, Expression left, Expression right)
 		{
 			//binary binder for dynamic type does not support AndAlso and OrElse as valid operations
 			if (binaryType == ExpressionType.AndAlso || binaryType == ExpressionType.OrElse)
@@ -2630,6 +2634,17 @@ namespace DynamicExpresso.Parsing
 				);
 
 			return Expression.Dynamic(binder, typeof(object), left, right);
+		}
+
+		private Expression GenerateBinaryEnums(ExpressionType binaryType, Expression left, Expression right)
+		{
+			var enumType = left.Type;
+			var underlyingType = enumType.GetEnumUnderlyingType();
+			left = Expression.Convert(left, underlyingType);
+			right = Expression.Convert(right, underlyingType);
+
+			var op = Expression.MakeBinary(binaryType, left, right);
+			return Expression.Convert(op, enumType);
 		}
 
 		private MethodData FindBinaryOperator(string operatorName, Expression left, Expression right)
