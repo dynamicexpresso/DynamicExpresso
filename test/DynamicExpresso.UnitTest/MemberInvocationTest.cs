@@ -322,6 +322,14 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.MethodWithGenericParam(y, y), target.Eval("x.MethodWithGenericParam(y, y)", parameters));
 			Assert.AreEqual(x.MethodWithGenericParam(y, z), target.Eval("x.MethodWithGenericParam(y, z)", parameters));
 			Assert.AreEqual(x.MethodWithGenericParam(y, w), target.Eval("x.MethodWithGenericParam(y, w)", parameters));
+
+			Assert.AreEqual(x.MethodWithGenericParamAndDefault(y,y), target.Eval("x.MethodWithGenericParamAndDefault(y,y)", parameters));
+			Assert.AreEqual(x.MethodWithGenericParamAndDefault(y), target.Eval("x.MethodWithGenericParamAndDefault(y)", parameters));
+			Assert.AreEqual(x.MethodWithGenericParamAndDefault1Levels(y), target.Eval("x.MethodWithGenericParamAndDefault1Levels(y)", parameters));
+			Assert.AreEqual(x.MethodWithGenericParamAndDefault2Levels(y), target.Eval("x.MethodWithGenericParamAndDefault2Levels(y)", parameters));
+			Assert.AreEqual(x.MethodWithGenericParamAndDefault2Levels(y, w), target.Eval("x.MethodWithGenericParamAndDefault2Levels(y, w)", parameters));
+
+
 		}
 
 		[Test]
@@ -557,6 +565,26 @@ namespace DynamicExpresso.UnitTest
 			public string MethodWithGenericParam<T>(string a, T p)
 			{
 				return string.Format("{0} {1}", a, p);
+			}
+
+			public T MethodWithGenericParamAndDefault<T>(T a, T b = default)
+			{
+				return a;
+			}
+
+			public T MethodWithGenericParamAndDefault1Levels<T>(T a, List<T> b = default)
+			{
+				return a;
+			}
+
+			public T MethodWithGenericParamAndDefault2Levels<T>(T a, List<List<T>> b = default)
+			{
+				return a;
+			}
+
+			public T MethodWithGenericParamAndDefault2Levels<T, T2>(T a, T2 b, List<T> c = default, List<List<T2>> d = default)
+			{
+				return a;
 			}
 
 			public string MethodWithOptionalParam(string param1, string param2 = "2", string param3 = "3")

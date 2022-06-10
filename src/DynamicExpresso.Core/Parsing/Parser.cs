@@ -2004,6 +2004,37 @@ namespace DynamicExpresso.Parsing
 			return applicable;
 		}
 
+		private static Type GetConcreteTypeForGenericMethod(Type type, List<Expression> promotedArgs, MethodData method)
+		{
+			if (type.IsGenericType)
+			{
+				//Generic<T> type
+				var genericArguments = type.GetGenericArguments();
+				var concreteTypeParameters = new Type[genericArguments.Length];
+
+				for (var i = 0; i < genericArguments.Length; i++)
+				{
+					concreteTypeParameters[i] = GetConcreteTypeForGenericMethod(genericArguments[i], promotedArgs,method);
+				}
+
+				return type.GetGenericTypeDefinition().MakeGenericType(concreteTypeParameters);
+			}
+			else if (type.ContainsGenericParameters)
+			{
+				//T case
+				//try finding an actual parameter for the generic
+				for (var i = 0; i < promotedArgs.Count; i++)
+				{
+					if (method.Parameters[i].ParameterType == type)
+					{						
+						return promotedArgs[i].Type;
+					}
+				}
+			}
+
+			return type;//already a concrete type
+		}
+
 		private static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
 		{
 			if (method.Parameters.Count(y => !y.HasDefaultValue && !HasParamsArrayType(y)) > args.Length)
@@ -2111,7 +2142,12 @@ namespace DynamicExpresso.Parsing
 			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select<ParameterInfo, Expression>(x =>
 			{
 				if (x.HasDefaultValue)
-					return Expression.Constant(x.DefaultValue, x.ParameterType);
+				{
+					var parameterType = GetConcreteTypeForGenericMethod(x.ParameterType, promotedArgs, method);
+
+					return Expression.Constant(x.DefaultValue, parameterType);
+				}
+
 
 				if (HasParamsArrayType(x))
 				{
