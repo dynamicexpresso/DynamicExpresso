@@ -360,8 +360,9 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(0b101ul, target.Eval("0b101ul"));
 			Assert.AreEqual(0B1111L, target.Eval("0B1111l"));
-			Assert.AreEqual(6, target.Eval("4 + 0b10"));
+			Assert.AreEqual(8, target.Eval("4+0b10+2"));
 
+			Assert.Throws<ParseException>(() => target.Eval("0b"));
 			Assert.Throws<ParseException>(() => target.Eval("0b12"));
 			Assert.Throws<ParseException>(() => target.Eval("0b10.10"));
 			Assert.Throws<ParseException>(() => target.Eval("0b10d"));
@@ -375,8 +376,10 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(0x012EFul, target.Eval("0x012EFul"));
 			Assert.AreEqual(0XAAe2L, target.Eval("0XAAe2l"));
-			Assert.AreEqual(165, target.Eval("4 + 0xA1"));
+			Assert.AreEqual(170, target.Eval("4+0xA1+5"));
+			Assert.AreEqual(170, target.Eval("4+(0xA1)+5"));
 
+			Assert.Throws<ParseException>(() => target.Eval("0x"));
 			Assert.Throws<ParseException>(() => target.Eval("0x1Gl"));
 			Assert.Throws<ParseException>(() => target.Eval("0x12.12"));
 		}

@@ -893,6 +893,9 @@ namespace DynamicExpresso.Parsing
 				else if (text.StartsWith("0b") || text.StartsWith("0B"))
 				{
 					var binary = text.Substring(2);
+					if (string.IsNullOrEmpty(binary))
+						throw CreateParseException(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
+
 					try
 					{
 						value = Convert.ToUInt64(binary, 2);
@@ -3073,6 +3076,8 @@ namespace DynamicExpresso.Parsing
 								{
 									NextChar();
 								} while (char.IsDigit(_parseChar) || (_parseChar >= 'a' && _parseChar <= 'f') || (_parseChar >= 'A' && _parseChar <= 'F'));
+
+								PreviousChar();
 							}
 							else if (_parseChar == 'b' || _parseChar == 'B')
 							{
@@ -3081,6 +3086,8 @@ namespace DynamicExpresso.Parsing
 								{
 									NextChar();
 								} while (_parseChar == '0' || _parseChar == '1');
+
+								PreviousChar();
 							}
 							else
 							{
