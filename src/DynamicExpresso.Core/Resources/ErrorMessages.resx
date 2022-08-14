@@ -264,4 +264,7 @@
   <data name="AmbiguousConstructorInvocation" xml:space="preserve">
     <value>Ambiguous invocation of constructor in type '{0}'</value>
   </data>
+  <data name="UnsupportedMultidimensionalArrays" xml:space="preserve">
+    <value>Multidimensional arrays are not supported</value>
+  </data>
 </root>

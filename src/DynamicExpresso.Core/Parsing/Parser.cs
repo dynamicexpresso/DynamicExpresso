@@ -1165,6 +1165,16 @@ namespace DynamicExpresso.Parsing
 
 			var newType = ParseKnownType();
 			var args = new Expression[0];
+
+			if (newType.IsArray)
+			{
+				if (newType.GetArrayRank() != 1)
+					throw CreateParseException(_token.pos, ErrorMessages.UnsupportedMultidimensionalArrays, newType);
+
+				args = ParseArrayInitializerList();
+				return Expression.NewArrayInit(newType.GetElementType(), args);
+			}
+
 			if (_token.id == TokenId.OpenParen)
 				args = ParseArgumentList();
 			else
@@ -1188,6 +1198,13 @@ namespace DynamicExpresso.Parsing
 				memberBindings = ParseObjectInitializer(newType);
 
 			return Expression.MemberInit(newExpr, memberBindings);
+		}
+
+		private Expression[] ParseArrayInitializerList()
+		{
+			return ParseArgumentList(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected,
+				TokenId.CloseCurlyBracket, ErrorMessages.CloseCurlyBracketExpected,
+				allowTrailingComma: true);
 		}
 
 		private MemberBinding[] ParseObjectInitializer(Type newType)
@@ -1698,36 +1715,37 @@ namespace DynamicExpresso.Parsing
 			return Expression.Dynamic(binder, typeof(object), argsDynamic);
 		}
 
-		private Expression[] ParseArgumentList()
+		private Expression[] ParseArgumentList(TokenId openToken, string missingOpenTokenMsg,
+			TokenId closeToken, string missingCloseTokenMsg,
+			bool allowTrailingComma = false)
 		{
-			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
+			ValidateToken(openToken, missingOpenTokenMsg);
 			NextToken();
-			var args = _token.id != TokenId.CloseParen ? ParseArguments() : new Expression[0];
-			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
-			NextToken();
-			return args;
-		}
-
-		private Expression[] ParseArguments()
-		{
 			var argList = new List<Expression>();
-			while (true)
+			while (_token.id != closeToken)
 			{
 				argList.Add(ParseExpressionSegment());
 				if (_token.id != TokenId.Comma) break;
 				NextToken();
+				if (!allowTrailingComma && _token.id == closeToken)
+					throw CreateParseException(_token.pos, missingCloseTokenMsg);
 			}
+			ValidateToken(closeToken, missingCloseTokenMsg);
+			NextToken();
 			return argList.ToArray();
+		}
+
+		private Expression[] ParseArgumentList()
+		{
+			return ParseArgumentList(TokenId.OpenParen, ErrorMessages.OpenParenExpected,
+				TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
 		}
 
 		private Expression ParseElementAccess(Expression expr)
 		{
 			var errorPos = _token.pos;
-			ValidateToken(TokenId.OpenBracket, ErrorMessages.OpenParenExpected);
-			NextToken();
-			var args = ParseArguments();
-			ValidateToken(TokenId.CloseBracket, ErrorMessages.CloseBracketOrCommaExpected);
-			NextToken();
+			var args = ParseArgumentList(TokenId.OpenBracket, ErrorMessages.OpenParenExpected,
+				TokenId.CloseBracket, ErrorMessages.CloseBracketOrCommaExpected);
 			if (expr.Type.IsArray)
 			{
 				if (expr.Type.GetArrayRank() != args.Length)
