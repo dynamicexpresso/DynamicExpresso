@@ -519,6 +519,24 @@ namespace DynamicExpresso.Resources {
             get {
                 return ResourceManager.GetString("InvalidOperation", resourceCulture);
             }
-        }
-    }
+		}
+
+		/// <summary>
+		///   Looks up a localized string similar to Invalid initializer member declarator.
+		/// </summary>
+		internal static string InvalidInitializerMemberDeclarator {
+			get {
+				return ResourceManager.GetString("InvalidInitializerMemberDeclarator", resourceCulture);
+			}
+		}
+
+		/// <summary>
+		///   Looks up a localized string similar to Cannot initialize type '{0}' with a collection initializer because it does not implement '{1}'.
+		/// </summary>
+		internal static string CollectionInitializationNotSupported {
+			get {
+				return ResourceManager.GetString("CollectionInitializationNotSupported", resourceCulture);
+			}
+		}
+	}
 }

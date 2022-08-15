@@ -264,4 +264,10 @@
   <data name="AmbiguousConstructorInvocation" xml:space="preserve">
     <value>Ambiguous invocation of constructor in type '{0}'</value>
   </data>
+  <data name="InvalidInitializerMemberDeclarator" xml:space="preserve">
+    <value>Invalid initializer member declarator</value>
+  </data>
+  <data name="CollectionInitializationNotSupported" xml:space="preserve">
+    <value>Cannot initialize type '{0}' with a collection initializer because it does not implement '{1}'</value>
+  </data>
 </root>

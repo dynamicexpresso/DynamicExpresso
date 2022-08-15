@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
@@ -1185,46 +1186,85 @@ namespace DynamicExpresso.Parsing
 
 			var memberBindings = new MemberBinding[0];
 			if (_token.id == TokenId.OpenCurlyBracket)
-				memberBindings = ParseObjectInitializer(newType);
+				return ParseWithObjectInitializer(newExpr, newType);
 
-			return Expression.MemberInit(newExpr, memberBindings);
+			return newExpr;
 		}
 
-		private MemberBinding[] ParseObjectInitializer(Type newType)
+		private Expression ParseWithObjectInitializer(NewExpression newExpr, Type newType)
 		{
 			ValidateToken(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected);
 			NextToken();
-			var bindings = ParseMemberInitializerList(newType);
+			var initializedInstance = ParseMemberAndInitializerList(newExpr, newType);
 			ValidateToken(TokenId.CloseCurlyBracket, ErrorMessages.CloseCurlyBracketExpected);
 			NextToken();
-			return bindings;
+			return initializedInstance;
 		}
 
-		private MemberBinding[] ParseMemberInitializerList(Type newType)
+		private Expression ParseMemberAndInitializerList(NewExpression newExpr, Type newType)
 		{
+			int originalPos = _token.pos;
 			var bindingList = new List<MemberBinding>();
+			List<Expression> actions = new List<Expression>();
+			ParameterExpression instance = null;
 			while (true)
 			{
 				if (_token.id == TokenId.CloseCurlyBracket) break;
-				ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
+				if (_token.id != TokenId.Identifier)
+				{
+					if (!typeof(IEnumerable).IsAssignableFrom(newType))
+					{
+						throw CreateParseException(_token.pos, ErrorMessages.CollectionInitializationNotSupported, newType, typeof(IEnumerable));
+					}
+					if (instance == null)
+					{
+						instance = Expression.Variable(newType);
+						actions.Add(Expression.Assign(instance, newExpr));
+					}
+					if (bindingList.Count > 0)
+					{
+						throw CreateParseException(originalPos, ErrorMessages.InvalidInitializerMemberDeclarator);
+					}
+					if (_token.id == TokenId.OpenCurlyBracket)
+					{
+						actions.Add(ParseMethodInvocation(newType, instance, _token.pos, "Add", TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected, TokenId.CloseCurlyBracket, ErrorMessages.CloseCurlyBracketExpected));
+					}
+					else
+					{
+						var args = new[] { ParseExpressionSegment() };
+						actions.Add(ParseNormalMethodInvocation(newType, instance, _token.pos, "Add", args));
+					}
+				}
+				else
+				{
+					if (instance != null)
+					{
+						throw CreateParseException(originalPos, ErrorMessages.InvalidInitializerMemberDeclarator);
+					}
+					ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
 
-				var propertyOrFieldName = _token.text;
-				var member = FindPropertyOrField(newType, propertyOrFieldName, false);
-				if (member == null)
-					throw CreateParseException(_token.pos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(newType));
+					var propertyOrFieldName = _token.text;
+					var member = FindPropertyOrField(newType, propertyOrFieldName, false);
+					if (member == null)
+						throw CreateParseException(_token.pos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(newType));
 
-				NextToken();
+					NextToken();
 
-				ValidateToken(TokenId.Equal, ErrorMessages.EqualExpected);
-				NextToken();
+					ValidateToken(TokenId.Equal, ErrorMessages.EqualExpected);
+					NextToken();
 
-				var value = ParseExpressionSegment();
-				bindingList.Add(Expression.Bind(member, value));
-
+					var value = ParseExpressionSegment();
+					bindingList.Add(Expression.Bind(member, value));
+				}
 				if (_token.id != TokenId.Comma) break;
 				NextToken();
 			}
-			return bindingList.ToArray();
+			if(instance != null)
+			{
+				actions.Add(instance);
+				return Expression.Block(new ParameterExpression[] { instance }, actions);
+			}
+			return Expression.MemberInit(newExpr, bindingList.ToArray());
 		}
 
 		private Expression ParseLambdaInvocation(LambdaExpression lambda, int errorPos)
@@ -1556,7 +1596,12 @@ namespace DynamicExpresso.Parsing
 
 		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName)
 		{
-			var args = ParseArgumentList();
+			return ParseMethodInvocation(type, instance, errorPos, methodName, TokenId.OpenParen, ErrorMessages.OpenParenExpected, TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+
+		}
+		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName, TokenId open, string openExpected, TokenId close, string closeExpected)
+		{
+			var args = ParseArgumentList(open, openExpected, close, closeExpected);
 
 			var methodInvocationExpression = ParseNormalMethodInvocation(type, instance, errorPos, methodName, args);
 			if (methodInvocationExpression == null && instance != null)
@@ -1698,16 +1743,31 @@ namespace DynamicExpresso.Parsing
 			return Expression.Dynamic(binder, typeof(object), argsDynamic);
 		}
 
-		private Expression[] ParseArgumentList()
+		private Expression[] ParseArgumentList(TokenId openToken, string missingOpenTokenMsg,
+			TokenId closeToken, string missingCloseTokenMsg,
+			bool allowTrailingComma = false)
 		{
-			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
+			ValidateToken(openToken, missingOpenTokenMsg);
 			NextToken();
-			var args = _token.id != TokenId.CloseParen ? ParseArguments() : new Expression[0];
-			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+			var argList = new List<Expression>();
+			while (_token.id != closeToken)
+			{
+				argList.Add(ParseExpressionSegment());
+				if (_token.id != TokenId.Comma) break;
+				NextToken();
+				if (!allowTrailingComma && _token.id == closeToken)
+					throw CreateParseException(_token.pos, missingCloseTokenMsg);
+			}
+			ValidateToken(closeToken, missingCloseTokenMsg);
 			NextToken();
-			return args;
+			return argList.ToArray();
 		}
 
+		private Expression[] ParseArgumentList()
+		{
+			return ParseArgumentList(TokenId.OpenParen, ErrorMessages.OpenParenExpected,
+				TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+		}
 		private Expression[] ParseArguments()
 		{
 			var argList = new List<Expression>();

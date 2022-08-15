@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using DynamicExpresso.Exceptions;
 using NUnit.Framework;
 
@@ -121,7 +122,6 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 			target.Reference(typeof(MyClass));
-
 			Assert.Throws<ParseException>(() => target.Parse("new MyClass() { StrProp }"));
 			Assert.Throws<ParseException>(() => target.Parse("new MyClass() { StrProp = }"));
 			Assert.Throws<ArgumentException>(() => target.Parse("new MyClass() { StrProp = 5 }")); // type mismatch
@@ -130,7 +130,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ParseException>(() => target.Parse("new MyClass() { StrProp ")); // no close bracket
 			Assert.Throws<ParseException>(() => target.Parse("new MyClass() StrProp }")); // no open bracket
 			Assert.Throws<ParseException>(() => target.Parse("new MyClass() {{IntField = 5}}")); // multiple bracket
-			Assert.Throws<ParseException>(() => target.Parse("new MyClass() {5}")); // no field name
+			Assert.Throws<ParseException>(() => target.Parse("new MyClass() {5}")); // collection initializer not supported
 		}
 
 		[Test]
@@ -139,6 +139,47 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			target.Reference(typeof(MyClass));
 			Assert.AreEqual(new MyClass(6, 5, 4, 3).MyArr, target.Eval("new MyClass(6, 5, 4, 3).MyArr"));
+		}
+
+		[Test]
+		public void Ctor_NewDictionaryWithItems()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(System.Collections.Generic.Dictionary<,>));
+			var l = target.Eval<System.Collections.Generic.Dictionary<int, string>>("new Dictionary<int, string>(){{1, \"1\"}, {2, \"2\"}, {3, \"3\"}, {4, \"4\"}, {5, \"5\"}}");
+			Assert.AreEqual(5, l.Count);
+			for (int i = 0; i < l.Count; ++i)
+			{
+				Assert.AreEqual(i + 1 + "", l[i + 1]);
+			}
+		}
+
+		[Test]
+		public void Ctor_NewMyClassWithItems()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(MyClassAdder));
+			var l = target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{\"6\" },7	}.Add(true)");
+			Assert.AreEqual(5, l.MyArr.Length);
+			for (int i = 0; i < l.MyArr.Length; ++i)
+			{
+				Assert.AreEqual(i + 1, l.MyArr[i]);
+			}
+			Assert.AreEqual("6", l.StrProp);
+			Assert.AreEqual(7, l.IntField);
+		}
+
+		[Test]
+		public void Ctor_NewListWithItems()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(System.Collections.Generic.List<>));
+			var intList = target.Eval<System.Collections.Generic.List<int>>("new List<int>(){1, 2, 3, 4, 5}");
+			Assert.AreEqual(5, intList.Count);
+			for (int i = 0; i < intList.Count; ++i)
+			{
+				Assert.AreEqual(i + 1, intList[i]);
+			}
 		}
 
 		private class MyClass
@@ -179,6 +220,43 @@ namespace DynamicExpresso.UnitTest
 			{
 				return 0;
 			}
+		}
+
+		private class MyClassAdder : MyClass, System.Collections.IEnumerable
+		{
+
+			public MyClassAdder Add(string s)
+			{
+				StrProp = s;
+				return this;
+			}
+
+			public MyClassAdder Add(int intValue)
+			{
+				IntField = intValue;
+				return this;
+			}
+
+			public MyClassAdder Add(params int[] intValues)
+			{
+				MyArr = intValues;
+				return this;
+			}
+
+			public MyClassAdder Add(bool returnMe)
+			{
+				if (returnMe)
+				{
+					return this;
+				}
+				return null;
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				yield break;
+			}
+
 		}
 	}
 }
