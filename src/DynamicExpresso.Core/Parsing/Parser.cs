@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
@@ -1193,11 +1194,10 @@ namespace DynamicExpresso.Parsing
 			var constructor = applicableConstructors[0];
 			var newExpr = Expression.New((ConstructorInfo)constructor.MethodBase, constructor.PromotedParameters);
 
-			var memberBindings = new MemberBinding[0];
 			if (_token.id == TokenId.OpenCurlyBracket)
-				memberBindings = ParseObjectInitializer(newType);
+				return ParseWithObjectInitializer(newExpr, newType);
 
-			return Expression.MemberInit(newExpr, memberBindings);
+			return newExpr;
 		}
 
 		private Expression[] ParseArrayInitializerList()
@@ -1207,41 +1207,134 @@ namespace DynamicExpresso.Parsing
 				allowTrailingComma: true);
 		}
 
-		private MemberBinding[] ParseObjectInitializer(Type newType)
+		private Expression ParseWithObjectInitializer(NewExpression newExpr, Type newType)
 		{
 			ValidateToken(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected);
 			NextToken();
-			var bindings = ParseMemberInitializerList(newType);
+			var initializedInstance = ParseMemberAndInitializerList(newExpr, newType);
 			ValidateToken(TokenId.CloseCurlyBracket, ErrorMessages.CloseCurlyBracketExpected);
 			NextToken();
-			return bindings;
+			return initializedInstance;
 		}
 
-		private MemberBinding[] ParseMemberInitializerList(Type newType)
+		private Expression ParseMemberAndInitializerList(NewExpression newExpr, Type newType)
 		{
+			var originalPos = _token.pos;
 			var bindingList = new List<MemberBinding>();
+			var actions = new List<Expression>();
+			var instance = Expression.Variable(newType);
+			var allowCollectionInit = typeof(IEnumerable).IsAssignableFrom(newType);
 			while (true)
 			{
 				if (_token.id == TokenId.CloseCurlyBracket) break;
-				ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
-
-				var propertyOrFieldName = _token.text;
-				var member = FindPropertyOrField(newType, propertyOrFieldName, false);
-				if (member == null)
-					throw CreateParseException(_token.pos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(newType));
-
-				NextToken();
-
-				ValidateToken(TokenId.Equal, ErrorMessages.EqualExpected);
-				NextToken();
-
-				var value = ParseExpressionSegment();
-				bindingList.Add(Expression.Bind(member, value));
-
+				if (_token.id != TokenId.Identifier)
+				{
+					ParseCollectionInitalizer(newType, originalPos, bindingList, actions, instance, allowCollectionInit);
+				}
+				else
+				{
+					ParsePossibleMemberBinding(newType, originalPos, bindingList, actions, instance, allowCollectionInit);
+				}
 				if (_token.id != TokenId.Comma) break;
 				NextToken();
 			}
-			return bindingList.ToArray();
+			if (bindingList.Count == 0)
+			{
+				actions.Insert(0, Expression.Assign(instance, newExpr));
+				actions.Add(instance);
+				return Expression.Block(new ParameterExpression[] { instance }, actions);
+			}
+			return Expression.MemberInit(newExpr, bindingList.ToArray());
+		}
+
+		private void ParsePossibleMemberBinding(Type newType, int originalPos, List<MemberBinding> bindingList, List<Expression> actions, ParameterExpression instance, bool allowCollectionInit)
+		{
+			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
+
+			var propertyOrFieldName = _token.text;
+			var member = FindPropertyOrField(newType, propertyOrFieldName, false);
+			var pos = _token.pos;
+			if (allowCollectionInit)
+			{
+				NextToken();
+				//new T(){Prop = 1}
+				//new T(){variable = 2}
+				if (_token.id == TokenId.Equal && member != null)
+				{
+					if (actions.Count > 0)
+					{
+						throw CreateParseException(pos, ErrorMessages.InvalidInitializerMemberDeclarator);
+					}
+				}
+				else if (_token.id != TokenId.Equal || _arguments.TryGetIdentifier(propertyOrFieldName, out _) || _arguments.TryGetParameters(propertyOrFieldName, out _))
+				{
+					SetTextPos(pos);
+					NextToken();
+					ParseCollectionInitalizer(newType, pos, bindingList, actions, instance, allowCollectionInit);
+					return;
+				}
+				SetTextPos(pos);
+				NextToken();
+			}
+			if (member == null)
+			{
+				throw CreateParseException(pos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(newType));
+			}
+			NextToken();
+
+			ValidateToken(TokenId.Equal, ErrorMessages.EqualExpected);
+			NextToken();
+
+			var value = ParseExpressionSegment();
+			bindingList.Add(Expression.Bind(member, value));
+		}
+
+		private void ParseCollectionInitalizer(Type newType, int originalPos, List<MemberBinding> bindingList, List<Expression> actions, ParameterExpression instance, bool allowCollectionInit)
+		{
+			if (!allowCollectionInit)
+			{
+				throw CreateParseException(_token.pos, ErrorMessages.CollectionInitializationNotSupported, newType, typeof(IEnumerable));
+			}
+			if (bindingList.Count > 0)
+			{
+				throw CreateParseException(originalPos, ErrorMessages.InvalidInitializerMemberDeclarator);
+			}
+			if (_token.id == TokenId.OpenCurlyBracket)
+			{
+				var pos = _token.pos;
+				NextToken();
+
+				if (_token.id == TokenId.Identifier)
+				{
+					var identifierName = _token.text;
+					NextToken();
+					if (_token.id == TokenId.Equal && !_arguments.TryGetIdentifier(identifierName, out _) && !_arguments.TryGetParameters(identifierName, out _))
+					{
+						throw CreateParseException(_token.pos, ErrorMessages.InvalidInitializerMemberDeclarator);
+					}
+					else
+					{
+						SetTextPos(pos);
+						NextToken();
+					}
+				}
+				else
+				{
+					SetTextPos(pos);
+					ParseExpressionSegment();
+				}
+				actions.Add(ParseMethodInvocation(newType, instance, _token.pos, "Add", TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected, TokenId.CloseCurlyBracket, ErrorMessages.CloseCurlyBracketExpected));
+			}
+			else
+			{
+				var args = new[] { ParseExpressionSegment() };
+				var addMethod = ParseNormalMethodInvocation(newType, instance, _token.pos, "Add", args);
+				if (addMethod == null)
+				{
+					throw CreateParseException(_token.pos, ErrorMessages.UnableToFindAppropriateAddMethod, GetTypeName(newType));
+				}
+				actions.Add(addMethod);
+			}
 		}
 
 		private Expression ParseLambdaInvocation(LambdaExpression lambda, int errorPos)
@@ -1573,7 +1666,12 @@ namespace DynamicExpresso.Parsing
 
 		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName)
 		{
-			var args = ParseArgumentList();
+			return ParseMethodInvocation(type, instance, errorPos, methodName, TokenId.OpenParen, ErrorMessages.OpenParenExpected, TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+
+		}
+		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName, TokenId open, string openExpected, TokenId close, string closeExpected)
+		{
+			var args = ParseArgumentList(open, openExpected, close, closeExpected);
 
 			var methodInvocationExpression = ParseNormalMethodInvocation(type, instance, errorPos, methodName, args);
 			if (methodInvocationExpression == null && instance != null)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework;
 using System.Globalization;
 using System.Reflection;
@@ -331,6 +331,7 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(4, lambda.Invoke(1, 5));
 		}
+
 
 		[Test]
 		public void When_lambda_is_invoked_I_can_omit_parameters_not_used()
