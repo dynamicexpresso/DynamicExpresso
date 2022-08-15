@@ -1203,16 +1203,17 @@ namespace DynamicExpresso.Parsing
 
 		private Expression ParseMemberAndInitializerList(NewExpression newExpr, Type newType)
 		{
-			int originalPos = _token.pos;
+			var originalPos = _token.pos;
 			var bindingList = new List<MemberBinding>();
-			List<Expression> actions = new List<Expression>();
+			var actions = new List<Expression>();
 			ParameterExpression instance = null;
+			var allowCollectionInit = typeof(IEnumerable).IsAssignableFrom(newType);
 			while (true)
 			{
 				if (_token.id == TokenId.CloseCurlyBracket) break;
 				if (_token.id != TokenId.Identifier)
 				{
-					if (!typeof(IEnumerable).IsAssignableFrom(newType))
+					if (!allowCollectionInit)
 					{
 						throw CreateParseException(_token.pos, ErrorMessages.CollectionInitializationNotSupported, newType, typeof(IEnumerable));
 					}
@@ -1259,7 +1260,7 @@ namespace DynamicExpresso.Parsing
 				if (_token.id != TokenId.Comma) break;
 				NextToken();
 			}
-			if(instance != null)
+			if (instance != null)
 			{
 				actions.Add(instance);
 				return Expression.Block(new ParameterExpression[] { instance }, actions);
