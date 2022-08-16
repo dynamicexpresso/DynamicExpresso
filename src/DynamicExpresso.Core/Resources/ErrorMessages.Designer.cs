@@ -520,5 +520,16 @@ namespace DynamicExpresso.Resources {
                 return ResourceManager.GetString("InvalidOperation", resourceCulture);
             }
         }
-    }
+
+		/// <summary>
+		///   Looks up a localized string similar to Multidimensional arrays are not supported.
+		/// </summary>
+		internal static string UnsupportedMultidimensionalArrays
+		{
+			get
+			{
+				return ResourceManager.GetString("UnsupportedMultidimensionalArrays", resourceCulture);
+			}
+		}
+	}
 }

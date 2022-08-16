@@ -141,6 +141,44 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(new MyClass(6, 5, 4, 3).MyArr, target.Eval("new MyClass(6, 5, 4, 3).MyArr"));
 		}
 
+		[Test]
+		public void Array_constructor()
+		{
+			var target = new Interpreter();
+			var arr = target.Eval<int[]>("new int[] { 1, 2 }");
+			Assert.AreEqual(2, arr.Length);
+			Assert.AreEqual(1, arr[0]);
+			Assert.AreEqual(2, arr[1]);
+		}
+
+		[Test]
+		public void Array_constructor_type_mismatch()
+		{
+			// Exception: an expression of type 'System.Char' cannot be used to initialize an array of type 'System.Int32'
+			var target = new Interpreter();
+			Assert.Throws<ParseException>(() => target.Eval<int[]>("new int[] { 1, 'a' }"));
+		}
+
+		[Test]
+		public void Jagged_array_constructor()
+		{
+			var target = new Interpreter();
+			var arr = target.Eval<int[][]>("new int[][] { new int[] { 1, 2, }, new int[] { 3, 4, }, }");
+			Assert.AreEqual(2, arr.Length);
+			Assert.AreEqual(1, arr[0][0]);
+			Assert.AreEqual(2, arr[0][1]);
+			Assert.AreEqual(3, arr[1][0]);
+			Assert.AreEqual(4, arr[1][1]);
+		}
+
+		[Test]
+		public void Array_multi_dimension_constructor()
+		{
+			// creating a multidimensional array is not supported
+			var target = new Interpreter();
+			Assert.Throws<ParseException>(() => target.Parse("new int[,] { { 1 }, { 2 } }"));
+		}
+
 		private class MyClass
 		{
 			public int IntField;
