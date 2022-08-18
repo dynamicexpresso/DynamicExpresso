@@ -169,6 +169,26 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(7, l.IntField);
 		}
 
+
+		[Test]
+		public void Ctor_NewMyClassWithCross()
+		{
+			string StrProp = "";
+			var mc = new MyClassAdder()
+			{
+				{1,2,3 },
+				{StrProp = "6" }
+			};
+			if (StrProp == "6")
+			{
+
+			}
+			var target = new Interpreter();
+			target.Reference(typeof(MyClassAdder));
+			Assert.DoesNotThrow(() => target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", new Parameter("StrProp", "0")));
+			Assert.DoesNotThrow(() => target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"));
+			Assert.Throws<ParseException>(() => target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7	}"));
+		}
 		[Test]
 		public void Ctor_NewListWithItems()
 		{
