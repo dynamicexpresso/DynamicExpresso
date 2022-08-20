@@ -186,6 +186,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			target.Reference(typeof(MyClassAdder));
 			Assert.DoesNotThrow(() => target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", new Parameter("StrProp", "0")));
+			Assert.DoesNotThrow(() => target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},StrProp = \"6\",7}", new Parameter("StrProp", "0")));
 			Assert.DoesNotThrow(() => target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"));
 			Assert.Throws<ParseException>(() => target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7	}"));
 		}
@@ -201,6 +202,22 @@ namespace DynamicExpresso.UnitTest
 				Assert.AreEqual(i + 1, intList[i]);
 			}
 		}
+
+		[Test]
+		public void Ctor_NewListWithString()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(System.Collections.Generic.List<>));
+			var list = target.Eval<System.Collections.Generic.List<string>>("new List<string>(){string.Empty}");
+			Assert.AreEqual(1, list.Count);
+			for (int i = 0; i < list.Count; ++i)
+			{
+				Assert.AreSame(string.Empty, list[i]);
+			}
+			Assert.DoesNotThrow(() => target.Eval<System.Collections.Generic.List<string>>("new List<string>(){StrProp = string.Empty}", new Parameter("StrProp", "0")));
+			Assert.DoesNotThrow(() => target.Eval<System.Collections.Generic.List<string>>("new List<string>(){StrValue()}", new Parameter("StrValue", new Func<string>(() => "Func"))));
+		}
+
 
 		private class MyClass
 		{
