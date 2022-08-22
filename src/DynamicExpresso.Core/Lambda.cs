@@ -83,23 +83,63 @@ namespace DynamicExpresso
 			var parameters = new List<Parameter>();
 			var declaredParameters = DeclaredParameters.ToArray();
 
-			if (args != null)
+			int[] actualArgOrdering = null;
+			object[] orderedArgs = args;
+			var argsAreReordered = false;
+			if (args != null && args.Length > 0)
 			{
 				if (declaredParameters.Length != args.Length)
 					throw new InvalidOperationException("Arguments count mismatch.");
 
+				actualArgOrdering = new int[args.Length];
+				var usedParametersIndex = new Dictionary<string, int>(_parserArguments.Settings.KeyComparer);
+				foreach (var v in UsedParameters)
+				{
+					if (declaredParameters.Any(x => string.Equals(x.Name, v.Name, _parserArguments.Settings.KeyComparison)))
+					{
+						usedParametersIndex[v.Name] = usedParametersIndex.Count;
+					}
+				}
+
 				for (var i = 0; i < args.Length; i++)
 				{
-					var parameter = new Parameter(
-						declaredParameters[i].Name,
-						declaredParameters[i].Type,
-						args[i]);
-
-					parameters.Add(parameter);
+					if (!usedParametersIndex.TryGetValue(declaredParameters[i].Name, out var actualArgIndex))
+					{
+						actualArgIndex = -1;
+					}
+					if (actualArgIndex != i)
+					{
+						if (!argsAreReordered)
+						{
+							orderedArgs = (object[])orderedArgs.Clone();
+							argsAreReordered = true;
+						}
+						if (actualArgIndex == -1)
+						{
+							Array.Resize(ref orderedArgs, args.Length - 1);
+						}
+						else
+						{
+							orderedArgs[actualArgIndex] = args[i];
+						}
+					}
+					actualArgOrdering[i] = actualArgIndex;
 				}
 			}
 
-			return Invoke(parameters);
+			var result = InvokeWithUsedParameters(orderedArgs);
+			if (argsAreReordered)
+			{
+				for (var i = 0; i < actualArgOrdering.Length; i++)
+				{
+					var pullFrom = actualArgOrdering[i];
+					if (pullFrom >= 0)
+					{
+						args[i] = orderedArgs[pullFrom];
+					}
+				}
+			}
+			return result;
 		}
 
 		private object InvokeWithUsedParameters(object[] orderedArgs)

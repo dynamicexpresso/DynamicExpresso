@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework;
 using System.Globalization;
 using System.Reflection;
@@ -15,9 +15,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[] {
-                            new Parameter("x", 23),
-                            new Parameter("y", 7)
-                            };
+							new Parameter("x", 23),
+							new Parameter("y", 7)
+							};
 
 			Assert.AreEqual(30, target.Eval("x + y", parameters));
 		}
@@ -28,9 +28,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[] {
-                            new Parameter("B", "B"),
-                            new Parameter("A", "A"),
-                            };
+							new Parameter("B", "B"),
+							new Parameter("A", "A"),
+							};
 
 			Assert.AreEqual("AB", target.Eval("A + B", parameters));
 		}
@@ -41,9 +41,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[] {
-                            new Parameter("A", "A"),
-                            new Parameter("B", "B"),
-                            };
+							new Parameter("A", "A"),
+							new Parameter("B", "B"),
+							};
 
 			var lambda = target.Parse("A + B", parameters);
 
@@ -68,15 +68,15 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[] {
-                            new Parameter("x", 23),
-                            new Parameter("y", 7)
-                            };
+							new Parameter("x", 23),
+							new Parameter("y", 7)
+							};
 
 			var exp = target.Parse("x + y", parameters);
 
 			var parametersMismatch = new[] {
-                            new Parameter("x", 546)
-                            };
+							new Parameter("x", 546)
+							};
 
 			Assert.Throws<TargetParameterCountException>(() => exp.Invoke(parametersMismatch));
 		}
@@ -87,23 +87,23 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[] {
-                            new Parameter("x", typeof(int)),
-                            new Parameter("y", typeof(int))
-                            };
+							new Parameter("x", typeof(int)),
+							new Parameter("y", typeof(int))
+							};
 
 			var myFunc = target.Parse("x + y", parameters);
 
 			var parameters1 = new[] {
-                            new Parameter("x", 25),
-                            new Parameter("y", 5)
-                            };
+							new Parameter("x", 25),
+							new Parameter("y", 5)
+							};
 
 			Assert.AreEqual(30, myFunc.Invoke(parameters1));
 
 			var parameters2 = new[] {
-                            new Parameter("x", 60),
-                            new Parameter("y", -2)
-                            };
+							new Parameter("x", 60),
+							new Parameter("y", -2)
+							};
 
 			Assert.AreEqual(58, myFunc.Invoke(parameters2));
 		}
@@ -114,9 +114,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[] {
-                            new Parameter("x", typeof(int)),
-                            new Parameter("y", typeof(int))
-                            };
+							new Parameter("x", typeof(int)),
+							new Parameter("y", typeof(int))
+							};
 
 			var myFunc = target.Parse("x + y", parameters);
 
@@ -132,9 +132,9 @@ namespace DynamicExpresso.UnitTest
 			double x = 2;
 			string y = "param y";
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x),
-                            new Parameter("y", y.GetType(), y)
-                            };
+							new Parameter("x", x.GetType(), x),
+							new Parameter("y", y.GetType(), y)
+							};
 
 			Assert.AreEqual(x, target.Eval("x", parameters));
 			Assert.AreEqual(x + x + x, target.Eval("x+x+x", parameters));
@@ -151,9 +151,9 @@ namespace DynamicExpresso.UnitTest
 			double x = 2;
 			string X = "param y";
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x),
-                            new Parameter("X", X.GetType(), X)
-                            };
+							new Parameter("x", x.GetType(), x),
+							new Parameter("X", X.GetType(), X)
+							};
 
 			Assert.AreEqual(x, target.Eval("x", parameters));
 			Assert.AreEqual(X, target.Eval("X", parameters));
@@ -166,8 +166,8 @@ namespace DynamicExpresso.UnitTest
 
 			double x = 2;
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x)
-                            };
+							new Parameter("x", x.GetType(), x)
+							};
 
 			Assert.AreEqual(x, target.Eval("x", parameters));
 			Assert.AreEqual(x, target.Eval("X", parameters));
@@ -206,10 +206,10 @@ namespace DynamicExpresso.UnitTest
 			var y = new Uri("http://www.google.com");
 			var z = CultureInfo.GetCultureInfo("en-US");
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x),
-                            new Parameter("y", y.GetType(), y),
-                            new Parameter("z", z.GetType(), z)
-                            };
+							new Parameter("x", x.GetType(), x),
+							new Parameter("y", y.GetType(), y),
+							new Parameter("z", z.GetType(), z)
+							};
 
 			Assert.AreEqual(x, target.Eval("x", parameters));
 			Assert.AreEqual(y, target.Eval("y", parameters));
@@ -226,11 +226,11 @@ namespace DynamicExpresso.UnitTest
 			var z = 5;
 			var w = DateTime.Today;
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x),
-                            new Parameter("y", y.GetType(), y),
-                            new Parameter("z", z.GetType(), z),
-                            new Parameter("w", w.GetType(), w)
-                            };
+							new Parameter("x", x.GetType(), x),
+							new Parameter("y", y.GetType(), y),
+							new Parameter("z", z.GetType(), z),
+							new Parameter("w", w.GetType(), w)
+							};
 
 			Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()", parameters));
 			Assert.AreEqual(x.CallMethod(y, z, w), target.Eval("x.CallMethod( y, z,w)", parameters));
@@ -249,9 +249,9 @@ namespace DynamicExpresso.UnitTest
 			y = null;
 
 			var parameters = new[] {
-                            new Parameter("x", typeof(int?), x),
-                            new Parameter("y", typeof(int?), y)
-                            };
+							new Parameter("x", typeof(int?), x),
+							new Parameter("y", typeof(int?), y)
+							};
 
 			Assert.AreEqual(x, target.Eval("x", parameters));
 			Assert.AreEqual(y, target.Eval("y", parameters));
@@ -268,9 +268,9 @@ namespace DynamicExpresso.UnitTest
 			MyDelegate myDelegate = (x) => x.Length;
 
 			var parameters = new[] {
-                            new Parameter("pow", pow.GetType(), pow),
-                            new Parameter("myDelegate", myDelegate.GetType(), myDelegate)
-                            };
+							new Parameter("pow", pow.GetType(), pow),
+							new Parameter("myDelegate", myDelegate.GetType(), myDelegate)
+							};
 
 			Assert.AreEqual(9.0, target.Eval("pow(3, 2)", parameters));
 			Assert.AreEqual(4, target.Eval("myDelegate(\"test\")", parameters));
@@ -282,10 +282,10 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[] {
-                            new Parameter("x", 23),
-                            new Parameter("y", 7),
-                            new Parameter("z", 54),
-                            };
+							new Parameter("x", 23),
+							new Parameter("y", 7),
+							new Parameter("z", 54),
+							};
 
 			var lambda = target.Parse("x + y", parameters);
 
@@ -306,9 +306,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[] {
-                            new Parameter("x", 23),
-                            new Parameter("y", 7),
-                            };
+							new Parameter("x", 23),
+							new Parameter("y", 7),
+							};
 
 			var lambda = target.Parse("x * y + x * y", parameters);
 
@@ -323,13 +323,133 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[]{
-                            new Parameter("x", typeof(int)),
-                            new Parameter("y", typeof(int))
-                            };
+							new Parameter("x", typeof(int)),
+							new Parameter("y", typeof(int))
+							};
 
 			var lambda = target.Parse("y-x", parameters);
 
 			Assert.AreEqual(4, lambda.Invoke(1, 5));
+		}
+
+		[Test]
+		public void When_lambda_is_invoked_byref_parameters_are_updated_on_invoke()
+		{
+			var a = 1;
+			var b = 2;
+			var c = 3;
+			var d = 4;
+			var e = 5;
+
+			var parameters = new[]{
+							new Parameter(nameof(a), typeof(int).MakeByRefType()),
+							new Parameter(nameof(b), typeof(int).MakeByRefType()),
+							new Parameter(nameof(c), typeof(int).MakeByRefType()),
+							new Parameter(nameof(d), typeof(int).MakeByRefType()),
+							new Parameter(nameof(e), typeof(int).MakeByRefType()),
+							};
+
+			var args = new object[]
+			{
+				a,
+				b,
+				c,
+				d,
+				e
+			};
+
+			a += b *= c -= d /= e %= 3;
+
+			var target = new Interpreter();
+
+			var lambda = target.Parse("a = a + (b = b * (c = c - (d = d / (e = e % 3))))", parameters);
+
+			Assert.AreEqual(a, lambda.Invoke(args));
+			Assert.AreEqual(a, args[0]);
+			Assert.AreEqual(b, args[1]);
+			Assert.AreEqual(c, args[2]);
+			Assert.AreEqual(d, args[3]);
+			Assert.AreEqual(e, args[4]);
+		}
+
+
+		[Test]
+		public void When_lambda_is_invoked_nonbyref_parameters_are_not_updated_on_invoke()
+		{
+			var a = 1;
+			var b = 2;
+			var c = 3;
+			var d = 4;
+			var e = 5;
+
+			var parameters = new[]{
+							new Parameter(nameof(a), typeof(int)),
+							new Parameter(nameof(b), typeof(int)),
+							new Parameter(nameof(c), typeof(int)),
+							new Parameter(nameof(d), typeof(int)),
+							new Parameter(nameof(e), typeof(int)),
+							};
+
+			var args = new object[]
+			{
+				a,
+				b,
+				c,
+				d,
+				e
+			};
+
+			var target = new Interpreter();
+
+			var result = a + (b * (c - (d / (e % 3))));
+
+			var lambda = target.Parse("a = a + (b = b * (c = c - (d = d / (e = e % 3))))", parameters);
+
+			Assert.AreEqual(result, lambda.Invoke(args));
+			Assert.AreEqual(a, args[0]);
+			Assert.AreEqual(b, args[1]);
+			Assert.AreEqual(c, args[2]);
+			Assert.AreEqual(d, args[3]);
+			Assert.AreEqual(e, args[4]);
+		}
+		[Test]
+		public void When_lambda_is_invoked_byref_parameters_are_updated_on_invoke_and_I_can_omit_parameters_not_used()
+		{
+			var target = new Interpreter();
+
+			var a = 1;
+			var b = 2;
+			var c = 3;
+			var d = 4;
+			var e = 5;
+
+			var parameters = new[]{
+							new Parameter(nameof(a), typeof(int).MakeByRefType()),
+							new Parameter(nameof(b), typeof(int).MakeByRefType()),
+							new Parameter(nameof(c), typeof(int).MakeByRefType()),
+							new Parameter(nameof(d), typeof(int).MakeByRefType()),
+							new Parameter(nameof(e), typeof(int).MakeByRefType()),
+							};
+
+			var args = new object[]
+			{
+				a,
+				b,
+				c,
+				d,
+				e
+			};
+
+			a += b *= d /= e %= 3;
+
+			var lambda = target.Parse("a = a + (b = b * (d = d / (e = e % 3)))", parameters);
+
+			Assert.AreEqual(a, lambda.Invoke(args));
+			Assert.AreEqual(a, args[0]);
+			Assert.AreEqual(b, args[1]);
+			Assert.AreEqual(c, args[2]);
+			Assert.AreEqual(d, args[3]);
+			Assert.AreEqual(e, args[4]);
 		}
 
 		[Test]
@@ -338,9 +458,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var parameters = new[]{
-                            new Parameter("x", typeof(int)),
-                            new Parameter("y", typeof(int))
-                            };
+							new Parameter("x", typeof(int)),
+							new Parameter("y", typeof(int))
+							};
 
 			var lambda = target.Parse("y+5", parameters);
 
