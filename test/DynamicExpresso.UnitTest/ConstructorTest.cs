@@ -198,24 +198,13 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 			target.Reference(typeof(MyClassAdder));
-			var l = target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{\"6\" },7	}.Add(true)");
-			Assert.AreEqual(5, l.MyArr.Length);
-			for (int i = 0; i < l.MyArr.Length; ++i)
-			{
-				Assert.AreEqual(i + 1, l.MyArr[i]);
-			}
-			Assert.AreEqual("6", l.StrProp);
-			Assert.AreEqual(7, l.IntField);
+
+			Assert.AreEqual(new MyClassAdder() { { 1, 2, 3, 4, 5 }, { "6" }, 7 }, target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{\"6\" },7	}.Add(true)"));
 		}
 
-
 		[Test]
-		public void Ctor_NewMyClassWithCross()
+		public void Ctor_NewMyClass_ExpectedValues()
 		{
-			var StrProp = string.Empty;
-
-			new MyClassAdder() { StrProp = StrProp = "6" };
-
 			var target = new Interpreter();
 			target.Reference(typeof(MyClassAdder));
 			target.Reference(typeof(MyClass));
@@ -224,14 +213,50 @@ namespace DynamicExpresso.UnitTest
 			{
 				strProp.Value
 			};
-			Assert.AreEqual(new MyClassAdder() { { 1, 2, 3, 4, 5 }, "6", 7 }, target.Parse("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", strProp).Invoke(args));
-			Assert.AreEqual(new MyClassAdder() { { 1, 2, 3, 4, 5 }, string.Empty, 7 }, target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"));
-			Assert.AreEqual(new MyClassAdder() {StrProp = string.Empty, MyArr = new[] { 1, 2, 3, 4, 5 }, IntField = int.MinValue }, target.Eval<MyClassAdder>("new MyClassAdder() {StrProp = string.Empty, MyArr = new int[] {1, 2, 3, 4, 5}, IntField = int.MinValue }"));
+			Assert.AreEqual(
+				new MyClassAdder() { { 1, 2, 3, 4, 5 }, "6", 7 },
+				target.Parse("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", strProp).Invoke(args));
+			Assert.AreEqual(
+				new MyClassAdder() { { 1, 2, 3, 4, 5 }, string.Empty, 7 },
+				target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"));
+			Assert.AreEqual(
+				new MyClassAdder() { StrProp = string.Empty, MyArr = new[] { 1, 2, 3, 4, 5 }, IntField = int.MinValue },
+				target.Eval<MyClassAdder>("new MyClassAdder() {StrProp = string.Empty, MyArr = new int[] {1, 2, 3, 4, 5}, IntField = int.MinValue }"));
+		}
+
+		[Test]
+		public void Ctor_NewMyClass_CanStillUseMemberSyntax()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(MyClassAdder));
+			target.Reference(typeof(MyClass));
+			Assert.AreEqual(
+				new MyClassAdder() { StrProp = string.Empty, MyArr = new[] { 1, 2, 3, 4, 5 }, IntField = int.MinValue },
+				target.Eval<MyClassAdder>("new MyClassAdder() {StrProp = string.Empty, MyArr = new int[] {1, 2, 3, 4, 5}, IntField = int.MinValue }"));
+		}
+
+		[Test]
+		public void Ctor_InvalidInitializerMemberDeclarator()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(MyClassAdder));
+			target.Reference(typeof(MyClass));
 			Assert.Throws<ParseException>(() => target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7	}"));
+			//Start with collection, then do member init
 			Assert.Throws<ParseException>(() => target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},StrProp = \"6\" ,7	}"));
+			//Member init first, then attempt a collection init.
 			Assert.Throws<ParseException>(() => target.Eval<MyClassAdder>("new MyClassAdder(){StrProp = \"6\" ,{ 1, 2, 3, 4, 5},7	}"));
+		}
+
+		[Test]
+		public void Ctor_CannotUseCollectionInitDoesNotImplementIEnumerable()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(MyClassAdder));
+			target.Reference(typeof(MyClass));
 			Assert.Throws<ParseException>(() => target.Eval<MyClass>("new MyClass(){ 1, 2, 3, 4, 5}"));
 		}
+
 		[Test]
 		public void Ctor_NewListWithItems()
 		{
@@ -289,6 +314,8 @@ namespace DynamicExpresso.UnitTest
 				Assert.AreSame(string.Empty, list[i]);
 			}
 			list = target.Eval<System.Collections.Generic.List<string>>("new List<string>(){StrProp = string.Empty}", new Parameter("StrProp", "0"));
+			Assert.AreSame(string.Empty, list[0]);
+			list = target.Eval<System.Collections.Generic.List<string>>("new List<string>(){{StrProp = string.Empty}}", new Parameter("StrProp", "0"));
 			Assert.AreSame(string.Empty, list[0]);
 			list = target.Eval<System.Collections.Generic.List<string>>("new List<string>(){StrValue()}", new Parameter("StrValue", new Func<string>(() => "Func")));
 			Assert.AreEqual("Func", list[0]);
