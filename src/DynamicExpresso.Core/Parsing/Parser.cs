@@ -3255,11 +3255,14 @@ namespace DynamicExpresso.Parsing
 				_expressionText = expressionText;
 				_parameters = parameters;
 
-				// convert the parent's parameters to variables
+				// Take the parent expression's parameters and set them as an identifier that
+				// can be accessed by any lower call
 				// note: this doesn't impact the initial settings, because they're cloned
-				foreach (var pe in parserArguments.DeclaredParameters)
+				foreach (var dp in parserArguments.DeclaredParameters)
 				{
-					_interpreter.SetVariable(pe.Name, pe.Value, pe.Type);
+					// Have to mark the parameter as "Used" otherwise we can get a compilation error.
+					parserArguments.TryGetParameters(dp.Name, out var pe);
+					_interpreter.SetIdentifier(new Identifier(dp.Name, pe));
 				}
 
 				// prior to evaluation, we don't know the generic arguments types
