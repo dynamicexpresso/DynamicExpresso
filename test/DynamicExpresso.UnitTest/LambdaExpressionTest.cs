@@ -178,7 +178,7 @@ namespace DynamicExpresso.UnitTest
 			result = target.Eval<char>("str.WithSeveralParams((c, i) => c == 'd')");
 			Assert.AreEqual('d', result);
 
-			result = target.Eval<char>("str.WithSeveralParams((c, i, str) => c == 'd')");
+			result = target.Eval<char>("str.WithSeveralParams((c, i, str2) => c == 'd')");
 			Assert.AreEqual('d', result);
 		}
 
