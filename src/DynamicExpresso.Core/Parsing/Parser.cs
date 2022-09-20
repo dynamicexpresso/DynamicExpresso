@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Dynamic;
 using System.Globalization;
 using System.Linq;
@@ -138,7 +139,7 @@ namespace DynamicExpresso.Parsing
 		{
 			// in case the expression is not a lambda, we have to restart parsing
 			var originalPos = _token.pos;
-
+			var isLambda = false;
 			try
 			{
 				var parameters = ParseLambdaParameterList();
@@ -168,10 +169,15 @@ namespace DynamicExpresso.Parsing
 				}
 
 				var lambdaBodyExp = _expressionText.Substring(startExpr, _token.pos - startExpr);
+				isLambda = true;
 				return new InterpreterExpression(_arguments, lambdaBodyExp, parameters);
 			}
 			catch (ParseException)
 			{
+				if (isLambda)
+				{
+					throw;
+				}
 				// not a lambda, return to the saved position
 				SetTextPos(originalPos);
 				NextToken();
@@ -180,13 +186,24 @@ namespace DynamicExpresso.Parsing
 			}
 		}
 
-		private Parameter[] ParseLambdaParameterList()
+		private class ParameterWithPosition : Parameter
+		{
+			public ParameterWithPosition(int pos, string name, Type type)
+				: base(name, type)
+			{
+				Position = pos;
+			}
+
+			public int Position { get; }
+		}
+
+		private ParameterWithPosition[] ParseLambdaParameterList()
 		{
 			var hasOpenParen = _token.id == TokenId.OpenParen;
 			if (hasOpenParen)
 				NextToken();
 
-			var parameters = _token.id != TokenId.CloseParen ? ParseLambdaParameters() : new Parameter[0];
+			var parameters = _token.id != TokenId.CloseParen ? ParseLambdaParameters() : new ParameterWithPosition[0];
 			if (hasOpenParen)
 			{
 				ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
@@ -196,9 +213,9 @@ namespace DynamicExpresso.Parsing
 			return parameters;
 		}
 
-		private Parameter[] ParseLambdaParameters()
+		private ParameterWithPosition[] ParseLambdaParameters()
 		{
-			var argList = new List<Parameter>();
+			var argList = new List<ParameterWithPosition>();
 			while (true)
 			{
 				argList.Add(ParseLambdaParameter());
@@ -208,11 +225,12 @@ namespace DynamicExpresso.Parsing
 			return argList.ToArray();
 		}
 
-		private Parameter ParseLambdaParameter()
+		private ParameterWithPosition ParseLambdaParameter()
 		{
 			ValidateToken(TokenId.Identifier);
 			var name = _token.text;
 
+			var pos = _token.pos;
 			if (TryParseKnownType(name, out var type))
 			{
 				ValidateToken(TokenId.Identifier);
@@ -224,7 +242,7 @@ namespace DynamicExpresso.Parsing
 			}
 
 			NextToken();
-			return new Parameter(name, type);
+			return new ParameterWithPosition(pos, name, type);
 		}
 
 		// = operator
@@ -1229,7 +1247,6 @@ namespace DynamicExpresso.Parsing
 				var member = FindPropertyOrField(newType, propertyOrFieldName, false);
 				if (member == null)
 					throw CreateParseException(_token.pos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(newType));
-
 				NextToken();
 
 				ValidateToken(TokenId.Equal, ErrorMessages.EqualExpected);
@@ -3249,9 +3266,10 @@ namespace DynamicExpresso.Parsing
 			private readonly IList<Parameter> _parameters;
 			private Type _type;
 
-			public InterpreterExpression(ParserArguments parserArguments, string expressionText, params Parameter[] parameters)
+			public InterpreterExpression(ParserArguments parserArguments, string expressionText, params ParameterWithPosition[] parameters)
 			{
-				_interpreter = new Interpreter(parserArguments.Settings.Clone());
+				var settings = parserArguments.Settings.Clone();
+				_interpreter = new Interpreter(settings);
 				_expressionText = expressionText;
 				_parameters = parameters;
 
@@ -3263,6 +3281,14 @@ namespace DynamicExpresso.Parsing
 					// Have to mark the parameter as "Used" otherwise we can get a compilation error.
 					parserArguments.TryGetParameters(dp.Name, out var pe);
 					_interpreter.SetIdentifier(new Identifier(dp.Name, pe));
+				}
+
+				foreach (var myParameter in parameters)
+				{
+					if (settings.Identifiers.ContainsKey(myParameter.Name))
+					{
+						throw new ParseException($"A local or parameter named '{myParameter.Name}' cannot be declared in this scope because that name is used in an enclosing local scope to define a local or parameter", myParameter.Position);
+					}
 				}
 
 				// prior to evaluation, we don't know the generic arguments types

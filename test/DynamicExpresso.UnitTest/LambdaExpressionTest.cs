@@ -353,7 +353,70 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Lambda_WithMultipleNestedExpressions()
 		{
-			NestedLambdaTestClass root = new NestedLambdaTestClass()
+			var root = BuildNestedTestClassHierarchy();
+			var expectedResult = root.GetChildrenIdentifiers(
+				// root
+				l1 => l1.Name + l1.GetChildrenIdentifiers(
+					// level 2, references my parameter, plus original lamda
+					l2 => l2.Name + l1.Name + l2.GetChildrenIdentifiers(
+						// level 3, references my parameter, plus parameter from l1 lamda
+						l3 => l3.Name + l2.Name + l3.GetChildrenIdentifiers(
+							// level 4, references my parameter, plus all parameters that have been used 
+							l4 => l4.Name + l2.Name + l3.Name + l1.Name + root.Name)
+							)));
+
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+
+			var evalResult = target.Eval<string>(@"root.GetChildrenIdentifiers(
+				l1 => l1.Name + l1.GetChildrenIdentifiers(
+					l2 => l2.Name + l1.Name + l2.GetChildrenIdentifiers(
+						l3 => l3.Name + l2.Name + l3.GetChildrenIdentifiers(
+							l4 => l4.Name + l2.Name + l3.Name + l1.Name + root.Name)
+							)))", new Parameter(nameof(root), root));
+			Assert.AreEqual(expectedResult, evalResult);
+		}
+
+		[Test]
+		public void Lambda_SameParameterNameInDifferentLambdas()
+		{
+			var root = BuildNestedTestClassHierarchy();
+			var expectedResult = root.GetChildrenIdentifiers(
+				// root
+				l1 => l1.Name + l1.GetChildrenIdentifiers(
+					// level 2, references my parameter, plus original lamda
+					l2 => l2.Name + l1.Name + l2.GetChildrenIdentifiers(l3 => l2.Name) + l2.GetChildrenIdentifiers(
+						// level 3, references my parameter, plus parameter from l1 lamda
+						l3 => l3.Name + l2.Name + l3.GetChildrenIdentifiers(
+							// level 4, references my parameter, plus all parameters that have been used 
+							l4 => l4.Name + l2.Name + l3.Name + l1.Name + root.Name)
+							)));
+
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+
+			var evalResult = target.Eval<string>(@"root.GetChildrenIdentifiers(
+				l1 => l1.Name + l1.GetChildrenIdentifiers(
+					l2 => l2.Name + l1.Name + l2.GetChildrenIdentifiers(l3 => l2.Name) + + l2.GetChildrenIdentifiers(
+						l3 => l3.Name + l2.Name + l3.GetChildrenIdentifiers(
+							l4 => l4.Name + l2.Name + l3.Name + l1.Name + root.Name)
+							)))", new Parameter(nameof(root), root));
+			Assert.AreEqual(expectedResult, evalResult);
+		}
+
+		[Test]
+		public void Lambda_CannotUseDuplicateParameterInSubLambda()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			Assert.Throws<ParseException>(() => target.Parse(@"root.GetChildrenIdentifiers(
+				l1 => l1.Name + l1.GetChildrenIdentifiers(
+					l2 => l2.Name + l1.Name + l2.GetChildrenIdentifiers(l2 => l2.Name) + l2.GetChildrenIdentifiers(
+						l3 => l3.Name + l2.Name + l3.GetChildrenIdentifiers(
+							l4 => l4.Name + l2.Name + l3.Name + l1.Name + root.Name)
+							)))", new Parameter("root", typeof(NestedLambdaTestClass))));
+		}
+
+		private static NestedLambdaTestClass BuildNestedTestClassHierarchy()
+		{
+			return new NestedLambdaTestClass()
 			{
 				Name = "Root",
 				Children = new List<NestedLambdaTestClass>()
@@ -522,26 +585,6 @@ namespace DynamicExpresso.UnitTest
 					}
 				}
 			};
-			var expectedResult = root.GetChildrenIdentifiers(
-				// root
-				l1 => l1.Name + l1.GetChildrenIdentifiers(
-					// level 2, references my parameter, plus original lamda
-					l2 => l2.Name + l1.Name + l2.GetChildrenIdentifiers(
-						// level 3, references my parameter, plus parameter from l1 lamda
-						l3 => l3.Name + l2.Name + l3.GetChildrenIdentifiers(
-							// level 4, references my parameter, plus all parameters that have been used 
-							l4 => l4.Name + l2.Name + l3.Name + l1.Name + root.Name)
-							)));
-
-			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
-
-			var evalResult = target.Eval<string>(@"root.GetChildrenIdentifiers(
-				l1 => l1.Name + l1.GetChildrenIdentifiers(
-					l2 => l2.Name + l1.Name + l2.GetChildrenIdentifiers(
-						l3 => l3.Name + l2.Name + l3.GetChildrenIdentifiers(
-							l4 => l4.Name + l2.Name + l3.Name + l1.Name + root.Name)
-							)))", new Parameter(nameof(root), root));
-			Assert.AreEqual(expectedResult, evalResult);
 		}
 	}
 
