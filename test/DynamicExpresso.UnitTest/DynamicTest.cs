@@ -20,7 +20,20 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
+			var l = interpreter.Parse("dyn.Foo");
+			l.Invoke();
+			l.Invoke();
+
+			//Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
+		}
+
+		[Test]
+		public void Get_Property_of_a_nested_anonymous()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new { Foo = new { Bar = new { Foo2 = "bar" } } };
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			Assert.AreEqual(dyn.Sub.Foo.Bar.Foo2, interpreter.Eval("dyn.Sub.Foo.Bar.Foo2"));
 		}
 
 		[Test]
@@ -87,6 +100,19 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Invoke_Method_of_a_nested_ExpandoObject_WithAnonymousType()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new ExpandoObject();
+			dyn.Sub.Foo = new { Func = new Func<string>(() => "bar") };
+
+			var interpreter = new Interpreter()
+					.SetVariable("dyn", dyn);
+
+			Assert.AreEqual(dyn.Sub.Foo.Func(), interpreter.Eval("dyn.Sub.Foo.Func()"));
+		}
+
+		[Test]
 		public void Standard_methods_have_precedence_over_dynamic_methods()
 		{
 			var dyn = new TestDynamicClass();
@@ -116,6 +142,16 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(dyn.Sub[0], interpreter.Eval("dyn.Sub[0]"));
 		}
 
+		[Test]
+		public void Get_value_of_a_nested_array_from_anonymous_type()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new { Foo = new int[] { 42 }, Bar = new { Sub = new int[] { 43 } } };
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			Assert.AreEqual(dyn.Sub.Foo[0], interpreter.Eval("dyn.Sub.Foo[0]"));
+			Assert.AreEqual(dyn.Sub.Bar.Sub[0], interpreter.Eval("dyn.Sub.Bar.Sub[0]"));
+			Assert.AreEqual(dyn.Sub.Bar.Sub.Length, interpreter.Eval("dyn.Sub.Bar.Sub.Length"));
+		}
 		[Test]
 		public void Get_value_of_a_nested_array_error()
 		{

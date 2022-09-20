@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Dynamic;
 using System.Globalization;
 using System.Linq;
@@ -1676,6 +1677,73 @@ namespace DynamicExpresso.Parsing
 		//    return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
 		//}
 
+		private class LateGetMemberCallSiteBinder : CallSiteBinder
+		{
+			private readonly string m_propertyOrFieldName;
+
+			public LateGetMemberCallSiteBinder(string propertyOrFieldName)
+			{
+				m_propertyOrFieldName = propertyOrFieldName;
+			}
+
+			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+			{
+				var binder =
+					Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
+					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+					m_propertyOrFieldName,
+					RemoveArrayType(args[0].GetType()),
+					new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
+				);
+				var e = binder.Bind(args, parameters, returnLabel);
+				return e;
+			}
+		}
+
+		private class LateInvokeMethodCallSiteBinder : CallSiteBinder
+		{
+			private readonly string _methodName;
+
+			public LateInvokeMethodCallSiteBinder(string methodName)
+			{
+				_methodName = methodName;
+			}
+
+			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+			{
+				var binderM = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
+					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+					_methodName,
+					null,
+					RemoveArrayType(args[0].GetType()),
+					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
+				);
+				return binderM.Bind(args, parameters, returnLabel);
+			}
+		}
+
+		private class LateInvokeIndexCallSiteBinder : CallSiteBinder
+		{
+			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+			{
+				var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetIndex(
+					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+					RemoveArrayType(args[0].GetType()),
+					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
+				);
+				return binder.Bind(args, parameters, returnLabel);
+			}
+		}
+
+		private static Type RemoveArrayType(Type t)
+		{
+			if (t.IsArray)
+			{
+				return null;
+			}
+			return t;
+		}
+
 		private static Expression ParseDynamicProperty(Type type, Expression instance, string propertyOrFieldName)
 		{
 			var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
@@ -1683,36 +1751,22 @@ namespace DynamicExpresso.Parsing
 				propertyOrFieldName,
 				type,
 				new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
-			);
-
-			return Expression.Dynamic(binder, typeof(object), instance);
+				);
+			return Expression.Dynamic(new LateGetMemberCallSiteBinder(propertyOrFieldName), typeof(object), instance);
 		}
 
 		private static Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
-			var binderM = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
-				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-				methodName,
-				null,
-				type,
-				argsDynamic.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
-			);
-
-			return Expression.Dynamic(binderM, typeof(object), argsDynamic);
+			return Expression.Dynamic(new LateInvokeMethodCallSiteBinder(methodName), typeof(object), argsDynamic);
 		}
 
 		private static Expression ParseDynamicIndex(Type type, Expression instance, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
-			var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetIndex(
-				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-				type,
-				argsDynamic.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
-			);
-			return Expression.Dynamic(binder, typeof(object), argsDynamic);
+			return Expression.Dynamic(new LateInvokeIndexCallSiteBinder(), typeof(object), argsDynamic);
 		}
 
 		private Expression[] ParseArgumentList(TokenId openToken, string missingOpenTokenMsg,
