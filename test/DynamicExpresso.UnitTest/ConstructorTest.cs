@@ -209,16 +209,23 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(MyClassAdder));
 			target.Reference(typeof(MyClass));
 			var strProp = new Parameter("StrProp", typeof(string).MakeByRefType(), "0");
+			var intProp = new Parameter("IntField", typeof(int).MakeByRefType(), int.MaxValue);
 			var args = new object[]
 			{
-				strProp.Value
+				strProp.Value,
+				intProp.Value
 			};
 			Assert.AreEqual(
 				new MyClassAdder() { { 1, 2, 3, 4, 5 }, "6", 7 },
-				target.Parse("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", strProp).Invoke(args));
+				target.Parse("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", strProp, intProp).Invoke(args));
 			Assert.AreEqual(
 				new MyClassAdder() { { 1, 2, 3, 4, 5 }, string.Empty, 7 },
 				target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"));
+
+			var IntField = int.MaxValue;
+			Assert.AreEqual(
+				new MyClassAdder() { { IntField = 5 }, { 1, 2, 3, 4, IntField }, "6" },
+				target.Parse("new MyClassAdder(){ { IntField = 5 }, { 1, 2, 3, 4, 5},{StrProp = \"6\" }, IntField}", strProp, intProp).Invoke(args));
 		}
 
 		[Test]
