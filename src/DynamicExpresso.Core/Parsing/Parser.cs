@@ -1268,13 +1268,9 @@ namespace DynamicExpresso.Parsing
 				}
 				else if (_token.id != TokenId.Equal || _arguments.TryGetIdentifier(propertyOrFieldName, out _) || _arguments.TryGetParameters(propertyOrFieldName, out _))
 				{
-					SetTextPos(pos);
-					NextToken();
 					ParseCollectionInitalizer(newType, pos, bindingList, actions, instance, allowCollectionInit);
 					return;
 				}
-				SetTextPos(pos);
-				NextToken();
 			}
 			if (member == null)
 			{
