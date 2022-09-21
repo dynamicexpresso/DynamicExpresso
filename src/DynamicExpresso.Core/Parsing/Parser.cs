@@ -1677,67 +1677,15 @@ namespace DynamicExpresso.Parsing
 		//    return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
 		//}
 
-		private class LateGetMemberCallSiteBinder : CallSiteBinder
-		{
-			private readonly string m_propertyOrFieldName;
-
-			public LateGetMemberCallSiteBinder(string propertyOrFieldName)
-			{
-				m_propertyOrFieldName = propertyOrFieldName;
-			}
-
-			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
-			{
-				var binder =
-					Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
-					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-					m_propertyOrFieldName,
-					RemoveArrayType(args[0].GetType()),
-					new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
-				);
-				var e = binder.Bind(args, parameters, returnLabel);
-				return e;
-			}
-		}
-
-		private class LateInvokeMethodCallSiteBinder : CallSiteBinder
-		{
-			private readonly string _methodName;
-
-			public LateInvokeMethodCallSiteBinder(string methodName)
-			{
-				_methodName = methodName;
-			}
-
-			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
-			{
-				var binderM = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
-					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-					_methodName,
-					null,
-					RemoveArrayType(args[0].GetType()),
-					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
-				);
-				return binderM.Bind(args, parameters, returnLabel);
-			}
-		}
-
-		private class LateInvokeIndexCallSiteBinder : CallSiteBinder
-		{
-			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
-			{
-				var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetIndex(
-					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-					RemoveArrayType(args[0].GetType()),
-					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
-				);
-				return binder.Bind(args, parameters, returnLabel);
-			}
-		}
-
+		/// <summary>
+		/// Returns null if <paramref name="t"/> is an Array type.  Needed because the <seealso cref="Microsoft.CSharp.RuntimeBinder.Binder"/> lookup methods fail with a <seealso cref="InvalidCastException"/> if the array type is used.
+		/// Everything still miraculously works on the array if null is given for the type.
+		/// </summary>
+		/// <param name="t"></param>
+		/// <returns></returns>
 		private static Type RemoveArrayType(Type t)
 		{
-			if (t.IsArray)
+			if (t == null || t.IsArray)
 			{
 				return null;
 			}
@@ -1746,12 +1694,6 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression ParseDynamicProperty(Type type, Expression instance, string propertyOrFieldName)
 		{
-			var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
-				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-				propertyOrFieldName,
-				type,
-				new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
-				);
 			return Expression.Dynamic(new LateGetMemberCallSiteBinder(propertyOrFieldName), typeof(object), instance);
 		}
 
@@ -3394,5 +3336,73 @@ namespace DynamicExpresso.Parsing
 				return result;
 			}
 		}
+
+		/// <summary>
+		/// Binds to a member access of an instance as late as possible.  This allows the use of anonymous types on dynamic values.
+		/// </summary>
+		private class LateGetMemberCallSiteBinder : CallSiteBinder
+		{
+			private readonly string m_propertyOrFieldName;
+
+			public LateGetMemberCallSiteBinder(string propertyOrFieldName)
+			{
+				m_propertyOrFieldName = propertyOrFieldName;
+			}
+
+			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+			{
+				var binder =
+					Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
+					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+					m_propertyOrFieldName,
+					RemoveArrayType(args[0]?.GetType()),
+					new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
+				);
+				var e = binder.Bind(args, parameters, returnLabel);
+				return e;
+			}
+		}
+
+		/// <summary>
+		/// Binds to a method invocation of an instance as late as possible.  This allows the use of anonymous types on dynamic values.
+		/// </summary>
+		private class LateInvokeMethodCallSiteBinder : CallSiteBinder
+		{
+			private readonly string _methodName;
+
+			public LateInvokeMethodCallSiteBinder(string methodName)
+			{
+				_methodName = methodName;
+			}
+
+			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+			{
+				var binderM = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
+					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+					_methodName,
+					null,
+					RemoveArrayType(args[0]?.GetType()),
+					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
+				);
+				return binderM.Bind(args, parameters, returnLabel);
+			}
+		}
+
+		/// <summary>
+		/// Binds to an items invocation of an instance as late as possible.  This allows the use of anonymous types on dynamic values.
+		/// </summary>
+		private class LateInvokeIndexCallSiteBinder : CallSiteBinder
+		{
+			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+			{
+				var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetIndex(
+					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+					RemoveArrayType(args[0]?.GetType()),
+					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
+				);
+				return binder.Bind(args, parameters, returnLabel);
+			}
+		}
+
 	}
 }
