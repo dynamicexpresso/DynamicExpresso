@@ -152,6 +152,23 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(dyn.Sub.Bar.Sub[0], interpreter.Eval("dyn.Sub.Bar.Sub[0]"));
 			Assert.AreEqual(dyn.Sub.Bar.Sub.Length, interpreter.Eval("dyn.Sub.Bar.Sub.Length"));
 		}
+
+		[Test]
+		public void Get_value_of_an_array_of_anonymous_type()
+		{
+			dynamic dyn = new ExpandoObject();
+			var anonType1 = new { Foo = string.Empty };
+			var anonType2 = new { Foo = "string.Empty" };
+			var nullAnonType = anonType1;
+			nullAnonType = null;
+			dyn.Sub = new { Arg1 = anonType1, Arg2 = anonType2, Arg3 = nullAnonType };
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			Assert.AreSame(dyn.Sub.Arg1.Foo, interpreter.Eval("dyn.Sub.Arg1.Foo"));
+			Assert.AreSame(dyn.Sub.Arg2.Foo, interpreter.Eval("dyn.Sub.Arg2.Foo"));
+			Assert.Throws<RuntimeBinderException>(() => Console.WriteLine(dyn.Sub.Arg3.Foo));
+			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Sub.Arg3.Foo"));
+		}
+
 		[Test]
 		public void Get_value_of_a_nested_array_error()
 		{
