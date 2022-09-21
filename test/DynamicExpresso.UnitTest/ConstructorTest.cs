@@ -219,9 +219,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(
 				new MyClassAdder() { { 1, 2, 3, 4, 5 }, string.Empty, 7 },
 				target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"));
-			Assert.AreEqual(
-				new MyClassAdder() { StrProp = string.Empty, MyArr = new[] { 1, 2, 3, 4, 5 }, IntField = int.MinValue },
-				target.Eval<MyClassAdder>("new MyClassAdder() {StrProp = string.Empty, MyArr = new int[] {1, 2, 3, 4, 5}, IntField = int.MinValue }"));
 		}
 
 		[Test]
@@ -260,9 +257,9 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Ctor_NewListWithItems()
 		{
-			Ctor_NewListGeneric<string, string>("\"1\"", "\"2\"", "\"3\"", "{string.Empty}", "string.Empty", "int.MaxValue.ToString()", "{int.MinValue.ToString()}");
-			Ctor_NewListGeneric<int, int>("1", "2", "3", "int.MinValue", "int.MaxValue", "{int.MinValue}", "{int.MaxValue}");
-			Ctor_NewListGeneric<object, object>("string.Empty", "int.MinValue");
+			Ctor_NewListGeneric<string>("\"1\"", "\"2\"", "\"3\"", "{string.Empty}", "string.Empty", "int.MaxValue.ToString()", "{int.MinValue.ToString()}");
+			Ctor_NewListGeneric<int>("1", "2", "3", "int.MinValue", "int.MaxValue", "{int.MinValue}", "{int.MaxValue}");
+			Ctor_NewListGeneric<object>("string.Empty", "int.MinValue");
 		}
 
 		[Test]
@@ -270,15 +267,28 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 			target.Reference(typeof(System.Collections.Generic.List<>));
-			Assert.Throws<ParseException>(() => target.Eval<System.Collections.Generic.List<int>>("string.Empty"));
-			Assert.Throws<ParseException>(() => target.Eval<System.Collections.Generic.List<string>>("int.MaxValue"));
+			try
+			{
+				target.Eval<System.Collections.Generic.List<int>>("new List<int>(){string.Empty}");
+			}
+			catch (ParseException ex)
+			{
+				if (ex.Message.Contains("The best overloaded Add "))
+				{
+					Assert.IsTrue(ex.Message.Contains("Add"));
+				}
+				else
+				{
+					throw;
+				}
+			}
+			Assert.Throws<ParseException>(() => target.Eval<System.Collections.Generic.List<string>>("new List<string>(){int.MaxValue}"));
 		}
 
-		public void Ctor_NewListGeneric<TList, TObject>(params string[] items)
+		public void Ctor_NewListGeneric<TObject>(params string[] items)
 		{
 			var target = new Interpreter();
 			target.Reference(typeof(System.Collections.Generic.List<>));
-			target.Reference(typeof(TList));
 			target.Reference(typeof(TObject));
 			//Create a random list of values to test.
 			var actual = new System.Collections.Generic.List<TObject>();
@@ -290,9 +300,9 @@ namespace DynamicExpresso.UnitTest
 			{
 				for (var count = Math.Min(min, 1); count <= actual.Count - min; ++count)
 				{
-					var evalText = $"new List<{typeof(TList).Name}>(){{{string.Join(",", items.Skip(min).Take(count))}}}";
-					System.Collections.Generic.List<TList> eval = null;
-					Assert.DoesNotThrow(() => eval = target.Eval<System.Collections.Generic.List<TList>>(evalText), evalText);
+					var evalText = $"new List<{typeof(TObject).Name}>(){{{string.Join(",", items.Skip(min).Take(count))}}}";
+					System.Collections.Generic.List<TObject> eval = null;
+					Assert.DoesNotThrow(() => eval = target.Eval<System.Collections.Generic.List<TObject>>(evalText), evalText);
 					Assert.AreEqual(count, eval.Count);
 					for (var i = 0; i < count; ++i)
 					{
