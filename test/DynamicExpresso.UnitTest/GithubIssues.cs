@@ -554,6 +554,92 @@ namespace DynamicExpresso.UnitTest
 			var result2 = target.Eval<DateTimeKind>("DateTimeKind.Local | DateTimeKind.Utc");
 			Assert.AreEqual((DateTimeKind)3, result2);
 		}
+
+		[Test]
+		public void GitHub_Issue_212()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var list = new Parameter("list", new[] { 1, 2, 3 });
+			var value1 = new Parameter("value", 1);
+			var value2 = new Parameter("value", 2);
+			var expression = "list.Where(x => x > value)";
+			var lambda = target.Parse(expression, list, value1);
+			var result = lambda.Invoke(list, value2);
+			Assert.AreEqual(new[] { 3 }, result);
+		}
+
+		[Test]
+		public void GitHub_Issue_212_bis()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var list = new Parameter("list", new[] { 1, 2, 3 });
+			var value1 = new Parameter("value", 1);
+			var value2 = new Parameter("value", 2);
+			var expression = "list.Where(x => x > value)";
+			var lambda = target.Parse(expression, (new[] { list, value1 }).Select(p => new Parameter(p.Name, p.Type)).ToArray());
+			var result = lambda.Invoke(list, value1);
+			Assert.AreEqual(new[] { 2, 3 }, result);
+		}
+
+		[Test]
+		public void GitHub_Issue_200_capture()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var list = new List<string> { "ab", "cdc" };
+			target.SetVariable("myList", list);
+
+			// the str parameter is captured, and can be used in the nested lambda
+			var results = target.Eval("myList.Select(str => str.Select(c => str.Length))");
+			Assert.AreEqual(new[] { new[] { 2, 2 }, new[] { 3, 3, 3 } }, results);
+		}
+
+		[Test]
+		public void Lambda_Issue_256()
+		{
+			ICollection<BonusMatrix> annualBonus = new List<BonusMatrix> {
+				new BonusMatrix() { Grade = 1, BonusFactor = 7 },
+				new BonusMatrix() { Grade = 2, BonusFactor = 5.5 },
+				new BonusMatrix() { Grade = 3, BonusFactor = 4 },
+				new BonusMatrix() { Grade = 4, BonusFactor = 3.5 },
+				new BonusMatrix() { Grade = 5, BonusFactor = 3 }
+			};
+
+			ICollection<Employee> employees = new List<Employee> {
+				new Employee() { Id = "01", Name = "A", Grade = 5, Salary = 20000}, //bonus = 20000 * 7   = 60000
+                new Employee() { Id = "02", Name = "B", Grade = 5, Salary = 18000}, //bonus = 18000 * 7   = 54000
+                new Employee() { Id = "03", Name = "C", Grade = 4, Salary = 12000}, //bonus = 12000 * 5.5 = 42000
+                new Employee() { Id = "04", Name = "D", Grade = 4, Salary = 10000}, //bonus = 10000 * 5.5 = 35000
+                new Employee() { Id = "05", Name = "E", Grade = 3, Salary = 8500},  //bonus = 8500  * 4   = 34000
+                new Employee() { Id = "06", Name = "F", Grade = 3, Salary = 8000},  //bonus = 8000  * 4   = 32000
+                new Employee() { Id = "07", Name = "G", Grade = 2, Salary = 5000},  //bonus = 5000  * 3.5 = 27500
+                new Employee() { Id = "08", Name = "H", Grade = 2, Salary = 4750},  //bonus = 4750  * 3.5 = 26125
+                new Employee() { Id = "09", Name = "I", Grade = 1, Salary = 3500},  //bonus = 3500  * 3   = 24500
+                new Employee() { Id = "10", Name = "J", Grade = 1, Salary = 3250}   //bonus = 3250  * 3   = 22750
+            };
+
+			var interpreter = new Interpreter(InterpreterOptions.LambdaExpressions | InterpreterOptions.Default);
+			interpreter.SetVariable(nameof(annualBonus), annualBonus);
+			interpreter.SetVariable(nameof(employees), employees);
+
+			var totalBonus = employees.Sum(x => x.Salary * (annualBonus.SingleOrDefault(y => y.Grade == x.Grade).BonusFactor)); //total = 357875
+
+			var evalSum = interpreter.Eval("employees.Sum(x => x.Salary * (annualBonus.SingleOrDefault(y => y.Grade == x.Grade).BonusFactor))");
+			Assert.AreEqual(totalBonus, evalSum);
+		}
+
+		public class Employee
+		{
+			public string Id { get; set; }
+			public string Name { get; set; }
+			public int Grade { get; set; }
+			public double Salary { get; set; }
+		}
+
+		public class BonusMatrix
+		{
+			public int Grade { get; set; }
+			public double BonusFactor { get; set; }
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
