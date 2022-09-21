@@ -20,11 +20,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			var l = interpreter.Parse("dyn.Foo");
-			l.Invoke();
-			l.Invoke();
-
-			//Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
+			Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
 		}
 
 		[Test]
@@ -161,12 +157,30 @@ namespace DynamicExpresso.UnitTest
 			var anonType2 = new { Foo = "string.Empty" };
 			var nullAnonType = anonType1;
 			nullAnonType = null;
-			dyn.Sub = new { Arg1 = anonType1, Arg2 = anonType2, Arg3 = nullAnonType };
+			dyn.Sub = new
+			{
+				Arg1 = anonType1,
+				Arg2 = anonType2,
+				Arg3 = nullAnonType,
+				Arr = new[] { anonType1, anonType2, nullAnonType },
+				ObjArr = new object[] { "Test", anonType1 }
+			};
 			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
 			Assert.AreSame(dyn.Sub.Arg1.Foo, interpreter.Eval("dyn.Sub.Arg1.Foo"));
 			Assert.AreSame(dyn.Sub.Arg2.Foo, interpreter.Eval("dyn.Sub.Arg2.Foo"));
 			Assert.Throws<RuntimeBinderException>(() => Console.WriteLine(dyn.Sub.Arg3.Foo));
 			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Sub.Arg3.Foo"));
+			Assert.AreSame(dyn.Sub.Arr[0].Foo, interpreter.Eval("dyn.Sub.Arr[0].Foo"));
+			Assert.AreSame(dyn.Sub.Arr[1].Foo, interpreter.Eval("dyn.Sub.Arr[1].Foo"));
+
+			Assert.Throws<RuntimeBinderException>(() => Console.WriteLine(dyn.Sub.Arr[2].Foo));
+			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Sub.Arr[2].Foo"));
+
+			Assert.AreSame(dyn.Sub.ObjArr[0], interpreter.Eval("dyn.Sub.ObjArr[0]"));
+			Assert.AreEqual(dyn.Sub.ObjArr[0].Length, interpreter.Eval("dyn.Sub.ObjArr[0].Length"));
+
+			Assert.AreSame(dyn.Sub.ObjArr[1], interpreter.Eval("dyn.Sub.ObjArr[1]"));
+			Assert.AreSame(dyn.Sub.ObjArr[1].Foo, interpreter.Eval("dyn.Sub.ObjArr[1].Foo"));
 		}
 
 		[Test]

@@ -3342,24 +3342,22 @@ namespace DynamicExpresso.Parsing
 		/// </summary>
 		private class LateGetMemberCallSiteBinder : CallSiteBinder
 		{
-			private readonly string m_propertyOrFieldName;
+			private readonly string _propertyOrFieldName;
 
 			public LateGetMemberCallSiteBinder(string propertyOrFieldName)
 			{
-				m_propertyOrFieldName = propertyOrFieldName;
+				_propertyOrFieldName = propertyOrFieldName;
 			}
 
 			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 			{
-				var binder =
-					Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
+				var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
 					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-					m_propertyOrFieldName,
+					_propertyOrFieldName,
 					RemoveArrayType(args[0]?.GetType()),
 					new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
 				);
-				var e = binder.Bind(args, parameters, returnLabel);
-				return e;
+				return binder.Bind(args, parameters, returnLabel);
 			}
 		}
 
