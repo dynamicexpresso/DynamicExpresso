@@ -31,11 +31,11 @@ namespace DynamicExpresso.Resources {
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal ErrorMessages() {
         }
-        
-        /// <summary>
-        ///   Returns the cached ResourceManager instance used by this class.
-        /// </summary>
-        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+
+		/// <summary>
+		///   Returns the cached ResourceManager instance used by this class.
+		/// </summary>
+		[global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
@@ -531,5 +531,33 @@ namespace DynamicExpresso.Resources {
 				return ResourceManager.GetString("UnsupportedMultidimensionalArrays", resourceCulture);
 			}
 		}
+
+		/// <summary>
+		///   Looks up a localized string similar to Invalid initializer member declarator.
+		/// </summary>
+		internal static string InvalidInitializerMemberDeclarator {
+			get {
+				return ResourceManager.GetString("InvalidInitializerMemberDeclarator", resourceCulture);
+			}
+		}
+
+		/// <summary>
+		///   Looks up a localized string similar to Cannot initialize type '{0}' with a collection initializer because it does not implement '{1}'.
+		/// </summary>
+		internal static string CollectionInitializationNotSupported {
+			get {
+				return ResourceManager.GetString("CollectionInitializationNotSupported", resourceCulture);
+			}
+		}
+
+		/// <summary>
+		///   Looks up a localized string similar to The best overloaded Add method '{0}.Add' for the collection initializer has some invalid arguments.
+		/// </summary>
+		internal static string UnableToFindAppropriateAddMethod { 
+			get {
+				return ResourceManager.GetString("UnableToFindAppropriateAddMethod", resourceCulture);
+			}
+		}
+
 	}
 }

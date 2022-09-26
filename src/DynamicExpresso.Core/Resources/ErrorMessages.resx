@@ -267,4 +267,13 @@
   <data name="UnsupportedMultidimensionalArrays" xml:space="preserve">
     <value>Multidimensional arrays are not supported</value>
   </data>
+  <data name="InvalidInitializerMemberDeclarator" xml:space="preserve">
+    <value>Invalid initializer member declarator</value>
+  </data>
+  <data name="CollectionInitializationNotSupported" xml:space="preserve">
+    <value>Cannot initialize type '{0}' with a collection initializer because it does not implement '{1}'</value>
+  </data>
+  <data name="UnableToFindAppropriateAddMethod" xml:space="preserve">
+    <value>The best overloaded Add method '{0}.Add' for the collection initializer has some invalid arguments</value>
+  </data>
 </root>
