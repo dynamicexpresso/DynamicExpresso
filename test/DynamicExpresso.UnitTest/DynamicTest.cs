@@ -24,6 +24,15 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Get_Property_of_a_nested_anonymous()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new { Foo = new { Bar = new { Foo2 = "bar" } } };
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			Assert.AreEqual(dyn.Sub.Foo.Bar.Foo2, interpreter.Eval("dyn.Sub.Foo.Bar.Foo2"));
+		}
+
+		[Test]
 		public void Get_Property_of_a_nested_ExpandoObject()
 		{
 			dynamic dyn = new ExpandoObject();
@@ -87,6 +96,19 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Invoke_Method_of_a_nested_ExpandoObject_WithAnonymousType()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new ExpandoObject();
+			dyn.Sub.Foo = new { Func = new Func<string>(() => "bar") };
+
+			var interpreter = new Interpreter()
+					.SetVariable("dyn", dyn);
+
+			Assert.AreEqual(dyn.Sub.Foo.Func(), interpreter.Eval("dyn.Sub.Foo.Func()"));
+		}
+
+		[Test]
 		public void Standard_methods_have_precedence_over_dynamic_methods()
 		{
 			var dyn = new TestDynamicClass();
@@ -114,6 +136,51 @@ namespace DynamicExpresso.UnitTest
 			dyn.Sub = new int[] {42};
 			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
 			Assert.AreEqual(dyn.Sub[0], interpreter.Eval("dyn.Sub[0]"));
+		}
+
+		[Test]
+		public void Get_value_of_a_nested_array_from_anonymous_type()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new { Foo = new int[] { 42 }, Bar = new { Sub = new int[] { 43 } } };
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			Assert.AreEqual(dyn.Sub.Foo[0], interpreter.Eval("dyn.Sub.Foo[0]"));
+			Assert.AreEqual(dyn.Sub.Bar.Sub[0], interpreter.Eval("dyn.Sub.Bar.Sub[0]"));
+			Assert.AreEqual(dyn.Sub.Bar.Sub.Length, interpreter.Eval("dyn.Sub.Bar.Sub.Length"));
+		}
+
+		[Test]
+		public void Get_value_of_an_array_of_anonymous_type()
+		{
+			dynamic dyn = new ExpandoObject();
+			var anonType1 = new { Foo = string.Empty };
+			var anonType2 = new { Foo = "string.Empty" };
+			var nullAnonType = anonType1;
+			nullAnonType = null;
+			dyn.Sub = new
+			{
+				Arg1 = anonType1,
+				Arg2 = anonType2,
+				Arg3 = nullAnonType,
+				Arr = new[] { anonType1, anonType2, nullAnonType },
+				ObjArr = new object[] { "Test", anonType1 }
+			};
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			Assert.AreSame(dyn.Sub.Arg1.Foo, interpreter.Eval("dyn.Sub.Arg1.Foo"));
+			Assert.AreSame(dyn.Sub.Arg2.Foo, interpreter.Eval("dyn.Sub.Arg2.Foo"));
+			Assert.Throws<RuntimeBinderException>(() => Console.WriteLine(dyn.Sub.Arg3.Foo));
+			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Sub.Arg3.Foo"));
+			Assert.AreSame(dyn.Sub.Arr[0].Foo, interpreter.Eval("dyn.Sub.Arr[0].Foo"));
+			Assert.AreSame(dyn.Sub.Arr[1].Foo, interpreter.Eval("dyn.Sub.Arr[1].Foo"));
+
+			Assert.Throws<RuntimeBinderException>(() => Console.WriteLine(dyn.Sub.Arr[2].Foo));
+			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Sub.Arr[2].Foo"));
+
+			Assert.AreSame(dyn.Sub.ObjArr[0], interpreter.Eval("dyn.Sub.ObjArr[0]"));
+			Assert.AreEqual(dyn.Sub.ObjArr[0].Length, interpreter.Eval("dyn.Sub.ObjArr[0].Length"));
+
+			Assert.AreSame(dyn.Sub.ObjArr[1], interpreter.Eval("dyn.Sub.ObjArr[1]"));
+			Assert.AreSame(dyn.Sub.ObjArr[1].Foo, interpreter.Eval("dyn.Sub.ObjArr[1].Foo"));
 		}
 
 		[Test]

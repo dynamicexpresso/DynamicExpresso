@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Dynamic;
 using System.Globalization;
@@ -1792,43 +1793,38 @@ namespace DynamicExpresso.Parsing
 		//    return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
 		//}
 
+		/// <summary>
+		/// Returns null if <paramref name="t"/> is an Array type.  Needed because the <seealso cref="Microsoft.CSharp.RuntimeBinder.Binder"/> lookup methods fail with a <seealso cref="InvalidCastException"/> if the array type is used.
+		/// Everything still miraculously works on the array if null is given for the type.
+		/// </summary>
+		/// <param name="t"></param>
+		/// <returns></returns>
+		private static Type RemoveArrayType(Type t)
+		{
+			if (t == null || t.IsArray)
+			{
+				return null;
+			}
+			return t;
+		}
+
 		private static Expression ParseDynamicProperty(Type type, Expression instance, string propertyOrFieldName)
 		{
-			var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
-				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-				propertyOrFieldName,
-				type,
-				new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
-			);
-
-			return Expression.Dynamic(binder, typeof(object), instance);
+			return Expression.Dynamic(new LateGetMemberCallSiteBinder(propertyOrFieldName), typeof(object), instance);
 		}
 
 		private static Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
-			var binderM = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
-				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-				methodName,
-				null,
-				type,
-				argsDynamic.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
-			);
-
-			return Expression.Dynamic(binderM, typeof(object), argsDynamic);
+			return Expression.Dynamic(new LateInvokeMethodCallSiteBinder(methodName), typeof(object), argsDynamic);
 		}
 
 		private static Expression ParseDynamicIndex(Type type, Expression instance, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
-			var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetIndex(
-				Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-				type,
-				argsDynamic.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
-			);
-			return Expression.Dynamic(binder, typeof(object), argsDynamic);
+			return Expression.Dynamic(new LateInvokeIndexCallSiteBinder(), typeof(object), argsDynamic);
 		}
 
 		private Expression[] ParseArgumentList(TokenId openToken, string missingOpenTokenMsg,
@@ -3468,5 +3464,71 @@ namespace DynamicExpresso.Parsing
 				return result;
 			}
 		}
+
+		/// <summary>
+		/// Binds to a member access of an instance as late as possible.  This allows the use of anonymous types on dynamic values.
+		/// </summary>
+		private class LateGetMemberCallSiteBinder : CallSiteBinder
+		{
+			private readonly string _propertyOrFieldName;
+
+			public LateGetMemberCallSiteBinder(string propertyOrFieldName)
+			{
+				_propertyOrFieldName = propertyOrFieldName;
+			}
+
+			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+			{
+				var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
+					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+					_propertyOrFieldName,
+					RemoveArrayType(args[0]?.GetType()),
+					new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
+				);
+				return binder.Bind(args, parameters, returnLabel);
+			}
+		}
+
+		/// <summary>
+		/// Binds to a method invocation of an instance as late as possible.  This allows the use of anonymous types on dynamic values.
+		/// </summary>
+		private class LateInvokeMethodCallSiteBinder : CallSiteBinder
+		{
+			private readonly string _methodName;
+
+			public LateInvokeMethodCallSiteBinder(string methodName)
+			{
+				_methodName = methodName;
+			}
+
+			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+			{
+				var binderM = Microsoft.CSharp.RuntimeBinder.Binder.InvokeMember(
+					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+					_methodName,
+					null,
+					RemoveArrayType(args[0]?.GetType()),
+					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
+				);
+				return binderM.Bind(args, parameters, returnLabel);
+			}
+		}
+
+		/// <summary>
+		/// Binds to an items invocation of an instance as late as possible.  This allows the use of anonymous types on dynamic values.
+		/// </summary>
+		private class LateInvokeIndexCallSiteBinder : CallSiteBinder
+		{
+			public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+			{
+				var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetIndex(
+					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
+					RemoveArrayType(args[0]?.GetType()),
+					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
+				);
+				return binder.Bind(args, parameters, returnLabel);
+			}
+		}
+
 	}
 }
