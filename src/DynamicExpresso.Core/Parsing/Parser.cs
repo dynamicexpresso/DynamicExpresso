@@ -149,6 +149,8 @@ namespace DynamicExpresso.Parsing
 
 				var startExpr = _parsePosition;
 
+				// decide where the lambda expression body ends:
+				// it's the first unmatched parenthesis, curly bracket, of comma
 				var parenCount = 0;
 				var inLambdaBody = true;
 				while (inLambdaBody)
@@ -156,9 +158,9 @@ namespace DynamicExpresso.Parsing
 					NextToken();
 					if (_token.id == TokenId.End)
 						inLambdaBody = false;
-					if (_token.id == TokenId.OpenParen)
+					if (_token.id == TokenId.OpenParen || _token.id == TokenId.OpenCurlyBracket)
 						parenCount++;
-					if (_token.id == TokenId.CloseParen)
+					if (_token.id == TokenId.CloseParen || _token.id == TokenId.CloseCurlyBracket)
 						parenCount--;
 
 					// lambda is a function parameter

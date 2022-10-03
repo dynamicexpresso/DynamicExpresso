@@ -249,12 +249,19 @@ namespace DynamicExpresso.UnitTest
 		public void Two_lambda_parameters()
 		{
 			var target = new Interpreter(_options);
+			target.Reference(typeof(WithProp));
+
 			var list = new List<string> { "aaaaa", "bbbb", "ccc", "ddd" };
 			target.SetVariable("myList", list);
-			var results = target.Eval<Dictionary<string, int>>("myList.ToDictionary(str => str, str => str.Length)");
+			var results = target.Eval<Dictionary<string, int>>("myList.ToDictionary(str => new WithProp { MyStr = str }.MyStr, str => str.Length)");
 
 			Assert.AreEqual(4, results.Count);
-			Assert.AreEqual(list.ToDictionary(str => str, str => str.Length), results);
+			Assert.AreEqual(list.ToDictionary(str => new WithProp { MyStr = str }.MyStr, str => str.Length), results);
+		}
+
+		private class WithProp
+		{
+			public string MyStr { get; set; }
 		}
 
 		[Test]

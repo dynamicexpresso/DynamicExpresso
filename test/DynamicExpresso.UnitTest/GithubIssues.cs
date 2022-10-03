@@ -640,6 +640,28 @@ namespace DynamicExpresso.UnitTest
 			public int Grade { get; set; }
 			public double BonusFactor { get; set; }
 		}
+
+		[Test]
+		public void Lambda_Issue_259()
+		{
+			var options = InterpreterOptions.Default | InterpreterOptions.LambdaExpressions;
+			var interpreter = new Interpreter(options);
+			interpreter.SetVariable("courseList", new[] { new { PageName = "Test" } });
+			interpreter.Reference(typeof(PageType));
+
+			var results = interpreter.Eval<IEnumerable<PageType>>(@"courseList.Select(x => new PageType() { PageName = x.PageName, VisualCount = 5 })");
+			Assert.AreEqual(1, results.Count());
+
+			var result = results.Single();
+			Assert.AreEqual("Test", result.PageName);
+			Assert.AreEqual(5, result.VisualCount);
+		}
+
+		public class PageType
+		{
+			public string PageName { get; set; }
+			public int VisualCount { get; set; }
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
