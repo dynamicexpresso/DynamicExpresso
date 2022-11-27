@@ -662,6 +662,28 @@ namespace DynamicExpresso.UnitTest
 			public string PageName { get; set; }
 			public int VisualCount { get; set; }
 		}
+
+		[Test]
+		public void Lambda_Issue_262()
+		{
+			var list = new List<int> { 10, 30, 4 };
+
+			var options = InterpreterOptions.Default | InterpreterOptions.LambdaExpressions;
+			var interpreter = new Interpreter(options);
+			interpreter.SetVariable("b", new Functions());
+			interpreter.SetVariable("list", list);
+
+			var results = interpreter.Eval<List<int>>(@"b.Add(list, (int t) => t + 10)");
+			Assert.AreEqual(new List<int> { 20, 40, 14 }, results);
+		}
+
+		public class Functions
+		{
+			public List<int> Add(List<int> list, Func<int, int> transform)
+			{
+				return list.Select(i => transform(i)).ToList();
+			}
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
