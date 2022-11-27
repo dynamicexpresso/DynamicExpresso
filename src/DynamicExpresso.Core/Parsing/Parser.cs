@@ -674,7 +674,6 @@ namespace DynamicExpresso.Parsing
 			var enumType = expr.Type;
 			var underlyingType = enumType.GetEnumUnderlyingType();
 			expr = Expression.Convert(expr, underlyingType);
-
 			return Expression.MakeUnary(unaryType, expr, enumType);
 		}
 
