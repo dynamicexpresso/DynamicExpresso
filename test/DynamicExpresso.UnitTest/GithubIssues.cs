@@ -664,7 +664,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		public void Lambda_Issue_262()
+		public void GitHub_Issue_262()
 		{
 			var list = new List<int> { 10, 30, 4 };
 
@@ -674,6 +674,10 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("list", list);
 
 			var results = interpreter.Eval<List<int>>(@"b.Add(list, (int t) => t + 10)");
+			Assert.AreEqual(new List<int> { 20, 40, 14 }, results);
+
+			// ensure that list, t are not parsed as two arguments of a lambda expression
+			results = interpreter.Eval<List<int>>(@"b.Add(list, t => t + 10)");
 			Assert.AreEqual(new List<int> { 20, 40, 14 }, results);
 		}
 
