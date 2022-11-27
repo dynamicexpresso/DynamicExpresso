@@ -671,7 +671,7 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(DateTimeKind));
 
 			var result = target.Eval<RegexOptions>("~RegexOptions.None");
-			Assert.AreEqual(result, ~RegexOptions.None);
+			Assert.AreEqual(~RegexOptions.None, result);
 
 			// DateTimeKind doesn't have the Flags attribute: the bitwise operation returns an integer
 			var result2 = target.Eval<DateTimeKind>("~DateTimeKind.Local");
