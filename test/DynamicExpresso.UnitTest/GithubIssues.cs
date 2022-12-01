@@ -663,6 +663,47 @@ namespace DynamicExpresso.UnitTest
 			public string PageName { get; set; }
 			public int VisualCount { get; set; }
 		}
+    
+		[Test]
+		public void GitHub_Issue_261()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(RegexOptions));
+			target.Reference(typeof(DateTimeKind));
+
+			var result = target.Eval<RegexOptions>("~RegexOptions.None");
+			Assert.AreEqual(~RegexOptions.None, result);
+
+			// DateTimeKind doesn't have the Flags attribute: the bitwise operation returns an integer
+			var result2 = target.Eval<DateTimeKind>("~DateTimeKind.Local");
+			Assert.AreEqual((DateTimeKind)(-3), result2);
+		}
+
+		[Test]
+		public void GitHub_Issue_262()
+		{
+			var list = new List<int> { 10, 30, 4 };
+
+			var options = InterpreterOptions.Default | InterpreterOptions.LambdaExpressions;
+			var interpreter = new Interpreter(options);
+			interpreter.SetVariable("b", new Functions());
+			interpreter.SetVariable("list", list);
+
+			var results = interpreter.Eval<List<int>>(@"b.Add(list, (int t) => t + 10)");
+			Assert.AreEqual(new List<int> { 20, 40, 14 }, results);
+
+			// ensure that list, t are not parsed as two arguments of a lambda expression
+			results = interpreter.Eval<List<int>>(@"b.Add(list, t => t + 10)");
+			Assert.AreEqual(new List<int> { 20, 40, 14 }, results);
+		}
+
+		public class Functions
+		{
+			public List<int> Add(List<int> list, Func<int, int> transform)
+			{
+				return list.Select(i => transform(i)).ToList();
+			}
+		}
 
 		[Test]
 		[TestCase("0, null, 0, 0")]

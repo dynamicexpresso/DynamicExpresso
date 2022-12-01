@@ -214,6 +214,9 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 			}
 
+			if (!hasOpenParen && parameters.Length > 1)
+				throw new ParseException("Multiple lambda parameters detected, but with no surrounding parenthesis", _parsePosition);
+
 			return parameters;
 		}
 
@@ -641,6 +644,11 @@ namespace DynamicExpresso.Parsing
 			if (IsDynamicExpression(expr))
 				return GenerateUnaryDynamic(unaryType, expr);
 
+			// enum unary operations are not resolved properly by Linq
+			var unaryOps = new[] { ExpressionType.OnesComplement };
+			if (expr.Type.IsEnum && unaryOps.Contains(unaryType))
+				return GenerateUnaryEnums(unaryType, expr);
+
 			// find the overloaded unary operator
 			string opName;
 			switch (unaryType)
@@ -662,6 +670,14 @@ namespace DynamicExpresso.Parsing
 
 			// if no operator was found, the default Linq resolution will occur
 			return Expression.MakeUnary(unaryType, expr, null, operatorMethod);
+		}
+
+		private Expression GenerateUnaryEnums(ExpressionType unaryType, Expression expr)
+		{
+			var enumType = expr.Type;
+			var underlyingType = enumType.GetEnumUnderlyingType();
+			expr = Expression.Convert(expr, underlyingType);
+			return Expression.MakeUnary(unaryType, expr, enumType);
 		}
 
 		private Expression GenerateUnaryDynamic(ExpressionType unaryType, Expression expr)
@@ -2309,11 +2325,11 @@ namespace DynamicExpresso.Parsing
 					if (method.PromotedParameters[i] is InterpreterExpression ie)
 					{
 						var actualParamInfo = actualMethodParameters[i];
-						var delegateType = actualParamInfo.ParameterType;
-						if (delegateType.GetGenericArguments().Length != ie.Parameters.Count + 1)
+						var lambdaExpr = GenerateLambdaFromInterpreterExpression(ie, actualParamInfo.ParameterType);
+						if (lambdaExpr == null)
 							return false;
 
-						method.PromotedParameters[i] = ie.EvalAs(delegateType);
+						method.PromotedParameters[i] = lambdaExpr;
 
 						// we have inferred all types, update the method definition
 						genericMethod = MakeGenericMethod(method);
@@ -2324,6 +2340,14 @@ namespace DynamicExpresso.Parsing
 			}
 
 			return true;
+		}
+
+		private static LambdaExpression GenerateLambdaFromInterpreterExpression(InterpreterExpression ie, Type delegateType)
+		{
+			if (delegateType.GetGenericArguments().Length != ie.Parameters.Count + 1)
+				return null;
+
+			return ie.EvalAs(delegateType);
 		}
 
 		private static MethodInfo MakeGenericMethod(MethodData method)
@@ -2404,6 +2428,9 @@ namespace DynamicExpresso.Parsing
 			{
 				if (!ie.IsCompatibleWithDelegate(type))
 					return null;
+
+				if (!type.ContainsGenericParameters)
+					return GenerateLambdaFromInterpreterExpression(ie, type);
 
 				return expr;
 			}
