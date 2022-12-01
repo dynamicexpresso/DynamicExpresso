@@ -2228,7 +2228,7 @@ namespace DynamicExpresso.Parsing
 					declaredWorkingParameters++;
 				}
 
-				if (paramsArrayPromotedArgument == null)
+				if (paramsArrayPromotedArgument == null && (paramsArrayTypeFound == null || args.Length == method.Parameters.Length))
 				{
 					if (parameterType.IsGenericParameter)
 					{

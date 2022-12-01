@@ -533,6 +533,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			public static List<T> Array<T>(IEnumerable<T> collection) => new List<T>(collection);
 			public static List<dynamic> Array(params dynamic[] array) => Array((IEnumerable<dynamic>)array);
+			public static int ParamArrayObjects(params object[] values) => values.Length;
 			public static IEnumerable<dynamic> Select<TSource>(IEnumerable<TSource> collection, string expression) => new List<dynamic>();
 			public static IEnumerable<dynamic> Select(IEnumerable collection, string expression) => new List<dynamic>();
 			public static int Any<T>(IEnumerable<T> collection) => 1;
@@ -702,6 +703,21 @@ namespace DynamicExpresso.UnitTest
 			{
 				return list.Select(i => transform(i)).ToList();
 			}
+		}
+
+		[Test]
+		[TestCase("0, null, 0, 0")]
+		[TestCase("null, null, 0, 0")]
+		[TestCase("new object[] { null, null, null, null }")]
+		public void GitHub_Issue_263(string paramsArguments)
+		{
+			var interpreter = new Interpreter();
+			interpreter.Reference(typeof(Utils));
+
+			Assert.Throws<NullReferenceException>(() => interpreter.Eval<int>("Utils.ParamArrayObjects(null)"));
+
+			var result = interpreter.Eval<int>($"Utils.ParamArrayObjects({paramsArguments})");
+			Assert.AreEqual(4, result);
 		}
 	}
 
