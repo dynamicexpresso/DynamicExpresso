@@ -1,4 +1,6 @@
-﻿using System.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
@@ -36,6 +38,21 @@ namespace DynamicExpresso.UnitTest
 
 		public class FakeClass
 		{
+		}
+
+		[Test]
+		public void Registering_generic_types()
+		{
+			var target = new Interpreter(InterpreterOptions.None);
+
+			var exception = Assert.Throws<ArgumentException>(() => target.Reference(typeof(List<string>)));
+			Assert.That(exception.Message, Contains.Substring("List<>"));
+
+			exception = Assert.Throws<ArgumentException>(() => target.Reference(typeof(Tuple<string, string, int>)));
+			Assert.That(exception.Message, Contains.Substring("Tuple<,,>"));
+
+			Assert.DoesNotThrow(() => target.Reference(typeof(List<>)));
+			Assert.DoesNotThrow(() => target.Reference(typeof(Tuple<,,>)));
 		}
 	}
 }
