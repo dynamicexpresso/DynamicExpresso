@@ -214,6 +214,9 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 			}
 
+			if (!hasOpenParen && parameters.Length > 1)
+				throw new ParseException("Multiple lambda parameters detected, but with no surrounding parenthesis", _parsePosition);
+
 			return parameters;
 		}
 
@@ -2322,11 +2325,11 @@ namespace DynamicExpresso.Parsing
 					if (method.PromotedParameters[i] is InterpreterExpression ie)
 					{
 						var actualParamInfo = actualMethodParameters[i];
-						var delegateType = actualParamInfo.ParameterType;
-						if (delegateType.GetGenericArguments().Length != ie.Parameters.Count + 1)
+						var lambdaExpr = GenerateLambdaFromInterpreterExpression(ie, actualParamInfo.ParameterType);
+						if (lambdaExpr == null)
 							return false;
 
-						method.PromotedParameters[i] = ie.EvalAs(delegateType);
+						method.PromotedParameters[i] = lambdaExpr;
 
 						// we have inferred all types, update the method definition
 						genericMethod = MakeGenericMethod(method);
@@ -2337,6 +2340,14 @@ namespace DynamicExpresso.Parsing
 			}
 
 			return true;
+		}
+
+		private static LambdaExpression GenerateLambdaFromInterpreterExpression(InterpreterExpression ie, Type delegateType)
+		{
+			if (delegateType.GetGenericArguments().Length != ie.Parameters.Count + 1)
+				return null;
+
+			return ie.EvalAs(delegateType);
 		}
 
 		private static MethodInfo MakeGenericMethod(MethodData method)
@@ -2417,6 +2428,9 @@ namespace DynamicExpresso.Parsing
 			{
 				if (!ie.IsCompatibleWithDelegate(type))
 					return null;
+
+				if (!type.ContainsGenericParameters)
+					return GenerateLambdaFromInterpreterExpression(ie, type);
 
 				return expr;
 			}
