@@ -662,6 +662,21 @@ namespace DynamicExpresso.UnitTest
 			public string PageName { get; set; }
 			public int VisualCount { get; set; }
 		}
+    
+		[Test]
+		public void GitHub_Issue_261()
+		{
+			var target = new Interpreter();
+			target.Reference(typeof(RegexOptions));
+			target.Reference(typeof(DateTimeKind));
+
+			var result = target.Eval<RegexOptions>("~RegexOptions.None");
+			Assert.AreEqual(~RegexOptions.None, result);
+
+			// DateTimeKind doesn't have the Flags attribute: the bitwise operation returns an integer
+			var result2 = target.Eval<DateTimeKind>("~DateTimeKind.Local");
+			Assert.AreEqual((DateTimeKind)(-3), result2);
+		}
 
 		[Test]
 		public void GitHub_Issue_262()
