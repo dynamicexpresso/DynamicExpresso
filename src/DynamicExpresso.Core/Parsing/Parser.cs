@@ -641,6 +641,11 @@ namespace DynamicExpresso.Parsing
 			if (IsDynamicExpression(expr))
 				return GenerateUnaryDynamic(unaryType, expr);
 
+			// enum unary operations are not resolved properly by Linq
+			var unaryOps = new[] { ExpressionType.OnesComplement };
+			if (expr.Type.IsEnum && unaryOps.Contains(unaryType))
+				return GenerateUnaryEnums(unaryType, expr);
+
 			// find the overloaded unary operator
 			string opName;
 			switch (unaryType)
@@ -662,6 +667,14 @@ namespace DynamicExpresso.Parsing
 
 			// if no operator was found, the default Linq resolution will occur
 			return Expression.MakeUnary(unaryType, expr, null, operatorMethod);
+		}
+
+		private Expression GenerateUnaryEnums(ExpressionType unaryType, Expression expr)
+		{
+			var enumType = expr.Type;
+			var underlyingType = enumType.GetEnumUnderlyingType();
+			expr = Expression.Convert(expr, underlyingType);
+			return Expression.MakeUnary(unaryType, expr, enumType);
 		}
 
 		private Expression GenerateUnaryDynamic(ExpressionType unaryType, Expression expr)
