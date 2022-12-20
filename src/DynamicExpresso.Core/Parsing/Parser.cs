@@ -2314,7 +2314,12 @@ namespace DynamicExpresso.Parsing
 			if (method.MethodBase != null && method.MethodBase.IsGenericMethodDefinition &&
 			    method.MethodBase is MethodInfo)
 			{
-				var genericMethod = MakeGenericMethod(method);
+				MethodInfo genericMethod;
+#if NET7_0_OR_GREATER
+				genericMethod = TryMakeGenericMethod(method);
+#else
+				genericMethod = MakeGenericMethod(method);
+#endif
 				if (genericMethod == null)
 					return false;
 
@@ -2364,11 +2369,40 @@ namespace DynamicExpresso.Parsing
 			return methodInfo.MakeGenericMethod(genericArgs);
 		}
 
+		private static MethodInfo TryMakeGenericMethod(MethodData method)
+		{
+			var methodInfo = (MethodInfo)method.MethodBase;
+			var actualGenericArgs = ExtractActualGenericArguments(
+				method.Parameters.Select(p => p.ParameterType).ToArray(),
+				method.PromotedParameters.Select(p => p.Type).ToArray());
+
+			var genericArgs = methodInfo.GetGenericArguments()
+				.Select(p => actualGenericArgs.TryGetValue(p.Name, out var typ) ? typ : typeof(object))
+				.ToArray();
+
+			MethodInfo methodToReturn = null;
+			try
+			{
+				methodToReturn = methodInfo.MakeGenericMethod(genericArgs);
+			}
+			catch (ArgumentException e)
+			{
+				return null;
+			}
+
+			return methodToReturn;
+		}
+
 		private static Dictionary<string, Type> ExtractActualGenericArguments(
 			Type[] methodGenericParameters,
 			Type[] methodActualParameters)
 		{
 			var extractedGenericTypes = new Dictionary<string, Type>();
+
+#if NET7_0_OR_GREATER
+			if (methodGenericParameters.Length != methodActualParameters.Length)
+				return extractedGenericTypes;
+#endif
 
 			for (var i = 0; i < methodGenericParameters.Length; i++)
 			{

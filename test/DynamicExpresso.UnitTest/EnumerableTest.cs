@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using NUnit.Framework;
 using System.Collections.Generic;
 
@@ -18,6 +18,7 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual(x.Count(), target.Eval("x.Count()"));
 			Assert.AreEqual(x.Average(), target.Eval("x.Average()"));
+			Assert.AreEqual(x.Sum(), target.Eval("x.Sum()"));
 			Assert.AreEqual(x.First(), target.Eval("x.First()"));
 			Assert.AreEqual(x.Last(), target.Eval("x.Last()"));
 			Assert.AreEqual(x.Max(), target.Eval("x.Max()"));
