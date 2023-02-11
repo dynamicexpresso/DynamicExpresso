@@ -17,10 +17,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.x'
-    - name: Setup .NET Core 5.0
+    - name: Setup .NET 7.0
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.x'
+        dotnet-version: '7.0.x'
     - name: Setup gitversion
       run: dotnet tool install --global GitVersion.Tool
     - name: Calculate version
@@ -34,16 +34,16 @@ jobs:
       run: dotnet build DynamicExpresso.sln --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}}
     - name: Test .net core 3.1
       run: dotnet test DynamicExpresso.sln --no-build --no-restore -c Release --verbosity normal -f netcoreapp3.1
-    - name: Test .net core 5.0
-      run: dotnet test DynamicExpresso.sln --no-build --no-restore -c Release --verbosity normal -f netcoreapp5.0
+    - name: Test .net core 7.0
+      run: dotnet test DynamicExpresso.sln --no-build --no-restore -c Release --verbosity normal -f net7.0
   test-win:
     runs-on: windows-2019
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET Core 5.0
+    - name: Setup .NET 7.0
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '5.0.x'
+        dotnet-version: '7.0.x'
     - name: Restore packages
       run: dotnet restore DynamicExpresso.sln
     - name: Build
