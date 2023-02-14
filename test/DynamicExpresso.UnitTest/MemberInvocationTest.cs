@@ -328,8 +328,18 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(x.MethodWithGenericParamAndDefault1Levels(y), target.Eval("x.MethodWithGenericParamAndDefault1Levels(y)", parameters));
 			Assert.AreEqual(x.MethodWithGenericParamAndDefault2Levels(y), target.Eval("x.MethodWithGenericParamAndDefault2Levels(y)", parameters));
 			Assert.AreEqual(x.MethodWithGenericParamAndDefault2Levels(y, w), target.Eval("x.MethodWithGenericParamAndDefault2Levels(y, w)", parameters));
+		}
 
+		[Test]
+		public void Method_with_generic_constraints()
+		{
+			var target = new Interpreter();
 
+			var x = new MyTestService();
+			target.SetVariable("x", x);
+
+			Assert.AreEqual("works", target.Eval("x.GenericMethodWithConstraint(\"works\")"));
+			Assert.Throws<NoApplicableMethodException>(() => target.Eval("x.GenericMethodWithConstraint(5)"), "This shouldn't throw a System.ArgumentException \"Violates the constraint of type 'T'\"");
 		}
 
 		[Test]
@@ -645,6 +655,11 @@ namespace DynamicExpresso.UnitTest
 			public long OverloadMethodWithParamsArray(params long[] paramsArray)
 			{
 				return paramsArray.Max();
+			}
+
+			public T GenericMethodWithConstraint<T>(T input) where T : class
+			{
+				return input;
 			}
 		}
 

@@ -2,13 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Dynamic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Security;
 using System.Text;
 using DynamicExpresso.Exceptions;
 using DynamicExpresso.Resources;
@@ -2361,7 +2361,18 @@ namespace DynamicExpresso.Parsing
 				.Select(p => actualGenericArgs.TryGetValue(p.Name, out var typ) ? typ : typeof(object))
 				.ToArray();
 
-			return methodInfo.MakeGenericMethod(genericArgs);
+			MethodInfo genericMethod = null;
+			try
+			{
+				genericMethod = methodInfo.MakeGenericMethod(genericArgs);
+			}
+			catch (ArgumentException e) when (e.InnerException is VerificationException)
+			{
+				// this exception is thrown when a generic argument violates the generic constraints
+				return null;
+			}
+
+			return genericMethod;
 		}
 
 		private static Dictionary<string, Type> ExtractActualGenericArguments(
@@ -2398,8 +2409,12 @@ namespace DynamicExpresso.Parsing
 					}
 					else
 					{
-						var innerGenericTypes = ExtractActualGenericArguments(requestedType.GetGenericArguments(), actualType.GetGenericArguments());
+						var requestedInnerGenericArgs = requestedType.GetGenericArguments();
+						var actualInnerGenericArgs = actualType.GetGenericArguments();
+						if (requestedInnerGenericArgs.Length != actualInnerGenericArgs.Length)
+							continue;
 
+						var innerGenericTypes = ExtractActualGenericArguments(requestedInnerGenericArgs, actualInnerGenericArgs);
 						foreach (var innerGenericType in innerGenericTypes)
 							extractedGenericTypes[innerGenericType.Key] = innerGenericType.Value;
 					}
