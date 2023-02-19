@@ -719,6 +719,15 @@ namespace DynamicExpresso.UnitTest
 			var result = interpreter.Eval<int>($"Utils.ParamArrayObjects({paramsArguments})");
 			Assert.AreEqual(4, result);
 		}
+
+		[Test]
+		public void GitHub_Issue_276()
+		{
+			var interpreter = new Interpreter();
+
+			var result = interpreter.Eval<bool>("((int?)5)>((double?)4)");
+			Assert.IsTrue(result);
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
