@@ -40,7 +40,7 @@ jobs:
     - name: Test .net core 7.0
       run: dotnet test DynamicExpresso.sln --no-build --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}} --verbosity normal -f net7.0
     - name: Setup nuget sources
-      run: dotnet nuget add source --name github "https://nuget.pkg.github.com/davideicardi/index.json"
+      run: dotnet nuget add source --name github "https://nuget.pkg.github.com/dynamicexpresso/index.json"
     - name: Pack
       run: dotnet pack DynamicExpresso.sln --no-build --no-restore -c Release /p:Version=${{steps.calc_version.outputs.PROJECT_VERSION}} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
     - name: Publish to github
