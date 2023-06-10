@@ -481,8 +481,6 @@ namespace DynamicExpresso.Parsing
 					left = Expression.TypeAs(left, knownType);
 				else
 					throw CreateParseException(_token.pos, ErrorMessages.SyntaxError);
-
-				NextToken();
 			}
 
 			return left;
@@ -1443,6 +1441,22 @@ namespace DynamicExpresso.Parsing
 			var originalPos = _token.pos;
 			_arguments.TryGetKnownType(name, out type);
 
+			type = ParseKnownGenericType(name, type);
+			type = ParseTypeModifiers(type);
+
+			if (type == null)
+			{
+				// type name couldn't be parsed: restore position
+				SetTextPos(originalPos);
+				NextToken();
+				return false;
+			}
+
+			return true;
+		}
+
+		private Type ParseKnownGenericType(string name, Type type)
+		{
 			NextToken();
 			if (_token.id == TokenId.LessThan)
 			{
@@ -1451,7 +1465,7 @@ namespace DynamicExpresso.Parsing
 
 				// if no type was registered with the simple name, try the full generic name
 				if (type == null && !_arguments.TryGetKnownType(name + $"`{rank}", out type))
-					return false;
+					return null;
 
 				if (rank != type.GetGenericArguments().Length)
 					throw new ArgumentException($"The number of generic arguments provided doesn't equal the arity of the generic type definition.");
@@ -1463,17 +1477,7 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 			}
 
-			type = ParseTypeModifiers(type);
-			if (type == null)
-			{
-				// type name couldn't be parsed: restore position
-				SetTextPos(originalPos);
-				NextToken();
-
-				return false;
-			}
-
-			return true;
+			return type;
 		}
 
 		// we found a known type identifier, check if it has some modifiers
@@ -3346,6 +3350,9 @@ namespace DynamicExpresso.Parsing
 					}
 					if (_parsePosition == _expressionTextLength)
 					{
+						if (_token.id == TokenId.End)
+							throw new InvalidOperationException("NextToken called when already at the end of the expression");
+
 						t = TokenId.End;
 						break;
 					}
