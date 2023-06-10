@@ -738,8 +738,8 @@ namespace DynamicExpresso.UnitTest
 			object str = "test";
 			interpreter.SetVariable("str", str, typeof(object));
 
-			Assert.AreEqual(str is string, interpreter.Eval("(str is string)"));
-			Assert.AreEqual(str is int?, interpreter.Eval("(str is int?)"));
+			Assert.AreEqual(str is string, interpreter.Eval("str is string"));
+			Assert.AreEqual(str is int?, interpreter.Eval("str is int?"));
 			Assert.AreEqual(str is int[], interpreter.Eval("(str is int[])"));
 			Assert.AreEqual(str is int?[], interpreter.Eval("(str is int?[])"));
 			Assert.AreEqual(str is int?[][], interpreter.Eval("(str is int?[][])"));
