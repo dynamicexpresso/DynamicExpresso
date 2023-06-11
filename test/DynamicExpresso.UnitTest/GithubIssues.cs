@@ -738,6 +738,7 @@ namespace DynamicExpresso.UnitTest
 			object str = "test";
 			interpreter.SetVariable("str", str, typeof(object));
 
+			Assert.AreEqual(string.IsNullOrEmpty(str as string), interpreter.Eval("string.IsNullOrEmpty(str as string)"));
 			Assert.AreEqual(str is string, interpreter.Eval("str is string"));
 			Assert.AreEqual(str is int?, interpreter.Eval("str is int?"));
 			Assert.AreEqual(str is int[], interpreter.Eval("(str is int[])"));
@@ -746,6 +747,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(str is IEnumerable<int>[][], interpreter.Eval("(str is IEnumerable<int>[][])"));
 			Assert.AreEqual(str is IEnumerable<int?>[][], interpreter.Eval("(str is IEnumerable<int?>[][])"));
 			Assert.AreEqual(str is IEnumerable<int[]>[][], interpreter.Eval("(str is IEnumerable<int[]>[][])"));
+			Assert.AreEqual(str is IEnumerable<int?[][]>[][], interpreter.Eval("(str is IEnumerable<int?[][]>[][])"));
 			Assert.AreEqual(str is IEnumerable<int?[][]>[][], interpreter.Eval("(str is IEnumerable<int?[][]>[][])"));
 		}
 	}
