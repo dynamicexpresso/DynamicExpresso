@@ -748,7 +748,6 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(str is IEnumerable<int?>[][], interpreter.Eval("(str is IEnumerable<int?>[][])"));
 			Assert.AreEqual(str is IEnumerable<int[]>[][], interpreter.Eval("(str is IEnumerable<int[]>[][])"));
 			Assert.AreEqual(str is IEnumerable<int?[][]>[][], interpreter.Eval("(str is IEnumerable<int?[][]>[][])"));
-			Assert.AreEqual(str is IEnumerable<int?[][]>[][], interpreter.Eval("(str is IEnumerable<int?[][]>[][])"));
 		}
 	}
 
