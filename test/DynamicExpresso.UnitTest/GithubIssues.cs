@@ -510,7 +510,7 @@ namespace DynamicExpresso.UnitTest
 
 			// case insensivity outside lambda expressions
 			Assert.IsFalse(interpreter.Eval<bool>("dateinthepast > now()")); // identifier
-			Assert.IsTrue(interpreter.Eval<bool>("dateinthepast is datetimeoffset)")); // known type
+			Assert.IsTrue(interpreter.Eval<bool>("dateinthepast is datetimeoffset")); // known type
 			Assert.IsFalse(interpreter.Eval<bool>("dateinthepast.isinfuture()")); // extension method
 
 			// ensure the case insensitivity option is also used in the lambda expression
@@ -727,6 +727,27 @@ namespace DynamicExpresso.UnitTest
 
 			var result = interpreter.Eval<bool>("((int?)5)>((double?)4)");
 			Assert.IsTrue(result);
+		}
+
+		[Test]
+		public void GitHub_Issue_287()
+		{
+			var interpreter = new Interpreter();
+			interpreter.Reference(typeof(IEnumerable<>));
+
+			object str = "test";
+			interpreter.SetVariable("str", str, typeof(object));
+
+			Assert.AreEqual(string.IsNullOrEmpty(str as string), interpreter.Eval("string.IsNullOrEmpty(str as string)"));
+			Assert.AreEqual(str is string, interpreter.Eval("str is string"));
+			Assert.AreEqual(str is int?, interpreter.Eval("str is int?"));
+			Assert.AreEqual(str is int[], interpreter.Eval("(str is int[])"));
+			Assert.AreEqual(str is int?[], interpreter.Eval("(str is int?[])"));
+			Assert.AreEqual(str is int?[][], interpreter.Eval("(str is int?[][])"));
+			Assert.AreEqual(str is IEnumerable<int>[][], interpreter.Eval("(str is IEnumerable<int>[][])"));
+			Assert.AreEqual(str is IEnumerable<int?>[][], interpreter.Eval("(str is IEnumerable<int?>[][])"));
+			Assert.AreEqual(str is IEnumerable<int[]>[][], interpreter.Eval("(str is IEnumerable<int[]>[][])"));
+			Assert.AreEqual(str is IEnumerable<int?[][]>[][], interpreter.Eval("(str is IEnumerable<int?[][]>[][])"));
 		}
 	}
 
