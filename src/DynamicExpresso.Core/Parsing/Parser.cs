@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
 using DynamicExpresso.Exceptions;
+using DynamicExpresso.Reflection;
 using DynamicExpresso.Resources;
 using Microsoft.CSharp.RuntimeBinder;
 
@@ -3468,7 +3469,26 @@ namespace DynamicExpresso.Parsing
 
 			internal LambdaExpression EvalAs(Type delegateType)
 			{
-				var lambdaExpr = _interpreter.ParseAsExpression(delegateType, _expressionText, _parameters.Select(p => p.Name).ToArray());
+				var parametersNames = _parameters.Select(p => p.Name).ToArray();
+				var delegateInfo = ReflectionExtensions.GetDelegateInfo(delegateType, parametersNames);
+
+				// return type is object means that we have no information beforehand
+				// => we force it to typeof(void) so that no conversion expression is emitted by the parser
+				//    and the actual expression type is preserved
+				var returnType = delegateInfo.ReturnType;
+				if (returnType == typeof(object))
+					returnType = typeof(void);
+
+				var lambda = _interpreter.ParseRawExpression(_expressionText, returnType, delegateInfo.Parameters);
+
+				// change delegate return type to the actual type inferred during parsing
+				var types = delegateType.GetGenericArguments();
+				types[types.Length - 1] = lambda.Expression.Type;
+
+				var genericType = delegateType.GetGenericTypeDefinition();
+				var inferredDelegateType = genericType.MakeGenericType(types);
+				var lambdaExpr = Lambda(inferredDelegateType, lambda.Expression, lambda.DeclaredParameters.Select(p => p.Expression).ToArray());
+
 				_type = lambdaExpr.Type;
 				return lambdaExpr;
 			}

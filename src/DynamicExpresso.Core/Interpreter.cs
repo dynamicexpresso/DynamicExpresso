@@ -61,6 +61,11 @@ namespace DynamicExpresso
 				_settings.LambdaExpressions = true;
 			}
 
+			if ((options & InterpreterOptions.DetectUsedParameters) == InterpreterOptions.DetectUsedParameters)
+			{
+				_settings.DetectUsedParameters = true;
+			}
+
 			_visitors.Add(new DisableReflectionVisitor());
 		}
 
@@ -413,7 +418,7 @@ namespace DynamicExpresso
 		/// <exception cref="ParseException"></exception>
 		public Lambda Parse(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
-			return ParseAsLambda(expressionText, expressionType, parameters);
+			return ParseRawExpression(expressionText, expressionType, parameters).ToLambda();
 		}
 
 		[Obsolete("Use ParseAsDelegate<TDelegate>(string, params string[])")]
@@ -432,8 +437,8 @@ namespace DynamicExpresso
 		/// <exception cref="ParseException"></exception>
 		public TDelegate ParseAsDelegate<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			var lambda = ParseAs<TDelegate>(expressionText, parametersNames);
-			return lambda.Compile<TDelegate>();
+			var lambda = ParseRawExpression<TDelegate>(expressionText, parametersNames);
+			return lambda.Compile();
 		}
 
 		/// <summary>
@@ -446,35 +451,14 @@ namespace DynamicExpresso
 		/// <exception cref="ParseException"></exception>
 		public Expression<TDelegate> ParseAsExpression<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			var lambda = ParseAs<TDelegate>(expressionText, parametersNames);
-			return lambda.LambdaExpression<TDelegate>();
-		}
-
-		internal LambdaExpression ParseAsExpression(Type delegateType, string expressionText, params string[] parametersNames)
-		{
-			var delegateInfo = ReflectionExtensions.GetDelegateInfo(delegateType, parametersNames);
-
-			// return type is object means that we have no information beforehand
-			// => we force it to typeof(void) so that no conversion expression is emitted by the parser
-			//    and the actual expression type is preserved
-			var returnType = delegateInfo.ReturnType;
-			if (returnType == typeof(object))
-				returnType = typeof(void);
-
-			var lambda = ParseAsLambda(expressionText, returnType, delegateInfo.Parameters);
-			return lambda.LambdaExpression(delegateType);
+			var lambda = ParseRawExpression<TDelegate>(expressionText, parametersNames);
+			return lambda.LambdaExpression();
 		}
 
 		public Lambda ParseAs<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			return ParseAs(typeof(TDelegate), expressionText, parametersNames); 
-		}
-
-		internal Lambda ParseAs(Type delegateType, string expressionText, params string[] parametersNames)
-		{
-			var delegateInfo = ReflectionExtensions.GetDelegateInfo(delegateType, parametersNames);
-
-			return ParseAsLambda(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
+			var lambda = ParseRawExpression<TDelegate>(expressionText, parametersNames);
+			return lambda.ToLambda();
 		}
 		#endregion
 
@@ -525,7 +509,14 @@ namespace DynamicExpresso
 
 		#region Private methods
 
-		private Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
+		internal ParseResult<TDelegate> ParseRawExpression<TDelegate>(string expressionText, params string[] parametersNames)
+		{
+			var delegateInfo = ReflectionExtensions.GetDelegateInfo(typeof(TDelegate), parametersNames);
+			var parseResult = ParseRawExpression(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
+			return new ParseResult<TDelegate>(parseResult);
+		}
+
+		internal ParseResult ParseRawExpression(string expressionText, Type expressionType, Parameter[] parameters)
 		{
 			var arguments = new ParserArguments(
 												expressionText,
@@ -538,7 +529,7 @@ namespace DynamicExpresso
 			foreach (var visitor in Visitors)
 				expression = visitor.Visit(expression);
 
-			var lambda = new Lambda(expression, arguments);
+			var lambda = new ParseResult(expression, arguments);
 
 #if TEST_DetectIdentifiers
 			AssertDetectIdentifiers(lambda);
@@ -548,7 +539,7 @@ namespace DynamicExpresso
 		}
 
 #if TEST_DetectIdentifiers
-		private void AssertDetectIdentifiers(Lambda lambda)
+		private void AssertDetectIdentifiers(ParseResult lambda)
 		{
 			var info = DetectIdentifiers(lambda.ExpressionText);
 

@@ -233,6 +233,18 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Unused_lambda_parameter()
+		{
+			var target = new Interpreter(_options);
+			var list = new List<int> { 1, 2, 3 };
+			target.SetVariable("myList", list);
+			var results = target.Eval<IEnumerable<int>>("myList.Select(i => 4)");
+
+			Assert.AreEqual(3, results.Count());
+			Assert.AreEqual(new[] { 4, 4, 4 }, results);
+		}
+
+		[Test]
 		public void Lambda_with_multiple_params()
 		{
 			var target = new Interpreter(_options);
