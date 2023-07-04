@@ -11,11 +11,11 @@ namespace DynamicExpresso
 	{
 		private readonly ParserSettings _settings;
 
-		private static readonly string Type = @"\b(?<type>[a-zA-Z_]\w*)\b";
-		private static readonly string Id = @"\b(?<id>[a-zA-Z_]\w*)\b";
-		private static readonly Regex LambdaDetectionRegex = new Regex($@"(\((((?<withtype>({Type}\s+)?{Id}))(\s*,\s*)?)+\)|(?<withtype>{Id}))\s*=>", RegexOptions.Compiled);
+		private static readonly Regex IdentifiersDetectionRegex = new Regex(@"(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)", RegexOptions.Compiled);
 
-		private static readonly Regex IdentifiersDetectionRegex = new Regex(@"([^\.]|^)\b(?<id>[a-zA-Z_]\w*)\b", RegexOptions.Compiled);
+		private static readonly string Id = IdentifiersDetectionRegex.ToString();
+		private static readonly string Type = Id.Replace("<id>", "<type>");
+		private static readonly Regex LambdaDetectionRegex = new Regex($@"(\((((?<withtype>({Type}\s+)?{Id}))(\s*,\s*)?)+\)|(?<withtype>{Id}))\s*=>", RegexOptions.Compiled);
 
 		private static readonly Regex StringDetectionRegex = new Regex(@"(?<!\\)?"".*?(?<!\\)""", RegexOptions.Compiled);
 		private static readonly Regex CharDetectionRegex = new Regex(@"(?<!\\)?'.{1,2}?(?<!\\)'", RegexOptions.Compiled);
@@ -57,8 +57,8 @@ namespace DynamicExpresso
 						t++;
 					}
 
-					// there might be several lambda parameters with the same name;
-					// in that case, we ignore the detected type
+					// there might be several lambda parameters with the same name
+					//  -> in that case, we ignore the detected type
 					if (lambdaParameters.TryGetValue(identifier, out Identifier already) && already.Expression.Type != type)
 						type = typeof(object);
 
@@ -70,9 +70,14 @@ namespace DynamicExpresso
 
 			foreach (Match match in IdentifiersDetectionRegex.Matches(expression))
 			{
-				var identifier = match.Groups["id"].Value;
+				var idGroup = match.Groups["id"];
+				var identifier = idGroup.Value;
 
 				if (IsReservedKeyword(identifier))
+					continue;
+
+				// don't consider member accesses as identifiers (e.g. "x.Length" will only return x but not Length)
+				if (idGroup.Index > 0 && expression[idGroup.Index - 1] == '.')
 					continue;
 
 				if (_settings.Identifiers.TryGetValue(identifier, out Identifier knownIdentifier))
