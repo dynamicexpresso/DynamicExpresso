@@ -39,7 +39,7 @@ namespace DynamicExpresso.UnitTest
 			var detectedIdentifiers = target.DetectIdentifiers("x + y");
 
 			CollectionAssert.AreEqual(
-				new []{ "x", "y"}, 
+				new[] { "x", "y" },
 				detectedIdentifiers.UnknownIdentifiers.ToArray());
 		}
 
@@ -161,36 +161,30 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		public void Detect_identifiers_inside_other_expressions()
+		[TestCase("x + y")]
+		[TestCase("x + y + 654")]
+		[TestCase("x + y + 654.564")]
+		[TestCase("x.method + y[0]")]
+		[TestCase("x+y")]
+		[TestCase("x[y]")]
+		[TestCase("x.method1.method2(y)")]
+		[TestCase("x + y + \"z\"")]
+		[TestCase("x + y + \"lorem ipsum\"")]
+		[TestCase(@"x + y + ""literal \""2""")]
+		[TestCase("x + y + \"\"")]
+		[TestCase("x + y + 'z'")]
+		[TestCase("x + y + '\\a'")]
+		[TestCase("x + y + '\\''")]
+		[TestCase("x+y")]
+		public void Detect_identifiers_inside_other_expressions(string testCase)
 		{
-			var testCases = new[] {
-				"x + y",
-				"x + y + 654",
-				"x + y + 654.564",
-				"x.method + y[0]",
-				"x+y",
-				"x[y]",
-				"x.method1.method2(y)",
-				"x + y + \"z\"",
-				"x + y + \"lorem ipsum\"",
-				@"x + y + ""literal \""2""",
-				"x + y + \"\"",
-				"x + y + 'z'",
-				"x + y + '\\a'",
-				"x + y + '\\''",
-				"x+y",
-			};
+			var target = new Interpreter();
 
-			foreach (var testCase in testCases)
-			{
-				var target = new Interpreter();
+			var detectedIdentifiers = target.DetectIdentifiers(testCase);
 
-				var detectedIdentifiers = target.DetectIdentifiers(testCase);
-
-				Assert.AreEqual("x", detectedIdentifiers.UnknownIdentifiers.ElementAt(0));
-				Assert.AreEqual("y", detectedIdentifiers.UnknownIdentifiers.ElementAt(1));
-				Assert.AreEqual(2, detectedIdentifiers.UnknownIdentifiers.Count());
-			}
+			Assert.AreEqual(2, detectedIdentifiers.UnknownIdentifiers.Count());
+			Assert.AreEqual("x", detectedIdentifiers.UnknownIdentifiers.ElementAt(0));
+			Assert.AreEqual("y", detectedIdentifiers.UnknownIdentifiers.ElementAt(1));
 		}
 
 		[Test]
@@ -233,7 +227,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 
-			var detectedIdentifiers = target.DetectIdentifiers("(x, y) => x + y");
+			var detectedIdentifiers = target.DetectIdentifiers("(x, _1y) => x + _1y");
 			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
 
 			Assert.AreEqual(2, detectedIdentifiers.Identifiers.Count());
@@ -241,7 +235,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("x", detectedIdentifiers.Identifiers.ElementAt(0).Name);
 			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type);
 
-			Assert.AreEqual("y", detectedIdentifiers.Identifiers.ElementAt(1).Name);
+			Assert.AreEqual("_1y", detectedIdentifiers.Identifiers.ElementAt(1).Name);
 			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type);
 		}
 
@@ -250,7 +244,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 
-			var detectedIdentifiers = target.DetectIdentifiers("(int x, string y) => x + y");
+			var detectedIdentifiers = target.DetectIdentifiers("(int x, string @class) => x + @class");
 			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
 
 			Assert.AreEqual(2, detectedIdentifiers.Types.Count());
@@ -264,7 +258,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual("x", detectedIdentifiers.Identifiers.ElementAt(0).Name);
 			Assert.AreEqual(typeof(int), detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type);
 
-			Assert.AreEqual("y", detectedIdentifiers.Identifiers.ElementAt(1).Name);
+			Assert.AreEqual("@class", detectedIdentifiers.Identifiers.ElementAt(1).Name);
 			Assert.AreEqual(typeof(string), detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type);
 		}
 
@@ -298,6 +292,37 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.AreEqual("b", detectedIdentifiers.Identifiers.ElementAt(4).Name);
 			Assert.AreEqual(typeof(string), detectedIdentifiers.Identifiers.ElementAt(4).Expression.Type);
+		}
+
+		[Test]
+		[TestCase("@class")]
+		[TestCase("français_holé")]
+		[TestCase("中文")]
+		[TestCase("_1中0文")]
+		[TestCase("日本語")]
+		[TestCase("русский")]
+		public void Detect_all_identifiers_including_not_ascii(string identifier)
+		{
+			var code = $"1 + {identifier}.Method()";
+
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var detectedIdentifiers = target.DetectIdentifiers(code);
+
+			Assert.AreEqual(1, detectedIdentifiers.UnknownIdentifiers.Count());
+			Assert.AreEqual(identifier, detectedIdentifiers.UnknownIdentifiers.ElementAt(0));
+		}
+
+		[Test]
+		public void Dont_detect_members_with_at()
+		{
+			var code = "@class.@if()";
+
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var detectedIdentifiers = target.DetectIdentifiers(code);
+
+			// @class should be detected as an identifier, but not the @if because it's a member
+			Assert.AreEqual(1, detectedIdentifiers.UnknownIdentifiers.Count());
+			Assert.AreEqual("@class", detectedIdentifiers.UnknownIdentifiers.ElementAt(0));
 		}
 	}
 }
