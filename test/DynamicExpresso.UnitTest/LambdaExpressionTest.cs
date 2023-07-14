@@ -421,6 +421,41 @@ namespace DynamicExpresso.UnitTest
 							)))", new Parameter("root", typeof(NestedLambdaTestClass))));
 		}
 
+		private class Npc
+		{
+			public int Money { get; set; }
+			public void AddMoney(Action<Npc, int, string> action)
+			{
+				action(this, 10, "test");
+			}
+		}
+
+		[Test]
+		public void Lambda_ShouldAllowActionLambda()
+		{
+			var target = new Interpreter(InterpreterOptions.LambdaExpressions);
+
+			var list = new List<Npc>() { new Npc { Money = 10 } };
+			target.SetVariable("list", list);
+
+			var result = target.Eval(@"list.ForEach(n => n.Money = 5)");
+			Assert.IsNull(result);
+			Assert.AreEqual(5, list[0].Money);
+		}
+
+		[Test]
+		public void Lambda_MultipleActionLambdaParameters()
+		{
+			var target = new Interpreter(InterpreterOptions.LambdaExpressions);
+
+			var npc = new Npc { Money = 10 };
+			target.SetVariable("npc", npc);
+
+			var result = target.Eval(@"npc.AddMoney((n, i, str) => n.Money = i + str.Length)");
+			Assert.IsNull(result);
+			Assert.AreEqual(14, npc.Money);
+		}
+
 		private static NestedLambdaTestClass BuildNestedTestClassHierarchy()
 		{
 			return new NestedLambdaTestClass()

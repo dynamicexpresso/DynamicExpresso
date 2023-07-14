@@ -663,7 +663,7 @@ namespace DynamicExpresso.UnitTest
 			public string PageName { get; set; }
 			public int VisualCount { get; set; }
 		}
-    
+
 		[Test]
 		public void GitHub_Issue_261()
 		{
@@ -749,10 +749,38 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(str is IEnumerable<int[]>[][], interpreter.Eval("(str is IEnumerable<int[]>[][])"));
 			Assert.AreEqual(str is IEnumerable<int?[][]>[][], interpreter.Eval("(str is IEnumerable<int?[][]>[][])"));
 		}
+
+		private class Npc
+		{
+			public int money { get; set; }
+		}
+
+		[Test]
+		public void GitHub_Issue_292()
+		{
+			var interpreter = new Interpreter(InterpreterOptions.LambdaExpressions);
+
+			var testnpcs = new List<Npc>();
+			for (var i = 0; i < 5; i++)
+				testnpcs.Add(new Npc { money = 0 });
+
+			interpreter.Reference(typeof(GithubIssuesTestExtensionsMethods));
+			interpreter.SetVariable("NearNpcs", testnpcs);
+
+			var func = interpreter.ParseAsDelegate<Action>("NearNpcs.ActionToAll(n => n.money = 10)");
+			func.Invoke();
+
+			Assert.IsTrue(testnpcs.All(n => n.money == 10));
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
 	{
 		public static bool IsInFuture(this DateTimeOffset date) => date > DateTimeOffset.UtcNow;
+		public static void ActionToAll<T>(this IEnumerable<T> source, Action<T> action)
+		{
+			foreach (var item in source)
+				action(item);
+		}
 	}
 }

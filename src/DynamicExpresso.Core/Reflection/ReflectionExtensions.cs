@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -55,6 +55,17 @@ namespace DynamicExpresso.Reflection
 
 			public Type ReturnType { get; private set; }
 			public Parameter[] Parameters { get; private set; }
+		}
+
+		public static Type GetFuncType(int parameterCount)
+		{
+			// +1 for the return type
+			return typeof(Func<>).Assembly.GetType($"System.Func`{parameterCount + 1}");
+		}
+
+		public static Type GetActionType(int parameterCount)
+		{
+			return typeof(Action<>).Assembly.GetType($"System.Action`{parameterCount}");
 		}
 	}
 }

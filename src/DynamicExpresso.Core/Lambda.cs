@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
+using DynamicExpresso.Reflection;
 
 namespace DynamicExpresso
 {
@@ -151,14 +152,16 @@ namespace DynamicExpresso
 
 		internal LambdaExpression LambdaExpression(Type delegateType)
 		{
+			var parameterExpressions = DeclaredParameters.Select(p => p.Expression).ToArray();
 			var types = delegateType.GetGenericArguments();
 
 			// return type
-			types[types.Length - 1] = _expression.Type;
+			if (delegateType.GetGenericTypeDefinition() == ReflectionExtensions.GetFuncType(parameterExpressions.Length))
+				types[types.Length - 1] = _expression.Type;
 
 			var genericType = delegateType.GetGenericTypeDefinition();
 			var inferredDelegateType = genericType.MakeGenericType(types);
-			return Expression.Lambda(inferredDelegateType, _expression, DeclaredParameters.Select(p => p.Expression).ToArray());
+			return Expression.Lambda(inferredDelegateType, _expression, parameterExpressions);
 		}
 	}
 }
