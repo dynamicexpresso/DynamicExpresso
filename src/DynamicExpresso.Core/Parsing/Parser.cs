@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
 using DynamicExpresso.Exceptions;
+using DynamicExpresso.Reflection;
 using DynamicExpresso.Resources;
 using Microsoft.CSharp.RuntimeBinder;
 
@@ -2348,9 +2349,6 @@ namespace DynamicExpresso.Parsing
 
 		private static LambdaExpression GenerateLambdaFromInterpreterExpression(InterpreterExpression ie, Type delegateType)
 		{
-			if (delegateType.GetGenericArguments().Length != ie.Parameters.Count + 1)
-				return null;
-
 			return ie.EvalAs(delegateType);
 		}
 
@@ -3453,7 +3451,7 @@ namespace DynamicExpresso.Parsing
 				}
 
 				// prior to evaluation, we don't know the generic arguments types
-				_type = typeof(Func<>).Assembly.GetType($"System.Func`{parameters.Length + 1}");
+				_type = ReflectionExtensions.GetFuncType(parameters.Length);
 			}
 
 			public IList<Parameter> Parameters
@@ -3468,6 +3466,9 @@ namespace DynamicExpresso.Parsing
 
 			internal LambdaExpression EvalAs(Type delegateType)
 			{
+				if (!IsCompatibleWithDelegate(delegateType))
+					return null;
+
 				var lambdaExpr = _interpreter.ParseAsExpression(delegateType, _expressionText, _parameters.Select(p => p.Name).ToArray());
 				_type = lambdaExpr.Type;
 				return lambdaExpr;
@@ -3475,9 +3476,12 @@ namespace DynamicExpresso.Parsing
 
 			internal bool IsCompatibleWithDelegate(Type target)
 			{
-				return target.IsGenericType
-					&& target.BaseType == typeof(MulticastDelegate)
-					&& target.GetGenericArguments().Length == _parameters.Count + 1;
+				if (!target.IsGenericType || target.BaseType != typeof(MulticastDelegate))
+					return false;
+
+				var genericTypeDefinition = target.GetGenericTypeDefinition();
+				return genericTypeDefinition == ReflectionExtensions.GetFuncType(_parameters.Count)
+					|| genericTypeDefinition == ReflectionExtensions.GetActionType(_parameters.Count);
 			}
 		}
 
