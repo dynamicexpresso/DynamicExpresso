@@ -772,6 +772,26 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.IsTrue(testnpcs.All(n => n.money == 10));
 		}
+
+		[Test]
+		public void GitHub_Issue_295() {
+			var evaluator = new Interpreter();
+
+			// create path helper functions in expressions...
+			Func<string, string, string> pathCombine = Path.Combine;
+			evaluator.SetFunction("PathCombine", pathCombine);
+
+			// add a GlobalSettings dynamic object...
+			dynamic globalSettings = new ExpandoObject();
+			globalSettings.MyTestPath = "C:\\delme\\";
+			evaluator.SetVariable("GlobalSettings", globalSettings);
+
+			var works = (string) evaluator.Eval("PathCombine((string)GlobalSettings.MyTestPath,\"test.txt\")");
+			Assert.That(works, Is.EqualTo("C:\\delme\\test.txt"));
+
+			var doesntWork = (string) evaluator.Eval("PathCombine(GlobalSettings.MyTestPath,\"test.txt\")");
+			Assert.That(doesntWork, Is.EqualTo("C:\\delme\\test.txt"));
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods

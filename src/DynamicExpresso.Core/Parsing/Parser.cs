@@ -2459,7 +2459,7 @@ namespace DynamicExpresso.Parsing
 					return Expression.Convert(expr, genericType);
 			}
 
-			if (IsCompatibleWith(expr.Type, type))
+			if (IsCompatibleWith(expr.Type, type) || expr is DynamicExpression)
 			{
 				if (type.IsValueType || exact)
 				{
