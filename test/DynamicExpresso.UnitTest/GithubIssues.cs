@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Dynamic;
 
 // ReSharper disable SpecifyACultureInStringConversionExplicitly
 
@@ -771,6 +772,26 @@ namespace DynamicExpresso.UnitTest
 			func.Invoke();
 
 			Assert.IsTrue(testnpcs.All(n => n.money == 10));
+		}
+
+		[Test]
+		public void GitHub_Issue_295() {
+			var evaluator = new Interpreter();
+
+			// create path helper functions in expressions...
+			Func<string, string, string> pathCombine = string.Concat;
+			evaluator.SetFunction("StringConcat", pathCombine);
+
+			// add a GlobalSettings dynamic object...
+			dynamic globalSettings = new ExpandoObject();
+			globalSettings.MyTestPath = "C:\\delme\\";
+			evaluator.SetVariable("GlobalSettings", globalSettings);
+
+			var works = (string) evaluator.Eval("StringConcat((string)GlobalSettings.MyTestPath,\"test.txt\")");
+			Assert.That(works, Is.EqualTo("C:\\delme\\test.txt"));
+
+			var doesntWork = (string) evaluator.Eval("StringConcat(GlobalSettings.MyTestPath,\"test.txt\")");
+			Assert.That(doesntWork, Is.EqualTo("C:\\delme\\test.txt"));
 		}
 	}
 
