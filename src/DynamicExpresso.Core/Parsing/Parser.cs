@@ -2711,7 +2711,10 @@ namespace DynamicExpresso.Parsing
 			if (better)
 				return true;
 
-			if (!method.MethodBase.IsGenericMethod && otherMethod.MethodBase.IsGenericMethod)
+			if (method.MethodBase != null &&
+				otherMethod.MethodBase != null &&
+				!method.MethodBase.IsGenericMethod &&
+				otherMethod.MethodBase.IsGenericMethod)
 				return true;
 
 			if (!method.HasParamsArray && otherMethod.HasParamsArray)
@@ -2720,6 +2723,19 @@ namespace DynamicExpresso.Parsing
 			// if a method has a params parameter, it can have less parameters than the number of arguments
 			if (method.HasParamsArray && otherMethod.HasParamsArray && method.Parameters.Length > otherMethod.Parameters.Length)
 				return true;
+
+			if (method is IndexerData indexer && otherMethod is IndexerData otherIndexer)
+			{
+				var declaringType = indexer.Indexer.DeclaringType;
+				var otherDeclaringType = otherIndexer.Indexer.DeclaringType;
+
+				var isOtherIndexerIsInParentType = otherDeclaringType.IsAssignableFrom(declaringType);
+				if (isOtherIndexerIsInParentType)
+				{
+					var isIndexerIsInDescendantType = !declaringType.IsAssignableFrom(otherDeclaringType);
+					return isIndexerIsInDescendantType;
+				}
+			}
 
 			return better;
 		}

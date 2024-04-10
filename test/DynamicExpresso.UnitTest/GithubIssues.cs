@@ -793,6 +793,32 @@ namespace DynamicExpresso.UnitTest
 			var doesntWork = (string) evaluator.Eval("StringConcat(GlobalSettings.MyTestPath,\"test.txt\")");
 			Assert.That(doesntWork, Is.EqualTo("C:\\delme\\test.txt"));
 		}
+
+		#region GitHub_Issue_305
+
+		public class _305_A
+		{
+			public string this[int index] => "some string";
+		}
+
+		public class _305_B : _305_A
+		{
+			public new int this[int index] => 25;
+		}
+
+		[Test]
+		public void GitHub_Issue_305()
+		{
+			var b = new _305_B();
+
+			var interpreter = new Interpreter();
+			var lambda = interpreter.Parse("this[0]", new Parameter("this", b));
+			var res = lambda.Invoke(b);
+
+			Assert.AreEqual(25, res);
+		}
+
+		#endregion
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
