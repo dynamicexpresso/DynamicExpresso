@@ -4,6 +4,8 @@
 		<TargetFrameworks>net8.0;net7.0;net5.0;netcoreapp3.1;net462</TargetFrameworks>
 
 		<IsPackable>false</IsPackable>
+
+    <InvariantGlobalization>true</InvariantGlobalization>
 	</PropertyGroup>
 
 	<ItemGroup>
