@@ -77,7 +77,7 @@ namespace DynamicExpresso
 		}
 
 		/// <summary>
-		/// Returns true if the known types contain a generic definition type with the given name + any arity (e.g. name`1).
+		/// Returns true if the known types contain a generic type definition with the given name + any arity (e.g. name`1).
 		/// </summary>
 		internal bool HasKnownGenericTypeDefinition(string name)
 		{
