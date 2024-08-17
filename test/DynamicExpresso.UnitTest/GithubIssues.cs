@@ -824,12 +824,11 @@ namespace DynamicExpresso.UnitTest
 		public void GitHub_Issue_314()
 		{
 			var interpreter = new Interpreter();
-			var parameters = new[] { new Parameter("a", 1) };
 
-			var exception1 = Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("a < 1 || b < 1 ", parameters));
+			var exception1 = Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("b < 1"));
 			Assert.AreEqual("b", exception1.Identifier);
 
-			var exception2 = Assert.Throws<UnknownIdentifierException>(() =>  interpreter.Eval("a < 1 || b > 1 ", parameters));
+			var exception2 = Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("b > 1"));
 			Assert.AreEqual("b", exception2.Identifier);
 		}
 	}
