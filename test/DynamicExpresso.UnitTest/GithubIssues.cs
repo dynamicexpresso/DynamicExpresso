@@ -819,6 +819,19 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		#endregion
+
+		[Test]
+		public void GitHub_Issue_314()
+		{
+			var interpreter = new Interpreter();
+			var parameters = new[] { new Parameter("a", 1) };
+
+			var exception1 = Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("a < 1 || b < 1 ", parameters));
+			Assert.AreEqual("b", exception1.Identifier);
+
+			var exception2 = Assert.Throws<UnknownIdentifierException>(() =>  interpreter.Eval("a < 1 || b > 1 ", parameters));
+			Assert.AreEqual("b", exception2.Identifier);
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
