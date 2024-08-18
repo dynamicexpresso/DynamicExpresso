@@ -39,31 +39,6 @@ namespace DynamicExpresso.Parsing
 
 		private readonly ParserArguments _arguments;
 
-		private static readonly MethodInfo _concatMethod = GetConcatMethod();
-		private static readonly MethodInfo _toStringMethod = GetToStringMethod();
-
-		private static MethodInfo GetConcatMethod()
-		{
-			var methodInfo = typeof(string).GetMethod("Concat", new[] {typeof(string), typeof(string)});
-			if (methodInfo == null)
-			{
-				throw new Exception("String concat method not found");
-			}
-
-			return methodInfo;
-		}
-
-		private static MethodInfo GetToStringMethod()
-		{
-			var toStringMethod = typeof(object).GetMethod("ToString", Type.EmptyTypes);
-			if (toStringMethod == null)
-			{
-				throw new Exception("ToString method not found");
-			}
-
-			return toStringMethod;
-		}
-
 		// Working context implementation
 		//ParameterExpression it;
 
@@ -2647,7 +2622,7 @@ namespace DynamicExpresso.Parsing
 
 			return Expression.Call(
 				null,
-				_concatMethod,
+				ReflectionExtensions.StringConcatMethod,
 				new[] { leftObj, rightObj });
 		}
 
@@ -2667,7 +2642,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.Condition(
 				condition,
 				stringNullConstant,
-				Expression.Call(expression, _toStringMethod));
+				Expression.Call(expression, ReflectionExtensions.ObjectToStringMethod));
 		}
 
 		private static Expression GenerateStringConcatOperand(Expression expression)
