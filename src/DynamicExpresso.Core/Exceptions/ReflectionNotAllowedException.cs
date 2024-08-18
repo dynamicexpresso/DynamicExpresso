@@ -1,5 +1,4 @@
 using System;
-using System.Security.Permissions;
 using System.Runtime.Serialization;
 
 namespace DynamicExpresso.Exceptions
