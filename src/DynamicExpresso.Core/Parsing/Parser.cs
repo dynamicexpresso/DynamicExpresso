@@ -272,7 +272,7 @@ namespace DynamicExpresso.Parsing
 				var promoted = PromoteExpression(right, left.Type, true);
 				if (promoted == null)
 					throw ParseException.Create(_token.pos, ErrorMessages.CannotConvertValue,
-						GetTypeName(right.Type), GetTypeName(left.Type));
+						TypeUtils.GetTypeName(right.Type), TypeUtils.GetTypeName(left.Type));
 
 				left = Expression.Assign(left, promoted);
 			}
@@ -400,7 +400,7 @@ namespace DynamicExpresso.Parsing
 				//		else
 				//		{
 				//			throw ParseException.Create(op.pos, ErrorMessages.IncompatibleOperands,
-				//				op.text, GetTypeName(left.Type), GetTypeName(right.Type));
+				//				op.text, TypeUtils.GetTypeName(left.Type), TypeUtils.GetTypeName(right.Type));
 				//		}
 				//	}
 				//}
@@ -420,7 +420,7 @@ namespace DynamicExpresso.Parsing
 				//		else
 				//		{
 				//			throw ParseException.Create(op.pos, ErrorMessages.IncompatibleOperands,
-				//				op.text, GetTypeName(left.Type), GetTypeName(right.Type));
+				//				op.text, TypeUtils.GetTypeName(left.Type), TypeUtils.GetTypeName(right.Type));
 				//		}
 				//	}
 				//}
@@ -704,7 +704,7 @@ namespace DynamicExpresso.Parsing
 			// try to find the user defined operator on both operands
 			var applicableMethods = FindMethods(type, operatorName, true, args);
 			if (applicableMethods.Length > 1)
-				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousUnaryOperatorInvocation, operatorName, GetTypeName(type));
+				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousUnaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(type));
 
 			MethodData userDefinedOperator = null;
 			if (applicableMethods.Length == 1)
@@ -764,7 +764,7 @@ namespace DynamicExpresso.Parsing
 					else if (typeof(Delegate).IsAssignableFrom(expr.Type))
 						expr = ParseDelegateInvocation(expr, tokenPos);
 					else
-						throw ParseException.Create(tokenPos, ErrorMessages.InvalidMethodCall, GetTypeName(expr.Type));
+						throw ParseException.Create(tokenPos, ErrorMessages.InvalidMethodCall, TypeUtils.GetTypeName(expr.Type));
 				}
 				else
 				{
@@ -779,7 +779,7 @@ namespace DynamicExpresso.Parsing
 		/// </summary>
 		private Expression GenerateGetNullableValue(Expression expr)
 		{
-			if (!IsNullableType(expr.Type))
+			if (!TypeUtils.IsNullableType(expr.Type))
 				return expr;
 			return GeneratePropertyOrFieldExpression(expr.Type, expr, _token.pos, "Value");
 		}
@@ -1314,7 +1314,7 @@ namespace DynamicExpresso.Parsing
 			}
 			if (member == null)
 			{
-				throw ParseException.Create(pos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(newType));
+				throw ParseException.Create(pos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, TypeUtils.GetTypeName(newType));
 			}
 			NextToken();
 
@@ -1367,7 +1367,7 @@ namespace DynamicExpresso.Parsing
 				var addMethod = ParseNormalMethodInvocation(newType, instance, _token.pos, "Add", args);
 				if (addMethod == null)
 				{
-					throw ParseException.Create(_token.pos, ErrorMessages.UnableToFindAppropriateAddMethod, GetTypeName(newType));
+					throw ParseException.Create(_token.pos, ErrorMessages.UnableToFindAppropriateAddMethod, TypeUtils.GetTypeName(newType));
 				}
 				actions.Add(addMethod);
 			}
@@ -1491,8 +1491,8 @@ namespace DynamicExpresso.Parsing
 			var errorPos = _token.pos;
 			if (_token.id == TokenId.Question)
 			{
-				if (!type.IsValueType || IsNullableType(type))
-					throw ParseException.Create(errorPos, ErrorMessages.TypeHasNoNullableForm, GetTypeName(type));
+				if (!type.IsValueType || TypeUtils.IsNullableType(type))
+					throw ParseException.Create(errorPos, ErrorMessages.TypeHasNoNullableForm, TypeUtils.GetTypeName(type));
 				type = typeof(Nullable<>).MakeGenericType(type);
 
 				NextToken();
@@ -1607,11 +1607,11 @@ namespace DynamicExpresso.Parsing
 		//        case 0:
 		//            if (args.Length == 1)
 		//                return GenerateConversion(args[0], type, errorPos);
-		//            throw ParseError(errorPos, ErrorMessages.NoMatchingConstructor, GetTypeName(type));
+		//            throw ParseError(errorPos, ErrorMessages.NoMatchingConstructor, TypeUtils.GetTypeName(type));
 		//        case 1:
 		//            return Expression.New((ConstructorInfo)method, args);
 		//        default:
-		//            throw ParseError(errorPos, ErrorMessages.AmbiguousConstructorInvocation, GetTypeName(type));
+		//            throw ParseError(errorPos, ErrorMessages.AmbiguousConstructorInvocation, TypeUtils.GetTypeName(type));
 		//    }
 		//}
 
@@ -1669,7 +1669,7 @@ namespace DynamicExpresso.Parsing
 			catch (InvalidOperationException)
 			{
 				throw ParseException.Create(errorPos, ErrorMessages.CannotConvertValue,
-					GetTypeName(exprType), GetTypeName(type));
+					TypeUtils.GetTypeName(exprType), TypeUtils.GetTypeName(type));
 			}
 		}
 
@@ -1700,10 +1700,10 @@ namespace DynamicExpresso.Parsing
 					Expression.Field(instance, (FieldInfo)member);
 			}
 
-			if (IsDynamicType(type) || IsDynamicExpression(instance))
+			if (TypeUtils.IsDynamicType(type) || IsDynamicExpression(instance))
 				return ParseDynamicProperty(type, instance, propertyOrFieldName);
 
-			throw ParseException.Create(errorPos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, GetTypeName(type));
+			throw ParseException.Create(errorPos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, TypeUtils.GetTypeName(type));
 		}
 
 		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName)
@@ -1724,10 +1724,10 @@ namespace DynamicExpresso.Parsing
 			if (methodInvocationExpression != null)
 				return methodInvocationExpression;
 
-			if (IsDynamicType(type) || IsDynamicExpression(instance))
+			if (TypeUtils.IsDynamicType(type) || IsDynamicExpression(instance))
 				return ParseDynamicMethodInvocation(type, instance, methodName, args);
 
-			throw new NoApplicableMethodException(methodName, GetTypeName(type), errorPos);
+			throw new NoApplicableMethodException(methodName, TypeUtils.GetTypeName(type), errorPos);
 		}
 
 		private Expression ParseExtensionMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
@@ -1738,7 +1738,7 @@ namespace DynamicExpresso.Parsing
 
 			var extensionMethods = FindExtensionMethods(id, extensionMethodsArguments);
 			if (extensionMethods.Length > 1)
-				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, GetTypeName(type));
+				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
 
 			if (extensionMethods.Length == 1)
 			{
@@ -1756,7 +1756,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var applicableMethods = FindMethods(type, id, instance == null, args);
 			if (applicableMethods.Length > 1)
-				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, GetTypeName(type));
+				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
 
 			if (applicableMethods.Length == 1)
 			{
@@ -1815,21 +1815,6 @@ namespace DynamicExpresso.Parsing
 		//    }
 		//    return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
 		//}
-
-		/// <summary>
-		/// Returns null if <paramref name="t"/> is an Array type.  Needed because the <seealso cref="Microsoft.CSharp.RuntimeBinder.Binder"/> lookup methods fail with a <seealso cref="InvalidCastException"/> if the array type is used.
-		/// Everything still miraculously works on the array if null is given for the type.
-		/// </summary>
-		/// <param name="t"></param>
-		/// <returns></returns>
-		private static Type RemoveArrayType(Type t)
-		{
-			if (t == null || t.IsArray)
-			{
-				return null;
-			}
-			return t;
-		}
 
 		private static Expression ParseDynamicProperty(Type type, Expression instance, string propertyOrFieldName)
 		{
@@ -1896,34 +1881,24 @@ namespace DynamicExpresso.Parsing
 				return Expression.ArrayAccess(expr, args);
 			}
 
-			if (IsDynamicType(expr.Type) || IsDynamicExpression(expr))
+			if (TypeUtils.IsDynamicType(expr.Type) || IsDynamicExpression(expr))
 				return ParseDynamicIndex(expr.Type, expr, args);
 
 			var applicableMethods = FindIndexer(expr.Type, args);
 			if (applicableMethods.Length == 0)
 			{
 				throw ParseException.Create(errorPos, ErrorMessages.NoApplicableIndexer,
-					GetTypeName(expr.Type));
+					TypeUtils.GetTypeName(expr.Type));
 			}
 
 			if (applicableMethods.Length > 1)
 			{
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousIndexerInvocation,
-					GetTypeName(expr.Type));
+					TypeUtils.GetTypeName(expr.Type));
 			}
 
 			var indexer = (IndexerData)applicableMethods[0];
 			return Expression.Property(expr, indexer.Indexer, indexer.PromotedParameters);
-		}
-
-		private static bool IsNullableType(Type type)
-		{
-			return Nullable.GetUnderlyingType(type) != null;
-		}
-
-		private static bool IsDynamicType(Type type)
-		{
-			return typeof(IDynamicMetaObjectProvider).IsAssignableFrom(type);
 		}
 
 		private bool IsDynamicExpression(Expression instance)
@@ -1931,60 +1906,6 @@ namespace DynamicExpresso.Parsing
 			return instance != null &&
 				(instance.NodeType == ExpressionType.Dynamic ||
 				(_arguments.Settings.LateBindObject && instance.Type == typeof(object)));
-		}
-
-		private static Type GetNonNullableType(Type type)
-		{
-			return IsNullableType(type) ? type.GetGenericArguments()[0] : type;
-		}
-
-		private static string GetTypeName(Type type)
-		{
-			var baseType = GetNonNullableType(type);
-			var s = baseType.Name;
-			if (type != baseType) s += '?';
-			return s;
-		}
-
-		static bool IsNumericType(Type type)
-		{
-			return GetNumericTypeKind(type) != 0;
-		}
-
-		private static bool IsSignedIntegralType(Type type)
-		{
-			return GetNumericTypeKind(type) == 2;
-		}
-
-		private static bool IsUnsignedIntegralType(Type type)
-		{
-			return GetNumericTypeKind(type) == 3;
-		}
-
-		private static int GetNumericTypeKind(Type type)
-		{
-			type = GetNonNullableType(type);
-			if (type.IsEnum) return 0;
-			switch (Type.GetTypeCode(type))
-			{
-				case TypeCode.Char:
-				case TypeCode.Single:
-				case TypeCode.Double:
-				case TypeCode.Decimal:
-					return 1;
-				case TypeCode.SByte:
-				case TypeCode.Int16:
-				case TypeCode.Int32:
-				case TypeCode.Int64:
-					return 2;
-				case TypeCode.Byte:
-				case TypeCode.UInt16:
-				case TypeCode.UInt32:
-				case TypeCode.UInt64:
-					return 3;
-				default:
-					return 0;
-			}
 		}
 
 		//static bool IsEnumType(Type type)
@@ -2003,7 +1924,8 @@ namespace DynamicExpresso.Parsing
 
 		private void CheckAndPromoteOperands(Type signatures, ref Expression left, ref Expression right)
 		{
-			if ((IsNullableType(left.Type) || IsNullableType(right.Type)) && (GetNonNullableType(left.Type) == right.Type || GetNonNullableType(right.Type) == left.Type))
+			if ((TypeUtils.IsNullableType(left.Type) || TypeUtils.IsNullableType(right.Type)) &&
+				(TypeUtils.GetNonNullableType(left.Type) == right.Type || TypeUtils.GetNonNullableType(right.Type) == left.Type))
 			{
 				left = GenerateNullableTypeConversion(left);
 				right = GenerateNullableTypeConversion(right);
@@ -2160,40 +2082,9 @@ namespace DynamicExpresso.Parsing
 			return applicable;
 		}
 
-		private static Type GetConcreteTypeForGenericMethod(Type type, List<Expression> promotedArgs, MethodData method)
-		{
-			if (type.IsGenericType)
-			{
-				//Generic<T> type
-				var genericArguments = type.GetGenericArguments();
-				var concreteTypeParameters = new Type[genericArguments.Length];
-
-				for (var i = 0; i < genericArguments.Length; i++)
-				{
-					concreteTypeParameters[i] = GetConcreteTypeForGenericMethod(genericArguments[i], promotedArgs,method);
-				}
-
-				return type.GetGenericTypeDefinition().MakeGenericType(concreteTypeParameters);
-			}
-			else if (type.ContainsGenericParameters)
-			{
-				//T case
-				//try finding an actual parameter for the generic
-				for (var i = 0; i < promotedArgs.Count; i++)
-				{
-					if (method.Parameters[i].ParameterType == type)
-					{						
-						return promotedArgs[i].Type;
-					}
-				}
-			}
-
-			return type;//already a concrete type
-		}
-
 		private static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
 		{
-			if (method.Parameters.Count(y => !y.HasDefaultValue && !HasParamsArrayType(y)) > args.Length)
+			if (method.Parameters.Count(y => !y.HasDefaultValue && !ReflectionExtensions.HasParamsArrayType(y)) > args.Length)
 				return false;
 
 			var promotedArgs = new List<Expression>();
@@ -2225,7 +2116,7 @@ namespace DynamicExpresso.Parsing
 
 					parameterType = parameterDeclaration.ParameterType;
 
-					if (HasParamsArrayType(parameterDeclaration))
+					if (ReflectionExtensions.HasParamsArrayType(parameterDeclaration))
 					{
 						paramsArrayTypeFound = parameterType;
 					}
@@ -2299,13 +2190,13 @@ namespace DynamicExpresso.Parsing
 			{
 				if (x.HasDefaultValue)
 				{
-					var parameterType = GetConcreteTypeForGenericMethod(x.ParameterType, promotedArgs, method);
+					var parameterType = TypeUtils.GetConcreteTypeForGenericMethod(x.ParameterType, promotedArgs, method);
 
 					return Expression.Constant(x.DefaultValue, parameterType);
 				}
 
 
-				if (HasParamsArrayType(x))
+				if (ReflectionExtensions.HasParamsArrayType(x))
 				{
 					method.HasParamsArray = true;
 					return Expression.NewArrayInit(x.ParameterType.GetElementType());
@@ -2436,7 +2327,7 @@ namespace DynamicExpresso.Parsing
 				{
 					if (type.ContainsGenericParameters)
 						return null;
-					if (!type.IsValueType || IsNullableType(type))
+					if (!type.IsValueType || TypeUtils.IsNullableType(type))
 						return Expression.Constant(null, type);
 				}
 			}
@@ -2452,14 +2343,14 @@ namespace DynamicExpresso.Parsing
 				return expr;
 			}
 
-			if (type.IsGenericType && !IsNumericType(type))
+			if (type.IsGenericType && !TypeUtils.IsNumericType(type))
 			{
-				var genericType = FindAssignableGenericType(expr.Type, type);
+				var genericType = TypeUtils.FindAssignableGenericType(expr.Type, type);
 				if (genericType != null)
 					return Expression.Convert(expr, genericType);
 			}
 
-			if (IsCompatibleWith(expr.Type, type) || expr is DynamicExpression)
+			if (TypeUtils.IsCompatibleWith(expr.Type, type) || expr is DynamicExpression)
 			{
 				if (type.IsValueType || exact)
 				{
@@ -2469,142 +2360,6 @@ namespace DynamicExpresso.Parsing
 			}
 
 			return null;
-		}
-
-		private static bool IsCompatibleWith(Type source, Type target)
-		{
-			if (source == target)
-			{
-				return true;
-			}
-
-			if (target.IsGenericParameter)
-			{
-				return true;
-			}
-
-			if (!target.IsValueType)
-			{
-				return target.IsAssignableFrom(source);
-			}
-			var st = GetNonNullableType(source);
-			var tt = GetNonNullableType(target);
-			if (st != source && tt == target) return false;
-			var sc = st.IsEnum ? TypeCode.Object : Type.GetTypeCode(st);
-			var tc = tt.IsEnum ? TypeCode.Object : Type.GetTypeCode(tt);
-			switch (sc)
-			{
-				case TypeCode.SByte:
-					switch (tc)
-					{
-						case TypeCode.SByte:
-						case TypeCode.Int16:
-						case TypeCode.Int32:
-						case TypeCode.Int64:
-						case TypeCode.Single:
-						case TypeCode.Double:
-						case TypeCode.Decimal:
-							return true;
-					}
-					break;
-				case TypeCode.Byte:
-					switch (tc)
-					{
-						case TypeCode.Byte:
-						case TypeCode.Int16:
-						case TypeCode.UInt16:
-						case TypeCode.Int32:
-						case TypeCode.UInt32:
-						case TypeCode.Int64:
-						case TypeCode.UInt64:
-						case TypeCode.Single:
-						case TypeCode.Double:
-						case TypeCode.Decimal:
-							return true;
-					}
-					break;
-				case TypeCode.Int16:
-					switch (tc)
-					{
-						case TypeCode.Int16:
-						case TypeCode.Int32:
-						case TypeCode.Int64:
-						case TypeCode.Single:
-						case TypeCode.Double:
-						case TypeCode.Decimal:
-							return true;
-					}
-					break;
-				case TypeCode.UInt16:
-					switch (tc)
-					{
-						case TypeCode.UInt16:
-						case TypeCode.Int32:
-						case TypeCode.UInt32:
-						case TypeCode.Int64:
-						case TypeCode.UInt64:
-						case TypeCode.Single:
-						case TypeCode.Double:
-						case TypeCode.Decimal:
-							return true;
-					}
-					break;
-				case TypeCode.Int32:
-					switch (tc)
-					{
-						case TypeCode.Int32:
-						case TypeCode.Int64:
-						case TypeCode.Single:
-						case TypeCode.Double:
-						case TypeCode.Decimal:
-							return true;
-					}
-					break;
-				case TypeCode.UInt32:
-					switch (tc)
-					{
-						case TypeCode.UInt32:
-						case TypeCode.Int64:
-						case TypeCode.UInt64:
-						case TypeCode.Single:
-						case TypeCode.Double:
-						case TypeCode.Decimal:
-							return true;
-					}
-					break;
-				case TypeCode.Int64:
-					switch (tc)
-					{
-						case TypeCode.Int64:
-						case TypeCode.Single:
-						case TypeCode.Double:
-						case TypeCode.Decimal:
-							return true;
-					}
-					break;
-				case TypeCode.UInt64:
-					switch (tc)
-					{
-						case TypeCode.UInt64:
-						case TypeCode.Single:
-						case TypeCode.Double:
-						case TypeCode.Decimal:
-							return true;
-					}
-					break;
-				case TypeCode.Single:
-					switch (tc)
-					{
-						case TypeCode.Single:
-						case TypeCode.Double:
-							return true;
-					}
-					break;
-				default:
-					if (st == tt) return true;
-					break;
-			}
-			return false;
 		}
 
 		private static bool IsWritable(Expression expression)
@@ -2632,53 +2387,6 @@ namespace DynamicExpresso.Parsing
 			return false;
 		}
 
-		// from http://stackoverflow.com/a/1075059/209727
-		private static Type FindAssignableGenericType(Type givenType, Type constructedGenericType)
-		{
-			var genericTypeDefinition = constructedGenericType.GetGenericTypeDefinition();
-			var interfaceTypes = givenType.GetInterfaces();
-
-			foreach (var it in interfaceTypes)
-			{
-				if (it.IsGenericType && it.GetGenericTypeDefinition() == genericTypeDefinition)
-				{
-					return it;
-				}
-			}
-
-			if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericTypeDefinition)
-			{
-				// the given type has the same generic type of the fully constructed generic type
-				//  => check if the generic arguments are compatible (e.g. Nullable<int> and Nullable<DateTime>: int is not compatible with DateTime)
-				var givenTypeGenericsArgs = givenType.GenericTypeArguments;
-				var constructedGenericsArgs = constructedGenericType.GenericTypeArguments;
-				if (givenTypeGenericsArgs.Zip(constructedGenericsArgs, (g, c) => IsCompatibleWith(g, c)).Any(compatible => !compatible))
-					return null;
-
-				return givenType;
-			}
-
-			var baseType = givenType.BaseType;
-			if (baseType == null)
-				return null;
-
-			return FindAssignableGenericType(baseType, genericTypeDefinition);
-		}
-
-		private static bool HasParamsArrayType(ParameterInfo parameterInfo)
-		{
-			return parameterInfo.IsDefined(typeof(ParamArrayAttribute), false);
-		}
-
-		private static Type GetParameterType(ParameterInfo parameterInfo)
-		{
-			var isParamsArray = HasParamsArrayType(parameterInfo);
-			var type = isParamsArray
-				? parameterInfo.ParameterType.GetElementType()
-				: parameterInfo.ParameterType;
-			return type;
-		}
-
 		private static bool MethodHasPriority(Expression[] args, MethodData method, MethodData otherMethod)
 		{
 			var better = false;
@@ -2689,8 +2397,8 @@ namespace DynamicExpresso.Parsing
 				var arg = args[i];
 				var methodParam = method.Parameters[m];
 				var otherMethodParam = otherMethod.Parameters[o];
-				var methodParamType = GetParameterType(methodParam);
-				var otherMethodParamType = GetParameterType(otherMethodParam);
+				var methodParamType = ReflectionExtensions.GetParameterType(methodParam);
+				var otherMethodParamType = ReflectionExtensions.GetParameterType(otherMethodParam);
 
 				if (methodParamType.ContainsGenericParameters)
 					methodParamType = method.PromotedParameters[i].Type;
@@ -2698,14 +2406,14 @@ namespace DynamicExpresso.Parsing
 				if (otherMethodParamType.ContainsGenericParameters)
 					otherMethodParamType = otherMethod.PromotedParameters[i].Type;
 
-				var c = CompareConversions(arg.Type, methodParamType, otherMethodParamType);
+				var c = TypeUtils.CompareConversions(arg.Type, methodParamType, otherMethodParamType);
 				if (c < 0)
 					return false;
 				if (c > 0)
 					better = true;
 
-				if (!HasParamsArrayType(methodParam)) m++;
-				if (!HasParamsArrayType(otherMethodParam)) o++;
+				if (!ReflectionExtensions.HasParamsArrayType(methodParam)) m++;
+				if (!ReflectionExtensions.HasParamsArrayType(otherMethodParam)) o++;
 			}
 
 			if (better)
@@ -2738,31 +2446,6 @@ namespace DynamicExpresso.Parsing
 			}
 
 			return better;
-		}
-
-		// Return 1 if s -> t1 is a better conversion than s -> t2
-		// Return -1 if s -> t2 is a better conversion than s -> t1
-		// Return 0 if neither conversion is better
-		private static int CompareConversions(Type s, Type t1, Type t2)
-		{
-			if (t1 == t2) return 0;
-			if (s == t1) return 1;
-			if (s == t2) return -1;
-
-			var assignableT1 = t1.IsAssignableFrom(s);
-			var assignableT2 = t2.IsAssignableFrom(s);
-			if (assignableT1 && !assignableT2) return 1;
-			if (assignableT2 && !assignableT1) return -1;
-
-			var compatibleT1T2 = IsCompatibleWith(t1, t2);
-			var compatibleT2T1 = IsCompatibleWith(t2, t1);
-			if (compatibleT1T2 && !compatibleT2T1) return 1;
-			if (compatibleT2T1 && !compatibleT1T2) return -1;
-
-			if (IsSignedIntegralType(t1) && IsUnsignedIntegralType(t2)) return 1;
-			if (IsSignedIntegralType(t2) && IsUnsignedIntegralType(t1)) return -1;
-
-			return 0;
 		}
 
 		private Expression GenerateEqual(Expression left, Expression right)
@@ -2921,7 +2604,7 @@ namespace DynamicExpresso.Parsing
 			var errorPos = _token.pos;
 			var leftType = left.Type;
 			var rightType = right.Type;
-			var error = ParseException.Create(errorPos, ErrorMessages.AmbiguousBinaryOperatorInvocation, operatorName, GetTypeName(leftType), GetTypeName(rightType));
+			var error = ParseException.Create(errorPos, ErrorMessages.AmbiguousBinaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(leftType), TypeUtils.GetTypeName(rightType));
 
 			var args = new[] { left, right };
 
@@ -2970,7 +2653,7 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression ToStringOrNull(Expression expression)
 		{
-			var nullableExpression = IsNullableType(expression.Type) ?
+			var nullableExpression = TypeUtils.IsNullableType(expression.Type) ?
 				expression :
 				GenerateNullableTypeConversion(expression);
 
@@ -2994,14 +2677,10 @@ namespace DynamicExpresso.Parsing
 				: expression;
 		}
 
-		private static MethodInfo GetStaticMethod(string methodName, Expression left, Expression right)
-		{
-			return left.Type.GetMethod(methodName, new[] { left.Type, right.Type });
-		}
-
 		private static Expression GenerateStaticMethodCall(string methodName, Expression left, Expression right)
 		{
-			return Expression.Call(null, GetStaticMethod(methodName, left, right), new[] { left, right });
+			var staticMethod = left.Type.GetMethod(methodName, new[] { left.Type, right.Type });
+			return Expression.Call(null, staticMethod, new[] { left, right });
 		}
 
 		private void SetTextPos(int pos)
@@ -3415,8 +3094,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var exprType = expr.Type;
 
-			if (IsNullableType(exprType) ||
-			    !exprType.IsValueType)
+			if (TypeUtils.IsNullableType(exprType) || !exprType.IsValueType)
 			{
 				return expr;
 			}
@@ -3513,7 +3191,7 @@ namespace DynamicExpresso.Parsing
 				var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetMember(
 					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
 					_propertyOrFieldName,
-					RemoveArrayType(args[0]?.GetType()),
+					TypeUtils.RemoveArrayType(args[0]?.GetType()),
 					new[] { Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null) }
 				);
 				return binder.Bind(args, parameters, returnLabel);
@@ -3538,7 +3216,7 @@ namespace DynamicExpresso.Parsing
 					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
 					_methodName,
 					null,
-					RemoveArrayType(args[0]?.GetType()),
+					TypeUtils.RemoveArrayType(args[0]?.GetType()),
 					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
 				);
 				return binderM.Bind(args, parameters, returnLabel);
@@ -3554,7 +3232,7 @@ namespace DynamicExpresso.Parsing
 			{
 				var binder = Microsoft.CSharp.RuntimeBinder.Binder.GetIndex(
 					Microsoft.CSharp.RuntimeBinder.CSharpBinderFlags.None,
-					RemoveArrayType(args[0]?.GetType()),
+					TypeUtils.RemoveArrayType(args[0]?.GetType()),
 					parameters.Select(x => Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create(Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfoFlags.None, null))
 				);
 				return binder.Bind(args, parameters, returnLabel);

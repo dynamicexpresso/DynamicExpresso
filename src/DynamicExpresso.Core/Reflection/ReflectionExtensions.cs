@@ -67,5 +67,19 @@ namespace DynamicExpresso.Reflection
 		{
 			return typeof(Action<>).Assembly.GetType($"System.Action`{parameterCount}");
 		}
+
+		public static bool HasParamsArrayType(ParameterInfo parameterInfo)
+		{
+			return parameterInfo.IsDefined(typeof(ParamArrayAttribute), false);
+		}
+
+		public static Type GetParameterType(ParameterInfo parameterInfo)
+		{
+			var isParamsArray = HasParamsArrayType(parameterInfo);
+			var type = isParamsArray
+				? parameterInfo.ParameterType.GetElementType()
+				: parameterInfo.ParameterType;
+			return type;
+		}
 	}
 }
