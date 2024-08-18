@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 
 namespace DynamicExpresso
@@ -48,5 +48,19 @@ namespace DynamicExpresso
 		public object Value { get; private set; }
 
 		public ParameterExpression Expression { get; private set; }
+	}
+
+	/// <summary>
+	/// Parameter with its position in the expression.
+	/// </summary>
+	internal class ParameterWithPosition : Parameter
+	{
+		public ParameterWithPosition(int pos, string name, Type type)
+			: base(name, type)
+		{
+			Position = pos;
+		}
+
+		public int Position { get; }
 	}
 }
