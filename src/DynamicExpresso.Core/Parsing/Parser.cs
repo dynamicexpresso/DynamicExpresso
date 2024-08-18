@@ -49,8 +49,7 @@ namespace DynamicExpresso.Parsing
 		private char _parseChar;
 		private Token _token;
 
-		private readonly BindingFlags _bindingCase;
-		private readonly MemberFilter _memberFilterCase;
+		private readonly MemberFinder _memberFinder;
 
 		private readonly DefaultNumberType _defaultNumberType;
 
@@ -58,8 +57,7 @@ namespace DynamicExpresso.Parsing
 		{
 			_arguments = arguments;
 
-			_bindingCase = arguments.Settings.CaseInsensitive ? BindingFlags.IgnoreCase : BindingFlags.Default;
-			_memberFilterCase = arguments.Settings.CaseInsensitive ? Type.FilterNameIgnoreCase : Type.FilterName;
+			_memberFinder = new MemberFinder(arguments);
 
 			_defaultNumberType = arguments.Settings.DefaultNumberType;
 
@@ -667,7 +665,7 @@ namespace DynamicExpresso.Parsing
 			var args = new[] { expr };
 
 			// try to find the user defined operator on both operands
-			var applicableMethods = FindMethods(type, operatorName, true, args);
+			var applicableMethods = _memberFinder.FindMethods(type, operatorName, true, args);
 			if (applicableMethods.Length > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousUnaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(type));
 
@@ -1253,7 +1251,7 @@ namespace DynamicExpresso.Parsing
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
 
 			var propertyOrFieldName = _token.text;
-			var member = FindPropertyOrField(newType, propertyOrFieldName, false);
+			var member = _memberFinder.FindPropertyOrField(newType, propertyOrFieldName, false);
 			var pos = _token.pos;
 			if (allowCollectionInit)
 			{
@@ -1352,7 +1350,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var args = ParseArgumentList();
 
-			var invokeMethod = FindInvokeMethod(expr.Type);
+			var invokeMethod = _memberFinder.FindInvokeMethod(expr.Type);
 			if (invokeMethod == null || !MethodResolution.CheckIfMethodIsApplicableAndPrepareIt(invokeMethod, args))
 				throw ParseException.Create(errorPos, error);
 
@@ -1369,7 +1367,7 @@ namespace DynamicExpresso.Parsing
 				{
 					Delegate = _,
 					Method = _.Method,
-					InvokeMethod = FindInvokeMethod(_.GetType()),
+					InvokeMethod = _memberFinder.FindInvokeMethod(_.GetType()),
 				})
 				.ToList();
 
@@ -1657,7 +1655,7 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GeneratePropertyOrFieldExpression(Type type, Expression instance, int errorPos, string propertyOrFieldName)
 		{
-			var member = FindPropertyOrField(type, propertyOrFieldName, instance == null);
+			var member = _memberFinder.FindPropertyOrField(type, propertyOrFieldName, instance == null);
 			if (member != null)
 			{
 				return member is PropertyInfo ?
@@ -1702,7 +1700,7 @@ namespace DynamicExpresso.Parsing
 			extensionMethodsArguments[0] = instance;
 			args.CopyTo(extensionMethodsArguments, 1);
 
-			var extensionMethods = FindExtensionMethods(id, extensionMethodsArguments);
+			var extensionMethods = _memberFinder.FindExtensionMethods(id, extensionMethodsArguments);
 			if (extensionMethods.Length > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
 
@@ -1720,7 +1718,7 @@ namespace DynamicExpresso.Parsing
 
 		private Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
 		{
-			var applicableMethods = FindMethods(type, id, instance == null, args);
+			var applicableMethods = _memberFinder.FindMethods(type, id, instance == null, args);
 			if (applicableMethods.Length > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
 
@@ -1850,7 +1848,7 @@ namespace DynamicExpresso.Parsing
 			if (TypeUtils.IsDynamicType(expr.Type) || IsDynamicExpression(expr))
 				return ParseDynamicIndex(expr.Type, expr, args);
 
-			var applicableMethods = FindIndexer(expr.Type, args);
+			var applicableMethods = _memberFinder.FindIndexer(expr.Type, args);
 			if (applicableMethods.Length == 0)
 			{
 				throw ParseException.Create(errorPos, ErrorMessages.NoApplicableIndexer,
@@ -1907,120 +1905,11 @@ namespace DynamicExpresso.Parsing
 
 		private Expression[] PrepareOperandArguments(Type signatures, Expression[] args)
 		{
-			var applicableMethods = FindMethods(signatures, "F", false, args);
+			var applicableMethods = _memberFinder.FindMethods(signatures, "F", false, args);
 			if (applicableMethods.Length == 1)
 				return applicableMethods[0].PromotedParameters;
 
 			return args;
-		}
-
-		private MemberInfo FindPropertyOrField(Type type, string memberName, bool staticAccess)
-		{
-			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
-			            (staticAccess ? BindingFlags.Static : BindingFlags.Instance) | _bindingCase;
-
-			foreach (var t in SelfAndBaseTypes(type))
-			{
-				var members = t.FindMembers(MemberTypes.Property | MemberTypes.Field, flags, _memberFilterCase, memberName);
-				if (members.Length != 0)
-					return members[0];
-			}
-			return null;
-		}
-
-		private MethodData[] FindMethods(Type type, string methodName, bool staticAccess, Expression[] args)
-		{
-			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
-			            (staticAccess ? BindingFlags.Static : BindingFlags.Instance) | _bindingCase;
-			foreach (var t in SelfAndBaseTypes(type))
-			{
-				var members = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, methodName);
-				var applicableMethods = MethodResolution.FindBestMethod(members.Cast<MethodBase>(), args);
-
-				if (applicableMethods.Length > 0)
-					return applicableMethods;
-			}
-
-			return new MethodData[0];
-		}
-
-		private MethodData FindInvokeMethod(Type type)
-		{
-			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
-						BindingFlags.Instance | _bindingCase;
-			foreach (var t in SelfAndBaseTypes(type))
-			{
-				var method = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, "Invoke")
-					.Cast<MethodBase>()
-					.SingleOrDefault();
-
-				if (method != null)
-					return MethodData.Gen(method);
-			}
-
-			return null;
-		}
-
-		private MethodData[] FindExtensionMethods(string methodName, Expression[] args)
-		{
-			var matchMethods = _arguments.GetExtensionMethods(methodName);
-
-			return MethodResolution.FindBestMethod(matchMethods, args);
-		}
-
-		private MethodData[] FindIndexer(Type type, Expression[] args)
-		{
-			foreach (var t in SelfAndBaseTypes(type))
-			{
-				MemberInfo[] members = t.GetDefaultMembers();
-				if (members.Length != 0)
-				{
-					IEnumerable<MethodData> methods = members.
-						OfType<PropertyInfo>().
-						Select(p => (MethodData)new IndexerData(p));
-
-					var applicableMethods = MethodResolution.FindBestMethod(methods, args);
-					if (applicableMethods.Length > 0)
-						return applicableMethods;
-				}
-			}
-
-			return new MethodData[0];
-		}
-
-		private static IEnumerable<Type> SelfAndBaseTypes(Type type)
-		{
-			if (type.IsInterface)
-			{
-				var types = new List<Type>();
-				AddInterface(types, type);
-
-				types.Add(typeof(object));
-
-				return types;
-			}
-			return SelfAndBaseClasses(type);
-		}
-
-		private static IEnumerable<Type> SelfAndBaseClasses(Type type)
-		{
-			while (type != null)
-			{
-				yield return type;
-				type = type.BaseType;
-			}
-		}
-
-		private static void AddInterface(List<Type> types, Type type)
-		{
-			if (!types.Contains(type))
-			{
-				types.Add(type);
-				foreach (Type t in type.GetInterfaces())
-				{
-					AddInterface(types, t);
-				}
-			}
 		}
 
 		private static bool IsWritable(Expression expression)
@@ -2042,7 +1931,6 @@ namespace DynamicExpresso.Parsing
 					}
 				case ExpressionType.Parameter:
 					return true;
-				
 			}
 
 			return false;
@@ -2211,7 +2099,7 @@ namespace DynamicExpresso.Parsing
 			MethodData userDefinedOperator = null;
 
 			// try to find the user defined operator on both operands
-			var opOnLeftType = FindMethods(leftType, operatorName, true, args);
+			var opOnLeftType = _memberFinder.FindMethods(leftType, operatorName, true, args);
 			if (opOnLeftType.Length > 1)
 				throw error;
 
@@ -2220,7 +2108,7 @@ namespace DynamicExpresso.Parsing
 
 			if (leftType != rightType)
 			{
-				var opOnRightType = FindMethods(rightType, operatorName, true, args);
+				var opOnRightType = _memberFinder.FindMethods(rightType, operatorName, true, args);
 				if (opOnRightType.Length > 1)
 					throw error;
 
