@@ -12,6 +12,7 @@ using System.Security;
 using System.Text;
 using DynamicExpresso.Exceptions;
 using DynamicExpresso.Reflection;
+using DynamicExpresso.Resolution;
 using DynamicExpresso.Resources;
 using Microsoft.CSharp.RuntimeBinder;
 
@@ -233,7 +234,7 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 				var right = ParseAssignment();
 
-				var promoted = PromoteExpression(right, left.Type, true);
+				var promoted = ExpressionUtils.PromoteExpression(right, left.Type, true);
 				if (promoted == null)
 					throw ParseException.Create(_token.pos, ErrorMessages.CannotConvertValue,
 						TypeUtils.GetTypeName(right.Type), TypeUtils.GetTypeName(left.Type));
@@ -1127,8 +1128,8 @@ namespace DynamicExpresso.Parsing
 				throw ParseException.Create(errorPos, ErrorMessages.FirstExprMustBeBool);
 			if (expr1.Type != expr2.Type)
 			{
-				var expr1As2 = expr2 != ParserConstants.NullLiteralExpression ? PromoteExpression(expr1, expr2.Type, true) : null;
-				var expr2As1 = expr1 != ParserConstants.NullLiteralExpression ? PromoteExpression(expr2, expr1.Type, true) : null;
+				var expr1As2 = expr2 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr1, expr2.Type, true) : null;
+				var expr2As1 = expr1 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr2, expr1.Type, true) : null;
 				if (expr1As2 != null && expr2As1 == null)
 				{
 					expr1 = expr1As2;
@@ -1184,7 +1185,7 @@ namespace DynamicExpresso.Parsing
 				ValidateToken(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected);
 			}
 
-			var applicableConstructors = FindBestMethod(newType.GetConstructors(), args);
+			var applicableConstructors = MethodResolution.FindBestMethod(newType.GetConstructors(), args);
 			if (applicableConstructors.Length == 0)
 				throw ParseException.Create(_token.pos, ErrorMessages.NoApplicableConstructor, newType);
 
@@ -1352,7 +1353,7 @@ namespace DynamicExpresso.Parsing
 			var args = ParseArgumentList();
 
 			var invokeMethod = FindInvokeMethod(expr.Type);
-			if (invokeMethod == null || !CheckIfMethodIsApplicableAndPrepareIt(invokeMethod, args))
+			if (invokeMethod == null || !MethodResolution.CheckIfMethodIsApplicableAndPrepareIt(invokeMethod, args))
 				throw ParseException.Create(errorPos, error);
 
 			return Expression.Invoke(expr, invokeMethod.PromotedParameters);
@@ -1372,12 +1373,12 @@ namespace DynamicExpresso.Parsing
 				})
 				.ToList();
 
-			var applicableMethods = FindBestMethod(candidates.Select(_ => _.Method), args);
+			var applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.Method), args);
 
 			// no method found: retry with the delegate's method
 			// (the parameters might be different, e.g. params array, default value, etc)
 			if (applicableMethods.Length == 0)
-				applicableMethods = FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
+				applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
 
 			if (applicableMethods.Length == 0)
 				throw ParseException.Create(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
@@ -1675,6 +1676,7 @@ namespace DynamicExpresso.Parsing
 			return ParseMethodInvocation(type, instance, errorPos, methodName, TokenId.OpenParen, ErrorMessages.OpenParenExpected, TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
 
 		}
+
 		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName, TokenId open, string openExpected, TokenId close, string closeExpected)
 		{
 			var args = ParseArgumentList(open, openExpected, close, closeExpected);
@@ -1837,7 +1839,7 @@ namespace DynamicExpresso.Parsing
 
 				for (int i = 0; i < args.Length; i++)
 				{
-					args[i] = PromoteExpression(args[i], typeof(int), true);
+					args[i] = ExpressionUtils.PromoteExpression(args[i], typeof(int), true);
 					if (args[i] == null)
 						throw ParseException.Create(errorPos, ErrorMessages.InvalidIndex);
 				}
@@ -1933,7 +1935,7 @@ namespace DynamicExpresso.Parsing
 			foreach (var t in SelfAndBaseTypes(type))
 			{
 				var members = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, methodName);
-				var applicableMethods = FindBestMethod(members.Cast<MethodBase>(), args);
+				var applicableMethods = MethodResolution.FindBestMethod(members.Cast<MethodBase>(), args);
 
 				if (applicableMethods.Length > 0)
 					return applicableMethods;
@@ -1963,7 +1965,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var matchMethods = _arguments.GetExtensionMethods(methodName);
 
-			return FindBestMethod(matchMethods, args);
+			return MethodResolution.FindBestMethod(matchMethods, args);
 		}
 
 		private MethodData[] FindIndexer(Type type, Expression[] args)
@@ -1977,7 +1979,7 @@ namespace DynamicExpresso.Parsing
 						OfType<PropertyInfo>().
 						Select(p => (MethodData)new IndexerData(p));
 
-					var applicableMethods = FindBestMethod(methods, args);
+					var applicableMethods = MethodResolution.FindBestMethod(methods, args);
 					if (applicableMethods.Length > 0)
 						return applicableMethods;
 				}
@@ -2021,306 +2023,6 @@ namespace DynamicExpresso.Parsing
 			}
 		}
 
-		private static MethodData[] FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
-		{
-			return FindBestMethod(methods.Select(MethodData.Gen), args);
-		}
-
-		private static MethodData[] FindBestMethod(IEnumerable<MethodData> methods, Expression[] args)
-		{
-			var applicable = methods.
-				Where(m => CheckIfMethodIsApplicableAndPrepareIt(m, args)).
-				ToArray();
-			if (applicable.Length > 1)
-			{
-				var bestCandidates = applicable
-					.Where(m => applicable.All(n => m == n || MethodHasPriority(args, m, n)))
-					.ToArray();
-
-				// bestCandidates.Length == 0 means that no applicable method has priority
-				// we don't return bestCandidates to prevent callers from thinking no method was found
-				if (bestCandidates.Length > 0)
-					return bestCandidates;
-			}
-
-			return applicable;
-		}
-
-		private static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
-		{
-			if (method.Parameters.Count(y => !y.HasDefaultValue && !ReflectionExtensions.HasParamsArrayType(y)) > args.Length)
-				return false;
-
-			var promotedArgs = new List<Expression>();
-			var declaredWorkingParameters = 0;
-
-			Type paramsArrayTypeFound = null;
-			List<Expression> paramsArrayPromotedArgument = null;
-
-			foreach (var currentArgument in args)
-			{
-				Type parameterType;
-
-				if (paramsArrayTypeFound != null)
-				{
-					parameterType = paramsArrayTypeFound;
-				}
-				else
-				{
-					if (declaredWorkingParameters >= method.Parameters.Length)
-					{
-						return false;
-					}
-
-					var parameterDeclaration = method.Parameters[declaredWorkingParameters];
-					if (parameterDeclaration.IsOut)
-					{
-						return false;
-					}
-
-					parameterType = parameterDeclaration.ParameterType;
-
-					if (ReflectionExtensions.HasParamsArrayType(parameterDeclaration))
-					{
-						paramsArrayTypeFound = parameterType;
-					}
-
-					declaredWorkingParameters++;
-				}
-
-				if (paramsArrayPromotedArgument == null && (paramsArrayTypeFound == null || args.Length == method.Parameters.Length))
-				{
-					if (parameterType.IsGenericParameter)
-					{
-						// an interpreter expression can only be matched to a parameter of type Func
-						if (currentArgument is InterpreterExpression)
-							return false;
-
-						promotedArgs.Add(currentArgument);
-						continue;
-					}
-
-					var promoted = PromoteExpression(currentArgument, parameterType, true);
-					if (promoted != null)
-					{
-						promotedArgs.Add(promoted);
-						continue;
-					}
-				}
-
-				if (paramsArrayTypeFound != null)
-				{
-					var paramsArrayElementType = paramsArrayTypeFound.GetElementType();
-					if (paramsArrayElementType.IsGenericParameter)
-					{
-						paramsArrayPromotedArgument = paramsArrayPromotedArgument ?? new List<Expression>();
-						paramsArrayPromotedArgument.Add(currentArgument);
-						continue;
-					}
-
-					var promoted = PromoteExpression(currentArgument, paramsArrayElementType, true);
-					if (promoted != null)
-					{
-						paramsArrayPromotedArgument = paramsArrayPromotedArgument ?? new List<Expression>();
-						paramsArrayPromotedArgument.Add(promoted);
-						continue;
-					}
-				}
-
-				return false;
-			}
-
-			if (paramsArrayPromotedArgument != null)
-			{
-				method.HasParamsArray = true;
-				var paramsArrayElementType = paramsArrayTypeFound.GetElementType();
-				if (paramsArrayElementType == null)
-					throw ParseException.Create(-1, ErrorMessages.ParamsArrayTypeNotAnArray);
-
-				if (paramsArrayElementType.IsGenericParameter)
-				{
-					var actualTypes = paramsArrayPromotedArgument.Select(_ => _.Type).Distinct().ToArray();
-					if (actualTypes.Length != 1)
-						throw ParseException.Create(-1, ErrorMessages.MethodTypeParametersCantBeInferred, method.MethodBase);
-
-					paramsArrayElementType = actualTypes[0];
-				}
-
-				promotedArgs.Add(Expression.NewArrayInit(paramsArrayElementType, paramsArrayPromotedArgument));
-			}
-
-			// Add default params, if needed.
-			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select<ParameterInfo, Expression>(x =>
-			{
-				if (x.HasDefaultValue)
-				{
-					var parameterType = TypeUtils.GetConcreteTypeForGenericMethod(x.ParameterType, promotedArgs, method);
-
-					return Expression.Constant(x.DefaultValue, parameterType);
-				}
-
-
-				if (ReflectionExtensions.HasParamsArrayType(x))
-				{
-					method.HasParamsArray = true;
-					return Expression.NewArrayInit(x.ParameterType.GetElementType());
-				}
-
-				throw new Exception("No default value found!");
-			}));
-
-			method.PromotedParameters = promotedArgs.ToArray();
-
-			if (method.MethodBase != null && method.MethodBase.IsGenericMethodDefinition &&
-			    method.MethodBase is MethodInfo)
-			{
-				var genericMethod = MakeGenericMethod(method);
-				if (genericMethod == null)
-					return false;
-
-				// we have all the type information we can get, update interpreter expressions and evaluate them
-				var actualMethodParameters = genericMethod.GetParameters();
-				for (var i = 0; i < method.PromotedParameters.Length; i++)
-				{
-					if (method.PromotedParameters[i] is InterpreterExpression ie)
-					{
-						var actualParamInfo = actualMethodParameters[i];
-						var lambdaExpr = ie.EvalAs(actualParamInfo.ParameterType);
-						if (lambdaExpr == null)
-							return false;
-
-						method.PromotedParameters[i] = lambdaExpr;
-
-						// we have inferred all types, update the method definition
-						genericMethod = MakeGenericMethod(method);
-					}
-				}
-
-				method.MethodBase = genericMethod;
-			}
-
-			return true;
-		}
-
-		private static MethodInfo MakeGenericMethod(MethodData method)
-		{
-			var methodInfo = (MethodInfo)method.MethodBase;
-			var actualGenericArgs = ExtractActualGenericArguments(
-				method.Parameters.Select(p => p.ParameterType).ToArray(),
-				method.PromotedParameters.Select(p => p.Type).ToArray());
-
-			var genericArgs = methodInfo.GetGenericArguments()
-				.Select(p => actualGenericArgs.TryGetValue(p.Name, out var typ) ? typ : typeof(object))
-				.ToArray();
-
-			MethodInfo genericMethod = null;
-			try
-			{
-				genericMethod = methodInfo.MakeGenericMethod(genericArgs);
-			}
-			catch (ArgumentException e) when (e.InnerException is VerificationException)
-			{
-				// this exception is thrown when a generic argument violates the generic constraints
-				return null;
-			}
-
-			return genericMethod;
-		}
-
-		private static Dictionary<string, Type> ExtractActualGenericArguments(
-			Type[] methodGenericParameters,
-			Type[] methodActualParameters)
-		{
-			var extractedGenericTypes = new Dictionary<string, Type>();
-
-			for (var i = 0; i < methodGenericParameters.Length; i++)
-			{
-				var requestedType = methodGenericParameters[i];
-				var actualType = methodActualParameters[i];
-
-				if (requestedType.IsGenericParameter)
-				{
-					if (!actualType.IsGenericParameter)
-						extractedGenericTypes[requestedType.Name] = actualType;
-				}
-				else if (requestedType.IsArray && actualType.IsArray)
-				{
-					var innerGenericTypes = ExtractActualGenericArguments(
-						new[] { requestedType.GetElementType() },
-						new[] { actualType.GetElementType()
-					});
-
-					foreach (var innerGenericType in innerGenericTypes)
-						extractedGenericTypes[innerGenericType.Key] = innerGenericType.Value;
-				}
-				else if (requestedType.ContainsGenericParameters)
-				{
-					if (actualType.IsGenericParameter)
-					{
-						extractedGenericTypes[actualType.Name] = requestedType;
-					}
-					else
-					{
-						var requestedInnerGenericArgs = requestedType.GetGenericArguments();
-						var actualInnerGenericArgs = actualType.GetGenericArguments();
-						if (requestedInnerGenericArgs.Length != actualInnerGenericArgs.Length)
-							continue;
-
-						var innerGenericTypes = ExtractActualGenericArguments(requestedInnerGenericArgs, actualInnerGenericArgs);
-						foreach (var innerGenericType in innerGenericTypes)
-							extractedGenericTypes[innerGenericType.Key] = innerGenericType.Value;
-					}
-				}
-			}
-
-			return extractedGenericTypes;
-		}
-
-		private static Expression PromoteExpression(Expression expr, Type type, bool exact)
-		{
-			if (expr.Type == type) return expr;
-			if (expr is ConstantExpression)
-			{
-				var ce = (ConstantExpression)expr;
-				if (ce == ParserConstants.NullLiteralExpression)
-				{
-					if (type.ContainsGenericParameters)
-						return null;
-					if (!type.IsValueType || TypeUtils.IsNullableType(type))
-						return Expression.Constant(null, type);
-				}
-			}
-
-			if (expr is InterpreterExpression ie)
-			{
-				if (!ie.IsCompatibleWithDelegate(type))
-					return null;
-
-				if (!type.ContainsGenericParameters)
-					return ie.EvalAs(type);
-
-				return expr;
-			}
-
-			if (type.IsGenericType && !TypeUtils.IsNumericType(type))
-			{
-				var genericType = TypeUtils.FindAssignableGenericType(expr.Type, type);
-				if (genericType != null)
-					return Expression.Convert(expr, genericType);
-			}
-
-			if (TypeUtils.IsCompatibleWith(expr.Type, type) || expr is DynamicExpression)
-			{
-				if (type.IsValueType || exact)
-				{
-					return Expression.Convert(expr, type);
-				}
-				return expr;
-			}
-
-			return null;
-		}
-
 		private static bool IsWritable(Expression expression)
 		{
 			switch (expression.NodeType)
@@ -2344,67 +2046,6 @@ namespace DynamicExpresso.Parsing
 			}
 
 			return false;
-		}
-
-		private static bool MethodHasPriority(Expression[] args, MethodData method, MethodData otherMethod)
-		{
-			var better = false;
-
-			// check conversion from argument list to parameter list
-			for (int i = 0, m = 0, o = 0; i < args.Length; i++)
-			{
-				var arg = args[i];
-				var methodParam = method.Parameters[m];
-				var otherMethodParam = otherMethod.Parameters[o];
-				var methodParamType = ReflectionExtensions.GetParameterType(methodParam);
-				var otherMethodParamType = ReflectionExtensions.GetParameterType(otherMethodParam);
-
-				if (methodParamType.ContainsGenericParameters)
-					methodParamType = method.PromotedParameters[i].Type;
-
-				if (otherMethodParamType.ContainsGenericParameters)
-					otherMethodParamType = otherMethod.PromotedParameters[i].Type;
-
-				var c = TypeUtils.CompareConversions(arg.Type, methodParamType, otherMethodParamType);
-				if (c < 0)
-					return false;
-				if (c > 0)
-					better = true;
-
-				if (!ReflectionExtensions.HasParamsArrayType(methodParam)) m++;
-				if (!ReflectionExtensions.HasParamsArrayType(otherMethodParam)) o++;
-			}
-
-			if (better)
-				return true;
-
-			if (method.MethodBase != null &&
-				otherMethod.MethodBase != null &&
-				!method.MethodBase.IsGenericMethod &&
-				otherMethod.MethodBase.IsGenericMethod)
-				return true;
-
-			if (!method.HasParamsArray && otherMethod.HasParamsArray)
-				return true;
-
-			// if a method has a params parameter, it can have less parameters than the number of arguments
-			if (method.HasParamsArray && otherMethod.HasParamsArray && method.Parameters.Length > otherMethod.Parameters.Length)
-				return true;
-
-			if (method is IndexerData indexer && otherMethod is IndexerData otherIndexer)
-			{
-				var declaringType = indexer.Indexer.DeclaringType;
-				var otherDeclaringType = otherIndexer.Indexer.DeclaringType;
-
-				var isOtherIndexerIsInParentType = otherDeclaringType.IsAssignableFrom(declaringType);
-				if (isOtherIndexerIsInParentType)
-				{
-					var isIndexerIsInDescendantType = !declaringType.IsAssignableFrom(otherDeclaringType);
-					return isIndexerIsInDescendantType;
-				}
-			}
-
-			return better;
 		}
 
 		private Expression GenerateEqual(Expression left, Expression right)
