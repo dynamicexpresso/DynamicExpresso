@@ -3496,56 +3496,6 @@ namespace DynamicExpresso.Parsing
 			}
 		}
 
-		private class MethodData
-		{
-			public MethodBase MethodBase;
-			public ParameterInfo[] Parameters;
-			public Expression[] PromotedParameters;
-			public bool HasParamsArray;
-
-			public static MethodData Gen(MethodBase method)
-			{
-				return new MethodData
-				{
-					MethodBase = method,
-					Parameters = method.GetParameters()
-				};
-			}
-
-			public override string ToString()
-			{
-				return MethodBase.ToString();
-			}
-		}
-
-		private class IndexerData : MethodData
-		{
-			public readonly PropertyInfo Indexer;
-
-			public IndexerData(PropertyInfo indexer)
-			{
-				Indexer = indexer;
-
-				var method = indexer.GetGetMethod();
-				if (method != null)
-				{
-					Parameters = method.GetParameters();
-				}
-				else
-				{
-					method = indexer.GetSetMethod();
-					Parameters = RemoveLast(method.GetParameters());
-				}
-			}
-
-			private static T[] RemoveLast<T>(T[] array)
-			{
-				T[] result = new T[array.Length - 1];
-				Array.Copy(array, 0, result, 0, result.Length);
-				return result;
-			}
-		}
-
 		/// <summary>
 		/// Binds to a member access of an instance as late as possible.  This allows the use of anonymous types on dynamic values.
 		/// </summary>
