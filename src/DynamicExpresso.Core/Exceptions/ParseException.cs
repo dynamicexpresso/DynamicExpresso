@@ -21,6 +21,11 @@ namespace DynamicExpresso.Exceptions
 
 		public int Position { get; private set; }
 
+		public static ParseException Create(int pos, string format, params object[] args)
+		{
+			return new ParseException(string.Format(format, args), pos);
+		}
+
 		protected ParseException(
 			SerializationInfo info,
 			StreamingContext context)
