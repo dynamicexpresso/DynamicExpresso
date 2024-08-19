@@ -324,5 +324,22 @@ namespace DynamicExpresso.UnitTest
 			Assert.AreEqual(1, detectedIdentifiers.UnknownIdentifiers.Count());
 			Assert.AreEqual("@class", detectedIdentifiers.UnknownIdentifiers.ElementAt(0));
 		}
+
+
+		[Test]
+		[TestCase("1L")]
+		[TestCase("2M")]
+		[TestCase("3.0D")]
+		[TestCase("4.0F")]
+		[TestCase("6.7e-8")]
+		[TestCase("9U")]
+		[TestCase("10ul")]
+		[TestCase("11lu")]
+		public void Dont_detect_numbers_with_suffix(string code)
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			var detectedIdentifiers = target.DetectIdentifiers(code);
+			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
+		}
 	}
 }
