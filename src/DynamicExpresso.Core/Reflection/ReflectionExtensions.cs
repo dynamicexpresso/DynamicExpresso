@@ -7,6 +7,9 @@ namespace DynamicExpresso.Reflection
 {
 	internal static class ReflectionExtensions
 	{
+		public static readonly MethodInfo StringConcatMethod = GetStringConcatMethod();
+		public static readonly MethodInfo ObjectToStringMethod = GetObjectToStringMethod();
+
 		public static DelegateInfo GetDelegateInfo(Type delegateType, params string[] parametersNames)
 		{
 			MethodInfo method = delegateType.GetMethod("Invoke");
@@ -57,6 +60,28 @@ namespace DynamicExpresso.Reflection
 			public Parameter[] Parameters { get; private set; }
 		}
 
+		private static MethodInfo GetStringConcatMethod()
+		{
+			var methodInfo = typeof(string).GetMethod("Concat", new[] { typeof(string), typeof(string) });
+			if (methodInfo == null)
+			{
+				throw new Exception("String concat method not found");
+			}
+
+			return methodInfo;
+		}
+
+		private static MethodInfo GetObjectToStringMethod()
+		{
+			var toStringMethod = typeof(object).GetMethod("ToString", Type.EmptyTypes);
+			if (toStringMethod == null)
+			{
+				throw new Exception("ToString method not found");
+			}
+
+			return toStringMethod;
+		}
+
 		public static Type GetFuncType(int parameterCount)
 		{
 			// +1 for the return type
@@ -66,6 +91,20 @@ namespace DynamicExpresso.Reflection
 		public static Type GetActionType(int parameterCount)
 		{
 			return typeof(Action<>).Assembly.GetType($"System.Action`{parameterCount}");
+		}
+
+		public static bool HasParamsArrayType(ParameterInfo parameterInfo)
+		{
+			return parameterInfo.IsDefined(typeof(ParamArrayAttribute), false);
+		}
+
+		public static Type GetParameterType(ParameterInfo parameterInfo)
+		{
+			var isParamsArray = HasParamsArrayType(parameterInfo);
+			var type = isParamsArray
+				? parameterInfo.ParameterType.GetElementType()
+				: parameterInfo.ParameterType;
+			return type;
 		}
 	}
 }

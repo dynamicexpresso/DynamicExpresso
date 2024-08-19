@@ -26,7 +26,12 @@ namespace DynamicExpresso.Exceptions
 
 		public int Position { get; private set; }
 
-		#if !NETSTANDARD1_6
+		public static ParseException Create(int pos, string format, params object[] args)
+		{
+			return new ParseException(string.Format(format, args), pos);
+		}
+
+#if !NETSTANDARD1_6
 		protected ParseException(
 			SerializationInfo info,
 			StreamingContext context)
