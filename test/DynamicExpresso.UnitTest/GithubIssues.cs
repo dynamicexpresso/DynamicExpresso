@@ -254,7 +254,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ParseException>(() => interpreter.Eval("GFunction(arg)"));
 
 			// GFunction1 is used
-			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true 
+			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true
 			// and     gFunc2.Method.GetParameters()[0].HasDefaultValue == false
 			Assert.False((bool)interpreter.Eval("GFunction()"));
 		}
@@ -819,6 +819,23 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		#endregion
+
+		[Test]
+		public void GitHub_Issue_311()
+		{
+			var a = "AABB";
+
+			var interpreter1 = new Interpreter();
+			interpreter1.SetVariable("a", a);
+			Assert.AreEqual("AA", interpreter1.Eval("a.Substring(0, 2)"));
+
+			var interpreter2 = new Interpreter().SetDefaultNumberType(DefaultNumberType.Decimal);
+			interpreter2.SetVariable("a", a);
+			// expected to throw because Substring is not defined for decimal
+			Assert.Throws<NoApplicableMethodException>(() => interpreter2.Eval("a.Substring(0, 2)"));
+			// It works if we cast to int
+			Assert.AreEqual("AA", interpreter2.Eval("a.Substring((int)0, (int)2)"));
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
