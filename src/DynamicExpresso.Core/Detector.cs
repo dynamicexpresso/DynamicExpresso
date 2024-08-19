@@ -76,9 +76,18 @@ namespace DynamicExpresso
 				if (IsReservedKeyword(identifier))
 					continue;
 
-				// don't consider member accesses as identifiers (e.g. "x.Length" will only return x but not Length)
-				if (idGroup.Index > 0 && expression[idGroup.Index - 1] == '.')
-					continue;
+				if (idGroup.Index > 0)
+				{
+					var previousChar = expression[idGroup.Index - 1];
+
+					// don't consider member accesses as identifiers (e.g. "x.Length" will only return x but not Length)
+					if (previousChar == '.')
+						continue;
+
+					// don't consider number literals as identifiers
+					if (char.IsDigit(previousChar))
+						continue;
+				}
 
 				if (_settings.Identifiers.TryGetValue(identifier, out Identifier knownIdentifier))
 					knownIdentifiers.Add(knownIdentifier);
