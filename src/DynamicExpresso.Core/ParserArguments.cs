@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using DynamicExpresso.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace DynamicExpresso
 {
@@ -73,6 +74,15 @@ namespace DynamicExpresso
 
 			type = null;
 			return false;
+		}
+
+		/// <summary>
+		/// Returns true if the known types contain a generic type definition with the given name + any arity (e.g. name`1).
+		/// </summary>
+		internal bool HasKnownGenericTypeDefinition(string name)
+		{
+			var regex = new Regex("^" + name + "`\\d+$");
+			return Settings.KnownTypes.Values.Any(refType => regex.IsMatch(refType.Name) && refType.Type.IsGenericTypeDefinition);
 		}
 
 		public bool TryGetIdentifier(string name, out Expression expression)

@@ -836,6 +836,18 @@ namespace DynamicExpresso.UnitTest
 			// It works if we cast to int
 			Assert.AreEqual("AA", interpreter2.Eval("a.Substring((int)0, (int)2)"));
 		}
+
+		[Test]
+		public void GitHub_Issue_314()
+		{
+			var interpreter = new Interpreter();
+
+			var exception1 = Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("b < 1"));
+			Assert.AreEqual("b", exception1.Identifier);
+
+			var exception2 = Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("b > 1"));
+			Assert.AreEqual("b", exception2.Identifier);
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods

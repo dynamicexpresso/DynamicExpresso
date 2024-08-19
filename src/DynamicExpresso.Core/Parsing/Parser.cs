@@ -1399,9 +1399,14 @@ namespace DynamicExpresso.Parsing
 		{
 			// if the type is unknown, we need to restart parsing 
 			var originalPos = _token.pos;
-			_arguments.TryGetKnownType(name, out type);
 
-			type = ParseKnownGenericType(name, type);
+			// the name might reference a generic type, with an aliased name (e.g. List<T> = MyList instead of List`1)
+			// it can also reference a generic type for which we don't know the arity yet (and therefore the name doesn't contain the `n suffix)
+			if (_arguments.TryGetKnownType(name, out type) || _arguments.HasKnownGenericTypeDefinition(name))
+			{
+				type = ParseKnownGenericType(name, type);
+			}
+
 			type = ParseTypeModifiers(type);
 
 			if (type == null)
