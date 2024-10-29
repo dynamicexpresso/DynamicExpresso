@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>1.3</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AmbiguousBinaryOperatorInvocation" xml:space="preserve">
+    <value>Mehrdeutiger Aufruf des Nutzer-definierten Opeators '{0}' mit Typen '{1}' und '{2}'</value>
+  </data>
+  <data name="AmbiguousConstructorInvocation" xml:space="preserve">
+    <value>Mehrdeutiger Aufruf eines Konstruktors des Typen '{0}'</value>
+  </data>
+  <data name="AmbiguousDelegateInvocation" xml:space="preserve">
+    <value>Mehrdeutiger Aufruf eines Delegats (mehrere Überladungen gefunden)</value>
+  </data>
+  <data name="AmbiguousIndexerInvocation" xml:space="preserve">
+    <value>Mehrdeutiger Aufruf eines Indexers des Typen '{0}'</value>
+  </data>
+  <data name="AmbiguousMethodInvocation" xml:space="preserve">
+    <value>Mehrdeutiger Aufruf der Methode '{0}' mit Typen '{1}'</value>
+  </data>
+  <data name="AmbiguousUnaryOperatorInvocation" xml:space="preserve">
+    <value>Mehrdeutiger Aufruf des Nutzer-definierten Operators '{0}' mit Typen '{1}'</value>
+  </data>
+  <data name="ArgsIncompatibleWithDelegate" xml:space="preserve">
+    <value>Argument-Liste inkompatibel mit Delegaten-Ausdruck</value>
+  </data>
+  <data name="ArgsIncompatibleWithLambda" xml:space="preserve">
+    <value>Argument-Liste inkompatibel mit Lambda-Ausdruck</value>
+  </data>
+  <data name="BothTypesConvertToOther" xml:space="preserve">
+    <value>Beide Typen '{0}' und '{1}' können zueinander konvertiert werden</value>
+  </data>
+  <data name="CannotConvertValue" xml:space="preserve">
+    <value>Ein Wert mit Typ '{0}' kann nicht zum Typ '{1}' konvertiert werden</value>
+  </data>
+  <data name="CloseBracketOrCommaExpected" xml:space="preserve">
+    <value>']' oder ',' erwartet</value>
+  </data>
+  <data name="CloseCurlyBracketExpected" xml:space="preserve">
+    <value>'}}' erwartet</value>
+  </data>
+  <data name="CloseParenOrCommaExpected" xml:space="preserve">
+    <value>')' oder ',' erwartet</value>
+  </data>
+  <data name="CloseParenOrOperatorExpected" xml:space="preserve">
+    <value>')' oder Operator erwartet</value>
+  </data>
+  <data name="CloseTypeArgumentListExpected" xml:space="preserve">
+    <value>'&gt;' erwartet</value>
+  </data>
+  <data name="CollectionInitializationNotSupported" xml:space="preserve">
+    <value>Der Typ '{0}' kann nicht mit einem Auflistungsinitialisierer initialisiert werden, da es '{1}' nicht implementiert</value>
+  </data>
+  <data name="ColonExpected" xml:space="preserve">
+    <value>':' erwartet</value>
+  </data>
+  <data name="DigitExpected" xml:space="preserve">
+    <value>Ziffer erwartet</value>
+  </data>
+  <data name="DotOrOpenParenExpected" xml:space="preserve">
+    <value>'.' oder '(' erwartet</value>
+  </data>
+  <data name="EqualExpected" xml:space="preserve">
+    <value>'=' erwartet</value>
+  </data>
+  <data name="ExpressionExpected" xml:space="preserve">
+    <value>Ausdruck erwartet</value>
+  </data>
+  <data name="ExpressionMustBeWritable" xml:space="preserve">
+    <value>Ausdruck muss schreibbar sein</value>
+  </data>
+  <data name="FirstExprMustBeBool" xml:space="preserve">
+    <value>Der erste Ausdruck muss vom Typ 'Boolean' sein</value>
+  </data>
+  <data name="Format" xml:space="preserve">
+    <value>{0} (an Stelle {1})</value>
+  </data>
+  <data name="IdentifierExpected" xml:space="preserve">
+    <value>Bezeichner erwartet</value>
+  </data>
+  <data name="IncompatibleOperand" xml:space="preserve">
+    <value>Operator '{0}' ist nicht kompatibel mit Operand von Typ '{1}'</value>
+  </data>
+  <data name="IncompatibleOperands" xml:space="preserve">
+    <value>Operator '{0}' ist nicht kompatibel mit Operanden von Typen '{1}' und '{2}'</value>
+  </data>
+  <data name="IncorrectNumberOfIndexes" xml:space="preserve">
+    <value>Falsche Anzahl an Indexen</value>
+  </data>
+  <data name="InvalidCharacter" xml:space="preserve">
+    <value>Syntax Fehler '{0}'</value>
+  </data>
+  <data name="InvalidCharacterLiteral" xml:space="preserve">
+    <value>Zeichenliteral muss genau ein Zeichen beinhalten</value>
+  </data>
+  <data name="InvalidEscapeSequence" xml:space="preserve">
+    <value>Invalide Escapezeichen-Sequenz</value>
+  </data>
+  <data name="InvalidIndex" xml:space="preserve">
+    <value>Array-Index muss ein Integer-Ausdruck sein</value>
+  </data>
+  <data name="InvalidInitializerMemberDeclarator" xml:space="preserve">
+    <value>Invalide Deklaration eines Member-Intialisierers</value>
+  </data>
+  <data name="InvalidIntegerLiteral" xml:space="preserve">
+    <value>Invalides Integer-Literal '{0}'</value>
+  </data>
+  <data name="InvalidMethodCall" xml:space="preserve">
+    <value>Keine zutreffende Methode gefunden im Typ '{0}'</value>
+  </data>
+  <data name="InvalidOperation" xml:space="preserve">
+    <value>Invalide Operation</value>
+  </data>
+  <data name="InvalidRealLiteral" xml:space="preserve">
+    <value>Invalides Kommazahl-Literal '{0}'</value>
+  </data>
+  <data name="MethodTypeParametersCantBeInferred" xml:space="preserve">
+    <value>Die Argumenttypen für die Methode '{0}' kann nicht von ihrer Nutzung erschlossen werden.</value>
+  </data>
+  <data name="NeitherTypeConvertsToOther" xml:space="preserve">
+    <value>Keine der beiden Typen '{0}' und '{1}' kann zueinander konvertiert werden</value>
+  </data>
+  <data name="NoApplicableConstructor" xml:space="preserve">
+    <value>Kein zutreffender Konstruktor existiert im Typ '{0}'</value>
+  </data>
+  <data name="NoApplicableIndexer" xml:space="preserve">
+    <value>Kein zutreffender Indexer existiert im Typ '{0}'</value>
+  </data>
+  <data name="OpenCurlyBracketExpected" xml:space="preserve">
+    <value>'{{' erwartet</value>
+  </data>
+  <data name="OpenParenExpected" xml:space="preserve">
+    <value>'(' erwartet</value>
+  </data>
+  <data name="ParamsArrayTypeNotAnArray" xml:space="preserve">
+    <value>Params Array Typ ist kein Array, Element nicht gefunden</value>
+  </data>
+  <data name="SyntaxError" xml:space="preserve">
+    <value>Syntax Fehler</value>
+  </data>
+  <data name="TypeHasNoNullableForm" xml:space="preserve">
+    <value>Typ '{0}' hat keine Nullable-Form</value>
+  </data>
+  <data name="TypeIdentifierExpected" xml:space="preserve">
+    <value>Typ-Bezeichner erwartet</value>
+  </data>
+  <data name="TypeofRequiresAType" xml:space="preserve">
+    <value>Das 'typeof'-Schlüsselwort benötigt einen Typen als Argument</value>
+  </data>
+  <data name="TypeofRequiresOneArg" xml:space="preserve">
+    <value>Das 'typeof'-Schlüsselwort benötigt 1 Argument</value>
+  </data>
+  <data name="UnableToFindAppropriateAddMethod" xml:space="preserve">
+    <value>Die beste Überladung der Add-Methode '{0}.Add' für den Auflistungsinitialisierer hat invalide Argumente</value>
+  </data>
+  <data name="UnknownPropertyOrField" xml:space="preserve">
+    <value>Keine Eigenschaft oder Feld '{0}' existiert am Typ '{1}'</value>
+  </data>
+  <data name="UnsupportedMultidimensionalArrays" xml:space="preserve">
+    <value>Mehrdimensionale Arrays werden nicht unterstützt</value>
+  </data>
+  <data name="UnterminatedStringLiteral" xml:space="preserve">
+    <value>Nicht-beendetes Zeichenfolgenliteral</value>
+  </data>
+</root>
