@@ -48,7 +48,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			var detectedIdentifiers = target.DetectIdentifiers("Contact.Personal.Year_of_birth = 1987", true);
+			var detectedIdentifiers = target.DetectIdentifiers("Contact.Personal.Year_of_birth = 1987",
+				DetectorOptions.IncludeChildren);
 
 			CollectionAssert.AreEqual(
 				new[] { "Contact.Personal.Year_of_birth" },

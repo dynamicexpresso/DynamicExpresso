@@ -533,11 +533,18 @@ namespace DynamicExpresso
 
 		#region Detection
 
-		public IdentifiersInfo DetectIdentifiers(string expression, bool includeChildName = false)
+		public IdentifiersInfo DetectIdentifiers(string expression)
 		{
 			var detector = new Detector(_settings);
 
-			return detector.DetectIdentifiers(expression, includeChildName);
+			return detector.DetectIdentifiers(expression, DetectorOptions.None);
+		}
+
+		public IdentifiersInfo DetectIdentifiers(string expression, DetectorOptions options)
+		{
+			var detector = new Detector(_settings);
+
+			return detector.DetectIdentifiers(expression, options);
 		}
 
 		#endregion

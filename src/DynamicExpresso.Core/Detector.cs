@@ -37,7 +37,7 @@ namespace DynamicExpresso
 			_settings = settings;
 		}
 
-		public IdentifiersInfo DetectIdentifiers(string expression, bool includeChildName = false)
+		public IdentifiersInfo DetectIdentifiers(string expression, DetectorOptions option)
 		{
 			expression = PrepareExpression(expression);
 
@@ -80,7 +80,9 @@ namespace DynamicExpresso
 				}
 			}
 
-			var identifierRegex = includeChildName ? ChildIdentifierDetectionRegex : RootIdentifierDetectionRegex;
+			var identifierRegex = option == DetectorOptions.IncludeChildren
+				? ChildIdentifierDetectionRegex
+				: RootIdentifierDetectionRegex;
 
 			foreach (Match match in identifierRegex.Matches(expression))
 			{
@@ -90,7 +92,7 @@ namespace DynamicExpresso
 				if (IsReservedKeyword(identifier))
 					continue;
 
-				if (!includeChildName && idGroup.Index > 0)
+				if (option == DetectorOptions.None && idGroup.Index > 0)
 				{
 					var previousChar = expression[idGroup.Index - 1];
 
