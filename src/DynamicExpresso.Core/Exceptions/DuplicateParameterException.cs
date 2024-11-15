@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso.Exceptions
 {
@@ -7,7 +8,7 @@ namespace DynamicExpresso.Exceptions
 	public class DuplicateParameterException : DynamicExpressoException
 	{
 		public DuplicateParameterException(string identifier)
-			: base(string.Format("The parameter '{0}' was defined more than once", identifier))
+			: base(string.Format(ErrorMessages.DuplicateParameter, identifier))
 		{
 			Identifier = identifier;
 		}

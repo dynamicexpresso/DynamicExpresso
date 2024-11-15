@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso.Exceptions
 {
@@ -7,7 +8,7 @@ namespace DynamicExpresso.Exceptions
 	public class UnknownIdentifierException : ParseException
 	{
 		public UnknownIdentifierException(string identifier, int position)
-			: base(string.Format("Unknown identifier '{0}'", identifier), position)
+			: base(string.Format(ErrorMessages.UnknownIdentifier, identifier), position)
 		{
 			Identifier = identifier;
 		}
