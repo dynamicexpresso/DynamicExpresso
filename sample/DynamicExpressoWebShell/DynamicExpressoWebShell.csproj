@@ -7,7 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DynamicExpresso.Core" Version="2.1.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
 	</ItemGroup>
 
@@ -30,6 +29,10 @@
 	  <None Include="wwwroot\Scripts\jquery-1.9.0.min.js" />
 	  <None Include="wwwroot\Scripts\jquery-1.9.0.min.map" />
 	  <None Include="wwwroot\Scripts\webshell.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\src\DynamicExpresso.Core\DynamicExpresso.Core.csproj" />
 	</ItemGroup>
 
 </Project>
