@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso.Exceptions
 {
@@ -7,7 +8,7 @@ namespace DynamicExpresso.Exceptions
 	public class NoApplicableMethodException : ParseException
 	{
 		public NoApplicableMethodException(string methodName, string methodTypeName, int position)
-			: base(string.Format("No applicable method '{0}' exists in type '{1}'", methodName, methodTypeName), position)
+			: base(string.Format(ErrorMessages.InvalidMethodCall2, methodName, methodTypeName), position)
 		{
 			MethodTypeName = methodTypeName;
 			MethodName = methodName;

@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using DynamicExpresso.Reflection;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso
 {
@@ -87,7 +88,7 @@ namespace DynamicExpresso
 			if (args != null)
 			{
 				if (declaredParameters.Length != args.Length)
-					throw new InvalidOperationException("Arguments count mismatch.");
+					throw new InvalidOperationException(ErrorMessages.ArgumentCountMismatch);
 
 				for (var i = 0; i < args.Length; i++)
 				{

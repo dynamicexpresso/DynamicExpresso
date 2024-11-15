@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DynamicExpresso.Reflection;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso
 {
@@ -30,7 +31,7 @@ namespace DynamicExpresso
 				var genericType = type.GetGenericTypeDefinition();
 				var genericTypeName = genericType.Name.Substring(0, genericType.Name.IndexOf('`'));
 				genericTypeName += $"<{new string(',', genericType.GetGenericArguments().Length - 1)}>";
-				throw new ArgumentException($"Generic type must be referenced via its generic definition: {genericTypeName}");
+				throw new ArgumentException(string.Format(ErrorMessages.GenericTypeReference, genericTypeName));
 			}
 
 			Type = type;
