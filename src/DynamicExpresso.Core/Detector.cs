@@ -11,21 +11,33 @@ namespace DynamicExpresso
 	{
 		private readonly ParserSettings _settings;
 
-		private static readonly Regex IdentifiersDetectionRegex = new Regex(@"(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)", RegexOptions.Compiled);
+		private static readonly Regex RootIdentifierDetectionRegex =
+			new Regex(@"(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)", RegexOptions.Compiled);
 
-		private static readonly string Id = IdentifiersDetectionRegex.ToString();
+		private static readonly Regex ChildIdentifierDetectionRegex = new Regex(
+			@"(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)*)",
+			RegexOptions.Compiled);
+
+
+		private static readonly string Id = RootIdentifierDetectionRegex.ToString();
 		private static readonly string Type = Id.Replace("<id>", "<type>");
-		private static readonly Regex LambdaDetectionRegex = new Regex($@"(\((((?<withtype>({Type}\s+)?{Id}))(\s*,\s*)?)+\)|(?<withtype>{Id}))\s*=>", RegexOptions.Compiled);
 
-		private static readonly Regex StringDetectionRegex = new Regex(@"(?<!\\)?"".*?(?<!\\)""", RegexOptions.Compiled);
-		private static readonly Regex CharDetectionRegex = new Regex(@"(?<!\\)?'.{1,2}?(?<!\\)'", RegexOptions.Compiled);
+		private static readonly Regex LambdaDetectionRegex =
+			new Regex($@"(\((((?<withtype>({Type}\s+)?{Id}))(\s*,\s*)?)+\)|(?<withtype>{Id}))\s*=>",
+				RegexOptions.Compiled);
+
+		private static readonly Regex StringDetectionRegex =
+			new Regex(@"(?<!\\)?"".*?(?<!\\)""", RegexOptions.Compiled);
+
+		private static readonly Regex CharDetectionRegex =
+			new Regex(@"(?<!\\)?'.{1,2}?(?<!\\)'", RegexOptions.Compiled);
 
 		public Detector(ParserSettings settings)
 		{
 			_settings = settings;
 		}
 
-		public IdentifiersInfo DetectIdentifiers(string expression)
+		public IdentifiersInfo DetectIdentifiers(string expression, DetectorOptions option)
 		{
 			expression = PrepareExpression(expression);
 
@@ -59,7 +71,8 @@ namespace DynamicExpresso
 
 					// there might be several lambda parameters with the same name
 					//  -> in that case, we ignore the detected type
-					if (lambdaParameters.TryGetValue(identifier, out Identifier already) && already.Expression.Type != type)
+					if (lambdaParameters.TryGetValue(identifier, out Identifier already) &&
+					    already.Expression.Type != type)
 						type = typeof(object);
 
 					var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
@@ -67,8 +80,11 @@ namespace DynamicExpresso
 				}
 			}
 
+			var identifierRegex = option == DetectorOptions.IncludeChildren
+				? ChildIdentifierDetectionRegex
+				: RootIdentifierDetectionRegex;
 
-			foreach (Match match in IdentifiersDetectionRegex.Matches(expression))
+			foreach (Match match in identifierRegex.Matches(expression))
 			{
 				var idGroup = match.Groups["id"];
 				var identifier = idGroup.Value;
@@ -76,7 +92,7 @@ namespace DynamicExpresso
 				if (IsReservedKeyword(identifier))
 					continue;
 
-				if (idGroup.Index > 0)
+				if (option == DetectorOptions.None && idGroup.Index > 0)
 				{
 					var previousChar = expression[idGroup.Index - 1];
 

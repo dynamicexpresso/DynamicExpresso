@@ -44,6 +44,19 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Detect_unknown_identifiers_with_complete_variable_name()
+		{
+			var target = new Interpreter();
+
+			var detectedIdentifiers = target.DetectIdentifiers("Contact.Personal.Year_of_birth = 1987",
+				DetectorOptions.IncludeChildren);
+
+			CollectionAssert.AreEqual(
+				new[] { "Contact.Personal.Year_of_birth" },
+				detectedIdentifiers.UnknownIdentifiers.ToArray());
+		}
+
+		[Test]
 		public void Should_detect_various_format_of_identifiers()
 		{
 			var target = new Interpreter();
@@ -267,7 +280,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 
-			var detectedIdentifiers = target.DetectIdentifiers("(x, int y, z, int a) => x.Select(z => z + y).Select((string a, string b) => b)");
+			var detectedIdentifiers =
+				target.DetectIdentifiers(
+					"(x, int y, z, int a) => x.Select(z => z + y).Select((string a, string b) => b)");
 			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
 
 			Assert.AreEqual(2, detectedIdentifiers.Types.Count());

@@ -19,6 +19,7 @@ namespace DynamicExpresso
 		private readonly ISet<ExpressionVisitor> _visitors = new HashSet<ExpressionVisitor>();
 
 		#region Constructors
+
 		/// <summary>
 		/// Creates a new Interpreter using InterpreterOptions.Default.
 		/// </summary>
@@ -70,9 +71,11 @@ namespace DynamicExpresso
 		{
 			_settings = settings;
 		}
+
 		#endregion
 
 		#region Properties
+
 		public bool CaseInsensitive
 		{
 			get
@@ -114,6 +117,7 @@ namespace DynamicExpresso
 		{
 			get { return _settings.AssignmentOperators; }
 		}
+
 		#endregion
 
 		#region Options
@@ -141,9 +145,11 @@ namespace DynamicExpresso
 
 			return this;
 		}
+
 		#endregion
 
 		#region Visitors
+
 		public ISet<ExpressionVisitor> Visitors
 		{
 			get { return _visitors; }
@@ -161,9 +167,11 @@ namespace DynamicExpresso
 
 			return this;
 		}
+
 		#endregion
 
 		#region Register identifiers
+
 		/// <summary>
 		/// Allow the specified function delegate to be called from a parsed expression.
 		/// Overloads can be added (ie. multiple delegates can be registered with the same name).
@@ -177,7 +185,8 @@ namespace DynamicExpresso
 			if (string.IsNullOrWhiteSpace(name))
 				throw new ArgumentNullException(nameof(name));
 
-			if (_settings.Identifiers.TryGetValue(name, out var identifier) && identifier is FunctionIdentifier fIdentifier)
+			if (_settings.Identifiers.TryGetValue(name, out var identifier) &&
+			    identifier is FunctionIdentifier fIdentifier)
 			{
 				fIdentifier.AddOverload(value);
 			}
@@ -319,9 +328,11 @@ namespace DynamicExpresso
 			_settings.Identifiers.Remove(name);
 			return this;
 		}
+
 		#endregion
 
 		#region Register referenced types
+
 		/// <summary>
 		/// Allow the specified type to be used inside an expression. The type will be available using its name.
 		/// If the type contains method extensions methods they will be available inside expressions.
@@ -385,9 +396,11 @@ namespace DynamicExpresso
 
 			return this;
 		}
+
 		#endregion
 
 		#region Parse
+
 		/// <summary>
 		/// Parse a text expression and returns a Lambda class that can be used to invoke it.
 		/// </summary>
@@ -443,13 +456,15 @@ namespace DynamicExpresso
 		/// <param name="parametersNames">Names of the parameters. If not specified the parameters names defined inside the delegate are used.</param>
 		/// <returns></returns>
 		/// <exception cref="ParseException"></exception>
-		public Expression<TDelegate> ParseAsExpression<TDelegate>(string expressionText, params string[] parametersNames)
+		public Expression<TDelegate> ParseAsExpression<TDelegate>(string expressionText,
+			params string[] parametersNames)
 		{
 			var lambda = ParseAs<TDelegate>(expressionText, parametersNames);
 			return lambda.LambdaExpression<TDelegate>();
 		}
 
-		internal LambdaExpression ParseAsExpression(Type delegateType, string expressionText, params string[] parametersNames)
+		internal LambdaExpression ParseAsExpression(Type delegateType, string expressionText,
+			params string[] parametersNames)
 		{
 			var delegateInfo = ReflectionExtensions.GetDelegateInfo(delegateType, parametersNames);
 
@@ -466,7 +481,7 @@ namespace DynamicExpresso
 
 		public Lambda ParseAs<TDelegate>(string expressionText, params string[] parametersNames)
 		{
-			return ParseAs(typeof(TDelegate), expressionText, parametersNames); 
+			return ParseAs(typeof(TDelegate), expressionText, parametersNames);
 		}
 
 		internal Lambda ParseAs(Type delegateType, string expressionText, params string[] parametersNames)
@@ -475,9 +490,11 @@ namespace DynamicExpresso
 
 			return ParseAsLambda(expressionText, delegateInfo.ReturnType, delegateInfo.Parameters);
 		}
+
 		#endregion
 
 		#region Eval
+
 		/// <summary>
 		/// Parse and invoke the specified expression.
 		/// </summary>
@@ -511,15 +528,25 @@ namespace DynamicExpresso
 		{
 			return Parse(expressionText, expressionType, parameters).Invoke(parameters);
 		}
+
 		#endregion
 
 		#region Detection
+
 		public IdentifiersInfo DetectIdentifiers(string expression)
 		{
 			var detector = new Detector(_settings);
 
-			return detector.DetectIdentifiers(expression);
+			return detector.DetectIdentifiers(expression, DetectorOptions.None);
 		}
+
+		public IdentifiersInfo DetectIdentifiers(string expression, DetectorOptions options)
+		{
+			var detector = new Detector(_settings);
+
+			return detector.DetectIdentifiers(expression, options);
+		}
+
 		#endregion
 
 		#region Private methods
@@ -527,10 +554,10 @@ namespace DynamicExpresso
 		private Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
 		{
 			var arguments = new ParserArguments(
-												expressionText,
-												_settings,
-												expressionType,
-												parameters);
+				expressionText,
+				_settings,
+				expressionType,
+				parameters);
 
 			var expression = Parser.Parse(arguments);
 
@@ -559,6 +586,7 @@ namespace DynamicExpresso
 				throw new Exception("Detected unknown identifiers doesn't match actual parameters");
 		}
 #endif
+
 		#endregion
 	}
 }
