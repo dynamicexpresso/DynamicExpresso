@@ -12,10 +12,10 @@ namespace DynamicExpresso
 		private readonly ParserSettings _settings;
 
 		private static readonly Regex RootIdentifierDetectionRegex =
-			new Regex(@"(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)", RegexOptions.Compiled);
+			new Regex(@"(?<=[^\w@]|^)(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)", RegexOptions.Compiled);
 
 		private static readonly Regex ChildIdentifierDetectionRegex = new Regex(
-			@"(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)*)",
+			@"(?<=[^\w@]|^)(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)*)",
 			RegexOptions.Compiled);
 
 
