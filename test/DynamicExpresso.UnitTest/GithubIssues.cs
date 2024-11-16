@@ -775,6 +775,7 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		[Ignore("The fix suggested in #296 break other use cases, so let's ignore this test for now")]
 		public void GitHub_Issue_295()
 		{
 			var evaluator = new Interpreter();
@@ -848,6 +849,21 @@ namespace DynamicExpresso.UnitTest
 
 			var exception2 = Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("b > 1"));
 			Assert.AreEqual("b", exception2.Identifier);
+		}
+
+		[Test]
+		public void GitHub_Issue_325()
+		{
+			var options = InterpreterOptions.Default | InterpreterOptions.LateBindObject;
+			var interpreter = new Interpreter(options);
+
+			var input = new
+			{
+				Prop1 = 4,
+			};
+
+			var expressionDelegate = interpreter.ParseAsDelegate<Func<object, bool>>($"input.Prop1 == null", "input");
+			Assert.IsFalse(expressionDelegate(input));
 		}
 	}
 

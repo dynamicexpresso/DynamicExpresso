@@ -36,7 +36,7 @@ namespace DynamicExpresso.Resolution
 					return Expression.Convert(expr, genericType);
 			}
 
-			if (TypeUtils.IsCompatibleWith(expr.Type, type) || expr is DynamicExpression)
+			if (TypeUtils.IsCompatibleWith(expr.Type, type))
 			{
 				return Expression.Convert(expr, type);
 			}
