@@ -1,12 +1,12 @@
-using DynamicExpresso.Exceptions;
-using NUnit.Framework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Dynamic;
+using DynamicExpresso.Exceptions;
+using NUnit.Framework;
 
 // ReSharper disable SpecifyACultureInStringConversionExplicitly
 
@@ -775,7 +775,8 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		public void GitHub_Issue_295() {
+		public void GitHub_Issue_295()
+		{
 			var evaluator = new Interpreter();
 
 			// create path helper functions in expressions...
@@ -787,10 +788,10 @@ namespace DynamicExpresso.UnitTest
 			globalSettings.MyTestPath = "C:\\delme\\";
 			evaluator.SetVariable("GlobalSettings", globalSettings);
 
-			var works = (string) evaluator.Eval("StringConcat((string)GlobalSettings.MyTestPath,\"test.txt\")");
+			var works = (string)evaluator.Eval("StringConcat((string)GlobalSettings.MyTestPath,\"test.txt\")");
 			Assert.That(works, Is.EqualTo("C:\\delme\\test.txt"));
 
-			var doesntWork = (string) evaluator.Eval("StringConcat(GlobalSettings.MyTestPath,\"test.txt\")");
+			var doesntWork = (string)evaluator.Eval("StringConcat(GlobalSettings.MyTestPath,\"test.txt\")");
 			Assert.That(doesntWork, Is.EqualTo("C:\\delme\\test.txt"));
 		}
 

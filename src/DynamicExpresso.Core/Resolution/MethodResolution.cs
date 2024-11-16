@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Security;
-using System.Text;
 using DynamicExpresso.Exceptions;
 using DynamicExpresso.Parsing;
 using DynamicExpresso.Reflection;

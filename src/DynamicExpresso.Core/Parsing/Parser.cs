@@ -336,8 +336,8 @@ namespace DynamicExpresso.Parsing
 		{
 			var left = ParseTypeTesting();
 			while (_token.id == TokenId.DoubleEqual || _token.id == TokenId.ExclamationEqual ||
-			       _token.id == TokenId.GreaterThan || _token.id == TokenId.GreaterThanEqual ||
-			       _token.id == TokenId.LessThan || _token.id == TokenId.LessThanEqual)
+				   _token.id == TokenId.GreaterThan || _token.id == TokenId.GreaterThanEqual ||
+				   _token.id == TokenId.LessThan || _token.id == TokenId.LessThanEqual)
 			{
 				var op = _token;
 				NextToken();
@@ -424,7 +424,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var left = ParseShift();
 			while (_token.text == ParserConstants.KeywordIs
-			       || _token.text == ParserConstants.KeywordAs)
+				|| _token.text == ParserConstants.KeywordAs)
 			{
 				var typeOperator = _token.text;
 
@@ -523,7 +523,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var left = ParseUnary();
 			while (_token.id == TokenId.Asterisk || _token.id == TokenId.Slash ||
-			       _token.id == TokenId.Percent)
+				   _token.id == TokenId.Percent)
 			{
 				var op = _token;
 				NextToken();
@@ -1053,7 +1053,7 @@ namespace DynamicExpresso.Parsing
 					return ParseMemberAccess(thisParameterExpression);
 				}
 			}
-			catch(ParseException)
+			catch (ParseException)
 			{
 				// ignore
 			}
@@ -1116,7 +1116,7 @@ namespace DynamicExpresso.Parsing
 		private Expression GenerateConditional(Expression test, Expression expr1, Expression expr2, int errorPos)
 		{
 			if (IsDynamicExpression(test))
-				return GenerateConditionalDynamic(test, expr1, expr2,errorPos);
+				return GenerateConditionalDynamic(test, expr1, expr2, errorPos);
 
 			if (test.Type != typeof(bool))
 				throw ParseException.Create(errorPos, ErrorMessages.FirstExprMustBeBool);
@@ -1958,8 +1958,6 @@ namespace DynamicExpresso.Parsing
 			}
 			return GenerateBinary(ExpressionType.GreaterThan, left, right);
 		}
-
-		
 
 		private Expression GenerateGreaterThanEqual(Expression left, Expression right)
 		{
