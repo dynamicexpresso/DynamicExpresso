@@ -177,4 +177,40 @@
   <data name="UnterminatedStringLiteral" xml:space="preserve">
     <value>Nicht-beendetes Zeichenfolgenliteral</value>
   </data>
+  <data name="ReservedWord" xml:space="preserve">
+    <value>{0} ist ein reserviertes Wort</value>
+  </data>
+  <data name="ArgumentCountMismatch" xml:space="preserve">
+    <value>Argumentzahl unpassend</value>
+  </data>
+  <data name="GenericTypeReference" xml:space="preserve">
+    <value>Generische Typen müssen mittels generischer Definition referenziert werden: {0}</value>
+  </data>
+  <data name="AssignmentOperatorNotAllowed" xml:space="preserve">
+    <value>Zuweisungsoperator '{0}' ist nicht erlaubt</value>
+  </data>
+  <data name="DuplicateParameter" xml:space="preserve">
+    <value>Der Parameter '{0}' wurde mehrmals definiert</value>
+  </data>
+  <data name="InvalidMethodCall2" xml:space="preserve">
+    <value>Keine zutreffende Methode '{0}' gefunden im Typ '{1}'</value>
+  </data>
+  <data name="ReflectionNotAllowed" xml:space="preserve">
+    <value>Spiegelungsausdrücke sind nicht erlaubt. Aktivieren Sie Spiegelung mittels Interpreter.EnableReflection().</value>
+  </data>
+  <data name="UnknownIdentifier" xml:space="preserve">
+    <value>Unbekannter Bezeichner '{0}'</value>
+  </data>
+  <data name="DuplicateLocalParameterDeclaration" xml:space="preserve">
+    <value>Eine locale Variable oder Parameter '{0}' kann nicht in dieser Zugriffsebene deklariert werden, da dieser Name bereits in einer höheren Zugriffsebene verwendet wird, um eine lokale Variable oder Parameter zu definieren</value>
+  </data>
+  <data name="MultipleLambdaParametersWithoutBrace" xml:space="preserve">
+    <value>Mehrere Lambda-Funktionsparameter erkannt, aber keine umgebenden Klammern gegeben</value>
+  </data>
+  <data name="GenericArgumentCountMismatch" xml:space="preserve">
+    <value>Die Anzahl an Typargumenten für den generischen Typ stimmt nicht mit der Stelligkeit der Definition überein</value>
+  </data>
+  <data name="NextTokenAtEnd" xml:space="preserve">
+    <value>NextToken wurde am Ende des Ausdrucks aufgerufen</value>
+  </data>
 </root>

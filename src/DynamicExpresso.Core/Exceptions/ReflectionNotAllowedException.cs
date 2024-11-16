@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso.Exceptions
 {
@@ -7,7 +8,7 @@ namespace DynamicExpresso.Exceptions
 	public class ReflectionNotAllowedException : ParseException
 	{
 		public ReflectionNotAllowedException()
-			: base("Reflection expression not allowed. To enable reflection use Interpreter.EnableReflection().", 0)
+			: base(ErrorMessages.ReflectionNotAllowed, 0)
 		{
 		}
 

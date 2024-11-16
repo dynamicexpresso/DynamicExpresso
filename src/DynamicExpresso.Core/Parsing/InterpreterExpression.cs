@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using DynamicExpresso.Exceptions;
 using DynamicExpresso.Reflection;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso.Parsing
 {
@@ -35,7 +36,7 @@ namespace DynamicExpresso.Parsing
 			{
 				if (settings.Identifiers.ContainsKey(myParameter.Name))
 				{
-					throw new ParseException($"A local or parameter named '{myParameter.Name}' cannot be declared in this scope because that name is used in an enclosing local scope to define a local or parameter", myParameter.Position);
+					throw new ParseException(string.Format(ErrorMessages.DuplicateLocalParameterDeclaration, myParameter.Name), myParameter.Position);
 				}
 			}
 

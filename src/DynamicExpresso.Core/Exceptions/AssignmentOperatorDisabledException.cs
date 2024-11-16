@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using DynamicExpresso.Resources;
 
 namespace DynamicExpresso.Exceptions
 {
@@ -7,7 +8,7 @@ namespace DynamicExpresso.Exceptions
 	public class AssignmentOperatorDisabledException : ParseException
 	{
 		public AssignmentOperatorDisabledException(string operatorString, int position)
-			: base(string.Format("Assignment operator '{0}' not allowed", operatorString), position)
+			: base(string.Format(ErrorMessages.AssignmentOperatorNotAllowed, operatorString), position)
 		{
 			OperatorString = operatorString;
 		}

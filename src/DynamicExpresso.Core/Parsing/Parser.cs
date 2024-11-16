@@ -175,7 +175,7 @@ namespace DynamicExpresso.Parsing
 			}
 
 			if (!hasOpenParen && parameters.Length > 1)
-				throw new ParseException("Multiple lambda parameters detected, but with no surrounding parenthesis", _parsePosition);
+				throw new ParseException(ErrorMessages.MultipleLambdaParametersWithoutBrace, _parsePosition);
 
 			return parameters;
 		}
@@ -508,7 +508,7 @@ namespace DynamicExpresso.Parsing
 			// << could be a token, but is not for symmetry
 			else if (_token.id == TokenId.LessThan && _parseChar == '<')
 			{
-				NextToken(); // consume next < 
+				NextToken(); // consume next <
 				shiftType = ExpressionType.LeftShift;
 				return true;
 			}
@@ -1397,7 +1397,7 @@ namespace DynamicExpresso.Parsing
 
 		private bool TryParseKnownType(string name, out Type type)
 		{
-			// if the type is unknown, we need to restart parsing 
+			// if the type is unknown, we need to restart parsing
 			var originalPos = _token.pos;
 
 			// the name might reference a generic type, with an aliased name (e.g. List<T> = MyList instead of List`1)
@@ -1433,7 +1433,7 @@ namespace DynamicExpresso.Parsing
 					return null;
 
 				if (rank != type.GetGenericArguments().Length)
-					throw new ArgumentException($"The number of generic arguments provided doesn't equal the arity of the generic type definition.");
+					throw new ArgumentException(ErrorMessages.GenericArgumentCountMismatch);
 
 				// there are actual type arguments: instantiate the proper generic type
 				if (typeArguments.All(_ => _ != null))
@@ -2531,7 +2531,7 @@ namespace DynamicExpresso.Parsing
 					if (_parsePosition == _expressionTextLength)
 					{
 						if (_token.id == TokenId.End)
-							throw new InvalidOperationException("NextToken called when already at the end of the expression");
+							throw new InvalidOperationException(ErrorMessages.NextTokenAtEnd);
 
 						t = TokenId.End;
 						break;
