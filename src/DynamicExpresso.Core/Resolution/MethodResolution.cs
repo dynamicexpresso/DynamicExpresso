@@ -92,7 +92,7 @@ namespace DynamicExpresso.Resolution
 						continue;
 					}
 
-					var promoted = ExpressionUtils.PromoteExpression(currentArgument, parameterType, true);
+					var promoted = ExpressionUtils.PromoteExpression(currentArgument, parameterType);
 					if (promoted != null)
 					{
 						promotedArgs.Add(promoted);
@@ -110,7 +110,7 @@ namespace DynamicExpresso.Resolution
 						continue;
 					}
 
-					var promoted = ExpressionUtils.PromoteExpression(currentArgument, paramsArrayElementType, true);
+					var promoted = ExpressionUtils.PromoteExpression(currentArgument, paramsArrayElementType);
 					if (promoted != null)
 					{
 						paramsArrayPromotedArgument = paramsArrayPromotedArgument ?? new List<Expression>();

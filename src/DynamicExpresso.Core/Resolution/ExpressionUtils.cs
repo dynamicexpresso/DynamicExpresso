@@ -7,19 +7,15 @@ namespace DynamicExpresso.Resolution
 {
 	internal static class ExpressionUtils
 	{
-		public static Expression PromoteExpression(Expression expr, Type type, bool exact)
+		public static Expression PromoteExpression(Expression expr, Type type)
 		{
 			if (expr.Type == type) return expr;
-			if (expr is ConstantExpression)
+			if (expr is ConstantExpression ce && ce == ParserConstants.NullLiteralExpression)
 			{
-				var ce = (ConstantExpression)expr;
-				if (ce == ParserConstants.NullLiteralExpression)
-				{
-					if (type.ContainsGenericParameters)
-						return null;
-					if (!type.IsValueType || TypeUtils.IsNullableType(type))
-						return Expression.Constant(null, type);
-				}
+				if (type.ContainsGenericParameters)
+					return null;
+				if (!type.IsValueType || TypeUtils.IsNullableType(type))
+					return Expression.Constant(null, type);
 			}
 
 			if (expr is InterpreterExpression ie)
@@ -42,11 +38,7 @@ namespace DynamicExpresso.Resolution
 
 			if (TypeUtils.IsCompatibleWith(expr.Type, type) || expr is DynamicExpression)
 			{
-				if (type.IsValueType || exact)
-				{
-					return Expression.Convert(expr, type);
-				}
-				return expr;
+				return Expression.Convert(expr, type);
 			}
 
 			return null;

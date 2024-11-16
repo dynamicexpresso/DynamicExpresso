@@ -228,7 +228,7 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 				var right = ParseAssignment();
 
-				var promoted = ExpressionUtils.PromoteExpression(right, left.Type, true);
+				var promoted = ExpressionUtils.PromoteExpression(right, left.Type);
 				if (promoted == null)
 					throw ParseException.Create(_token.pos, ErrorMessages.CannotConvertValue,
 						TypeUtils.GetTypeName(right.Type), TypeUtils.GetTypeName(left.Type));
@@ -1122,8 +1122,8 @@ namespace DynamicExpresso.Parsing
 				throw ParseException.Create(errorPos, ErrorMessages.FirstExprMustBeBool);
 			if (expr1.Type != expr2.Type)
 			{
-				var expr1As2 = expr2 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr1, expr2.Type, true) : null;
-				var expr2As1 = expr1 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr2, expr1.Type, true) : null;
+				var expr1As2 = expr2 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr1, expr2.Type) : null;
+				var expr2As1 = expr1 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr2, expr1.Type) : null;
 				if (expr1As2 != null && expr2As1 == null)
 				{
 					expr1 = expr1As2;
@@ -1838,7 +1838,7 @@ namespace DynamicExpresso.Parsing
 
 				for (int i = 0; i < args.Length; i++)
 				{
-					args[i] = ExpressionUtils.PromoteExpression(args[i], typeof(int), true);
+					args[i] = ExpressionUtils.PromoteExpression(args[i], typeof(int));
 					if (args[i] == null)
 						throw ParseException.Create(errorPos, ErrorMessages.InvalidIndex);
 				}
