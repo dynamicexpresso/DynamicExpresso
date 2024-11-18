@@ -228,7 +228,7 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 				var right = ParseAssignment();
 
-				var promoted = ExpressionUtils.PromoteExpression(right, left.Type, true);
+				var promoted = ExpressionUtils.PromoteExpression(right, left.Type);
 				if (promoted == null)
 					throw ParseException.Create(_token.pos, ErrorMessages.CannotConvertValue,
 						TypeUtils.GetTypeName(right.Type), TypeUtils.GetTypeName(left.Type));
@@ -336,8 +336,8 @@ namespace DynamicExpresso.Parsing
 		{
 			var left = ParseTypeTesting();
 			while (_token.id == TokenId.DoubleEqual || _token.id == TokenId.ExclamationEqual ||
-			       _token.id == TokenId.GreaterThan || _token.id == TokenId.GreaterThanEqual ||
-			       _token.id == TokenId.LessThan || _token.id == TokenId.LessThanEqual)
+				   _token.id == TokenId.GreaterThan || _token.id == TokenId.GreaterThanEqual ||
+				   _token.id == TokenId.LessThan || _token.id == TokenId.LessThanEqual)
 			{
 				var op = _token;
 				NextToken();
@@ -424,7 +424,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var left = ParseShift();
 			while (_token.text == ParserConstants.KeywordIs
-			       || _token.text == ParserConstants.KeywordAs)
+				|| _token.text == ParserConstants.KeywordAs)
 			{
 				var typeOperator = _token.text;
 
@@ -523,7 +523,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var left = ParseUnary();
 			while (_token.id == TokenId.Asterisk || _token.id == TokenId.Slash ||
-			       _token.id == TokenId.Percent)
+				   _token.id == TokenId.Percent)
 			{
 				var op = _token;
 				NextToken();
@@ -1053,7 +1053,7 @@ namespace DynamicExpresso.Parsing
 					return ParseMemberAccess(thisParameterExpression);
 				}
 			}
-			catch(ParseException)
+			catch (ParseException)
 			{
 				// ignore
 			}
@@ -1116,14 +1116,14 @@ namespace DynamicExpresso.Parsing
 		private Expression GenerateConditional(Expression test, Expression expr1, Expression expr2, int errorPos)
 		{
 			if (IsDynamicExpression(test))
-				return GenerateConditionalDynamic(test, expr1, expr2,errorPos);
+				return GenerateConditionalDynamic(test, expr1, expr2, errorPos);
 
 			if (test.Type != typeof(bool))
 				throw ParseException.Create(errorPos, ErrorMessages.FirstExprMustBeBool);
 			if (expr1.Type != expr2.Type)
 			{
-				var expr1As2 = expr2 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr1, expr2.Type, true) : null;
-				var expr2As1 = expr1 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr2, expr1.Type, true) : null;
+				var expr1As2 = expr2 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr1, expr2.Type) : null;
+				var expr2As1 = expr1 != ParserConstants.NullLiteralExpression ? ExpressionUtils.PromoteExpression(expr2, expr1.Type) : null;
 				if (expr1As2 != null && expr2As1 == null)
 				{
 					expr1 = expr1As2;
@@ -1838,7 +1838,7 @@ namespace DynamicExpresso.Parsing
 
 				for (int i = 0; i < args.Length; i++)
 				{
-					args[i] = ExpressionUtils.PromoteExpression(args[i], typeof(int), true);
+					args[i] = ExpressionUtils.PromoteExpression(args[i], typeof(int));
 					if (args[i] == null)
 						throw ParseException.Create(errorPos, ErrorMessages.InvalidIndex);
 				}
@@ -1958,8 +1958,6 @@ namespace DynamicExpresso.Parsing
 			}
 			return GenerateBinary(ExpressionType.GreaterThan, left, right);
 		}
-
-
 
 		private Expression GenerateGreaterThanEqual(Expression left, Expression right)
 		{
