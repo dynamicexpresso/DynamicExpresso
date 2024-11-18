@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpressoWebShell", "sample\DynamicExpressoWebShell\DynamicExpressoWebShell.csproj", "{970A9B0D-4DDF-4E8F-A184-89CC202DB542}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DynamicExpresso.Core", "src\DynamicExpresso.Core\DynamicExpresso.Core.csproj", "{B496A172-45A2-413A-9060-CDBE4142A8F2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{970A9B0D-4DDF-4E8F-A184-89CC202DB542}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{970A9B0D-4DDF-4E8F-A184-89CC202DB542}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{970A9B0D-4DDF-4E8F-A184-89CC202DB542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B496A172-45A2-413A-9060-CDBE4142A8F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B496A172-45A2-413A-9060-CDBE4142A8F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B496A172-45A2-413A-9060-CDBE4142A8F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B496A172-45A2-413A-9060-CDBE4142A8F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
