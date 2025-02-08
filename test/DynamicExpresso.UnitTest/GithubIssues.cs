@@ -874,7 +874,7 @@ namespace DynamicExpresso.UnitTest
 			var x = 1L;
 			interpreter.SetVariable("x", x);
 
-			Assert.AreEqual((int)x == 1, interpreter.Eval<bool>($"(int)x == 1"));
+			Assert.AreEqual((int)x == 1, interpreter.Eval<bool>("(int)x == 1"));
 		}
 	}
 
