@@ -865,6 +865,17 @@ namespace DynamicExpresso.UnitTest
 			var expressionDelegate = interpreter.ParseAsDelegate<Func<object, bool>>($"input.Prop1 == null", "input");
 			Assert.IsFalse(expressionDelegate(input));
 		}
+
+		[Test]
+		public void GitHub_Issue_341()
+		{
+			var interpreter = new Interpreter();
+
+			var x = 1L;
+			interpreter.SetVariable("x", x);
+
+			Assert.AreEqual((int)x == 1, interpreter.Eval<bool>($"(int)x == 1"));
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
