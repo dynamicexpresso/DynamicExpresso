@@ -216,13 +216,16 @@ namespace DynamicExpresso.UnitTest
 				intProp.Value
 			};
 			Assert.That(
-				target.Parse("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", strProp, intProp).Invoke(args), Is.EqualTo(new MyClassAdder() { { 1, 2, 3, 4, 5 }, "6", 7 }));
+				target.Parse("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", strProp, intProp).Invoke(args),
+				Is.EqualTo(new MyClassAdder() { { 1, 2, 3, 4, 5 }, "6", 7 }));
 			Assert.That(
-				target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"), Is.EqualTo(new MyClassAdder() { { 1, 2, 3, 4, 5 }, string.Empty, 7 }));
+				target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"),
+				Is.EqualTo(new MyClassAdder() { { 1, 2, 3, 4, 5 }, string.Empty, 7 }));
 
 			var IntField = int.MaxValue;
 			Assert.That(
-				target.Parse("new MyClassAdder(){ { IntField = 5 }, { 1, 2, 3, 4, 5},{StrProp = \"6\" }, IntField}", strProp, intProp).Invoke(args), Is.EqualTo(new MyClassAdder() { { IntField = 5 }, { 1, 2, 3, 4, IntField }, "6" }));
+				target.Parse("new MyClassAdder(){ { IntField = 5 }, { 1, 2, 3, 4, 5},{StrProp = \"6\" }, IntField}", strProp, intProp).Invoke(args),
+				Is.EqualTo(new MyClassAdder() { { IntField = 5 }, { 1, 2, 3, 4, IntField }, "6" }));
 		}
 
 		[Test]
@@ -232,7 +235,8 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(MyClassAdder));
 			target.Reference(typeof(MyClass));
 			Assert.That(
-				target.Eval<MyClassAdder>("new MyClassAdder() {StrProp = string.Empty, MyArr = new int[] {1, 2, 3, 4, 5}, IntField = int.MinValue }"), Is.EqualTo(new MyClassAdder() { StrProp = string.Empty, MyArr = new[] { 1, 2, 3, 4, 5 }, IntField = int.MinValue }));
+				target.Eval<MyClassAdder>("new MyClassAdder() {StrProp = string.Empty, MyArr = new int[] {1, 2, 3, 4, 5}, IntField = int.MinValue }"),
+				Is.EqualTo(new MyClassAdder() { StrProp = string.Empty, MyArr = new[] { 1, 2, 3, 4, 5 }, IntField = int.MinValue }));
 		}
 
 		[Test]
@@ -278,7 +282,7 @@ namespace DynamicExpresso.UnitTest
 			{
 				if (ex.Message.Contains("The best overloaded Add "))
 				{
-					Assert.That(ex.Message.Contains("Add"), Is.True);
+					Assert.That(ex.Message, Does.Contain("Add"));
 				}
 				else
 				{
