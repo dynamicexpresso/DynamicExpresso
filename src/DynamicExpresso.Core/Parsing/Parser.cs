@@ -997,7 +997,9 @@ namespace DynamicExpresso.Parsing
 			if (constExp != null && constExp.Value is Type)
 			{
 				NextToken();
-				var nextExpression = ParseExpressionSegment();
+
+				// we're in a cast expression, the next expression can only be a unary expression
+				var nextExpression = ParseUnary();
 
 				// cast: (constExp)nextExpression
 				return Expression.Convert(nextExpression, (Type)constExp.Value);
