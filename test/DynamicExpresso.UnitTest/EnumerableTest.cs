@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -21,8 +21,8 @@ namespace DynamicExpresso.UnitTest
 			Assert.That(target.Eval("x.First()"), Is.EqualTo(x.First()));
 			Assert.That(target.Eval("x.Last()"), Is.EqualTo(x.Last()));
 			Assert.That(target.Eval("x.Max()"), Is.EqualTo(x.Max()));
-			Assert.That(target.Eval<IEnumerable<int>>("x.Skip(2)").ToArray(), Is.EqualTo(x.Skip(2).ToArray()).AsCollection);
-			Assert.That(target.Eval<IEnumerable<int>>("x.Skip(2)").ToArray(), Is.EqualTo(x.Skip(2).ToArray()).AsCollection);
+			Assert.That(target.Eval<IEnumerable<int>>("x.Skip(2)"), Is.EqualTo(x.Skip(2)));
+			Assert.That(target.Eval<IEnumerable<int>>("x.Skip(2)"), Is.EqualTo(x.Skip(2)));
 		}
 	}
 }
