@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net8.0;net7.0;net5.0;net462</TargetFrameworks>
+		<TargetFrameworks>net9.0;net8.0;net462</TargetFrameworks>
 
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
@@ -13,7 +13,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\src\DynamicExpresso.Core\DynamicExpresso.Core.csproj" />
+		<ProjectReference Include="..\..\src\DynamicExpresso.Core\DynamicExpresso.Core.csproj" />
 	</ItemGroup>
 
 </Project>
