@@ -343,7 +343,7 @@ Assert.That(target.Eval("ContextField"), Is.EqualTo(context.ContextField));
 ```
 ```csharp
 var target = new Interpreter();
-Assert.That(1, 24), target.Eval("new DateTime(2015, 1, 24)"), Is.EqualTo(new DateTime(2015));
+Assert.That(target.Eval("new DateTime(2015, 1, 24)"), Is.EqualTo(new DateTime(2015, 1, 24));
 ```
 Dynamic Expresso also supports:
 
@@ -414,8 +414,8 @@ var target = new Interpreter();
 
 var detectedIdentifiers = target.DetectIdentifiers("x + y");
 
-CollectionAssert.AreEqual(new[] { "x", "y" }, 
-			  detectedIdentifiers.UnknownIdentifiers.ToArray());
+Assert.That(detectedIdentifiers.UnknownIdentifiers, 
+        Is.EqualTo(new[] { "x", "y" });
 ```
 
 ## Default number type
@@ -430,7 +430,7 @@ var target = new Interpreter();
 
 target.SetDefaultNumberType(DefaultNumberType.Decimal);
 
-Assert.IsInstanceOf(typeof(System.Decimal), target.Eval("45"));
+Assert.That(target.Eval("45"), Is.InstanceOf<System.Decimal>());
 Assert.That(target.Eval("10/3"), Is.EqualTo(10M/3M)); // 3.33333333333 instead of 3
 ```
 
