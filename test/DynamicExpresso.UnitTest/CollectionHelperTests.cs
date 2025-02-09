@@ -1,7 +1,7 @@
-﻿using System;
-using NUnit.Framework;
-using System.Linq;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -20,8 +20,8 @@ namespace DynamicExpresso.UnitTest
 			var results = target.Eval("IntCollectionHelper.Where(list, \"x > 19\")", new Parameter("list", list))
 									as IEnumerable<int>;
 
-			Assert.AreEqual(1, results.Count());
-			Assert.AreEqual(21, results.First());
+			Assert.That(results.Count(), Is.EqualTo(1));
+			Assert.That(results.First(), Is.EqualTo(21));
 		}
 	}
 

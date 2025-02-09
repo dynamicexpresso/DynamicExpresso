@@ -14,9 +14,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("");
 
-			Assert.AreEqual(0, detectedIdentifiers.UnknownIdentifiers.Count());
-			Assert.AreEqual(0, detectedIdentifiers.Identifiers.Count());
-			Assert.AreEqual(0, detectedIdentifiers.Types.Count());
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.Count(), Is.EqualTo(0));
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(0));
+			Assert.That(detectedIdentifiers.Types.Count(), Is.EqualTo(0));
 		}
 
 		[Test]
@@ -26,9 +26,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers(null);
 
-			Assert.AreEqual(0, detectedIdentifiers.UnknownIdentifiers.Count());
-			Assert.AreEqual(0, detectedIdentifiers.Identifiers.Count());
-			Assert.AreEqual(0, detectedIdentifiers.Types.Count());
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.Count(), Is.EqualTo(0));
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(0));
+			Assert.That(detectedIdentifiers.Types.Count(), Is.EqualTo(0));
 		}
 
 		[Test]
@@ -38,9 +38,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("x + y");
 
-			CollectionAssert.AreEqual(
-				new[] { "x", "y" },
-				detectedIdentifiers.UnknownIdentifiers.ToArray());
+			Assert.That(
+				detectedIdentifiers.UnknownIdentifiers,
+				Is.EqualTo(new[] { "x", "y" }));
 		}
 
 		[Test]
@@ -51,9 +51,9 @@ namespace DynamicExpresso.UnitTest
 			var detectedIdentifiers = target.DetectIdentifiers("Contact.Personal.Year_of_birth = 1987",
 				DetectorOptions.IncludeChildren);
 
-			CollectionAssert.AreEqual(
-				new[] { "Contact.Personal.Year_of_birth" },
-				detectedIdentifiers.UnknownIdentifiers.ToArray());
+			Assert.That(
+				detectedIdentifiers.UnknownIdentifiers,
+				Is.EqualTo(new[] { "Contact.Personal.Year_of_birth" }));
 		}
 
 		[Test]
@@ -67,9 +67,9 @@ namespace DynamicExpresso.UnitTest
 			{
 				var detectedIdentifiers = target.DetectIdentifiers(name);
 
-				CollectionAssert.AreEqual(
-					new[] { name },
-					detectedIdentifiers.UnknownIdentifiers.ToArray());
+				Assert.That(
+					detectedIdentifiers.UnknownIdentifiers,
+					Is.EqualTo(new[] { name }));
 			}
 		}
 
@@ -80,9 +80,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("x + x");
 
-			CollectionAssert.AreEqual(
-				new[] { "x" },
-				detectedIdentifiers.UnknownIdentifiers.ToArray());
+			Assert.That(
+				detectedIdentifiers.UnknownIdentifiers,
+				Is.EqualTo(new[] { "x" }));
 		}
 
 		[Test]
@@ -92,9 +92,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("x + X");
 
-			CollectionAssert.AreEqual(
-				new[] { "x" },
-				detectedIdentifiers.UnknownIdentifiers.ToArray());
+			Assert.That(
+				detectedIdentifiers.UnknownIdentifiers,
+				Is.EqualTo(new[] { "x" }));
 		}
 
 		[Test]
@@ -105,9 +105,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("x + x");
 
-			CollectionAssert.AreEqual(
-				new[] { "x" },
-				detectedIdentifiers.Identifiers.Select(p => p.Name).ToArray());
+			Assert.That(
+				detectedIdentifiers.Identifiers.Select(p => p.Name).ToArray(),
+				Is.EqualTo(new[] { "x" }));
 		}
 
 		[Test]
@@ -118,9 +118,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("x + X");
 
-			CollectionAssert.AreEqual(
-				new[] { "x" },
-				detectedIdentifiers.Identifiers.Select(p => p.Name).ToArray());
+			Assert.That(
+				detectedIdentifiers.Identifiers.Select(p => p.Name).ToArray(),
+				Is.EqualTo(new[] { "x" }));
 		}
 
 		[Test]
@@ -130,9 +130,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("string.Empty + string.Empty");
 
-			CollectionAssert.AreEqual(
-				new[] { "string" },
-				detectedIdentifiers.Types.Select(p => p.Name).ToArray());
+			Assert.That(
+				detectedIdentifiers.Types.Select(p => p.Name).ToArray(),
+				Is.EqualTo(new[] { "string" }));
 		}
 
 		[Test]
@@ -142,9 +142,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("string.Empty + STRING.Empty");
 
-			CollectionAssert.AreEqual(
-				new[] { "string" },
-				detectedIdentifiers.Types.Select(p => p.Name).ToArray());
+			Assert.That(
+				detectedIdentifiers.Types.Select(p => p.Name).ToArray(),
+				Is.EqualTo(new[] { "string" }));
 		}
 
 		[Test]
@@ -156,9 +156,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("x + y");
 
-			Assert.AreEqual(2, detectedIdentifiers.Identifiers.Count());
-			Assert.AreEqual("x", detectedIdentifiers.Identifiers.ElementAt(0).Name);
-			Assert.AreEqual("y", detectedIdentifiers.Identifiers.ElementAt(1).Name);
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(2));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Name, Is.EqualTo("x"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(1).Name, Is.EqualTo("y"));
 		}
 
 		[Test]
@@ -168,9 +168,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers("string.Empty");
 
-			Assert.AreEqual(1, detectedIdentifiers.Types.Count());
-			Assert.AreEqual("string", detectedIdentifiers.Types.ElementAt(0).Name);
-			Assert.AreEqual(typeof(string), detectedIdentifiers.Types.ElementAt(0).Type);
+			Assert.That(detectedIdentifiers.Types.Count(), Is.EqualTo(1));
+			Assert.That(detectedIdentifiers.Types.ElementAt(0).Name, Is.EqualTo("string"));
+			Assert.That(detectedIdentifiers.Types.ElementAt(0).Type, Is.EqualTo(typeof(string)));
 		}
 
 		[Test]
@@ -195,9 +195,9 @@ namespace DynamicExpresso.UnitTest
 
 			var detectedIdentifiers = target.DetectIdentifiers(testCase);
 
-			Assert.AreEqual(2, detectedIdentifiers.UnknownIdentifiers.Count());
-			Assert.AreEqual("x", detectedIdentifiers.UnknownIdentifiers.ElementAt(0));
-			Assert.AreEqual("y", detectedIdentifiers.UnknownIdentifiers.ElementAt(1));
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.Count(), Is.EqualTo(2));
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.ElementAt(0), Is.EqualTo("x"));
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.ElementAt(1), Is.EqualTo("y"));
 		}
 
 		[Test]
@@ -207,18 +207,18 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("list", new List<string>());
 
 			var detectedIdentifiers = target.DetectIdentifiers("list.Any(x => x == null)");
-			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
+			Assert.That(detectedIdentifiers.UnknownIdentifiers, Is.Empty);
 
-			Assert.AreEqual(3, detectedIdentifiers.Identifiers.Count());
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(3));
 
-			Assert.AreEqual("list", detectedIdentifiers.Identifiers.ElementAt(0).Name);
-			Assert.AreEqual(typeof(List<string>), detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Name, Is.EqualTo("list"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type, Is.EqualTo(typeof(List<string>)));
 
-			Assert.AreEqual("x", detectedIdentifiers.Identifiers.ElementAt(1).Name);
-			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(1).Name, Is.EqualTo("x"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type, Is.EqualTo(typeof(object)));
 
-			Assert.AreEqual("null", detectedIdentifiers.Identifiers.ElementAt(2).Name);
-			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(2).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(2).Name, Is.EqualTo("null"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(2).Expression.Type, Is.EqualTo(typeof(object)));
 		}
 
 		[Test]
@@ -227,12 +227,12 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 
 			var detectedIdentifiers = target.DetectIdentifiers("x => x + 5");
-			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
+			Assert.That(detectedIdentifiers.UnknownIdentifiers, Is.Empty);
 
-			Assert.AreEqual(1, detectedIdentifiers.Identifiers.Count());
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(1));
 
-			Assert.AreEqual("x", detectedIdentifiers.Identifiers.ElementAt(0).Name);
-			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Name, Is.EqualTo("x"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type, Is.EqualTo(typeof(object)));
 		}
 
 		[Test]
@@ -241,15 +241,15 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 
 			var detectedIdentifiers = target.DetectIdentifiers("(x, _1y) => x + _1y");
-			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
+			Assert.That(detectedIdentifiers.UnknownIdentifiers, Is.Empty);
 
-			Assert.AreEqual(2, detectedIdentifiers.Identifiers.Count());
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(2));
 
-			Assert.AreEqual("x", detectedIdentifiers.Identifiers.ElementAt(0).Name);
-			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Name, Is.EqualTo("x"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type, Is.EqualTo(typeof(object)));
 
-			Assert.AreEqual("_1y", detectedIdentifiers.Identifiers.ElementAt(1).Name);
-			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(1).Name, Is.EqualTo("_1y"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type, Is.EqualTo(typeof(object)));
 		}
 
 		[Test]
@@ -258,21 +258,21 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 
 			var detectedIdentifiers = target.DetectIdentifiers("(int x, string @class) => x + @class");
-			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
+			Assert.That(detectedIdentifiers.UnknownIdentifiers, Is.Empty);
 
-			Assert.AreEqual(2, detectedIdentifiers.Types.Count());
-			Assert.AreEqual("int", detectedIdentifiers.Types.ElementAt(0).Name);
-			Assert.AreEqual(typeof(int), detectedIdentifiers.Types.ElementAt(0).Type);
-			Assert.AreEqual("string", detectedIdentifiers.Types.ElementAt(1).Name);
-			Assert.AreEqual(typeof(string), detectedIdentifiers.Types.ElementAt(1).Type);
+			Assert.That(detectedIdentifiers.Types.Count(), Is.EqualTo(2));
+			Assert.That(detectedIdentifiers.Types.ElementAt(0).Name, Is.EqualTo("int"));
+			Assert.That(detectedIdentifiers.Types.ElementAt(0).Type, Is.EqualTo(typeof(int)));
+			Assert.That(detectedIdentifiers.Types.ElementAt(1).Name, Is.EqualTo("string"));
+			Assert.That(detectedIdentifiers.Types.ElementAt(1).Type, Is.EqualTo(typeof(string)));
 
-			Assert.AreEqual(2, detectedIdentifiers.Identifiers.Count());
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(2));
 
-			Assert.AreEqual("x", detectedIdentifiers.Identifiers.ElementAt(0).Name);
-			Assert.AreEqual(typeof(int), detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Name, Is.EqualTo("x"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type, Is.EqualTo(typeof(int)));
 
-			Assert.AreEqual("@class", detectedIdentifiers.Identifiers.ElementAt(1).Name);
-			Assert.AreEqual(typeof(string), detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(1).Name, Is.EqualTo("@class"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type, Is.EqualTo(typeof(string)));
 		}
 
 		[Test]
@@ -283,30 +283,30 @@ namespace DynamicExpresso.UnitTest
 			var detectedIdentifiers =
 				target.DetectIdentifiers(
 					"(x, int y, z, int a) => x.Select(z => z + y).Select((string a, string b) => b)");
-			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
+			Assert.That(detectedIdentifiers.UnknownIdentifiers, Is.Empty);
 
-			Assert.AreEqual(2, detectedIdentifiers.Types.Count());
-			Assert.AreEqual("int", detectedIdentifiers.Types.ElementAt(0).Name);
-			Assert.AreEqual(typeof(int), detectedIdentifiers.Types.ElementAt(0).Type);
-			Assert.AreEqual("string", detectedIdentifiers.Types.ElementAt(1).Name);
-			Assert.AreEqual(typeof(string), detectedIdentifiers.Types.ElementAt(1).Type);
+			Assert.That(detectedIdentifiers.Types.Count(), Is.EqualTo(2));
+			Assert.That(detectedIdentifiers.Types.ElementAt(0).Name, Is.EqualTo("int"));
+			Assert.That(detectedIdentifiers.Types.ElementAt(0).Type, Is.EqualTo(typeof(int)));
+			Assert.That(detectedIdentifiers.Types.ElementAt(1).Name, Is.EqualTo("string"));
+			Assert.That(detectedIdentifiers.Types.ElementAt(1).Type, Is.EqualTo(typeof(string)));
 
-			Assert.AreEqual(5, detectedIdentifiers.Identifiers.Count());
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(5));
 
-			Assert.AreEqual("x", detectedIdentifiers.Identifiers.ElementAt(0).Name);
-			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Name, Is.EqualTo("x"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type, Is.EqualTo(typeof(object)));
 
-			Assert.AreEqual("y", detectedIdentifiers.Identifiers.ElementAt(1).Name);
-			Assert.AreEqual(typeof(int), detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(1).Name, Is.EqualTo("y"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(1).Expression.Type, Is.EqualTo(typeof(int)));
 
-			Assert.AreEqual("z", detectedIdentifiers.Identifiers.ElementAt(2).Name);
-			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(2).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(2).Name, Is.EqualTo("z"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(2).Expression.Type, Is.EqualTo(typeof(object)));
 
-			Assert.AreEqual("a", detectedIdentifiers.Identifiers.ElementAt(3).Name);
-			Assert.AreEqual(typeof(object), detectedIdentifiers.Identifiers.ElementAt(3).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(3).Name, Is.EqualTo("a"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(3).Expression.Type, Is.EqualTo(typeof(object)));
 
-			Assert.AreEqual("b", detectedIdentifiers.Identifiers.ElementAt(4).Name);
-			Assert.AreEqual(typeof(string), detectedIdentifiers.Identifiers.ElementAt(4).Expression.Type);
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(4).Name, Is.EqualTo("b"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(4).Expression.Type, Is.EqualTo(typeof(string)));
 		}
 
 		[Test]
@@ -323,8 +323,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 			var detectedIdentifiers = target.DetectIdentifiers(code);
 
-			Assert.AreEqual(1, detectedIdentifiers.UnknownIdentifiers.Count());
-			Assert.AreEqual(identifier, detectedIdentifiers.UnknownIdentifiers.ElementAt(0));
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.Count(), Is.EqualTo(1));
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.ElementAt(0), Is.EqualTo(identifier));
 		}
 
 		[Test]
@@ -336,8 +336,8 @@ namespace DynamicExpresso.UnitTest
 			var detectedIdentifiers = target.DetectIdentifiers(code);
 
 			// @class should be detected as an identifier, but not the @if because it's a member
-			Assert.AreEqual(1, detectedIdentifiers.UnknownIdentifiers.Count());
-			Assert.AreEqual("@class", detectedIdentifiers.UnknownIdentifiers.ElementAt(0));
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.Count(), Is.EqualTo(1));
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.ElementAt(0), Is.EqualTo("@class"));
 		}
 
 
@@ -354,7 +354,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 			var detectedIdentifiers = target.DetectIdentifiers(code);
-			Assert.IsEmpty(detectedIdentifiers.UnknownIdentifiers);
+			Assert.That(detectedIdentifiers.UnknownIdentifiers, Is.Empty);
 		}
 	}
 }

@@ -17,8 +17,8 @@ namespace DynamicExpresso.UnitTest
 									.Reference(typeof(TestExtensionsMethods))
 									.SetVariable("x", x);
 
-			Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()"));
-			Assert.AreEqual(x.HelloWorldWithParam(DateTime.Now), target.Eval("x.HelloWorldWithParam(DateTime.Now)"));
+			Assert.That(target.Eval("x.HelloWorld()"), Is.EqualTo(x.HelloWorld()));
+			Assert.That(target.Eval("x.HelloWorldWithParam(DateTime.Now)"), Is.EqualTo(x.HelloWorldWithParam(DateTime.Now)));
 		}
 
 		[Test]
@@ -30,7 +30,7 @@ namespace DynamicExpresso.UnitTest
 									.Reference(typeof(TestExtensionsMethods))
 									.SetVariable("x", x);
 
-			Assert.AreEqual(x.GenericHello(), target.Eval("x.GenericHello()"));
+			Assert.That(target.Eval("x.GenericHello()"), Is.EqualTo(x.GenericHello()));
 		}
 
 		[Test]
@@ -42,7 +42,7 @@ namespace DynamicExpresso.UnitTest
 									.Reference(typeof(TestExtensionsMethods))
 									.SetVariable("x", x);
 
-			Assert.AreEqual(x.GenericParamHello(), target.Eval("x.GenericParamHello()"));
+			Assert.That(target.Eval("x.GenericParamHello()"), Is.EqualTo(x.GenericParamHello()));
 		}
 
 		[Test]
@@ -55,7 +55,7 @@ namespace DynamicExpresso.UnitTest
 									.Reference(typeof(MyClass))
 									.SetVariable("x", x);
 
-			Assert.AreEqual(x.GenericWith2Params(new MyClass()), target.Eval("x.GenericWith2Params(new MyClass())"));
+			Assert.That(target.Eval("x.GenericWith2Params(new MyClass())"), Is.EqualTo(x.GenericWith2Params(new MyClass())));
 		}
 
 		[Test]
@@ -68,7 +68,7 @@ namespace DynamicExpresso.UnitTest
 									.Reference(typeof(TestExtensionsMethods))
 									.SetVariable("x", x);
 
-			Assert.AreEqual(x.GenericWith2Args(), target.Eval("x.GenericWith2Args()"));
+			Assert.That(target.Eval("x.GenericWith2Args()"), Is.EqualTo(x.GenericWith2Args()));
 		}
 
 		[Test]
@@ -80,7 +80,7 @@ namespace DynamicExpresso.UnitTest
 									.Reference(typeof(TestExtensionsMethods))
 									.SetVariable("x", x);
 
-			Assert.AreEqual(x.GenericMixedParamHello(), target.Eval("x.GenericMixedParamHello()"));
+			Assert.That(target.Eval("x.GenericMixedParamHello()"), Is.EqualTo(x.GenericMixedParamHello()));
 		}
 
 		public class MyClass

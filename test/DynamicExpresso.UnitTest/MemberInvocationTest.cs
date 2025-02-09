@@ -16,9 +16,9 @@ namespace DynamicExpresso.UnitTest
 
 			var target = new Interpreter().SetVariable("x", x);
 
-			Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()"));
-			Assert.AreEqual(x.AProperty, target.Eval("x.AProperty"));
-			Assert.AreEqual(x.AField, target.Eval("x.AField"));
+			Assert.That(target.Eval("x.HelloWorld()"), Is.EqualTo(x.HelloWorld()));
+			Assert.That(target.Eval("x.AProperty"), Is.EqualTo(x.AProperty));
+			Assert.That(target.Eval("x.AField"), Is.EqualTo(x.AField));
 		}
 
 		[Ignore("See issue 65")]
@@ -26,7 +26,7 @@ namespace DynamicExpresso.UnitTest
 		public void Null_conditional_property()
 		{
 			var target = new Interpreter().SetVariable("x", null, typeof(MyTestService));
-			Assert.IsNull(target.Eval("x?.AProperty"));
+			Assert.That(target.Eval("x?.AProperty"), Is.Null);
 		}
 
 		[Test]
@@ -38,14 +38,14 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 			var y = new MyTestService();
 			target.SetVariable("y", y);
-			var z = new[] {7, 8, 9, 10};
+			var z = new[] { 7, 8, 9, 10 };
 			target.SetVariable("z", z);
 
-			Assert.AreEqual(x[2], target.Eval("x[2]"));
-			Assert.AreEqual(y[2], target.Eval("y[2]"));
-			Assert.AreEqual(y[2].ToString(), target.Eval("y[2].ToString()"));
-			Assert.AreEqual(y[(short)2], target.Eval("y[(Int16)2]"));
-			Assert.AreEqual(z[2], target.Eval("z[2]"));
+			Assert.That(target.Eval("x[2]"), Is.EqualTo(x[2]));
+			Assert.That(target.Eval("y[2]"), Is.EqualTo(y[2]));
+			Assert.That(target.Eval("y[2].ToString()"), Is.EqualTo(y[2].ToString()));
+			Assert.That(target.Eval("y[(Int16)2]"), Is.EqualTo(y[(short)2]));
+			Assert.That(target.Eval("z[2]"), Is.EqualTo(z[2]));
 		}
 
 		[Test]
@@ -61,13 +61,13 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("z", z);
 
 			target.Eval("x[2] = 'r'");
-			Assert.AreEqual(x.ToString(), "tire");
+			Assert.That(x.ToString(), Is.EqualTo("tire"));
 			target.Eval("y[(Int16)9] = y.Today");
-			Assert.AreEqual(y.AField, y.Today.AddYears(9));
+			Assert.That(y.Today.AddYears(9), Is.EqualTo(y.AField));
 			target.Eval("y[(Int64)7] = y.Today");
-			Assert.AreEqual(y.AField, y.Today.AddSeconds(7));
+			Assert.That(y.Today.AddSeconds(7), Is.EqualTo(y.AField));
 			target.Eval("z[2] = 4");
-			Assert.AreEqual(z, new[] { 7, 8, 4, 10 });
+			Assert.That(z, Is.EqualTo(new[] { 7, 8, 4, 10 }));
 		}
 
 		[Test]
@@ -90,13 +90,13 @@ namespace DynamicExpresso.UnitTest
 			var y = new Dictionary<string, int> { { "first", 1 }, { "second", 2 }, { "third", 3 } };
 			target.SetVariable("y", y);
 
-			Assert.AreEqual(x[2], target.Eval("x[2]"));
-			Assert.AreEqual(y["second"], target.Eval("y[\"second\"]"));
+			Assert.That(target.Eval("x[2]"), Is.EqualTo(x[2]));
+			Assert.That(target.Eval("y[\"second\"]"), Is.EqualTo(y["second"]));
 
 			target.Eval("x[2] = 1");
-			Assert.AreEqual(x, new List<int> { 3, 4, 1, 6 });
+			Assert.That(new List<int> { 3, 4, 1, 6 }, Is.EqualTo(x));
 			target.Eval("y[\"second\"] = 2000");
-			Assert.AreEqual(y, new Dictionary<string, int> { { "first", 1 }, { "second", 2000 }, { "third", 3 } });
+			Assert.That(new Dictionary<string, int> { { "first", 1 }, { "second", 2000 }, { "third", 3 } }, Is.EqualTo(y));
 		}
 
 		[Test]
@@ -109,9 +109,9 @@ namespace DynamicExpresso.UnitTest
 			var y = new MyTestService();
 			target.SetVariable("y", y);
 
-			Assert.AreEqual(x[1, 2], target.Eval("x[1, 2]"));
-			Assert.AreEqual(y[y.Today, 2], target.Eval("y[y.Today, 2]"));
-			Assert.AreEqual(y[y.Today], target.Eval("y[y.Today]"));
+			Assert.That(target.Eval("x[1, 2]"), Is.EqualTo(x[1, 2]));
+			Assert.That(target.Eval("y[y.Today, 2]"), Is.EqualTo(y[y.Today, 2]));
+			Assert.That(target.Eval("y[y.Today]"), Is.EqualTo(y[y.Today]));
 		}
 
 		[Test]
@@ -128,11 +128,11 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("span", span);
 
 			target.Eval("x[1, 2] = 7");
-			Assert.AreEqual(x, new[,] { { 11, 12, 13, 14 }, { 21, 22, 7, 24 }, { 31, 32, 33, 34 } });
+			Assert.That(new[,] { { 11, 12, 13, 14 }, { 21, 22, 7, 24 }, { 31, 32, 33, 34 } }, Is.EqualTo(x));
 			target.Eval("y[y.Today, 2] = span");
-			Assert.AreEqual(y.AField, y.Today.AddDays(2).Add(span));
+			Assert.That(y.Today.AddDays(2).Add(span), Is.EqualTo(y.AField));
 			target.Eval("y[y.Today] = span");
-			Assert.AreEqual(y.AField, y.Today.AddDays(3).Add(span));
+			Assert.That(y.Today.AddDays(3).Add(span), Is.EqualTo(y.AField));
 		}
 
 		[Test]
@@ -140,8 +140,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(string.Format("ciao {0}, today is {1}", "mondo", DateTime.Today),
-											target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today.ToString())"));
+			Assert.That(target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today.ToString())"), Is.EqualTo(string.Format("ciao {0}, today is {1}", "mondo", DateTime.Today)));
 		}
 
 		[Test]
@@ -149,8 +148,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(string.Format("ciao {0}, today is {1}", "mondo", DateTime.Today),
-											target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today)"));
+			Assert.That(target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today)"), Is.EqualTo(string.Format("ciao {0}, today is {1}", "mondo", DateTime.Today)));
 		}
 
 		[Test]
@@ -158,8 +156,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(string.Format("ciao {0}", ""),
-											target.Eval("string.Format(\"ciao {0}\", \"\")"));
+			Assert.That(target.Eval("string.Format(\"ciao {0}\", \"\")"), Is.EqualTo(string.Format("ciao {0}", "")));
 		}
 
 		[Test]
@@ -167,8 +164,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(string.Format("ciao mondo, today is {0}", DateTime.Today),
-											target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today)"));
+			Assert.That(target.Eval("string.Format(\"ciao {0}, today is {1}\", \"mondo\", DateTime.Today)"), Is.EqualTo(string.Format("ciao mondo, today is {0}", DateTime.Today)));
 		}
 
 		[Test]
@@ -178,15 +174,15 @@ namespace DynamicExpresso.UnitTest
 
 			var x = new MyTestService();
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x)
-                            };
+							new Parameter("x", x.GetType(), x)
+							};
 
-			Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()", parameters));
-			Assert.AreEqual(x.HELLOWORLD(), target.Eval("x.HELLOWORLD()", parameters));
-			Assert.AreEqual(x.AProperty, target.Eval("x.AProperty", parameters));
-			Assert.AreEqual(x.APROPERTY, target.Eval("x.APROPERTY", parameters));
-			Assert.AreEqual(x.AField, target.Eval("x.AField", parameters));
-			Assert.AreEqual(x.AFIELD, target.Eval("x.AFIELD", parameters));
+			Assert.That(target.Eval("x.HelloWorld()", parameters), Is.EqualTo(x.HelloWorld()));
+			Assert.That(target.Eval("x.HELLOWORLD()", parameters), Is.EqualTo(x.HELLOWORLD()));
+			Assert.That(target.Eval("x.AProperty", parameters), Is.EqualTo(x.AProperty));
+			Assert.That(target.Eval("x.APROPERTY", parameters), Is.EqualTo(x.APROPERTY));
+			Assert.That(target.Eval("x.AField", parameters), Is.EqualTo(x.AField));
+			Assert.That(target.Eval("x.AFIELD", parameters), Is.EqualTo(x.AFIELD));
 		}
 
 		[Test]
@@ -196,15 +192,15 @@ namespace DynamicExpresso.UnitTest
 
 			var x = new MyTestServiceCaseInsensitive();
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x)
-                            };
+							new Parameter("x", x.GetType(), x)
+							};
 
-			Assert.AreEqual(x.AMethod(), target.Eval("x.AMethod()", parameters));
-			Assert.AreEqual(x.AMethod(), target.Eval("x.AMETHOD()", parameters));
-			Assert.AreEqual(x.AProperty, target.Eval("x.AProperty", parameters));
-			Assert.AreEqual(x.AProperty, target.Eval("x.APROPERTY", parameters));
-			Assert.AreEqual(x.AField, target.Eval("x.AField", parameters));
-			Assert.AreEqual(x.AField, target.Eval("x.AFIELD", parameters));
+			Assert.That(target.Eval("x.AMethod()", parameters), Is.EqualTo(x.AMethod()));
+			Assert.That(target.Eval("x.AMETHOD()", parameters), Is.EqualTo(x.AMethod()));
+			Assert.That(target.Eval("x.AProperty", parameters), Is.EqualTo(x.AProperty));
+			Assert.That(target.Eval("x.APROPERTY", parameters), Is.EqualTo(x.AProperty));
+			Assert.That(target.Eval("x.AField", parameters), Is.EqualTo(x.AField));
+			Assert.That(target.Eval("x.AFIELD", parameters), Is.EqualTo(x.AField));
 		}
 
 		[Test]
@@ -214,11 +210,11 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("service", service);
 
-			Assert.AreEqual(0, service.VoidMethodCalls);
+			Assert.That(service.VoidMethodCalls, Is.EqualTo(0));
 			target.Eval("service.VoidMethod()");
-			Assert.AreEqual(1, service.VoidMethodCalls);
+			Assert.That(service.VoidMethodCalls, Is.EqualTo(1));
 
-			Assert.AreEqual(typeof(void), target.Parse("service.VoidMethod()").ReturnType);
+			Assert.That(target.Parse("service.VoidMethod()").ReturnType, Is.EqualTo(typeof(void)));
 		}
 
 		[Test]
@@ -228,7 +224,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("service", service);
 
-			Assert.AreEqual("DynamicExpresso.UnitTest.MemberInvocationTest+MyTestService", target.Eval("service.ToString()"));
+			Assert.That(target.Eval("service.ToString()"), Is.EqualTo("DynamicExpresso.UnitTest.MemberInvocationTest+MyTestService"));
 		}
 
 		[Test]
@@ -238,14 +234,14 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("service", service, typeof(MyTestInterface));
 
-			Assert.AreEqual("DynamicExpresso.UnitTest.MemberInvocationTest+MyTestInterfaceImp", target.Eval("service.ToString()"));
+			Assert.That(target.Eval("service.ToString()"), Is.EqualTo("DynamicExpresso.UnitTest.MemberInvocationTest+MyTestInterfaceImp"));
 		}
 
 		[Test]
 		public void ToString_Method_on_a_primitive_type()
 		{
 			var target = new Interpreter();
-			Assert.AreEqual("3", target.Eval("(3).ToString()"));
+			Assert.That(target.Eval("(3).ToString()"), Is.EqualTo("3"));
 		}
 
 		[Test]
@@ -255,7 +251,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("service", service);
 
-			Assert.AreEqual(typeof(MyTestService), target.Eval("service.GetType()"));
+			Assert.That(target.Eval("service.GetType()"), Is.EqualTo(typeof(MyTestService)));
 		}
 
 		[Test]
@@ -265,14 +261,14 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("service", service, typeof(MyTestInterface));
 
-			Assert.AreEqual(typeof(MyTestInterfaceImp), target.Eval("service.GetType()"));
+			Assert.That(target.Eval("service.GetType()"), Is.EqualTo(typeof(MyTestInterfaceImp)));
 		}
 
 		[Test]
 		public void GetType_Method_on_a_primitive_type()
 		{
 			var target = new Interpreter();
-			Assert.AreEqual((3).GetType(), target.Eval("(3).GetType()"));
+			Assert.That(target.Eval("(3).GetType()"), Is.EqualTo((3).GetType()));
 		}
 
 		[Test]
@@ -285,16 +281,16 @@ namespace DynamicExpresso.UnitTest
 			var z = 5;
 			int? w = null;
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x),
-                            new Parameter("y", y.GetType(), y),
-                            new Parameter("z", z.GetType(), z),
-                            new Parameter("w", typeof(int?), w)
-                            };
+							new Parameter("x", x.GetType(), x),
+							new Parameter("y", y.GetType(), y),
+							new Parameter("z", z.GetType(), z),
+							new Parameter("w", typeof(int?), w)
+							};
 
-			Assert.AreEqual(x.MethodWithNullableParam(y, z), target.Eval("x.MethodWithNullableParam(y, z)", parameters));
-			Assert.AreEqual(x.MethodWithNullableParam(y, w), target.Eval("x.MethodWithNullableParam(y, w)", parameters));
-			Assert.AreEqual(x.MethodWithNullableParam(y, 30), target.Eval("x.MethodWithNullableParam(y, 30)", parameters));
-			Assert.AreEqual(x.MethodWithNullableParam(y, null), target.Eval("x.MethodWithNullableParam(y, null)", parameters));
+			Assert.That(target.Eval("x.MethodWithNullableParam(y, z)", parameters), Is.EqualTo(x.MethodWithNullableParam(y, z)));
+			Assert.That(target.Eval("x.MethodWithNullableParam(y, w)", parameters), Is.EqualTo(x.MethodWithNullableParam(y, w)));
+			Assert.That(target.Eval("x.MethodWithNullableParam(y, 30)", parameters), Is.EqualTo(x.MethodWithNullableParam(y, 30)));
+			Assert.That(target.Eval("x.MethodWithNullableParam(y, null)", parameters), Is.EqualTo(x.MethodWithNullableParam(y, null)));
 		}
 
 		[Test]
@@ -307,27 +303,27 @@ namespace DynamicExpresso.UnitTest
 			double z = 5;
 			int? w = null;
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x),
-                            new Parameter("y", y.GetType(), y),
-                            new Parameter("z", z.GetType(), z),
-                            new Parameter("w", typeof(int?), w)
-                            };
+							new Parameter("x", x.GetType(), x),
+							new Parameter("y", y.GetType(), y),
+							new Parameter("z", z.GetType(), z),
+							new Parameter("w", typeof(int?), w)
+							};
 
-			Assert.AreEqual(x.MethodWithGenericParam(x), target.Eval("x.MethodWithGenericParam(x)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParam(y), target.Eval("x.MethodWithGenericParam(y)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParam(z), target.Eval("x.MethodWithGenericParam(z)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParam(w), target.Eval("x.MethodWithGenericParam(w)", parameters));
+			Assert.That(target.Eval("x.MethodWithGenericParam(x)", parameters), Is.EqualTo(x.MethodWithGenericParam(x)));
+			Assert.That(target.Eval("x.MethodWithGenericParam(y)", parameters), Is.EqualTo(x.MethodWithGenericParam(y)));
+			Assert.That(target.Eval("x.MethodWithGenericParam(z)", parameters), Is.EqualTo(x.MethodWithGenericParam(z)));
+			Assert.That(target.Eval("x.MethodWithGenericParam(w)", parameters), Is.EqualTo(x.MethodWithGenericParam(w)));
 
-			Assert.AreEqual(x.MethodWithGenericParam(y, x), target.Eval("x.MethodWithGenericParam(y, x)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParam(y, y), target.Eval("x.MethodWithGenericParam(y, y)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParam(y, z), target.Eval("x.MethodWithGenericParam(y, z)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParam(y, w), target.Eval("x.MethodWithGenericParam(y, w)", parameters));
+			Assert.That(target.Eval("x.MethodWithGenericParam(y, x)", parameters), Is.EqualTo(x.MethodWithGenericParam(y, x)));
+			Assert.That(target.Eval("x.MethodWithGenericParam(y, y)", parameters), Is.EqualTo(x.MethodWithGenericParam(y, y)));
+			Assert.That(target.Eval("x.MethodWithGenericParam(y, z)", parameters), Is.EqualTo(x.MethodWithGenericParam(y, z)));
+			Assert.That(target.Eval("x.MethodWithGenericParam(y, w)", parameters), Is.EqualTo(x.MethodWithGenericParam(y, w)));
 
-			Assert.AreEqual(x.MethodWithGenericParamAndDefault(y,y), target.Eval("x.MethodWithGenericParamAndDefault(y,y)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParamAndDefault(y), target.Eval("x.MethodWithGenericParamAndDefault(y)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParamAndDefault1Levels(y), target.Eval("x.MethodWithGenericParamAndDefault1Levels(y)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParamAndDefault2Levels(y), target.Eval("x.MethodWithGenericParamAndDefault2Levels(y)", parameters));
-			Assert.AreEqual(x.MethodWithGenericParamAndDefault2Levels(y, w), target.Eval("x.MethodWithGenericParamAndDefault2Levels(y, w)", parameters));
+			Assert.That(target.Eval("x.MethodWithGenericParamAndDefault(y,y)", parameters), Is.EqualTo(x.MethodWithGenericParamAndDefault(y, y)));
+			Assert.That(target.Eval("x.MethodWithGenericParamAndDefault(y)", parameters), Is.EqualTo(x.MethodWithGenericParamAndDefault(y)));
+			Assert.That(target.Eval("x.MethodWithGenericParamAndDefault1Levels(y)", parameters), Is.EqualTo(x.MethodWithGenericParamAndDefault1Levels(y)));
+			Assert.That(target.Eval("x.MethodWithGenericParamAndDefault2Levels(y)", parameters), Is.EqualTo(x.MethodWithGenericParamAndDefault2Levels(y)));
+			Assert.That(target.Eval("x.MethodWithGenericParamAndDefault2Levels(y, w)", parameters), Is.EqualTo(x.MethodWithGenericParamAndDefault2Levels(y, w)));
 		}
 
 		[Test]
@@ -338,7 +334,7 @@ namespace DynamicExpresso.UnitTest
 			var x = new MyTestService();
 			target.SetVariable("x", x);
 
-			Assert.AreEqual("works", target.Eval("x.GenericMethodWithConstraint(\"works\")"));
+			Assert.That(target.Eval("x.GenericMethodWithConstraint(\"works\")"), Is.EqualTo("works"));
 			Assert.Throws<NoApplicableMethodException>(() => target.Eval("x.GenericMethodWithConstraint(5)"), "This shouldn't throw a System.ArgumentException \"Violates the constraint of type 'T'\"");
 		}
 
@@ -351,16 +347,16 @@ namespace DynamicExpresso.UnitTest
 
 			target.SetVariable("x", x);
 
-			Assert.AreEqual(0, x.MethodWithParamsArrayCalls);
+			Assert.That(x.MethodWithParamsArrayCalls, Is.EqualTo(0));
 
-			Assert.AreEqual(x.MethodWithParamsArray(DateTime.Now, 2, 1, 34), target.Eval("x.MethodWithParamsArray(DateTime.Now, 2, 1, 34)"));
-			Assert.AreEqual(2, x.MethodWithParamsArrayCalls);
+			Assert.That(target.Eval("x.MethodWithParamsArray(DateTime.Now, 2, 1, 34)"), Is.EqualTo(x.MethodWithParamsArray(DateTime.Now, 2, 1, 34)));
+			Assert.That(x.MethodWithParamsArrayCalls, Is.EqualTo(2));
 
 			var myParamArray = new int[] { 2, 1, 34 };
 			target.SetVariable("myParamArray", myParamArray);
 
-			Assert.AreEqual(x.MethodWithParamsArray(DateTime.Now, myParamArray), target.Eval("x.MethodWithParamsArray(DateTime.Now, myParamArray)"));
-			Assert.AreEqual(4, x.MethodWithParamsArrayCalls);
+			Assert.That(target.Eval("x.MethodWithParamsArray(DateTime.Now, myParamArray)"), Is.EqualTo(x.MethodWithParamsArray(DateTime.Now, myParamArray)));
+			Assert.That(x.MethodWithParamsArrayCalls, Is.EqualTo(4));
 		}
 
 		[Test]
@@ -373,12 +369,12 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 
 			target.Eval("x.AmbiguousMethod(DateTime.Now, 2, 3)");
-			Assert.AreEqual(1, x.AmbiguousMethod_NormalCalls);
-			Assert.AreEqual(0, x.AmbiguousMethod_ParamsArrayCalls);
+			Assert.That(x.AmbiguousMethod_NormalCalls, Is.EqualTo(1));
+			Assert.That(x.AmbiguousMethod_ParamsArrayCalls, Is.EqualTo(0));
 
 			target.Eval("x.AmbiguousMethod(DateTime.Now, 2, 3, 4)");
-			Assert.AreEqual(1, x.AmbiguousMethod_NormalCalls);
-			Assert.AreEqual(1, x.AmbiguousMethod_ParamsArrayCalls);
+			Assert.That(x.AmbiguousMethod_NormalCalls, Is.EqualTo(1));
+			Assert.That(x.AmbiguousMethod_ParamsArrayCalls, Is.EqualTo(1));
 		}
 
 		[Test]
@@ -387,7 +383,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			var x = new MyTestService();
 			target.SetVariable("x", x);
-			Assert.AreEqual(3, target.Eval("x.OverloadMethodWithParamsArray(2, 3, 1)"));
+			Assert.That(target.Eval("x.OverloadMethodWithParamsArray(2, 3, 1)"), Is.EqualTo(3));
 		}
 
 
@@ -398,7 +394,7 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(Utils));
 
 			var listInt = target.Eval<List<int>>("Utils.Array(1, 2, 3)");
-			Assert.AreEqual(new[] { 1, 2, 3 }, listInt);
+			Assert.That(listInt, Is.EqualTo(new[] { 1, 2, 3 }));
 
 			// type parameter can't be inferred from usage
 			Assert.Throws<ParseException>(() => target.Eval<List<int>>("Utils.Array(1,\"str\", 3)"));
@@ -420,11 +416,11 @@ namespace DynamicExpresso.UnitTest
 				new Parameter("w", w.GetType(), w)
 			};
 
-			Assert.AreEqual(x.MethodWithOptionalParam(y), target.Eval("x.MethodWithOptionalParam(y)", parameters));
-			Assert.AreEqual(x.MethodWithOptionalParam(y, z), target.Eval("x.MethodWithOptionalParam(y, z)", parameters));
-			Assert.AreEqual(x.MethodWithOptionalParam(z, y), target.Eval("x.MethodWithOptionalParam(z, y)", parameters));
-			Assert.AreEqual(x.MethodWithOptionalParam(y, z, w), target.Eval("x.MethodWithOptionalParam(y, z, w)", parameters));
-			Assert.AreEqual(x.MethodWithOptionalParam(w, y, z), target.Eval("x.MethodWithOptionalParam(w, y, z)", parameters));
+			Assert.That(target.Eval("x.MethodWithOptionalParam(y)", parameters), Is.EqualTo(x.MethodWithOptionalParam(y)));
+			Assert.That(target.Eval("x.MethodWithOptionalParam(y, z)", parameters), Is.EqualTo(x.MethodWithOptionalParam(y, z)));
+			Assert.That(target.Eval("x.MethodWithOptionalParam(z, y)", parameters), Is.EqualTo(x.MethodWithOptionalParam(z, y)));
+			Assert.That(target.Eval("x.MethodWithOptionalParam(y, z, w)", parameters), Is.EqualTo(x.MethodWithOptionalParam(y, z, w)));
+			Assert.That(target.Eval("x.MethodWithOptionalParam(w, y, z)", parameters), Is.EqualTo(x.MethodWithOptionalParam(w, y, z)));
 		}
 
 		[Test]
@@ -441,8 +437,8 @@ namespace DynamicExpresso.UnitTest
 				new Parameter("z", z.GetType(), z),
 			};
 
-			Assert.AreEqual(x.MethodWithOptionalNullParam(y), target.Eval("x.MethodWithOptionalNullParam(y)", parameters));
-			Assert.AreEqual(x.MethodWithOptionalNullParam(y, z), target.Eval("x.MethodWithOptionalNullParam(y, z)", parameters));
+			Assert.That(target.Eval("x.MethodWithOptionalNullParam(y)", parameters), Is.EqualTo(x.MethodWithOptionalNullParam(y)));
+			Assert.That(target.Eval("x.MethodWithOptionalNullParam(y, z)", parameters), Is.EqualTo(x.MethodWithOptionalNullParam(y, z)));
 		}
 
 		[Test]
@@ -453,7 +449,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			target.SetVariable("x", x);
 
-			Assert.AreEqual(x.HelloWorld().ToUpper(), target.Eval("x.HelloWorld().ToUpper()"));
+			Assert.That(target.Eval("x.HelloWorld().ToUpper()"), Is.EqualTo(x.HelloWorld().ToUpper()));
 		}
 
 		internal static class Utils
@@ -482,8 +478,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			target.Reference(typeof(Utils));
 
-			Assert.AreEqual(1, target.Eval("Utils.GenericVsNonGeneric(12345)"));
-			Assert.AreEqual(2, target.Eval("Utils.GenericVsNonGeneric('a')"));
+			Assert.That(target.Eval("Utils.GenericVsNonGeneric(12345)"), Is.EqualTo(1));
+			Assert.That(target.Eval("Utils.GenericVsNonGeneric('a')"), Is.EqualTo(2));
 		}
 
 		[Test]
@@ -495,12 +491,12 @@ namespace DynamicExpresso.UnitTest
 			var arr = new int[] { 2 };
 			target.SetVariable("arr", arr);
 
-			Assert.AreEqual(3, target.Eval("Utils.WithParamsArray(arr)"));
-			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1)"));
-			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1, arr)"));
-			Assert.AreEqual(5, target.Eval("Utils.WithParamsArray(1, 2)"));
-			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1, 2, 3)"));
-			Assert.AreEqual(4, target.Eval("Utils.WithParamsArray(1, 2, 3, 4)"));
+			Assert.That(target.Eval("Utils.WithParamsArray(arr)"), Is.EqualTo(3));
+			Assert.That(target.Eval("Utils.WithParamsArray(1)"), Is.EqualTo(4));
+			Assert.That(target.Eval("Utils.WithParamsArray(1, arr)"), Is.EqualTo(4));
+			Assert.That(target.Eval("Utils.WithParamsArray(1, 2)"), Is.EqualTo(5));
+			Assert.That(target.Eval("Utils.WithParamsArray(1, 2, 3)"), Is.EqualTo(4));
+			Assert.That(target.Eval("Utils.WithParamsArray(1, 2, 3, 4)"), Is.EqualTo(4));
 		}
 
 		[Test]
@@ -515,9 +511,9 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("str", str);
 			target.SetVariable("e", e);
 			target.SetVariable("intg", intg);
-			Assert.AreEqual(6, target.Eval("Utils.WithParamsArray2(str, e)"));
-			Assert.AreEqual(7, target.Eval("Utils.WithParamsArray2(str, e, str, str)"));
-			Assert.AreEqual(8, target.Eval("Utils.WithParamsArray2(str, e, intg, intg)"));
+			Assert.That(target.Eval("Utils.WithParamsArray2(str, e)"), Is.EqualTo(6));
+			Assert.That(target.Eval("Utils.WithParamsArray2(str, e, str, str)"), Is.EqualTo(7));
+			Assert.That(target.Eval("Utils.WithParamsArray2(str, e, intg, intg)"), Is.EqualTo(8));
 		}
 
 		private interface MyTestInterface

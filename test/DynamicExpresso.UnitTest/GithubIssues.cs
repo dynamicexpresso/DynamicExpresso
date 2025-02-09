@@ -20,10 +20,10 @@ namespace DynamicExpresso.UnitTest
 		{
 			var interpreter = new Interpreter();
 
-			Assert.AreEqual(5.0.ToString(), interpreter.Eval("5.0.ToString()"));
-			Assert.AreEqual((5).ToString(), interpreter.Eval("(5).ToString()"));
-			Assert.AreEqual((5.0).ToString(), interpreter.Eval("(5.0).ToString()"));
-			Assert.AreEqual(5.ToString(), interpreter.Eval("5.ToString()"));
+			Assert.That(interpreter.Eval("5.0.ToString()"), Is.EqualTo(5.0.ToString()));
+			Assert.That(interpreter.Eval("(5).ToString()"), Is.EqualTo((5).ToString()));
+			Assert.That(interpreter.Eval("(5.0).ToString()"), Is.EqualTo((5.0).ToString()));
+			Assert.That(interpreter.Eval("5.ToString()"), Is.EqualTo(5.ToString()));
 		}
 
 		[Test]
@@ -31,9 +31,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var interpreter = new Interpreter();
 
-			Assert.AreEqual((-.5).ToString(), interpreter.Eval("-.5.ToString()"));
-			Assert.AreEqual((.1).ToString(), interpreter.Eval(".1.ToString()"));
-			Assert.AreEqual((-1 - .1 - 0.1).ToString(), interpreter.Eval("(-1-.1-0.1).ToString()"));
+			Assert.That(interpreter.Eval("-.5.ToString()"), Is.EqualTo((-.5).ToString()));
+			Assert.That(interpreter.Eval(".1.ToString()"), Is.EqualTo((.1).ToString()));
+			Assert.That(interpreter.Eval("(-1-.1-0.1).ToString()"), Is.EqualTo((-1 - .1 - 0.1).ToString()));
 		}
 
 		[Test]
@@ -45,17 +45,17 @@ namespace DynamicExpresso.UnitTest
 
 			interpreter.SetVariable("array", array);
 
-			Assert.AreEqual(array.Contains(5), interpreter.Eval("array.Contains(5)"));
-			Assert.AreEqual(array.Contains(3), interpreter.Eval("array.Contains(3)"));
+			Assert.That(interpreter.Eval("array.Contains(5)"), Is.EqualTo(array.Contains(5)));
+			Assert.That(interpreter.Eval("array.Contains(3)"), Is.EqualTo(array.Contains(3)));
 		}
 
 		[Test]
 		public void GitHub_Issue_64()
 		{
 			var interpreter = new Interpreter();
-			Assert.AreEqual(null, interpreter.Eval("null ?? null"));
-			Assert.AreEqual("hallo", interpreter.Eval("\"hallo\" ?? null"));
-			Assert.AreEqual("hallo", interpreter.Eval("null ?? \"hallo\""));
+			Assert.That(interpreter.Eval("null ?? null"), Is.Null);
+			Assert.That(interpreter.Eval("\"hallo\" ?? null"), Is.EqualTo("hallo"));
+			Assert.That(interpreter.Eval("null ?? \"hallo\""), Is.EqualTo("hallo"));
 		}
 
 		[Test]
@@ -70,9 +70,9 @@ namespace DynamicExpresso.UnitTest
 			};
 
 			interpreter.SetVariable("x", x);
-			Assert.AreEqual("hallo", interpreter.Eval("x.var1?.ToString()"));
-			Assert.AreEqual(null, interpreter.Eval("x.var2?.ToString()"));
-			Assert.AreEqual("allo", interpreter.Eval("x.var1?.Substring(1)"));
+			Assert.That(interpreter.Eval("x.var1?.ToString()"), Is.EqualTo("hallo"));
+			Assert.That(interpreter.Eval("x.var2?.ToString()"), Is.Null);
+			Assert.That(interpreter.Eval("x.var1?.Substring(1)"), Is.EqualTo("allo"));
 		}
 
 		[Test]
@@ -87,10 +87,10 @@ namespace DynamicExpresso.UnitTest
 			};
 
 			interpreter.SetVariable("x", x);
-			Assert.AreEqual(x.var1?[2], interpreter.Eval("x.var1?[2]"));
-			Assert.AreEqual(x.var2?[2], interpreter.Eval("x.var2?[2]"));
-			Assert.AreEqual(x.var1?[2] == 'l', interpreter.Eval("x.var1?[2] == 'l'"));
-			Assert.AreEqual(x.var2?[2] == null, interpreter.Eval("x.var2?[2] == null"));
+			Assert.That(interpreter.Eval("x.var1?[2]"), Is.EqualTo(x.var1?[2]));
+			Assert.That(interpreter.Eval("x.var2?[2]"), Is.EqualTo(x.var2?[2]));
+			Assert.That(interpreter.Eval("x.var1?[2] == 'l'"), Is.EqualTo(x.var1?[2] == 'l'));
+			Assert.That(interpreter.Eval("x.var2?[2] == null"), Is.EqualTo(x.var2?[2] == null));
 		}
 
 		[Test]
@@ -102,7 +102,7 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("b", 1.2, typeof(double?));
 			var result = interpreter.Eval("a + b");
 
-			Assert.AreEqual(result, 2.2);
+			Assert.That(result, Is.EqualTo(2.2));
 		}
 
 		[Test]
@@ -119,20 +119,20 @@ namespace DynamicExpresso.UnitTest
 		{
 			var interpreter = new Interpreter();
 
-			Assert.AreEqual(10000000001, interpreter.Eval("1+1e10"));
-			Assert.AreEqual(10000000001, interpreter.Eval("1+1e+10"));
-			Assert.AreEqual(1.0000000001, interpreter.Eval("1+1e-10"));
-			Assert.AreEqual(-20199999999, interpreter.Eval("1 - 2.02e10"));
-			Assert.AreEqual(-20199999999, interpreter.Eval("1 - 2.02e+10"));
-			Assert.AreEqual(0.999999999798, interpreter.Eval("1 - 2.02e-10"));
-			Assert.AreEqual(1e-10, interpreter.Eval("1/1e+10"));
+			Assert.That(interpreter.Eval("1+1e10"), Is.EqualTo(10000000001));
+			Assert.That(interpreter.Eval("1+1e+10"), Is.EqualTo(10000000001));
+			Assert.That(interpreter.Eval("1+1e-10"), Is.EqualTo(1.0000000001));
+			Assert.That(interpreter.Eval("1 - 2.02e10"), Is.EqualTo(-20199999999));
+			Assert.That(interpreter.Eval("1 - 2.02e+10"), Is.EqualTo(-20199999999));
+			Assert.That(interpreter.Eval("1 - 2.02e-10"), Is.EqualTo(0.999999999798));
+			Assert.That(interpreter.Eval("1/1e+10"), Is.EqualTo(1e-10));
 
 			interpreter.SetVariable("@Var1", 1);
 			interpreter.SetVariable("@Var2", 1e+10);
-			Assert.AreEqual(10000000001, interpreter.Eval("@Var1+@Var2"));
+			Assert.That(interpreter.Eval("@Var1+@Var2"), Is.EqualTo(10000000001));
 
 			interpreter.SetVariable("e", 2);
-			Assert.AreEqual(10000000003, interpreter.Eval("@Var1+@Var2+e"));
+			Assert.That(interpreter.Eval("@Var1+@Var2+e"), Is.EqualTo(10000000003));
 		}
 
 		private delegate bool GFunction(string arg = null);
@@ -148,18 +148,18 @@ namespace DynamicExpresso.UnitTest
 			// GetGFunction1 is defined outside the test function
 			GFunction gFunc1 = GetGFunction1;
 
-			Assert.True(gFunc1.Method.GetParameters()[0].HasDefaultValue);
+			Assert.That(gFunc1.Method.GetParameters()[0].HasDefaultValue, Is.True);
 
 			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance;
 			var invokeMethod1 = (MethodInfo)gFunc1.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke")[0];
-			Assert.True(invokeMethod1.GetParameters()[0].HasDefaultValue);
+			Assert.That(invokeMethod1.GetParameters()[0].HasDefaultValue, Is.True);
 
 			var interpreter = new Interpreter();
 			interpreter.SetFunction("GFunction", gFunc1);
 			interpreter.SetVariable("arg", "arg");
 
-			Assert.True((bool)interpreter.Eval("GFunction(arg)"));
-			Assert.False((bool)interpreter.Eval("GFunction()"));
+			Assert.That((bool)interpreter.Eval("GFunction(arg)"), Is.True);
+			Assert.That((bool)interpreter.Eval("GFunction()"), Is.False);
 		}
 
 		[Test]
@@ -172,7 +172,7 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("arr1", new object[] { 1d, 2d, 3d });
 			target.SetFunction("SubArray", subArray);
 
-			Assert.AreEqual(2, target.Eval("SubArray(arr1, 1, 1).First()"));
+			Assert.That(target.Eval("SubArray(arr1, 1, 1).First()"), Is.EqualTo(2));
 		}
 
 		[Test]
@@ -188,7 +188,7 @@ namespace DynamicExpresso.UnitTest
 			// we should properly throw an ambiguous invocation exception (multiple matching overloads found)
 			// and not an Argument list incompatible with delegate expression (no matching overload found)
 			var exc = Assert.Throws<ParseException>(() => interpreter.Eval("f(null)"));
-			StringAssert.StartsWith("Ambiguous invocation of delegate (multiple overloads found)", exc.Message);
+			Assert.That(exc.Message, Does.StartWith("Ambiguous invocation of delegate (multiple overloads found)"));
 		}
 
 
@@ -200,7 +200,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetFunction("f", f1);
 
-			Assert.AreEqual(1, interpreter.Eval("f()"));
+			Assert.That(interpreter.Eval("f()"), Is.EqualTo(1));
 
 			// calls to f should lead to an unknown identifier exception
 			interpreter.UnsetFunction("f");
@@ -223,14 +223,14 @@ namespace DynamicExpresso.UnitTest
 
 			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance;
 			var invokeMethod2 = (MethodInfo)gFunc2.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke")[0];
-			Assert.True(invokeMethod2.GetParameters()[0].HasDefaultValue);
+			Assert.That(invokeMethod2.GetParameters()[0].HasDefaultValue, Is.True);
 
 			var interpreter = new Interpreter();
 			interpreter.SetFunction("GFunction", gFunc2);
 			interpreter.SetVariable("arg", "arg");
 
-			Assert.True((bool)interpreter.Eval("GFunction(arg)"));
-			Assert.False((bool)interpreter.Eval("GFunction()"));
+			Assert.That((bool)interpreter.Eval("GFunction(arg)"), Is.True);
+			Assert.That((bool)interpreter.Eval("GFunction()"), Is.False);
 		}
 
 		[Test]
@@ -256,7 +256,7 @@ namespace DynamicExpresso.UnitTest
 			// GFunction1 is used
 			// because gFunc1.Method.GetParameters()[0].HasDefaultValue == true
 			// and     gFunc2.Method.GetParameters()[0].HasDefaultValue == false
-			Assert.False((bool)interpreter.Eval("GFunction()"));
+			Assert.That((bool)interpreter.Eval("GFunction()"), Is.False);
 		}
 
 #endif
@@ -269,13 +269,13 @@ namespace DynamicExpresso.UnitTest
 			var str = "str";
 
 			interpreter.SetVariable("str", str);
-			Assert.AreEqual(str?.Length, interpreter.Eval("str?.Length"));
-			Assert.AreEqual(str?.Length == 3, interpreter.Eval<bool>("str?.Length == 3"));
+			Assert.That(interpreter.Eval("str?.Length"), Is.EqualTo(str?.Length));
+			Assert.That(interpreter.Eval<bool>("str?.Length == 3"), Is.EqualTo(str?.Length == 3));
 
 			str = null;
 			interpreter.SetVariable("str", str);
-			Assert.AreEqual(str?.Length, interpreter.Eval("str?.Length"));
-			Assert.AreEqual(str?.Length == 0, interpreter.Eval<bool>("str?.Length == 0"));
+			Assert.That(interpreter.Eval("str?.Length"), Is.EqualTo(str?.Length));
+			Assert.That(interpreter.Eval<bool>("str?.Length == 0"), Is.EqualTo(str?.Length == 0));
 		}
 
 		[Test]
@@ -286,14 +286,14 @@ namespace DynamicExpresso.UnitTest
 			var lambda = interpreter.Parse("Scope?.ValueInt", new Parameter("Scope", typeof(Scope)));
 
 			var result = lambda.Invoke((Scope)null);
-			Assert.IsNull(result);
+			Assert.That(result, Is.Null);
 
 			result = lambda.Invoke(new Scope { ValueInt = 5 });
-			Assert.AreEqual(5, result);
+			Assert.That(result, Is.EqualTo(5));
 
 			var scope = new Scope { Value = 5 };
 			interpreter.SetVariable("scope", scope);
-			Assert.AreEqual(scope?.Value.HasValue, interpreter.Eval<bool>("scope?.Value.HasValue"));
+			Assert.That(interpreter.Eval<bool>("scope?.Value.HasValue"), Is.EqualTo(scope?.Value.HasValue));
 
 			// must throw, because scope.ValueInt is not a nullable type
 			Assert.Throws<ParseException>(() => interpreter.Eval<bool>("scope.ValueInt.HasValue"));
@@ -316,16 +316,16 @@ namespace DynamicExpresso.UnitTest
 			var lambda = interpreter.Parse("Scope?.Value", new Parameter("Scope", typeof(Scope)));
 
 			var result = lambda.Invoke((Scope)null);
-			Assert.IsNull(result);
+			Assert.That(result, Is.Null);
 
 			result = lambda.Invoke(new Scope());
-			Assert.IsNull(result);
+			Assert.That(result, Is.Null);
 
 			result = lambda.Invoke(new Scope { Value = null });
-			Assert.IsNull(result);
+			Assert.That(result, Is.Null);
 
 			result = lambda.Invoke(new Scope { Value = 5 });
-			Assert.AreEqual(5, result);
+			Assert.That(result, Is.EqualTo(5));
 		}
 
 		[Test]
@@ -336,13 +336,13 @@ namespace DynamicExpresso.UnitTest
 			var lambda = interpreter.Parse("Scope?.Arr?[0]", new Parameter("Scope", typeof(Scope)));
 
 			var result = lambda.Invoke(new Scope());
-			Assert.IsNull(result);
+			Assert.That(result, Is.Null);
 
 			result = lambda.Invoke(new Scope { Arr = null });
-			Assert.IsNull(result);
+			Assert.That(result, Is.Null);
 
 			result = lambda.Invoke(new Scope { Arr = new int?[] { 5 } });
-			Assert.AreEqual(5, result);
+			Assert.That(result, Is.EqualTo(5));
 		}
 
 		[Test]
@@ -353,14 +353,14 @@ namespace DynamicExpresso.UnitTest
 			var lambda = interpreter.Parse("Scope?.ArrInt?[0]", new Parameter("Scope", typeof(Scope)));
 
 			var result = lambda.Invoke(new Scope());
-			Assert.IsNull(result);
+			Assert.That(result, Is.Null);
 
 			result = lambda.Invoke(new Scope { ArrInt = new int[] { 5 } });
-			Assert.AreEqual(5, result);
+			Assert.That(result, Is.EqualTo(5));
 
 			interpreter.SetVariable("scope", new Scope { ArrInt = new int[] { 5 } });
 			var resultNullableBool = interpreter.Eval<bool>("scope?.ArrInt?[0].HasValue");
-			Assert.IsTrue(resultNullableBool);
+			Assert.That(resultNullableBool, Is.True);
 
 			// must throw, because scope.ValueInt is not a nullable type
 			Assert.Throws<ParseException>(() => interpreter.Eval<bool>("scope.ArrInt[0].HasValue"));
@@ -373,11 +373,11 @@ namespace DynamicExpresso.UnitTest
 
 			interpreter.SetVariable("x", (int?)null);
 			var result = interpreter.Eval<string>("x?.ToString()");
-			Assert.IsNull(result);
+			Assert.That(result, Is.Null);
 
 			interpreter.SetVariable("x", (int?)56);
 			result = interpreter.Eval<string>("x?.ToString()");
-			Assert.AreEqual("56", result);
+			Assert.That(result, Is.EqualTo("56"));
 		}
 
 		[Test]
@@ -394,10 +394,10 @@ namespace DynamicExpresso.UnitTest
 			};
 
 			var expressionWithoutLambdas = interpreterWithoutLambdas.Parse(stringExpression, typeof(void), parameters.ToArray());
-			Assert.AreEqual("E33", expressionWithoutLambdas.Invoke(parameters.ToArray()));
+			Assert.That(expressionWithoutLambdas.Invoke(parameters.ToArray()), Is.EqualTo("E33"));
 
 			var expressionWithLambdas = interpreterWithLambdas.Parse(stringExpression, typeof(void), parameters.ToArray());
-			Assert.AreEqual("E33", expressionWithLambdas.Invoke(parameters.ToArray()));
+			Assert.That(expressionWithLambdas.Invoke(parameters.ToArray()), Is.EqualTo("E33"));
 		}
 
 		[Test]
@@ -409,7 +409,7 @@ namespace DynamicExpresso.UnitTest
 			// (ie a conversion expression should be emitted from long to object)
 			var del = interpreter.ParseAsDelegate<Func<object>>("a*2");
 			var result = del();
-			Assert.AreEqual(246, result);
+			Assert.That(result, Is.EqualTo(246));
 		}
 
 		[Test]
@@ -418,7 +418,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter().SetVariable("a", 123L);
 			var del = interpreter.ParseAsDelegate<Func<dynamic>>("a*2");
 			var result = del();
-			Assert.AreEqual(246, result);
+			Assert.That(result, Is.EqualTo(246));
 		}
 
 		[Test]
@@ -428,7 +428,7 @@ namespace DynamicExpresso.UnitTest
 			interpreter.Reference(typeof(Utils));
 
 			var result = interpreter.Eval<object>("Utils.Select(Utils.Array(\"a\", \"b\"), \"x+x\")");
-			Assert.IsNotNull(result);
+			Assert.That(result, Is.Not.Null);
 		}
 
 		[Test]
@@ -440,7 +440,7 @@ namespace DynamicExpresso.UnitTest
 			var list = new[] { 1, 2, 3 };
 
 			var listInt = target.Eval<List<int>>("Utils.Array(list)", new Parameter("list", list));
-			Assert.AreEqual(Utils.Array(list), listInt);
+			Assert.That(listInt, Is.EqualTo(Utils.Array(list)));
 		}
 
 		[Test]
@@ -451,14 +451,14 @@ namespace DynamicExpresso.UnitTest
 			DateTime? date = DateTime.UtcNow;
 			interpreter.SetVariable("date", date);
 
-			Assert.AreEqual(date?.Day, interpreter.Eval("date?.Day"));
-			Assert.AreEqual(date?.IsDaylightSavingTime(), interpreter.Eval("date?.IsDaylightSavingTime()"));
+			Assert.That(interpreter.Eval("date?.Day"), Is.EqualTo(date?.Day));
+			Assert.That(interpreter.Eval("date?.IsDaylightSavingTime()"), Is.EqualTo(date?.IsDaylightSavingTime()));
 
 			date = null;
 			interpreter.SetVariable("date", date);
 
-			Assert.AreEqual(date?.Day, interpreter.Eval("date?.Day"));
-			Assert.AreEqual(date?.IsDaylightSavingTime(), interpreter.Eval("date?.IsDaylightSavingTime()"));
+			Assert.That(interpreter.Eval("date?.Day"), Is.EqualTo(date?.Day));
+			Assert.That(interpreter.Eval("date?.IsDaylightSavingTime()"), Is.EqualTo(date?.IsDaylightSavingTime()));
 		}
 
 		[Test]
@@ -472,11 +472,11 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("date1", date1);
 			interpreter.SetVariable("date2", date2);
 
-			Assert.IsNull(interpreter.Eval("(date1 - date2)?.Days"));
+			Assert.That(interpreter.Eval("(date1 - date2)?.Days"), Is.Null);
 
 			date2 = date1.AddDays(1);
 			interpreter.SetVariable("date2", date2);
-			Assert.AreEqual(-1, interpreter.Eval("(date1 - date2)?.Days"));
+			Assert.That(interpreter.Eval("(date1 - date2)?.Days"), Is.EqualTo(-1));
 		}
 
 		[Test]
@@ -486,12 +486,12 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(Utils));
 			target.Reference(typeof(IEnumerable<>));
 
-			Assert.AreEqual(1, Utils.Any((IEnumerable<object>)null));
-			Assert.AreEqual(2, Utils.Any((IEnumerable)null));
-			Assert.AreEqual(2, Utils.Any(null));
-			Assert.AreEqual(1, target.Eval("Utils.Any(list)", new Parameter("list", typeof(IEnumerable<object>), null)));
-			Assert.AreEqual(2, target.Eval("Utils.Any(list)", new Parameter("list", typeof(IEnumerable), null)));
-			Assert.AreEqual(2, target.Eval("Utils.Any(null)"));
+			Assert.That(Utils.Any((IEnumerable<object>)null), Is.EqualTo(1));
+			Assert.That(Utils.Any((IEnumerable)null), Is.EqualTo(2));
+			Assert.That(Utils.Any(null), Is.EqualTo(2));
+			Assert.That(target.Eval("Utils.Any(list)", new Parameter("list", typeof(IEnumerable<object>), null)), Is.EqualTo(1));
+			Assert.That(target.Eval("Utils.Any(list)", new Parameter("list", typeof(IEnumerable), null)), Is.EqualTo(2));
+			Assert.That(target.Eval("Utils.Any(null)"), Is.EqualTo(2));
 		}
 
 		[Test]
@@ -505,19 +505,19 @@ namespace DynamicExpresso.UnitTest
 				.SetVariable("DateInThePast", DateTimeOffset.UtcNow.AddDays(-5));
 
 			// actual case
-			Assert.IsTrue(interpreter.Eval<bool>("List.Any(x => x > Now())"));
-			Assert.IsTrue(interpreter.Eval<bool>("List.Any(x => x is DateTimeOffset)"));
-			Assert.IsFalse(interpreter.Eval<bool>("DateInThePast.IsInFuture()"));
+			Assert.That(interpreter.Eval<bool>("List.Any(x => x > Now())"), Is.True);
+			Assert.That(interpreter.Eval<bool>("List.Any(x => x is DateTimeOffset)"), Is.True);
+			Assert.That(interpreter.Eval<bool>("DateInThePast.IsInFuture()"), Is.False);
 
 			// case insensivity outside lambda expressions
-			Assert.IsFalse(interpreter.Eval<bool>("dateinthepast > now()")); // identifier
-			Assert.IsTrue(interpreter.Eval<bool>("dateinthepast is datetimeoffset")); // known type
-			Assert.IsFalse(interpreter.Eval<bool>("dateinthepast.isinfuture()")); // extension method
+			Assert.That(interpreter.Eval<bool>("dateinthepast > now()"), Is.False); // identifier
+			Assert.That(interpreter.Eval<bool>("dateinthepast is datetimeoffset"), Is.True); // known type
+			Assert.That(interpreter.Eval<bool>("dateinthepast.isinfuture()"), Is.False); // extension method
 
 			// ensure the case insensitivity option is also used in the lambda expression
-			Assert.IsTrue(interpreter.Eval<bool>("list.Any(x => x > now())")); // identifier
-			Assert.IsTrue(interpreter.Eval<bool>("list.Any(x => x is datetimeoffset)")); // known type
-			Assert.IsTrue(interpreter.Eval<bool>("list.Any(x => x.isinfuture())")); // extension method
+			Assert.That(interpreter.Eval<bool>("list.Any(x => x > now())"), Is.True); // identifier
+			Assert.That(interpreter.Eval<bool>("list.Any(x => x is datetimeoffset)"), Is.True); // known type
+			Assert.That(interpreter.Eval<bool>("list.Any(x => x.isinfuture())"), Is.True); // extension method
 		}
 
 		[Test]
@@ -549,12 +549,12 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(DateTimeKind));
 
 			var result = target.Eval<RegexOptions>("RegexOptions.Compiled | RegexOptions.Singleline");
-			Assert.True(result.HasFlag(RegexOptions.Compiled));
-			Assert.True(result.HasFlag(RegexOptions.Singleline));
+			Assert.That(result.HasFlag(RegexOptions.Compiled), Is.True);
+			Assert.That(result.HasFlag(RegexOptions.Singleline), Is.True);
 
 			// DateTimeKind doesn't have the Flags attribute: the bitwise operation returns an integer
 			var result2 = target.Eval<DateTimeKind>("DateTimeKind.Local | DateTimeKind.Utc");
-			Assert.AreEqual((DateTimeKind)3, result2);
+			Assert.That(result2, Is.EqualTo((DateTimeKind)3));
 		}
 
 		[Test]
@@ -567,7 +567,7 @@ namespace DynamicExpresso.UnitTest
 			var expression = "list.Where(x => x > value)";
 			var lambda = target.Parse(expression, list, value1);
 			var result = lambda.Invoke(list, value2);
-			Assert.AreEqual(new[] { 3 }, result);
+			Assert.That(result, Is.EqualTo(new[] { 3 }));
 		}
 
 		[Test]
@@ -580,7 +580,7 @@ namespace DynamicExpresso.UnitTest
 			var expression = "list.Where(x => x > value)";
 			var lambda = target.Parse(expression, (new[] { list, value1 }).Select(p => new Parameter(p.Name, p.Type)).ToArray());
 			var result = lambda.Invoke(list, value1);
-			Assert.AreEqual(new[] { 2, 3 }, result);
+			Assert.That(result, Is.EqualTo(new[] { 2, 3 }));
 		}
 
 		[Test]
@@ -592,7 +592,7 @@ namespace DynamicExpresso.UnitTest
 
 			// the str parameter is captured, and can be used in the nested lambda
 			var results = target.Eval("myList.Select(str => str.Select(c => str.Length))");
-			Assert.AreEqual(new[] { new[] { 2, 2 }, new[] { 3, 3, 3 } }, results);
+			Assert.That(results, Is.EqualTo(new[] { new[] { 2, 2 }, new[] { 3, 3, 3 } }));
 		}
 
 		[Test]
@@ -626,7 +626,7 @@ namespace DynamicExpresso.UnitTest
 			var totalBonus = employees.Sum(x => x.Salary * (annualBonus.SingleOrDefault(y => y.Grade == x.Grade).BonusFactor)); //total = 357875
 
 			var evalSum = interpreter.Eval("employees.Sum(x => x.Salary * (annualBonus.SingleOrDefault(y => y.Grade == x.Grade).BonusFactor))");
-			Assert.AreEqual(totalBonus, evalSum);
+			Assert.That(evalSum, Is.EqualTo(totalBonus));
 		}
 
 		public class Employee
@@ -652,11 +652,11 @@ namespace DynamicExpresso.UnitTest
 			interpreter.Reference(typeof(PageType));
 
 			var results = interpreter.Eval<IEnumerable<PageType>>(@"courseList.Select(x => new PageType() { PageName = x.PageName, VisualCount = 5 })");
-			Assert.AreEqual(1, results.Count());
+			Assert.That(results.Count(), Is.EqualTo(1));
 
 			var result = results.Single();
-			Assert.AreEqual("Test", result.PageName);
-			Assert.AreEqual(5, result.VisualCount);
+			Assert.That(result.PageName, Is.EqualTo("Test"));
+			Assert.That(result.VisualCount, Is.EqualTo(5));
 		}
 
 		public class PageType
@@ -673,11 +673,11 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(DateTimeKind));
 
 			var result = target.Eval<RegexOptions>("~RegexOptions.None");
-			Assert.AreEqual(~RegexOptions.None, result);
+			Assert.That(result, Is.EqualTo(~RegexOptions.None));
 
 			// DateTimeKind doesn't have the Flags attribute: the bitwise operation returns an integer
 			var result2 = target.Eval<DateTimeKind>("~DateTimeKind.Local");
-			Assert.AreEqual((DateTimeKind)(-3), result2);
+			Assert.That(result2, Is.EqualTo((DateTimeKind)(-3)));
 		}
 
 		[Test]
@@ -691,11 +691,11 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("list", list);
 
 			var results = interpreter.Eval<List<int>>(@"b.Add(list, (int t) => t + 10)");
-			Assert.AreEqual(new List<int> { 20, 40, 14 }, results);
+			Assert.That(results, Is.EqualTo(new List<int> { 20, 40, 14 }));
 
 			// ensure that list, t are not parsed as two arguments of a lambda expression
 			results = interpreter.Eval<List<int>>(@"b.Add(list, t => t + 10)");
-			Assert.AreEqual(new List<int> { 20, 40, 14 }, results);
+			Assert.That(results, Is.EqualTo(new List<int> { 20, 40, 14 }));
 		}
 
 		public class Functions
@@ -718,7 +718,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<NullReferenceException>(() => interpreter.Eval<int>("Utils.ParamArrayObjects(null)"));
 
 			var result = interpreter.Eval<int>($"Utils.ParamArrayObjects({paramsArguments})");
-			Assert.AreEqual(4, result);
+			Assert.That(result, Is.EqualTo(4));
 		}
 
 		[Test]
@@ -727,7 +727,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 
 			var result = interpreter.Eval<bool>("((int?)5)>((double?)4)");
-			Assert.IsTrue(result);
+			Assert.That(result, Is.True);
 		}
 
 		[Test]
@@ -739,16 +739,16 @@ namespace DynamicExpresso.UnitTest
 			object str = "test";
 			interpreter.SetVariable("str", str, typeof(object));
 
-			Assert.AreEqual(string.IsNullOrEmpty(str as string), interpreter.Eval("string.IsNullOrEmpty(str as string)"));
-			Assert.AreEqual(str is string, interpreter.Eval("str is string"));
-			Assert.AreEqual(str is int?, interpreter.Eval("str is int?"));
-			Assert.AreEqual(str is int[], interpreter.Eval("(str is int[])"));
-			Assert.AreEqual(str is int?[], interpreter.Eval("(str is int?[])"));
-			Assert.AreEqual(str is int?[][], interpreter.Eval("(str is int?[][])"));
-			Assert.AreEqual(str is IEnumerable<int>[][], interpreter.Eval("(str is IEnumerable<int>[][])"));
-			Assert.AreEqual(str is IEnumerable<int?>[][], interpreter.Eval("(str is IEnumerable<int?>[][])"));
-			Assert.AreEqual(str is IEnumerable<int[]>[][], interpreter.Eval("(str is IEnumerable<int[]>[][])"));
-			Assert.AreEqual(str is IEnumerable<int?[][]>[][], interpreter.Eval("(str is IEnumerable<int?[][]>[][])"));
+			Assert.That(interpreter.Eval("string.IsNullOrEmpty(str as string)"), Is.EqualTo(string.IsNullOrEmpty(str as string)));
+			Assert.That(interpreter.Eval("str is string"), Is.EqualTo(str is string));
+			Assert.That(interpreter.Eval("str is int?"), Is.EqualTo(str is int?));
+			Assert.That(interpreter.Eval("(str is int[])"), Is.EqualTo(str is int[]));
+			Assert.That(interpreter.Eval("(str is int?[])"), Is.EqualTo(str is int?[]));
+			Assert.That(interpreter.Eval("(str is int?[][])"), Is.EqualTo(str is int?[][]));
+			Assert.That(interpreter.Eval("(str is IEnumerable<int>[][])"), Is.EqualTo(str is IEnumerable<int>[][]));
+			Assert.That(interpreter.Eval("(str is IEnumerable<int?>[][])"), Is.EqualTo(str is IEnumerable<int?>[][]));
+			Assert.That(interpreter.Eval("(str is IEnumerable<int[]>[][])"), Is.EqualTo(str is IEnumerable<int[]>[][]));
+			Assert.That(interpreter.Eval("(str is IEnumerable<int?[][]>[][])"), Is.EqualTo(str is IEnumerable<int?[][]>[][]));
 		}
 
 		private class Npc
@@ -771,7 +771,7 @@ namespace DynamicExpresso.UnitTest
 			var func = interpreter.ParseAsDelegate<Action>("NearNpcs.ActionToAll(n => n.money = 10)");
 			func.Invoke();
 
-			Assert.IsTrue(testnpcs.All(n => n.money == 10));
+			Assert.That(testnpcs.All(n => n.money == 10), Is.True);
 		}
 
 		[Test]
@@ -817,7 +817,7 @@ namespace DynamicExpresso.UnitTest
 			var lambda = interpreter.Parse("this[0]", new Parameter("this", b));
 			var res = lambda.Invoke(b);
 
-			Assert.AreEqual(25, res);
+			Assert.That(res, Is.EqualTo(25));
 		}
 
 		#endregion
@@ -829,14 +829,14 @@ namespace DynamicExpresso.UnitTest
 
 			var interpreter1 = new Interpreter();
 			interpreter1.SetVariable("a", a);
-			Assert.AreEqual("AA", interpreter1.Eval("a.Substring(0, 2)"));
+			Assert.That(interpreter1.Eval("a.Substring(0, 2)"), Is.EqualTo("AA"));
 
 			var interpreter2 = new Interpreter().SetDefaultNumberType(DefaultNumberType.Decimal);
 			interpreter2.SetVariable("a", a);
 			// expected to throw because Substring is not defined for decimal
 			Assert.Throws<NoApplicableMethodException>(() => interpreter2.Eval("a.Substring(0, 2)"));
 			// It works if we cast to int
-			Assert.AreEqual("AA", interpreter2.Eval("a.Substring((int)0, (int)2)"));
+			Assert.That(interpreter2.Eval("a.Substring((int)0, (int)2)"), Is.EqualTo("AA"));
 		}
 
 		[Test]
@@ -845,10 +845,10 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 
 			var exception1 = Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("b < 1"));
-			Assert.AreEqual("b", exception1.Identifier);
+			Assert.That(exception1.Identifier, Is.EqualTo("b"));
 
 			var exception2 = Assert.Throws<UnknownIdentifierException>(() => interpreter.Eval("b > 1"));
-			Assert.AreEqual("b", exception2.Identifier);
+			Assert.That(exception2.Identifier, Is.EqualTo("b"));
 		}
 
 		[Test]
@@ -863,7 +863,7 @@ namespace DynamicExpresso.UnitTest
 			};
 
 			var expressionDelegate = interpreter.ParseAsDelegate<Func<object, bool>>($"input.Prop1 == null", "input");
-			Assert.IsFalse(expressionDelegate(input));
+			Assert.That(expressionDelegate(input), Is.False);
 		}
 
 		[Test]
@@ -874,7 +874,7 @@ namespace DynamicExpresso.UnitTest
 			var x = 1L;
 			interpreter.SetVariable("x", x);
 
-			Assert.AreEqual((int)x == 1, interpreter.Eval<bool>("(int)x == 1"));
+			Assert.That(interpreter.Eval<bool>("(int)x == 1"), Is.EqualTo((int)x == 1));
 		}
 	}
 

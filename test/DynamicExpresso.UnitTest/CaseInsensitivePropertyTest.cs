@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -10,7 +10,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.IsFalse(target.CaseInsensitive);
+			Assert.That(target.CaseInsensitive, Is.False);
 		}
 
 		[Test]
@@ -18,7 +18,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive);
 
-			Assert.IsTrue(target.CaseInsensitive);
+			Assert.That(target.CaseInsensitive, Is.True);
 		}
 
 	}
