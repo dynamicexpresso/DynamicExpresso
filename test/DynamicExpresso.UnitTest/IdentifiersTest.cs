@@ -21,9 +21,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.IsTrue(target.Identifiers.Any(p => p.Name == "true"));
-			Assert.IsTrue(target.Identifiers.Any(p => p.Name == "false"));
-			Assert.IsTrue(target.Identifiers.Any(p => p.Name == "null"));
+			Assert.That(target.Identifiers.Any(p => p.Name == "true"), Is.True);
+			Assert.That(target.Identifiers.Any(p => p.Name == "false"), Is.True);
+			Assert.That(target.Identifiers.Any(p => p.Name == "null"), Is.True);
 		}
 
 		[Test]
@@ -33,7 +33,7 @@ namespace DynamicExpresso.UnitTest
 
 			target.SetVariable("x", null);
 
-			Assert.IsTrue(target.Identifiers.Any(p => p.Name == "x"));
+			Assert.That(target.Identifiers.Any(p => p.Name == "x"), Is.True);
 		}
 
 		[Test]
@@ -44,9 +44,9 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("x > a || true == b", new Parameter("a", 1), new Parameter("b", false));
 
-			Assert.AreEqual(2, lambda.Identifiers.Count());
-			Assert.AreEqual("x", lambda.Identifiers.ElementAt(0).Name);
-			Assert.AreEqual("true", lambda.Identifiers.ElementAt(1).Name);
+			Assert.That(lambda.Identifiers.Count(), Is.EqualTo(2));
+			Assert.That(lambda.Identifiers.ElementAt(0).Name, Is.EqualTo("x"));
+			Assert.That(lambda.Identifiers.ElementAt(1).Name, Is.EqualTo("true"));
 		}
 
 		[Test]
@@ -58,11 +58,11 @@ namespace DynamicExpresso.UnitTest
 
 			interpreter.SetVariable("this", new Customer {Name = Name});
 
-			Assert.AreEqual(Name, interpreter.Eval("this.Name"));
-			Assert.AreEqual(Name, interpreter.Eval("this.GetName()"));
+			Assert.That(interpreter.Eval("this.Name"), Is.EqualTo(Name));
+			Assert.That(interpreter.Eval("this.GetName()"), Is.EqualTo(Name));
 
-			Assert.AreEqual(Name, interpreter.Eval("Name"));
-			Assert.AreEqual(Name, interpreter.Eval("GetName()"));
+			Assert.That(interpreter.Eval("Name"), Is.EqualTo(Name));
+			Assert.That(interpreter.Eval("GetName()"), Is.EqualTo(Name));
 		}
 
 		[Test]
@@ -74,11 +74,11 @@ namespace DynamicExpresso.UnitTest
 			var parameter = new Parameter("this", context.GetType());
 			var interpreter = new Interpreter();
 
-			Assert.AreEqual(Name, interpreter.Parse("this.Name", parameter).Invoke(context));
-			Assert.AreEqual(Name, interpreter.Parse("this.GetName()", parameter).Invoke(context));
+			Assert.That(interpreter.Parse("this.Name", parameter).Invoke(context), Is.EqualTo(Name));
+			Assert.That(interpreter.Parse("this.GetName()", parameter).Invoke(context), Is.EqualTo(Name));
 
-			Assert.AreEqual(Name, interpreter.Parse("Name", parameter).Invoke(context));
-			Assert.AreEqual(Name, interpreter.Parse("GetName()", parameter).Invoke(context));
+			Assert.That(interpreter.Parse("Name", parameter).Invoke(context), Is.EqualTo(Name));
+			Assert.That(interpreter.Parse("GetName()", parameter).Invoke(context), Is.EqualTo(Name));
 		}
 	}
 }

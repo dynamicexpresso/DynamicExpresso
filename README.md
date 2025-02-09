@@ -75,7 +75,7 @@ Variables can be used inside expressions with `Interpreter.SetVariable` method:
 ```csharp
 var target = new Interpreter().SetVariable("myVar", 23);
 
-Assert.AreEqual(23, target.Eval("myVar"));
+Assert.That(target.Eval("myVar"), Is.EqualTo(23));
 ```
 Variables can be primitive types or custom complex types (classes, structures, delegates, arrays, collections, ...).
 
@@ -84,7 +84,7 @@ Custom functions can be passed with delegate variables using `Interpreter.SetFun
 Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
 var target = new Interpreter().SetFunction("pow", pow);
 
-Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
+Assert.That(target.Eval("pow(3, 2)"), Is.EqualTo(9.0));
 ```
 Custom [Expression](http://msdn.microsoft.com/en-us/library/system.linq.expressions.expression.aspx) can be passed by using `Interpreter.SetExpression` method.
 
@@ -99,7 +99,7 @@ var parameters = new[] {
 	new Parameter("y", 7)
 };
 
-Assert.AreEqual(30, interpreter.Eval("x + y", parameters));
+Assert.That(interpreter.Eval("x + y", parameters), Is.EqualTo(30));
 ```
 Parameters can be primitive types or custom types. You can parse an expression once and invoke it multiple times with different parameter values:
 ```csharp
@@ -112,8 +112,8 @@ var parameters = new[] {
 
 var myFunc = target.Parse("x + y", parameters);
 
-Assert.AreEqual(30, myFunc.Invoke(23, 7));
-Assert.AreEqual(30, myFunc.Invoke(32, -2));
+Assert.That(myFunc.Invoke(23, 7), Is.EqualTo(30));
+Assert.That(myFunc.Invoke(32, -2), Is.EqualTo(30));
 ```
 
 ### Special identifiers
@@ -129,10 +129,10 @@ var target = new Interpreter();
 target.SetVariable("this", new Customer { Name = "John" });
 
 // explicit context reference via 'this' variable
-Assert.AreEqual("John", target.Eval("this.Name"));
+Assert.That(target.Eval("this.Name"), Is.EqualTo("John"));
 
 // 'this' variable is referenced implicitly
-Assert.AreEqual("John", target.Eval("Name"));
+Assert.That(target.Eval("Name"), Is.EqualTo("John"));
 ```
 
 ### Built-in types and custom types
@@ -153,8 +153,8 @@ You can reference any other custom .NET type by using `Interpreter.Reference` me
 ```csharp
 var target = new Interpreter().Reference(typeof(Uri));
 
-Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
-Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
+Assert.That(target.Eval("typeof(Uri)"), Is.EqualTo(typeof(Uri)));
+Assert.That(target.Eval("Uri.UriSchemeHttp"), Is.EqualTo(Uri.UriSchemeHttp));
 ```
 
 ### Generate dynamic delegates
@@ -184,7 +184,7 @@ public void Linq_Where()
 	var interpreter = new Interpreter();
 	Func<Customer, bool> dynamicWhere = interpreter.ParseAsDelegate<Func<Customer, bool>>(whereExpression, "customer");
 
-	Assert.AreEqual(1, customers.Where(dynamicWhere).Count());
+	Assert.That(customers.Where(dynamicWhere).Count(), Is.EqualTo(1));
 }
 ```
 This is the preferred way to parse an expression that you known at compile time what parameters can accept and what value must return.
@@ -217,7 +217,7 @@ public void Linq_Queryable_Expression_Where()
 	var interpreter = new Interpreter();
 	Expression<Func<Customer, bool>> expression = interpreter.ParseAsExpression<Func<Customer, bool>>(whereExpression, "customer");
 
-	Assert.AreEqual(1, customers.Where(expression).Count());
+	Assert.That(customers.Where(expression).Count(), Is.EqualTo(1));
 }
 ```
 
@@ -332,18 +332,18 @@ var target = new Interpreter()
   .SetVariable("x", service)
   .SetVariable("this", context);
 
-Assert.AreEqual(service.HelloWorld(), target.Eval("x.HelloWorld()"));
-Assert.AreEqual(service.AProperty, target.Eval("x.AProperty"));
-Assert.AreEqual(service.AField, target.Eval("x.AField"));
+Assert.That(target.Eval("x.HelloWorld()"), Is.EqualTo(service.HelloWorld()));
+Assert.That(target.Eval("x.AProperty"), Is.EqualTo(service.AProperty));
+Assert.That(target.Eval("x.AField"), Is.EqualTo(service.AField));
 
 // implicit context reference
-Assert.AreEqual(context.GetContextId(), target.Eval("GetContextId()"));
-Assert.AreEqual(context.ContextName, target.Eval("ContextName"));
-Assert.AreEqual(context.ContextField, target.Eval("ContextField"));
+Assert.That(target.Eval("GetContextId()"), Is.EqualTo(context.GetContextId()));
+Assert.That(target.Eval("ContextName"), Is.EqualTo(context.ContextName));
+Assert.That(target.Eval("ContextField"), Is.EqualTo(context.ContextField));
 ```
 ```csharp
 var target = new Interpreter();
-Assert.AreEqual(new DateTime(2015, 1, 24), target.Eval("new DateTime(2015, 1, 24)"));
+Assert.That(1, 24), target.Eval("new DateTime(2015, 1, 24)"), Is.EqualTo(new DateTime(2015));
 ```
 Dynamic Expresso also supports:
 
@@ -353,7 +353,7 @@ var x = new int[] { 10, 30, 4 };
 var target = new Interpreter()
 	.Reference(typeof(System.Linq.Enumerable))
 	.SetVariable("x", x);
-Assert.AreEqual(x.Count(), target.Eval("x.Count()"));
+Assert.That(target.Eval("x.Count()"), Is.EqualTo(x.Count()));
 ```
 - Indexer methods (like `array[0]`)
 - Generics, only partially supported (only implicit, you cannot invoke an explicit generic method)
@@ -369,7 +369,7 @@ var target = new Interpreter(options)
 	.SetVariable("x", x);
 
 var results = target.Eval<IEnumerable<string>>("x.Where(str => str.Length > 5).Select(str => str.ToUpper())");
-Assert.AreEqual(new[] { "AWESOME" }, results);
+Assert.That(results, Is.EqualTo(new[] { "AWESOME" }));
 ```
 
 Note that parsing lambda expressions is disabled by default, because it has a slight performance cost.
@@ -383,7 +383,7 @@ var target = new Interpreter(options)
 	.SetVariable("increment", 3); // access a variable from the lambda expression
 
 var myFunc = target.Eval<Func<int, string, string>>("(i, str) => str.ToUpper() + (i + increment)");
-Assert.AreEqual("TEST8", lambda.Invoke(5, "test"));
+Assert.That(lambda.Invoke(5, "test"), Is.EqualTo("TEST8"));
 ```
 
 ### Case sensitive/insensitive
@@ -397,8 +397,8 @@ var parameters = new[] {
 	new Parameter("x", x.GetType(), x)
 };
 
-Assert.AreEqual(x, target.Eval("x", parameters));
-Assert.AreEqual(x, target.Eval("X", parameters));
+Assert.That(target.Eval("x", parameters), Is.EqualTo(x));
+Assert.That(target.Eval("X", parameters), Is.EqualTo(x));
 ```
 
 
@@ -431,7 +431,7 @@ var target = new Interpreter();
 target.SetDefaultNumberType(DefaultNumberType.Decimal);
 
 Assert.IsInstanceOf(typeof(System.Decimal), target.Eval("45"));
-Assert.AreEqual(10M/3M, target.Eval("10/3")); // 3.33333333333 instead of 3
+Assert.That(target.Eval("10/3"), Is.EqualTo(10M/3M)); // 3.33333333333 instead of 3
 ```
 
 ## Limitations

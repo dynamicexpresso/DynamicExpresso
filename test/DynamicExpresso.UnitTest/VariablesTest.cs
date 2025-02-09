@@ -1,9 +1,9 @@
 using System;
-using NUnit.Framework;
-using System.Linq.Expressions;
-using DynamicExpresso.Exceptions;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using DynamicExpresso.Exceptions;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -32,9 +32,9 @@ namespace DynamicExpresso.UnitTest
 				.SetVariable("Int32", 2)
 				.SetVariable("Math", 3);
 
-			Assert.AreEqual(1, target.Eval("bool"));
-			Assert.AreEqual(2, target.Eval("Int32"));
-			Assert.AreEqual(3, target.Eval("Math"));
+			Assert.That(target.Eval("bool"), Is.EqualTo(1));
+			Assert.That(target.Eval("Int32"), Is.EqualTo(2));
+			Assert.That(target.Eval("Math"), Is.EqualTo(3));
 		}
 
 		[Test]
@@ -43,8 +43,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("myk", 23);
 
-			Assert.AreEqual(23, target.Eval("myk"));
-			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
+			Assert.That(target.Eval("myk"), Is.EqualTo(23));
+			Assert.That(target.Parse("myk").ReturnType, Is.EqualTo(typeof(int)));
 		}
 
 		[Test]
@@ -54,8 +54,8 @@ namespace DynamicExpresso.UnitTest
 											.SetVariable("x", 23)
 											.SetVariable("X", 50);
 
-			Assert.AreEqual(23, target.Eval("x"));
-			Assert.AreEqual(50, target.Eval("X"));
+			Assert.That(target.Eval("x"), Is.EqualTo(23));
+			Assert.That(target.Eval("X"), Is.EqualTo(50));
 		}
 
 		[Test]
@@ -64,8 +64,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
 											.SetVariable("x", 23);
 
-			Assert.AreEqual(23, target.Eval("x"));
-			Assert.AreEqual(23, target.Eval("X"));
+			Assert.That(target.Eval("x"), Is.EqualTo(23));
+			Assert.That(target.Eval("X"), Is.EqualTo(23));
 		}
 
 		[Test]
@@ -74,13 +74,13 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("myk", 23);
 
-			Assert.AreEqual(23, target.Eval("myk"));
+			Assert.That(target.Eval("myk"), Is.EqualTo(23));
 
 			target.SetVariable("myk", 3489);
 
-			Assert.AreEqual(3489, target.Eval("myk"));
+			Assert.That(target.Eval("myk"), Is.EqualTo(3489));
 
-			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
+			Assert.That(target.Parse("myk").ReturnType, Is.EqualTo(typeof(int)));
 		}
 
 		[Test]
@@ -89,13 +89,13 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
 											.SetVariable("myk", 23);
 
-			Assert.AreEqual(23, target.Eval("myk"));
+			Assert.That(target.Eval("myk"), Is.EqualTo(23));
 
 			target.SetVariable("MYK", 3489);
 
-			Assert.AreEqual(3489, target.Eval("myk"));
+			Assert.That(target.Eval("myk"), Is.EqualTo(3489));
 
-			Assert.AreEqual(typeof(int), target.Parse("myk").ReturnType);
+			Assert.That(target.Parse("myk").ReturnType, Is.EqualTo(typeof(int)));
 		}
 
 		[Test]
@@ -104,9 +104,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("myk", null);
 
-			Assert.AreEqual(null, target.Eval("myk"));
-			Assert.AreEqual(true, target.Eval("myk == null"));
-			Assert.AreEqual(typeof(object), target.Parse("myk").ReturnType);
+			Assert.That(target.Eval("myk"), Is.EqualTo(null));
+			Assert.That(target.Eval("myk == null"), Is.EqualTo(true));
+			Assert.That(target.Parse("myk").ReturnType, Is.EqualTo(typeof(object)));
 		}
 
 		[Test]
@@ -115,9 +115,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("myk", null, typeof(string));
 
-			Assert.AreEqual(null, target.Eval("myk"));
-			Assert.AreEqual(true, target.Eval("myk == null"));
-			Assert.AreEqual(typeof(string), target.Parse("myk").ReturnType);
+			Assert.That(target.Eval("myk"), Is.EqualTo(null));
+			Assert.That(target.Eval("myk == null"), Is.EqualTo(true));
+			Assert.That(target.Parse("myk").ReturnType, Is.EqualTo(typeof(string)));
 		}
 
 		[Test]
@@ -127,7 +127,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 									.SetExpression("pow", pow);
 
-			Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
+			Assert.That(target.Eval("pow(3, 2)"), Is.EqualTo(9.0));
 		}
 
 		[Test]
@@ -137,7 +137,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 									.SetFunction("pow", pow);
 
-			Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
+			Assert.That(target.Eval("pow(3, 2)"), Is.EqualTo(9.0));
 		}
 
 		[Test]
@@ -148,7 +148,7 @@ namespace DynamicExpresso.UnitTest
 									.SetFunction("pow", pow)
 									.SetFunction("pow", pow);
 
-			Assert.AreEqual(9.0, target.Eval("pow(3, 2)"));
+			Assert.That(target.Eval("pow(3, 2)"), Is.EqualTo(9.0));
 		}
 
 		[Test]
@@ -162,7 +162,7 @@ namespace DynamicExpresso.UnitTest
 									.SetFunction("f", f2);
 
 			// f2 should override the f1 registration, because both delegates have the same signature
-			Assert.AreEqual(2, target.Eval("f(0d)"));
+			Assert.That(target.Eval("f(0d)"), Is.EqualTo(2));
 		}
 
 		[Test]
@@ -185,8 +185,8 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetFunction("ROUND", roundFunction1);
 			interpreter.SetFunction("ROUND", roundFunction2);
 
-			Assert.AreEqual(3.13M, interpreter.Eval("ROUND(3.12789M, 2)"));
-			Assert.AreEqual(3M, interpreter.Eval("ROUND(3.12789M)"));
+			Assert.That(interpreter.Eval("ROUND(3.12789M, 2)"), Is.EqualTo(3.13M));
+			Assert.That(interpreter.Eval("ROUND(3.12789M)"), Is.EqualTo(3M));
 		}
 
 		[Test]
@@ -206,7 +206,7 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ParseException>(() => interpreter.Eval("MyFunc(null)"));
 
 			// call resolved to the string overload
-			Assert.AreEqual("test", interpreter.Eval("MyFunc(\"test\")"));
+			Assert.That(interpreter.Eval("MyFunc(\"test\")"), Is.EqualTo("test"));
 		}
 
 		[Test]
@@ -221,7 +221,7 @@ namespace DynamicExpresso.UnitTest
 
 			// there should be no ambiguous exception: int can implicitly be converted to double, 
 			// but there's a perfect match 
-			Assert.AreEqual("integer", interpreter.Eval("MyFunc(5)"));
+			Assert.That(interpreter.Eval("MyFunc(5)"), Is.EqualTo("integer"));
 		}
 
 		[Test]
@@ -235,14 +235,14 @@ namespace DynamicExpresso.UnitTest
 			var del = methodInfo.CreateDelegate(Expression.GetDelegateType(types.ToArray()));
 			target.SetFunction(methodInfo.Name, del);
 
-			Assert.IsNotNull(del.Method.GetParameters()[0].GetCustomAttribute<ParamArrayAttribute>());
+			Assert.That(del.Method.GetParameters()[0].GetCustomAttribute<ParamArrayAttribute>(), Is.Not.Null);
 
 			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance;
 			var invokeMethod = (MethodInfo)(del.GetType().FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke")[0]);
-			Assert.IsNull(invokeMethod.GetParameters()[0].GetCustomAttribute<ParamArrayAttribute>()); // should be not null!
+			Assert.That(invokeMethod.GetParameters()[0].GetCustomAttribute<ParamArrayAttribute>(), Is.Null); // should be not null!
 
 			// the imported Sum function can be called with any parameters
-			Assert.AreEqual(6, target.Eval<int>("Sum(1, 2, 3)"));
+			Assert.That(target.Eval<int>("Sum(1, 2, 3)"), Is.EqualTo(6));
 		}
 
 		internal static int Sum(params int[] integers)

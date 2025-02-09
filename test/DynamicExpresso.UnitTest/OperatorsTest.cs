@@ -15,9 +15,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(2 * 4, target.Eval("2 * 4"));
-			Assert.AreEqual(8 / 2, target.Eval("8 / 2"));
-			Assert.AreEqual(7 % 3, target.Eval("7 % 3"));
+			Assert.That(target.Eval("2 * 4"), Is.EqualTo(2 * 4));
+			Assert.That(target.Eval("8 / 2"), Is.EqualTo(8 / 2));
+			Assert.That(target.Eval("7 % 3"), Is.EqualTo(7 % 3));
 		}
 
 		[Test]
@@ -25,9 +25,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(45 + 5, target.Eval("45 + 5"));
-			Assert.AreEqual(45 - 5, target.Eval("45 - 5"));
-			Assert.AreEqual(1.0 - 0.5, target.Eval("1.0 - 0.5"));
+			Assert.That(target.Eval("45 + 5"), Is.EqualTo(45 + 5));
+			Assert.That(target.Eval("45 - 5"), Is.EqualTo(45 - 5));
+			Assert.That(target.Eval("1.0 - 0.5"), Is.EqualTo(1.0 - 0.5));
 		}
 
 		[Test]
@@ -35,12 +35,12 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(-45, target.Eval("-45"));
-			Assert.AreEqual(5, target.Eval("+5"));
-			Assert.AreEqual(false, target.Eval("!true"));
+			Assert.That(target.Eval("-45"), Is.EqualTo(-45));
+			Assert.That(target.Eval("+5"), Is.EqualTo(5));
+			Assert.That(target.Eval("!true"), Is.EqualTo(false));
 
-			Assert.AreEqual(~2, target.Eval("~2"));
-			Assert.AreEqual(~2ul, target.Eval("~2ul"));
+			Assert.That(target.Eval("~2"), Is.EqualTo(~2));
+			Assert.That(target.Eval("~2ul"), Is.EqualTo(~2ul));
 		}
 
 		[Test]
@@ -50,16 +50,16 @@ namespace DynamicExpresso.UnitTest
 			var x = 0b_1100_1001_0000_0000_0000_0000_0001_0001;
 			target.SetVariable("x", x);
 
-			Assert.AreEqual(x >> 4, target.Eval("x >> 4"));
-			Assert.AreEqual(x << 4, target.Eval("x << 4"));
+			Assert.That(target.Eval("x >> 4"), Is.EqualTo(x >> 4));
+			Assert.That(target.Eval("x << 4"), Is.EqualTo(x << 4));
 
 			// ensure they can be chained
-			Assert.AreEqual(x >> 1 >> 1 >> 1, target.Eval("x >> 1 >> 1 >> 1"));
-			Assert.AreEqual(x << 1 << 1 << 1, target.Eval("x << 1 << 1 << 1"));
+			Assert.That(target.Eval("x >> 1 >> 1 >> 1"), Is.EqualTo(x >> 1 >> 1 >> 1));
+			Assert.That(target.Eval("x << 1 << 1 << 1"), Is.EqualTo(x << 1 << 1 << 1));
 
 			// ensure priority
-			Assert.IsFalse(target.Eval<bool>("1 << 4 < 16"));
-			Assert.IsTrue(target.Eval<bool>("1 << 4 < 17"));
+			Assert.That(target.Eval<bool>("1 << 4 < 16"), Is.False);
+			Assert.That(target.Eval<bool>("1 << 4 < 17"), Is.True);
 		}
 
 		[Test]
@@ -73,7 +73,7 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("a", a);
 			target.SetVariable("b", b);
 
-			Assert.AreEqual(a & b, target.Eval("a & b"));
+			Assert.That(target.Eval("a & b"), Is.EqualTo(a & b));
 		}
 
 		[Test]
@@ -87,7 +87,7 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("a", a);
 			target.SetVariable("b", b);
 
-			Assert.AreEqual(a | b, target.Eval("a | b"));
+			Assert.That(target.Eval("a | b"), Is.EqualTo(a | b));
 		}
 
 		[Test]
@@ -101,7 +101,7 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("a", a);
 			target.SetVariable("b", b);
 
-			Assert.AreEqual(a ^ b, target.Eval("a ^ b"));
+			Assert.That(target.Eval("a ^ b"), Is.EqualTo(a ^ b));
 		}
 
 		[Test, Ignore("Current operator resolution doesn't lift int to uint")]
@@ -113,13 +113,13 @@ namespace DynamicExpresso.UnitTest
 			var x = 0b_1111_1000u;
 			target.SetVariable("x", x);
 
-			Assert.AreEqual(~x, target.Eval<uint>("~x"));
-			Assert.AreEqual(x >> 4, target.Eval<uint>("x >> 4"));
-			Assert.AreEqual(x << 4, target.Eval<uint>("x << 4"));
+			Assert.That(target.Eval<uint>("~x"), Is.EqualTo(~x));
+			Assert.That(target.Eval<uint>("x >> 4"), Is.EqualTo(x >> 4));
+			Assert.That(target.Eval<uint>("x << 4"), Is.EqualTo(x << 4));
 
-			Assert.AreEqual(x & 4, target.Eval<uint>("x & 4"));
-			Assert.AreEqual(x | 4, target.Eval<uint>("x | 4"));
-			Assert.AreEqual(x ^ 4, target.Eval<uint>("x ^ 4"));
+			Assert.That(target.Eval<uint>("x & 4"), Is.EqualTo(x & 4));
+			Assert.That(target.Eval<uint>("x | 4"), Is.EqualTo(x | 4));
+			Assert.That(target.Eval<uint>("x ^ 4"), Is.EqualTo(x ^ 4));
 		}
 
 		[Test]
@@ -130,10 +130,10 @@ namespace DynamicExpresso.UnitTest
 			var x = 51.5;
 			target.SetVariable("x", x);
 
-			Assert.AreEqual((int)x, target.Eval("(int)x"));
-			Assert.AreEqual(typeof(int), target.Parse("(int)x").ReturnType);
-			Assert.AreEqual(typeof(object), target.Parse("(object)x").ReturnType);
-			Assert.AreEqual((double)84 + 9 * 8, target.Eval("(double)84 + 9 *8"));
+			Assert.That(target.Eval("(int)x"), Is.EqualTo((int)x));
+			Assert.That(target.Parse("(int)x").ReturnType, Is.EqualTo(typeof(int)));
+			Assert.That(target.Parse("(object)x").ReturnType, Is.EqualTo(typeof(object)));
+			Assert.That(target.Eval("(double)84 + 9 *8"), Is.EqualTo((double)84 + 9 * 8));
 		}
 
 		[Test]
@@ -141,8 +141,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(8 / 2 + 2, target.Eval("8 / 2 + 2"));
-			Assert.AreEqual(8 + 2 / 2, target.Eval("8 + 2 / 2"));
+			Assert.That(target.Eval("8 / 2 + 2"), Is.EqualTo(8 / 2 + 2));
+			Assert.That(target.Eval("8 + 2 / 2"), Is.EqualTo(8 + 2 / 2));
 		}
 
 		[Test]
@@ -153,9 +153,9 @@ namespace DynamicExpresso.UnitTest
 			Assert.Throws<ParseException>(() => target.Eval("typeof(int??)"));
 			Assert.Throws<ParseException>(() => target.Eval("typeof(string?)"));
 
-			Assert.AreEqual(typeof(string), target.Eval("typeof(string)"));
-			Assert.AreEqual(typeof(int), target.Eval("typeof(int)"));
-			Assert.AreEqual(typeof(int?), target.Eval("typeof(int?)"));
+			Assert.That(target.Eval("typeof(string)"), Is.EqualTo(typeof(string)));
+			Assert.That(target.Eval("typeof(int)"), Is.EqualTo(typeof(int)));
+			Assert.That(target.Eval("typeof(int?)"), Is.EqualTo(typeof(int?)));
 		}
 
 		[Test]
@@ -163,9 +163,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(typeof(int[]), target.Eval("typeof(int[])"));
-			Assert.AreEqual(typeof(int?[]), target.Eval("typeof(int?[])"));
-			Assert.AreEqual(typeof(int?[,,][][,]), target.Eval("typeof(int?[,,][][,])"));
+			Assert.That(target.Eval("typeof(int[])"), Is.EqualTo(typeof(int[])));
+			Assert.That(target.Eval("typeof(int?[])"), Is.EqualTo(typeof(int?[])));
+			Assert.That(target.Eval("typeof(int?[,,][][,])"), Is.EqualTo(typeof(int?[,,][][,])));
 		}
 
 		[Test]
@@ -175,13 +175,13 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(IEnumerable<>), "IEnumerable");
 			target.Reference(typeof(Dictionary<,>), "Dictionary");
 
-			Assert.AreEqual(typeof(IEnumerable<int>), target.Eval("typeof(IEnumerable<int>)"));
-			Assert.AreEqual(typeof(IEnumerable<IEnumerable<int?[]>>), target.Eval("typeof(IEnumerable<IEnumerable<int?[]>>)"));
-			Assert.AreEqual(typeof(IEnumerable<>), target.Eval("typeof(IEnumerable<>)"));
+			Assert.That(target.Eval("typeof(IEnumerable<int>)"), Is.EqualTo(typeof(IEnumerable<int>)));
+			Assert.That(target.Eval("typeof(IEnumerable<IEnumerable<int?[]>>)"), Is.EqualTo(typeof(IEnumerable<IEnumerable<int?[]>>)));
+			Assert.That(target.Eval("typeof(IEnumerable<>)"), Is.EqualTo(typeof(IEnumerable<>)));
 
-			Assert.AreEqual(typeof(Dictionary<int, string>[,]), target.Eval("typeof(Dictionary<int,string>[,])"));
-			Assert.AreEqual(typeof(Dictionary<int, IEnumerable<int[]>>), target.Eval("typeof(Dictionary<int, IEnumerable<int[]>>)"));
-			Assert.AreEqual(typeof(Dictionary<,>), target.Eval("typeof(Dictionary<,>)"));
+			Assert.That(target.Eval("typeof(Dictionary<int,string>[,])"), Is.EqualTo(typeof(Dictionary<int, string>[,])));
+			Assert.That(target.Eval("typeof(Dictionary<int, IEnumerable<int[]>>)"), Is.EqualTo(typeof(Dictionary<int, IEnumerable<int[]>>)));
+			Assert.That(target.Eval("typeof(Dictionary<,>)"), Is.EqualTo(typeof(Dictionary<,>)));
 		}
 
 		[Test]
@@ -191,9 +191,9 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(Tuple<>));
 			target.Reference(typeof(Tuple<,>));
 			target.Reference(typeof(Tuple<,,>));
-			Assert.AreEqual(typeof(Tuple<>), target.Eval("typeof(Tuple<>)"));
-			Assert.AreEqual(typeof(Tuple<,>), target.Eval("typeof(Tuple<,>)"));
-			Assert.AreEqual(typeof(Tuple<,,>), target.Eval("typeof(Tuple<,,>)"));
+			Assert.That(target.Eval("typeof(Tuple<>)"), Is.EqualTo(typeof(Tuple<>)));
+			Assert.That(target.Eval("typeof(Tuple<,>)"), Is.EqualTo(typeof(Tuple<,>)));
+			Assert.That(target.Eval("typeof(Tuple<,,>)"), Is.EqualTo(typeof(Tuple<,,>)));
 		}
 
 		[Test]
@@ -206,12 +206,12 @@ namespace DynamicExpresso.UnitTest
 				.SetVariable("b", b, typeof(object));
 
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
-			Assert.AreEqual(a is string, target.Eval("a is string"));
-			Assert.AreEqual(typeof(bool), target.Parse("a is string").ReturnType);
+			Assert.That(target.Eval("a is string"), Is.EqualTo(a is string));
+			Assert.That(target.Parse("a is string").ReturnType, Is.EqualTo(typeof(bool)));
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
-			Assert.AreEqual(b is string, target.Eval("b is string"));
+			Assert.That(target.Eval("b is string"), Is.EqualTo(b is string));
 			// ReSharper disable once ConditionIsAlwaysTrueOrFalse
-			Assert.AreEqual(b is int, target.Eval("b is int"));
+			Assert.That(target.Eval("b is int"), Is.EqualTo(b is int));
 		}
 
 		[Test]
@@ -226,9 +226,9 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(Tuple<>));
 			target.Reference(typeof(Tuple<,>));
 
-			Assert.AreEqual(true, target.Eval("a is Tuple<int>"));
-			Assert.AreEqual(typeof(bool), target.Parse("a is Tuple<int>").ReturnType);
-			Assert.AreEqual(true, target.Eval("b is Tuple<int,int>"));
+			Assert.That(target.Eval("a is Tuple<int>"), Is.EqualTo(true));
+			Assert.That(target.Parse("a is Tuple<int>").ReturnType, Is.EqualTo(typeof(bool)));
+			Assert.That(target.Eval("b is Tuple<int,int>"), Is.EqualTo(true));
 		}
 
 		[Test]
@@ -241,11 +241,11 @@ namespace DynamicExpresso.UnitTest
 				.SetVariable("b", b, typeof(object));
 
 			// ReSharper disable once TryCastAlwaysSucceeds
-			Assert.AreEqual(a as string, target.Eval("a as string"));
-			Assert.AreEqual(typeof(string), target.Parse("a as string").ReturnType);
+			Assert.That(target.Eval("a as string"), Is.EqualTo(a as string));
+			Assert.That(target.Parse("a as string").ReturnType, Is.EqualTo(typeof(string)));
 			// ReSharper disable once ExpressionIsAlwaysNull
-			Assert.AreEqual(b as string, target.Eval("b as string"));
-			Assert.AreEqual(typeof(string), target.Parse("b as string").ReturnType);
+			Assert.That(target.Eval("b as string"), Is.EqualTo(b as string));
+			Assert.That(target.Parse("b as string").ReturnType, Is.EqualTo(typeof(string)));
 		}
 
 		[Test]
@@ -253,9 +253,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(typeof(string) != typeof(int), target.Eval("typeof(string) != typeof(int)"));
+			Assert.That(target.Eval("typeof(string) != typeof(int)"), Is.EqualTo(typeof(string) != typeof(int)));
 			// ReSharper disable once EqualExpressionComparison
-			Assert.AreEqual(typeof(string) == typeof(string), target.Eval("typeof(string) == typeof(string)"));
+			Assert.That(target.Eval("typeof(string) == typeof(string)"), Is.EqualTo(typeof(string) == typeof(string)));
 		}
 
 		[Test]
@@ -263,7 +263,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual("ciao " + "mondo", target.Eval("\"ciao \" + \"mondo\""));
+			Assert.That(target.Eval("\"ciao \" + \"mondo\""), Is.EqualTo("ciao " + "mondo"));
 		}
 
 		[Test]
@@ -271,8 +271,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual("ciao " + 1981, target.Eval("\"ciao \" + 1981"));
-			Assert.AreEqual(1981 + "ciao ", target.Eval("1981 + \"ciao \""));
+			Assert.That(target.Eval("\"ciao \" + 1981"), Is.EqualTo("ciao " + 1981));
+			Assert.That(target.Eval("1981 + \"ciao \""), Is.EqualTo(1981 + "ciao "));
 		}
 
 		[Test]
@@ -288,9 +288,9 @@ namespace DynamicExpresso.UnitTest
 			Lambda lambda = interpreter.Parse(expressionText);
             
 			MethodCallExpression methodCallExpression = lambda.Expression as MethodCallExpression;
-            
-			Assert.IsNotNull(methodCallExpression);
-			Assert.AreEqual(expectedMethod, methodCallExpression.Method);
+
+			Assert.That(methodCallExpression, Is.Not.Null);
+			Assert.That(methodCallExpression.Method, Is.EqualTo(expectedMethod));
 		}
 
 		[Test]
@@ -299,20 +299,20 @@ namespace DynamicExpresso.UnitTest
 			Interpreter interpreter = new Interpreter();
 			
 			string expressionText = "\"ciao \" + null";
-			Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
+			Assert.That(interpreter.Eval(expressionText), Is.EqualTo("ciao "));
 			
 			Func<String> someFunc = () => null;
 			interpreter.SetFunction("someFunc", someFunc);
 			expressionText = "\"ciao \" + someFunc()";
-			Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
+			Assert.That(interpreter.Eval(expressionText), Is.EqualTo("ciao "));
 			
 			Func<Object> someFuncObject = () => null;
 			interpreter.SetFunction("someFuncObject", someFuncObject);
 			expressionText = "\"ciao \" + someFuncObject()";
-			Assert.AreEqual("ciao ", interpreter.Eval(expressionText));
+			Assert.That(interpreter.Eval(expressionText), Is.EqualTo("ciao "));
 
 			expressionText = "someFunc() + \"123\" + null + \"678\" + someFuncObject()";
-			Assert.AreEqual("123678", interpreter.Eval(expressionText));
+			Assert.That(interpreter.Eval(expressionText), Is.EqualTo("123678"));
 		}
 		
 		private class MyClass
@@ -338,8 +338,8 @@ namespace DynamicExpresso.UnitTest
 				.SetVariable("myClass", new MyClass())
 				.SetVariable("myClassNullToString", new MyClassNullToString());
 		
-			Assert.AreEqual("ciao MyClassStr", interpreter.Eval("\"ciao \" + myClass"));
-			Assert.AreEqual("ciao ", interpreter.Eval("\"ciao \" + myClassNullToString"));
+			Assert.That(interpreter.Eval("\"ciao \" + myClass"), Is.EqualTo("ciao MyClassStr"));
+			Assert.That(interpreter.Eval("\"ciao \" + myClassNullToString"), Is.EqualTo("ciao "));
 		}
 
 		[Test]
@@ -347,11 +347,11 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(8 / (2 + 2), target.Eval("8 / (2 + 2)"));
-			Assert.AreEqual(58 / (2 * (8 + 2)), target.Eval(" 58 / (2 * (8 + 2))"));
+			Assert.That(target.Eval("8 / (2 + 2)"), Is.EqualTo(8 / (2 + 2)));
+			Assert.That(target.Eval(" 58 / (2 * (8 + 2))"), Is.EqualTo(58 / (2 * (8 + 2))));
 
-			Assert.AreEqual(-(8 / (2 + 2)), target.Eval("-(8 / (2 + 2))"));
-			Assert.AreEqual(+(8 / (2 + 2)), target.Eval("+(8 / (2 + 2))"));
+			Assert.That(target.Eval("-(8 / (2 + 2))"), Is.EqualTo(-(8 / (2 + 2))));
+			Assert.That(target.Eval("+(8 / (2 + 2))"), Is.EqualTo(+(8 / (2 + 2))));
 		}
 
 		[Test]
@@ -359,19 +359,19 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.IsFalse((bool)target.Eval("0 > 3"));
-			Assert.IsFalse((bool)target.Eval("0 >= 3"));
-			Assert.IsTrue((bool)target.Eval("3 < 5"));
-			Assert.IsTrue((bool)target.Eval("3 <= 5"));
-			Assert.IsFalse((bool)target.Eval("5 == 3"));
-			Assert.IsTrue((bool)target.Eval("5 == 5"));
-			Assert.IsTrue((bool)target.Eval("5 >= 5"));
-			Assert.IsTrue((bool)target.Eval("5 <= 5"));
-			Assert.IsTrue((bool)target.Eval("5m >= 5m"));
-			Assert.IsTrue((bool)target.Eval("5f <= 5f"));
-			Assert.IsTrue((bool)target.Eval("5 != 3"));
-			Assert.IsTrue((bool)target.Eval("\"dav\" == \"dav\""));
-			Assert.IsFalse((bool)target.Eval("\"dav\" == \"jack\""));
+			Assert.That((bool)target.Eval("0 > 3"), Is.False);
+			Assert.That((bool)target.Eval("0 >= 3"), Is.False);
+			Assert.That((bool)target.Eval("3 < 5"), Is.True);
+			Assert.That((bool)target.Eval("3 <= 5"), Is.True);
+			Assert.That((bool)target.Eval("5 == 3"), Is.False);
+			Assert.That((bool)target.Eval("5 == 5"), Is.True);
+			Assert.That((bool)target.Eval("5 >= 5"), Is.True);
+			Assert.That((bool)target.Eval("5 <= 5"), Is.True);
+			Assert.That((bool)target.Eval("5m >= 5m"), Is.True);
+			Assert.That((bool)target.Eval("5f <= 5f"), Is.True);
+			Assert.That((bool)target.Eval("5 != 3"), Is.True);
+			Assert.That((bool)target.Eval("\"dav\" == \"dav\""), Is.True);
+			Assert.That((bool)target.Eval("\"dav\" == \"jack\""), Is.False);
 		}
 
 		[Test]
@@ -379,10 +379,10 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(3 < 5f, target.Eval("3 < 5f"));
-			Assert.AreEqual(3f < 5, target.Eval("3f < 5"));
-			Assert.AreEqual(43 > 5m, target.Eval("43 > 5m"));
-			Assert.AreEqual(34 == 34m, target.Eval("34 == 34m"));
+			Assert.That(target.Eval("3 < 5f"), Is.EqualTo(3 < 5f));
+			Assert.That(target.Eval("3f < 5"), Is.EqualTo(3f < 5));
+			Assert.That(target.Eval("43 > 5m"), Is.EqualTo(43 > 5m));
+			Assert.That(target.Eval("34 == 34m"), Is.EqualTo(34 == 34m));
 		}
 
 		[Test]
@@ -395,51 +395,51 @@ namespace DynamicExpresso.UnitTest
 
 			// simple assignment
 			target.Eval("x.Property1 = 156");
-			Assert.AreEqual(156, x.Property1);
+			Assert.That(x.Property1, Is.EqualTo(156));
 
 			// assignment without space
 			target.Eval("x.Property1=156");
-			Assert.AreEqual(156, x.Property1);
+			Assert.That(x.Property1, Is.EqualTo(156));
 
 			// assignment with many spaces
 			target.Eval("x.Property1     =    156");
-			Assert.AreEqual(156, x.Property1);
+			Assert.That(x.Property1, Is.EqualTo(156));
 
 			// assignment should return the assigned value
 			var returnValue = target.Eval("x.Property1 = 81");
-			Assert.AreEqual(81, x.Property1);
-			Assert.AreEqual(x.Property1, returnValue);
+			Assert.That(x.Property1, Is.EqualTo(81));
+			Assert.That(returnValue, Is.EqualTo(x.Property1));
 
 			// assignment can be chained
 			target.Eval("x.Property1 = x.Property2 = 2014");
-			Assert.AreEqual(2014, x.Property1);
-			Assert.AreEqual(x.Property1, x.Property2);
+			Assert.That(x.Property1, Is.EqualTo(2014));
+			Assert.That(x.Property2, Is.EqualTo(x.Property1));
 
 			// assignment can be nested with other operators
 			returnValue = target.Eval("x.Property1 = (486 + 4) * 10");
-			Assert.AreEqual(4900, x.Property1);
-			Assert.AreEqual(x.Property1, returnValue);
+			Assert.That(x.Property1, Is.EqualTo(4900));
+			Assert.That(returnValue, Is.EqualTo(x.Property1));
 
 			// right member is not modified
 			x.Property2 = 2;
 			target.Eval("x.Property1 = x.Property2 * 10");
-			Assert.AreEqual(20, x.Property1);
-			Assert.AreEqual(2, x.Property2);
+			Assert.That(x.Property1, Is.EqualTo(20));
+			Assert.That(x.Property2, Is.EqualTo(2));
 		}
 
 		[Test]
 		public void Null_coalescing()
 		{
 			var interpreter = new Interpreter();
-			Assert.AreEqual(null, interpreter.Eval("null ?? null"));
-			Assert.AreEqual("hallo", interpreter.Eval("\"hallo\" ?? null"));
-			Assert.AreEqual("hallo", interpreter.Eval("null ?? \"hallo\""));
+			Assert.That(interpreter.Eval("null ?? null"), Is.EqualTo(null));
+			Assert.That(interpreter.Eval("\"hallo\" ?? null"), Is.EqualTo("hallo"));
+			Assert.That(interpreter.Eval("null ?? \"hallo\""), Is.EqualTo("hallo"));
 
 			interpreter.SetVariable("x", null, typeof(string));
 			interpreter.SetVariable("y", "hello", typeof(string));
-			Assert.AreEqual(null, interpreter.Eval("x ?? null"));
-			Assert.AreEqual("hallo", interpreter.Eval("x ?? \"hallo\""));
-			Assert.AreEqual("hello", interpreter.Eval("y ?? \"hallo\""));
+			Assert.That(interpreter.Eval("x ?? null"), Is.EqualTo(null));
+			Assert.That(interpreter.Eval("x ?? \"hallo\""), Is.EqualTo("hallo"));
+			Assert.That(interpreter.Eval("y ?? \"hallo\""), Is.EqualTo("hello"));
 		}
 
 		[Test]
@@ -448,7 +448,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("x", null, typeof(double?));
 
-			Assert.AreEqual(50.5, interpreter.Eval("x * 2 ?? 50.5"));
+			Assert.That(interpreter.Eval("x * 2 ?? 50.5"), Is.EqualTo(50.5));
 		}
 
 		// ReSharper disable once UnusedAutoPropertyAccessor.Local
@@ -461,7 +461,7 @@ namespace DynamicExpresso.UnitTest
 
 			var result = target.Eval<int>("x = 5", new Parameter("x", 0));
 
-			Assert.AreEqual(5, result);
+			Assert.That(result, Is.EqualTo(5));
 		}
 
 		[Test]
@@ -479,7 +479,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 				.EnableAssignment(AssignmentOperators.None);
 
-			Assert.AreEqual(AssignmentOperators.None, target.AssignmentOperators);
+			Assert.That(target.AssignmentOperators, Is.EqualTo(AssignmentOperators.None));
 
 			Assert.Throws<AssignmentOperatorDisabledException>(() => target.Parse("x = 5", new Parameter("x", 0)));
 		}
@@ -490,18 +490,18 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			double x1 = 5;
-			Assert.AreEqual(true, target.Eval("x > 3", new Parameter("x", x1)));
+			Assert.That(target.Eval("x > 3", new Parameter("x", x1)), Is.EqualTo(true));
 			double x2 = 1;
-			Assert.AreEqual(false, target.Eval("x > 3", new Parameter("x", x2)));
+			Assert.That(target.Eval("x > 3", new Parameter("x", x2)), Is.EqualTo(false));
 			decimal x3 = 5;
-			Assert.AreEqual(true, target.Eval("x > 3", new Parameter("x", x3)));
+			Assert.That(target.Eval("x > 3", new Parameter("x", x3)), Is.EqualTo(true));
 			decimal x4 = 1;
-			Assert.AreEqual(false, target.Eval("x > 3", new Parameter("x", x4)));
+			Assert.That(target.Eval("x > 3", new Parameter("x", x4)), Is.EqualTo(false));
 			int x5 = 1;
 			double y1 = 10;
-			Assert.AreEqual(true, target.Eval("x < y", new Parameter("x", x5), new Parameter("y", y1)));
+			Assert.That(target.Eval("x < y", new Parameter("x", x5), new Parameter("y", y1)), Is.EqualTo(true));
 			double x6 = 0;
-			Assert.AreEqual(true, target.Eval("x == 0", new Parameter("x", x6)));
+			Assert.That(target.Eval("x == 0", new Parameter("x", x6)), Is.EqualTo(true));
 		}
 
 		[Test]
@@ -512,10 +512,10 @@ namespace DynamicExpresso.UnitTest
 			InterpreterOptions x = InterpreterOptions.CaseInsensitive;
 			InterpreterOptions y = InterpreterOptions.CaseInsensitive;
 
-			Assert.AreEqual(x == y, target.Eval("x == y", new Parameter("x", x), new Parameter("y", y)));
+			Assert.That(target.Eval("x == y", new Parameter("x", x), new Parameter("y", y)), Is.EqualTo(x == y));
 
 			y = InterpreterOptions.CommonTypes;
-			Assert.AreEqual(x != y, target.Eval("x != y", new Parameter("x", x), new Parameter("y", y)));
+			Assert.That(target.Eval("x != y", new Parameter("x", x), new Parameter("y", y)), Is.EqualTo(x != y));
 		}
 
 		[Test]
@@ -523,67 +523,67 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.IsTrue((bool)target.Eval("0 > 3 || true"));
-			Assert.IsFalse((bool)target.Eval("0 > 3 && 4 < 6"));
+			Assert.That((bool)target.Eval("0 > 3 || true"), Is.True);
+			Assert.That((bool)target.Eval("0 > 3 && 4 < 6"), Is.False);
 		}
 
 		[Test]
 		public void Logical_ExclusiveOr()
 		{
 			var target = new Interpreter();
-			Assert.IsTrue((bool)target.Eval("true ^ false"));
-			Assert.IsTrue((bool)target.Eval("false ^ true"));
-			Assert.IsFalse((bool)target.Eval("true ^ true"));
-			Assert.IsFalse((bool)target.Eval("false ^ false"));
+			Assert.That((bool)target.Eval("true ^ false"), Is.True);
+			Assert.That((bool)target.Eval("false ^ true"), Is.True);
+			Assert.That((bool)target.Eval("true ^ true"), Is.False);
+			Assert.That((bool)target.Eval("false ^ false"), Is.False);
 
-			Assert.AreEqual(2, target.Eval("1 ^ 3"));
-			Assert.AreEqual(3, target.Eval("1 ^ 2"));
+			Assert.That(target.Eval("1 ^ 3"), Is.EqualTo(2));
+			Assert.That(target.Eval("1 ^ 2"), Is.EqualTo(3));
 		}
 
 		[Test]
 		public void Conditional_And()
 		{
 			var target = new Interpreter();
-			Assert.IsFalse((bool)target.Eval("true && false"));
-			Assert.IsFalse((bool)target.Eval("false && true"));
-			Assert.IsTrue((bool)target.Eval("true && true"));
-			Assert.IsFalse((bool)target.Eval("false && false"));
+			Assert.That((bool)target.Eval("true && false"), Is.False);
+			Assert.That((bool)target.Eval("false && true"), Is.False);
+			Assert.That((bool)target.Eval("true && true"), Is.True);
+			Assert.That((bool)target.Eval("false && false"), Is.False);
 		}
 
 		[Test]
 		public void Logical_And()
 		{
 			var target = new Interpreter();
-			Assert.IsFalse((bool)target.Eval("true & false"));
-			Assert.IsFalse((bool)target.Eval("false & true"));
-			Assert.IsTrue((bool)target.Eval("true & true"));
-			Assert.IsFalse((bool)target.Eval("false & false"));
+			Assert.That((bool)target.Eval("true & false"), Is.False);
+			Assert.That((bool)target.Eval("false & true"), Is.False);
+			Assert.That((bool)target.Eval("true & true"), Is.True);
+			Assert.That((bool)target.Eval("false & false"), Is.False);
 
-			Assert.AreEqual(1, target.Eval("1 & 3"));
-			Assert.AreEqual(0, target.Eval("1 & 2"));
+			Assert.That(target.Eval("1 & 3"), Is.EqualTo(1));
+			Assert.That(target.Eval("1 & 2"), Is.EqualTo(0));
 		}
 
 		[Test]
 		public void Conditional_Or()
 		{
 			var target = new Interpreter();
-			Assert.IsTrue((bool)target.Eval("true || false"));
-			Assert.IsTrue((bool)target.Eval("false || true"));
-			Assert.IsTrue((bool)target.Eval("true || true"));
-			Assert.IsFalse((bool)target.Eval("false || false"));
+			Assert.That((bool)target.Eval("true || false"), Is.True);
+			Assert.That((bool)target.Eval("false || true"), Is.True);
+			Assert.That((bool)target.Eval("true || true"), Is.True);
+			Assert.That((bool)target.Eval("false || false"), Is.False);
 		}
 
 		[Test]
 		public void Logical_Or()
 		{
 			var target = new Interpreter();
-			Assert.IsTrue((bool)target.Eval("true | false"));
-			Assert.IsTrue((bool)target.Eval("false | true"));
-			Assert.IsTrue((bool)target.Eval("true | true"));
-			Assert.IsFalse((bool)target.Eval("false | false"));
+			Assert.That((bool)target.Eval("true | false"), Is.True);
+			Assert.That((bool)target.Eval("false | true"), Is.True);
+			Assert.That((bool)target.Eval("true | true"), Is.True);
+			Assert.That((bool)target.Eval("false | false"), Is.False);
 
-			Assert.AreEqual(3, target.Eval("1 | 3"));
-			Assert.AreEqual(3, target.Eval("1 | 2"));
+			Assert.That(target.Eval("1 | 3"), Is.EqualTo(3));
+			Assert.That(target.Eval("1 | 2"), Is.EqualTo(3));
 		}
 
 		[Test]
@@ -594,10 +594,10 @@ namespace DynamicExpresso.UnitTest
 			// From: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/operators/
 
 			var target = new Interpreter();
-			Assert.AreEqual(false ^ false | true & true, target.Eval("false ^ false | true & true"));
-			Assert.AreEqual(false & false ^ false | true, target.Eval("false & false ^ false | true"));
-			Assert.AreEqual(true ^ true & false, target.Eval("true ^ true & false"));
-			Assert.AreEqual(true ^ true && false, target.Eval("true ^ true && false"));
+			Assert.That(target.Eval("false ^ false | true & true"), Is.EqualTo(false ^ false | true & true));
+			Assert.That(target.Eval("false & false ^ false | true"), Is.EqualTo(false & false ^ false | true));
+			Assert.That(target.Eval("true ^ true & false"), Is.EqualTo(true ^ true & false));
+			Assert.That(target.Eval("true ^ true && false"), Is.EqualTo(true ^ true && false));
 		}
 
 		[Test]
@@ -606,9 +606,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			// ReSharper disable once UnreachableCode
-			Assert.AreEqual(10 > 3 ? "yes" : "no", target.Eval("10 > 3 ? \"yes\" : \"no\""));
+			Assert.That(target.Eval("10 > 3 ? \"yes\" : \"no\""), Is.EqualTo(10 > 3 ? "yes" : "no"));
 			// ReSharper disable once UnreachableCode
-			Assert.AreEqual(10 < 3 ? "yes" : "no", target.Eval("10 < 3 ? \"yes\" : \"no\""));
+			Assert.That(target.Eval("10 < 3 ? \"yes\" : \"no\""), Is.EqualTo(10 < 3 ? "yes" : "no"));
 		}
 
 		[Test]
@@ -628,7 +628,7 @@ namespace DynamicExpresso.UnitTest
 			var func = target.ParseAsDelegate<Func<int>>("x");
 			var val = func();
 
-			Assert.AreEqual(10, val);
+			Assert.That(val, Is.EqualTo(10));
 		}
 
 		private struct TypeWithImplicitConversion
@@ -655,22 +655,22 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 
 			var y = "5";
-			Assert.IsFalse(x == y);
-			Assert.IsFalse(target.Eval<bool>("x == y", new Parameter("y", y)));
+			Assert.That(x == y, Is.False);
+			Assert.That(target.Eval<bool>("x == y", new Parameter("y", y)), Is.False);
 
 			y = "3";
-			Assert.IsTrue(x == y);
-			Assert.IsTrue(target.Eval<bool>("x == y", new Parameter("y", y)));
+			Assert.That(x == y, Is.True);
+			Assert.That(target.Eval<bool>("x == y", new Parameter("y", y)), Is.True);
 
-			Assert.IsFalse(target.Eval<bool>("x == \"4\""));
-			Assert.IsTrue(target.Eval<bool>("x == \"3\""));
+			Assert.That(target.Eval<bool>("x == \"4\""), Is.False);
+			Assert.That(target.Eval<bool>("x == \"3\""), Is.True);
 
-			Assert.IsTrue(!x == "-3");
-			Assert.IsTrue(target.Eval<bool>("!x == \"-3\""));
+			Assert.That(!x == "-3", Is.True);
+			Assert.That(target.Eval<bool>("!x == \"-3\""), Is.True);
 
 			var z = new StructWithOverloadedBinaryOperators(10);
-			Assert.IsTrue((x + z) == "13");
-			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
+			Assert.That((x + z) == "13", Is.True);
+			Assert.That(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)), Is.True);
 		}
 
 		private struct StructWithOverloadedBinaryOperators
@@ -728,22 +728,22 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 
 			string y = "5";
-			Assert.IsFalse(x == y);
-			Assert.IsFalse(target.Eval<bool>("x == y", new Parameter("y", y)));
+			Assert.That(x == y, Is.False);
+			Assert.That(target.Eval<bool>("x == y", new Parameter("y", y)), Is.False);
 
 			y = "3";
-			Assert.IsTrue(x == y);
-			Assert.IsTrue(target.Eval<bool>("x == y", new Parameter("y", y)));
+			Assert.That(x == y, Is.True);
+			Assert.That(target.Eval<bool>("x == y", new Parameter("y", y)), Is.True);
 
-			Assert.IsFalse(target.Eval<bool>("x == \"4\""));
-			Assert.IsTrue(target.Eval<bool>("x == \"3\""));
+			Assert.That(target.Eval<bool>("x == \"4\""), Is.False);
+			Assert.That(target.Eval<bool>("x == \"3\""), Is.True);
 
-			Assert.IsTrue(!x == "-3");
-			Assert.IsTrue(target.Eval<bool>("!x == \"-3\""));
+			Assert.That(!x == "-3", Is.True);
+			Assert.That(target.Eval<bool>("!x == \"-3\""), Is.True);
 
 			var z = new ClassWithOverloadedBinaryOperators(10);
-			Assert.IsTrue((x + z) == "13");
-			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
+			Assert.That((x + z) == "13", Is.True);
+			Assert.That(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)), Is.True);
 		}
 
 		private class ClassWithOverloadedBinaryOperators
@@ -819,29 +819,29 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 
 			string y = "5";
-			Assert.IsFalse(x == y);
-			Assert.IsFalse(target.Eval<bool>("x == y", new Parameter("y", y)));
+			Assert.That(x == y, Is.False);
+			Assert.That(target.Eval<bool>("x == y", new Parameter("y", y)), Is.False);
 
 			y = "3";
-			Assert.IsTrue(x == y);
-			Assert.IsTrue(target.Eval<bool>("x == y", new Parameter("y", y)));
+			Assert.That(x == y, Is.True);
+			Assert.That(target.Eval<bool>("x == y", new Parameter("y", y)), Is.True);
 
-			Assert.IsFalse(target.Eval<bool>("x == \"4\""));
-			Assert.IsTrue(target.Eval<bool>("x == \"3\""));
+			Assert.That(target.Eval<bool>("x == \"4\""), Is.False);
+			Assert.That(target.Eval<bool>("x == \"3\""), Is.True);
 
-			Assert.IsTrue(!x == "-3");
-			Assert.IsTrue(target.Eval<bool>("!x == \"-3\""));
+			Assert.That(!x == "-3", Is.True);
+			Assert.That(target.Eval<bool>("!x == \"-3\""), Is.True);
 
 			var z = new DerivedClassWithOverloadedBinaryOperators(10);
-			Assert.IsTrue((x + z) == "13");
-			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
+			Assert.That((x + z) == "13", Is.True);
+			Assert.That(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)), Is.True);
 
-			Assert.IsTrue((x * 4) == "12");
-			Assert.IsTrue(target.Eval<bool>("(x * 4) == \"12\""));
+			Assert.That((x * 4) == "12", Is.True);
+			Assert.That(target.Eval<bool>("(x * 4) == \"12\""), Is.True);
 
 			// ensure a user defined operator can be found if it's on the right side operand's type
-			Assert.IsTrue((4 * x) == "12");
-			Assert.IsTrue(target.Eval<bool>("(4 * x) == \"12\""));
+			Assert.That((4 * x) == "12", Is.True);
+			Assert.That(target.Eval<bool>("(4 * x) == \"12\""), Is.True);
 		}
 
 		[Test]
@@ -854,8 +854,8 @@ namespace DynamicExpresso.UnitTest
 
 			// ensure we don't trigger an ambiguous operator exception
 			var z = new DerivedClassWithOverloadedBinaryOperators(10);
-			Assert.IsTrue((x + z) == "13");
-			Assert.IsTrue(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)));
+			Assert.That((x + z) == "13", Is.True);
+			Assert.That(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)), Is.True);
 		}
 
 
@@ -870,7 +870,7 @@ namespace DynamicExpresso.UnitTest
 			var y = "5";
 
 			var ex = Assert.Throws<ParseException>(() => target.Parse("x == y", new Parameter("y", y)));
-			Assert.IsInstanceOf<InvalidOperationException>(ex.InnerException);
+			Assert.That(ex.InnerException, Is.InstanceOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -884,7 +884,7 @@ namespace DynamicExpresso.UnitTest
 			var y = 5;
 
 			var ex = Assert.Throws<ParseException>(() => target.Parse("x + y", new Parameter("y", y)));
-			Assert.IsInstanceOf<InvalidOperationException>(ex.InnerException);
+			Assert.That(ex.InnerException, Is.InstanceOf<InvalidOperationException>());
 		}
 
 		[Test]
@@ -896,7 +896,7 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", x);
 
 			var ex = Assert.Throws<ParseException>(() => target.Parse("!x"));
-			Assert.IsInstanceOf<InvalidOperationException>(ex.InnerException);
+			Assert.That(ex.InnerException, Is.InstanceOf<InvalidOperationException>());
 		}
 
 		private struct TypeWithoutOverloadedBinaryOperators

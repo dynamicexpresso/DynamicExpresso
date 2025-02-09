@@ -1,8 +1,8 @@
 using System;
 using System.Collections;
+using System.Linq;
 using DynamicExpresso.Exceptions;
 using NUnit.Framework;
-using System.Linq;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -14,8 +14,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(new DateTime(2015, 1, 24), target.Eval("new DateTime(2015, 1, 24)"));
-			Assert.AreEqual(new string('a', 10), target.Eval("new string('a', 10)"));
+			Assert.That(target.Eval("new DateTime(2015, 1, 24)"), Is.EqualTo(new DateTime(2015, 1, 24)));
+			Assert.That(target.Eval("new string('a', 10)"), Is.EqualTo(new string('a', 10)));
 		}
 
 		[Test]
@@ -25,7 +25,7 @@ namespace DynamicExpresso.UnitTest
 
 			target.Reference(typeof(Uri));
 
-			Assert.AreEqual(new Uri("http://www.google.com"), target.Eval("new Uri(\"http://www.google.com\")"));
+			Assert.That(target.Eval("new Uri(\"http://www.google.com\")"), Is.EqualTo(new Uri("http://www.google.com")));
 		}
 
 		[Test]
@@ -33,8 +33,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(new DateTime(2015, 1, 24).Month, target.Eval("new DateTime(2015,   1, 24).Month"));
-			Assert.AreEqual(new DateTime(2015, 1, 24).Month + 34, target.Eval("new DateTime( 2015, 1, 24).Month + 34"));
+			Assert.That(target.Eval("new DateTime(2015,   1, 24).Month"), Is.EqualTo(new DateTime(2015, 1, 24).Month));
+			Assert.That(target.Eval("new DateTime( 2015, 1, 24).Month + 34"), Is.EqualTo(new DateTime(2015, 1, 24).Month + 34));
 		}
 
 		[Test]
@@ -59,9 +59,9 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			target.Reference(typeof(MyClass));
 
-			Assert.AreEqual(new MyClass() { }, target.Eval("new MyClass() {}"));
-			Assert.AreEqual(new MyClass("test") { }, target.Eval("new MyClass(\"test\") {}"));
-			Assert.AreEqual(new MyClass { }, target.Eval("new MyClass{}"));
+			Assert.That(target.Eval("new MyClass() {}"), Is.EqualTo(new MyClass() { }));
+			Assert.That(target.Eval("new MyClass(\"test\") {}"), Is.EqualTo(new MyClass("test") { }));
+			Assert.That(target.Eval("new MyClass{}"), Is.EqualTo(new MyClass { }));
 		}
 
 		[Test]
@@ -71,14 +71,14 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(MyClass));
 
 			// each member initializer can end with a comma, even if there's nothing afterwards
-			Assert.AreEqual(new MyClass { StrProp = "test", }, target.Eval("new MyClass { StrProp = \"test\", }"));
-			Assert.AreEqual(new MyClass { StrProp = "test" }, target.Eval("new MyClass { StrProp = \"test\" }"));
+			Assert.That(target.Eval("new MyClass { StrProp = \"test\", }"), Is.EqualTo(new MyClass { StrProp = "test", }));
+			Assert.That(target.Eval("new MyClass { StrProp = \"test\" }"), Is.EqualTo(new MyClass { StrProp = "test" }));
 
-			Assert.AreEqual(new MyClass("test") { IntField = 5, }, target.Eval("new MyClass(\"test\") { IntField = 5, }"));
-			Assert.AreEqual(new MyClass("test") { IntField = 5 }, target.Eval("new MyClass(\"test\") { IntField = 5 }"));
+			Assert.That(target.Eval("new MyClass(\"test\") { IntField = 5, }"), Is.EqualTo(new MyClass("test") { IntField = 5, }));
+			Assert.That(target.Eval("new MyClass(\"test\") { IntField = 5 }"), Is.EqualTo(new MyClass("test") { IntField = 5 }));
 
-			Assert.AreEqual(new MyClass() { StrProp = "test", IntField = 5, }, target.Eval("new MyClass() { StrProp = \"test\", IntField = 5, }"));
-			Assert.AreEqual(new MyClass() { StrProp = "test", IntField = 5 }, target.Eval("new MyClass() { StrProp = \"test\", IntField = 5 }"));
+			Assert.That(target.Eval("new MyClass() { StrProp = \"test\", IntField = 5, }"), Is.EqualTo(new MyClass() { StrProp = "test", IntField = 5, }));
+			Assert.That(target.Eval("new MyClass() { StrProp = \"test\", IntField = 5 }"), Is.EqualTo(new MyClass() { StrProp = "test", IntField = 5 }));
 		}
 
 		[Test]
@@ -88,9 +88,9 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(Tuple<>));
 			target.Reference(typeof(Tuple<,>));
 			target.Reference(typeof(Tuple<,,>));
-			Assert.AreEqual(1, target.Eval("new Tuple<int>(1).Item1"));
-			Assert.AreEqual("My str item", target.Eval("new Tuple<int, string>(5, \"My str item\").Item2"));
-			Assert.AreEqual(3, target.Eval("new Tuple<int, int, int>(1, 2, 3).Item3"));
+			Assert.That(target.Eval("new Tuple<int>(1).Item1"), Is.EqualTo(1));
+			Assert.That(target.Eval("new Tuple<int, string>(5, \"My str item\").Item2"), Is.EqualTo("My str item"));
+			Assert.That(target.Eval("new Tuple<int, int, int>(1, 2, 3).Item3"), Is.EqualTo(3));
 		}
 
 		[Test]
@@ -100,9 +100,9 @@ namespace DynamicExpresso.UnitTest
 			target.Reference(typeof(Tuple<>), "Toto`1");
 			target.Reference(typeof(Tuple<,>), "Toto`2");
 			target.Reference(typeof(Tuple<,,>), "Toto`3");
-			Assert.AreEqual(1, target.Eval("new Toto<int>(1).Item1"));
-			Assert.AreEqual("My str item", target.Eval("new Toto<int, string>(5, \"My str item\").Item2"));
-			Assert.AreEqual(3, target.Eval("new Toto<int, int, int>(1, 2, 3).Item3"));
+			Assert.That(target.Eval("new Toto<int>(1).Item1"), Is.EqualTo(1));
+			Assert.That(target.Eval("new Toto<int, string>(5, \"My str item\").Item2"), Is.EqualTo("My str item"));
+			Assert.That(target.Eval("new Toto<int, int, int>(1, 2, 3).Item3"), Is.EqualTo(3));
 		}
 
 		[Test]
@@ -110,12 +110,12 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 			target.Reference(typeof(Tuple<,>), "Tuple");
-			Assert.AreEqual("My str item", target.Eval("new Tuple<int, string>(5, \"My str item\").Item2"));
+			Assert.That(target.Eval("new Tuple<int, string>(5, \"My str item\").Item2"), Is.EqualTo("My str item"));
 
 			target.Reference(typeof(Tuple<>), "Tuple1");
 			target.Reference(typeof(Tuple<,,>), "Tuple3");
-			Assert.AreEqual(1, target.Eval("new Tuple1<int>(1).Item1"));
-			Assert.AreEqual(3, target.Eval("new Tuple3<int, int, int>(1, 2, 3).Item3"));
+			Assert.That(target.Eval("new Tuple1<int>(1).Item1"), Is.EqualTo(1));
+			Assert.That(target.Eval("new Tuple3<int, int, int>(1, 2, 3).Item3"), Is.EqualTo(3));
 		}
 
 		[Test]
@@ -139,7 +139,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 			target.Reference(typeof(MyClass));
-			Assert.AreEqual(new MyClass(6, 5, 4, 3).MyArr, target.Eval("new MyClass(6, 5, 4, 3).MyArr"));
+			Assert.That(target.Eval("new MyClass(6, 5, 4, 3).MyArr"), Is.EqualTo(new MyClass(6, 5, 4, 3).MyArr));
 		}
 
 		[Test]
@@ -147,9 +147,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 			var arr = target.Eval<int[]>("new int[] { 1, 2 }");
-			Assert.AreEqual(2, arr.Length);
-			Assert.AreEqual(1, arr[0]);
-			Assert.AreEqual(2, arr[1]);
+			Assert.That(arr.Length, Is.EqualTo(2));
+			Assert.That(arr[0], Is.EqualTo(1));
+			Assert.That(arr[1], Is.EqualTo(2));
 		}
 
 		[Test]
@@ -165,11 +165,11 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 			var arr = target.Eval<int[][]>("new int[][] { new int[] { 1, 2, }, new int[] { 3, 4, }, }");
-			Assert.AreEqual(2, arr.Length);
-			Assert.AreEqual(1, arr[0][0]);
-			Assert.AreEqual(2, arr[0][1]);
-			Assert.AreEqual(3, arr[1][0]);
-			Assert.AreEqual(4, arr[1][1]);
+			Assert.That(arr.Length, Is.EqualTo(2));
+			Assert.That(arr[0][0], Is.EqualTo(1));
+			Assert.That(arr[0][1], Is.EqualTo(2));
+			Assert.That(arr[1][0], Is.EqualTo(3));
+			Assert.That(arr[1][1], Is.EqualTo(4));
 		}
 
 		[Test]
@@ -186,10 +186,10 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			target.Reference(typeof(System.Collections.Generic.Dictionary<,>));
 			var l = target.Eval<System.Collections.Generic.Dictionary<int, string>>("new Dictionary<int, string>(){{1, \"1\"}, {2, \"2\"}, {3, \"3\"}, {4, \"4\"}, {5, \"5\"}}");
-			Assert.AreEqual(5, l.Count);
+			Assert.That(l.Count, Is.EqualTo(5));
 			for (int i = 0; i < l.Count; ++i)
 			{
-				Assert.AreEqual(i + 1 + "", l[i + 1]);
+				Assert.That(l[i + 1], Is.EqualTo(i + 1 + ""));
 			}
 		}
 
@@ -199,7 +199,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			target.Reference(typeof(MyClassAdder));
 
-			Assert.AreEqual(new MyClassAdder() { { 1, 2, 3, 4, 5 }, { "6" }, 7 }, target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{\"6\" },7	}.Add(true)"));
+			Assert.That(target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},{\"6\" },7	}.Add(true)"), Is.EqualTo(new MyClassAdder() { { 1, 2, 3, 4, 5 }, { "6" }, 7 }));
 		}
 
 		[Test]
@@ -215,17 +215,14 @@ namespace DynamicExpresso.UnitTest
 				strProp.Value,
 				intProp.Value
 			};
-			Assert.AreEqual(
-				new MyClassAdder() { { 1, 2, 3, 4, 5 }, "6", 7 },
-				target.Parse("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", strProp, intProp).Invoke(args));
-			Assert.AreEqual(
-				new MyClassAdder() { { 1, 2, 3, 4, 5 }, string.Empty, 7 },
-				target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"));
+			Assert.That(
+				target.Parse("new MyClassAdder(){{ 1, 2, 3, 4, 5},{StrProp = \"6\" },7}", strProp, intProp).Invoke(args), Is.EqualTo(new MyClassAdder() { { 1, 2, 3, 4, 5 }, "6", 7 }));
+			Assert.That(
+				target.Eval<MyClassAdder>("new MyClassAdder(){{ 1, 2, 3, 4, 5},string.Empty, 7}"), Is.EqualTo(new MyClassAdder() { { 1, 2, 3, 4, 5 }, string.Empty, 7 }));
 
 			var IntField = int.MaxValue;
-			Assert.AreEqual(
-				new MyClassAdder() { { IntField = 5 }, { 1, 2, 3, 4, IntField }, "6" },
-				target.Parse("new MyClassAdder(){ { IntField = 5 }, { 1, 2, 3, 4, 5},{StrProp = \"6\" }, IntField}", strProp, intProp).Invoke(args));
+			Assert.That(
+				target.Parse("new MyClassAdder(){ { IntField = 5 }, { 1, 2, 3, 4, 5},{StrProp = \"6\" }, IntField}", strProp, intProp).Invoke(args), Is.EqualTo(new MyClassAdder() { { IntField = 5 }, { 1, 2, 3, 4, IntField }, "6" }));
 		}
 
 		[Test]
@@ -234,9 +231,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			target.Reference(typeof(MyClassAdder));
 			target.Reference(typeof(MyClass));
-			Assert.AreEqual(
-				new MyClassAdder() { StrProp = string.Empty, MyArr = new[] { 1, 2, 3, 4, 5 }, IntField = int.MinValue },
-				target.Eval<MyClassAdder>("new MyClassAdder() {StrProp = string.Empty, MyArr = new int[] {1, 2, 3, 4, 5}, IntField = int.MinValue }"));
+			Assert.That(
+				target.Eval<MyClassAdder>("new MyClassAdder() {StrProp = string.Empty, MyArr = new int[] {1, 2, 3, 4, 5}, IntField = int.MinValue }"), Is.EqualTo(new MyClassAdder() { StrProp = string.Empty, MyArr = new[] { 1, 2, 3, 4, 5 }, IntField = int.MinValue }));
 		}
 
 		[Test]
@@ -282,7 +278,7 @@ namespace DynamicExpresso.UnitTest
 			{
 				if (ex.Message.Contains("The best overloaded Add "))
 				{
-					Assert.IsTrue(ex.Message.Contains("Add"));
+					Assert.That(ex.Message.Contains("Add"), Is.True);
 				}
 				else
 				{
@@ -310,10 +306,10 @@ namespace DynamicExpresso.UnitTest
 					var evalText = $"new List<{typeof(TObject).Name}>(){{{string.Join(",", items.Skip(min).Take(count))}}}";
 					System.Collections.Generic.List<TObject> eval = null;
 					Assert.DoesNotThrow(() => eval = target.Eval<System.Collections.Generic.List<TObject>>(evalText), evalText);
-					Assert.AreEqual(count, eval.Count);
+					Assert.That(eval.Count, Is.EqualTo(count));
 					for (var i = 0; i < count; ++i)
 					{
-						Assert.AreEqual(actual[i + min], eval[i]);
+						Assert.That(eval[i], Is.EqualTo(actual[i + min]));
 					}
 				}
 			}
@@ -325,17 +321,17 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 			target.Reference(typeof(System.Collections.Generic.List<>));
 			var list = target.Eval<System.Collections.Generic.List<string>>("new List<string>(){string.Empty}");
-			Assert.AreEqual(1, list.Count);
+			Assert.That(list.Count, Is.EqualTo(1));
 			for (int i = 0; i < list.Count; ++i)
 			{
-				Assert.AreSame(string.Empty, list[i]);
+				Assert.That(list[i], Is.SameAs(string.Empty));
 			}
 			list = target.Eval<System.Collections.Generic.List<string>>("new List<string>(){StrProp = string.Empty}", new Parameter("StrProp", "0"));
-			Assert.AreSame(string.Empty, list[0]);
+			Assert.That(list[0], Is.SameAs(string.Empty));
 			list = target.Eval<System.Collections.Generic.List<string>>("new List<string>(){{StrProp = string.Empty}}", new Parameter("StrProp", "0"));
-			Assert.AreSame(string.Empty, list[0]);
+			Assert.That(list[0], Is.SameAs(string.Empty));
 			list = target.Eval<System.Collections.Generic.List<string>>("new List<string>(){StrValue()}", new Parameter("StrValue", new Func<string>(() => "Func")));
-			Assert.AreEqual("Func", list[0]);
+			Assert.That(list[0], Is.EqualTo("Func"));
 		}
 
 

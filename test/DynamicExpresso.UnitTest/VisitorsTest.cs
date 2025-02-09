@@ -23,8 +23,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual("Double", target.Eval("typeof(double).Name"));
-			Assert.AreEqual("X", target.Eval("x.GetType().Name", new Parameter("x", typeof(X), new X())));
+			Assert.That(target.Eval("typeof(double).Name"), Is.EqualTo("Double"));
+			Assert.That(target.Eval("x.GetType().Name", new Parameter("x", typeof(X), new X())), Is.EqualTo("X"));
 		}
 
 		[Test]
@@ -33,12 +33,12 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 				.EnableReflection();
 
-			Assert.AreEqual(typeof(double).GetMethods(), target.Eval("typeof(double).GetMethods()"));
-			Assert.AreEqual(typeof(double).Assembly, target.Eval("typeof(double).Assembly"));
+			Assert.That(target.Eval("typeof(double).GetMethods()"), Is.EqualTo(typeof(double).GetMethods()));
+			Assert.That(target.Eval("typeof(double).Assembly"), Is.EqualTo(typeof(double).Assembly));
 
 			var x = new X();
-			Assert.AreEqual(x.GetType().GetMethods(), target.Eval("x.GetType().GetMethods()", new Parameter("x", x)));
-			Assert.AreEqual(x.GetType().Assembly, target.Eval("x.GetType().Assembly", new Parameter("x", x)));
+			Assert.That(target.Eval("x.GetType().GetMethods()", new Parameter("x", x)), Is.EqualTo(x.GetType().GetMethods()));
+			Assert.That(target.Eval("x.GetType().Assembly", new Parameter("x", x)), Is.EqualTo(x.GetType().Assembly));
 		}
 
 		public class X { }
