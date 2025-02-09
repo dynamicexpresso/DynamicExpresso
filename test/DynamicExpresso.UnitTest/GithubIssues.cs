@@ -53,7 +53,7 @@ namespace DynamicExpresso.UnitTest
 		public void GitHub_Issue_64()
 		{
 			var interpreter = new Interpreter();
-			Assert.That(interpreter.Eval("null ?? null"), Is.EqualTo(null));
+			Assert.That(interpreter.Eval("null ?? null"), Is.Null);
 			Assert.That(interpreter.Eval("\"hallo\" ?? null"), Is.EqualTo("hallo"));
 			Assert.That(interpreter.Eval("null ?? \"hallo\""), Is.EqualTo("hallo"));
 		}
@@ -71,7 +71,7 @@ namespace DynamicExpresso.UnitTest
 
 			interpreter.SetVariable("x", x);
 			Assert.That(interpreter.Eval("x.var1?.ToString()"), Is.EqualTo("hallo"));
-			Assert.That(interpreter.Eval("x.var2?.ToString()"), Is.EqualTo(null));
+			Assert.That(interpreter.Eval("x.var2?.ToString()"), Is.Null);
 			Assert.That(interpreter.Eval("x.var1?.Substring(1)"), Is.EqualTo("allo"));
 		}
 

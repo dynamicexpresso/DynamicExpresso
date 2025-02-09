@@ -104,7 +104,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("myk", null);
 
-			Assert.That(target.Eval("myk"), Is.EqualTo(null));
+			Assert.That(target.Eval("myk"), Is.Null);
 			Assert.That(target.Eval("myk == null"), Is.EqualTo(true));
 			Assert.That(target.Parse("myk").ReturnType, Is.EqualTo(typeof(object)));
 		}
@@ -115,7 +115,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.SetVariable("myk", null, typeof(string));
 
-			Assert.That(target.Eval("myk"), Is.EqualTo(null));
+			Assert.That(target.Eval("myk"), Is.Null);
 			Assert.That(target.Eval("myk == null"), Is.EqualTo(true));
 			Assert.That(target.Parse("myk").ReturnType, Is.EqualTo(typeof(string)));
 		}

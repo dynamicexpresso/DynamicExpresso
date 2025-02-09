@@ -1,8 +1,8 @@
-﻿using System;
-using NUnit.Framework;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Collections.Generic;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -22,13 +22,13 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.That(target.Eval(""), Is.EqualTo(null));
+			Assert.That(target.Eval(""), Is.Null);
 			Assert.That(target.Parse("").ReturnType, Is.EqualTo(typeof(void)));
 
-			Assert.That(target.Eval(null), Is.EqualTo(null));
+			Assert.That(target.Eval(null), Is.Null);
 			Assert.That(target.Parse(null).ReturnType, Is.EqualTo(typeof(void)));
 
-			Assert.That(target.Eval("  \t\t\r\n  \t   "), Is.EqualTo(null));
+			Assert.That(target.Eval("  \t\t\r\n  \t   "), Is.Null);
 			Assert.That(target.Parse("  \t\t\r\n  \t   ").ReturnType, Is.EqualTo(typeof(void)));
 		}
 
@@ -40,9 +40,9 @@ namespace DynamicExpresso.UnitTest
 			var x = new MyTestService();
 			var y = 5;
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x),
-                            new Parameter("y", y.GetType(), y),
-                            };
+							new Parameter("x", x.GetType(), x),
+							new Parameter("y", y.GetType(), y),
+							};
 
 			Assert.That(target.Eval("x.AProperty      >\t y && \r\n x.HelloWorld().Length == 10", parameters), Is.EqualTo(x.AProperty > y && x.HelloWorld().Length == 10));
 			Assert.That(target.Eval("x.AProperty * (4 + 65) / x.AProperty", parameters), Is.EqualTo(x.AProperty * (4 + 65) / x.AProperty));
@@ -83,9 +83,9 @@ namespace DynamicExpresso.UnitTest
 			var x = new MyTestService();
 			var y = 5;
 			var parameters = new[] {
-                            new Parameter("x", x.GetType(), x),
-                            new Parameter("y", y.GetType(), y),
-                            };
+							new Parameter("x", x.GetType(), x),
+							new Parameter("y", y.GetType(), y),
+							};
 
 			Assert.That(target.Parse("x.AProperty > y && x.HelloWorld().Length == 10", parameters).ReturnType, Is.EqualTo(typeof(bool)));
 			Assert.That(target.Parse("x.AProperty * (4 + 65) / x.AProperty", parameters).ReturnType, Is.EqualTo(typeof(int)));
@@ -114,13 +114,13 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Linq_Where()
 		{
-			var customers = new List<Customer> { 
-                                    new Customer() { Name = "David", Age = 31, Gender = 'M' },
-                                    new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
-                                    new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
-                                    new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
-                                    new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
-                                    };
+			var customers = new List<Customer> {
+									new Customer() { Name = "David", Age = 31, Gender = 'M' },
+									new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
+									new Customer() { Name = "Jack", Age = 2, Gender = 'M' },
+									new Customer() { Name = "Marta", Age = 1, Gender = 'F' },
+									new Customer() { Name = "Moses", Age = 120, Gender = 'M' },
+									};
 
 			string whereExpression = "customer.Age > 18 && customer.Gender == 'F'";
 
@@ -133,7 +133,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Linq_Where2()
 		{
-			var prices = new [] { 5, 8, 6, 2 };
+			var prices = new[] { 5, 8, 6, 2 };
 
 			var whereFunction = new Interpreter()
 				.ParseAsDelegate<Func<int, bool>>("arg > 5");
@@ -144,7 +144,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Linq_Queryable_Expression_Where()
 		{
-			IQueryable<Customer> customers = (new List<Customer> { 
+			IQueryable<Customer> customers = (new List<Customer> {
 				new Customer() { Name = "David", Age = 31, Gender = 'M' },
 				new Customer() { Name = "Mary", Age = 29, Gender = 'F' },
 				new Customer() { Name = "Jack", Age = 2, Gender = 'M' },

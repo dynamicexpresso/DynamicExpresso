@@ -431,13 +431,13 @@ namespace DynamicExpresso.UnitTest
 		public void Null_coalescing()
 		{
 			var interpreter = new Interpreter();
-			Assert.That(interpreter.Eval("null ?? null"), Is.EqualTo(null));
+			Assert.That(interpreter.Eval("null ?? null"), Is.Null);
 			Assert.That(interpreter.Eval("\"hallo\" ?? null"), Is.EqualTo("hallo"));
 			Assert.That(interpreter.Eval("null ?? \"hallo\""), Is.EqualTo("hallo"));
 
 			interpreter.SetVariable("x", null, typeof(string));
 			interpreter.SetVariable("y", "hello", typeof(string));
-			Assert.That(interpreter.Eval("x ?? null"), Is.EqualTo(null));
+			Assert.That(interpreter.Eval("x ?? null"), Is.Null);
 			Assert.That(interpreter.Eval("x ?? \"hallo\""), Is.EqualTo("hallo"));
 			Assert.That(interpreter.Eval("y ?? \"hallo\""), Is.EqualTo("hello"));
 		}
