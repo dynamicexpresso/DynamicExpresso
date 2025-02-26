@@ -21,12 +21,13 @@ namespace DynamicExpresso
 			string expressionText, 
 			ParserSettings settings, 
 			Type expressionReturnType,
-			IEnumerable<Parameter> declaredParameters
+			IEnumerable<Parameter> declaredParameters,
+			IMemberAccessProvider memberAccessProvider
 		)
 		{
 			ExpressionText = expressionText;
 			ExpressionReturnType = expressionReturnType;
-
+			MemberAccessProvider = memberAccessProvider;
 			Settings = settings;
 			_declaredParameters = new Dictionary<string, Parameter>(settings.KeyComparer);
 			foreach (var pe in declaredParameters)
@@ -46,6 +47,7 @@ namespace DynamicExpresso
 		public string ExpressionText { get; private set; }
 		public Type ExpressionReturnType { get; private set; }
 		public IEnumerable<Parameter> DeclaredParameters { get { return _declaredParameters.Values; } }
+		public IMemberAccessProvider MemberAccessProvider { get; set; }
 
 		public IEnumerable<Parameter> UsedParameters
 		{

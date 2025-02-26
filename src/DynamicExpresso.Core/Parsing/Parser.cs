@@ -1658,6 +1658,11 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GeneratePropertyOrFieldExpression(Type type, Expression instance, int errorPos, string propertyOrFieldName)
 		{
+			if (_arguments.MemberAccessProvider != null && _arguments.MemberAccessProvider.TryGetMemberAccess(instance, propertyOrFieldName, out var result))
+			{
+				return result;
+			}
+
 			var member = _memberFinder.FindPropertyOrField(type, propertyOrFieldName, instance == null);
 			if (member != null)
 			{

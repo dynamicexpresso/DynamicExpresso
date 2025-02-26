@@ -155,6 +155,7 @@ namespace DynamicExpresso
 		{
 			get { return _visitors; }
 		}
+		public IMemberAccessProvider MemberAccessProvider { get; set; }
 
 		/// <summary>
 		/// Enable reflection expression (like x.GetType().GetMethod() or typeof(double).Assembly) by removing the DisableReflectionVisitor.
@@ -558,7 +559,8 @@ namespace DynamicExpresso
 				expressionText,
 				_settings,
 				expressionType,
-				parameters);
+				parameters,
+				MemberAccessProvider);
 
 			var expression = Parser.Parse(arguments);
 
