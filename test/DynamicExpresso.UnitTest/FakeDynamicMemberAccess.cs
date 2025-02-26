@@ -87,5 +87,21 @@ namespace DynamicExpresso.UnitTest
 			context["y"] = 30;
 			Assert.AreEqual(15, cb(context));
 		}
+
+		[Test]
+		public void CanSetValues()
+		{
+			Dictionary<string, int> context = new Dictionary<string, int>() { { "x", 5 } };
+
+			var interpreter = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
+				.EnableMemberAccessProvider(new DictMemberAccessProvider<Dictionary<string, int>>())
+				.EnableAssignment(AssignmentOperators.All)
+				.SetVariable("this", context);
+
+			interpreter.Eval("y = 10");
+			Assert.AreEqual(10, context["y"]);
+			interpreter.Eval("y = y + x");
+			Assert.AreEqual(15, context["y"]);
+		}
     }
 }
