@@ -33,11 +33,7 @@ namespace DynamicExpresso.UnitTest
 					return false;
 				}
 
-				result = Expression.Convert(
-					Expression.Call(leftHand,
-					typeof(TDict).GetMethod("get_Item", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public),
-					Expression.Constant(identifier)
-					), typeof(int));
+				result = Expression.MakeIndex(leftHand, leftHand.Type.GetProperty("Item"), new[] { Expression.Constant(identifier) });
 				return true;
 			}
 		}
@@ -50,10 +46,8 @@ namespace DynamicExpresso.UnitTest
 		public void Parse_Dictionary()
 		{
 			var interpreter = new Interpreter()
-			{
-				MemberAccessProvider = new DictMemberAccessProvider<Dictionary<string, int>>()
-			};
-			Dictionary<string, int> context = new Dictionary<string, int>() { { "x", 5 }, { "y", 6 } };
+				.EnableMemberAccessProvider(new DictMemberAccessProvider<Dictionary<string, int>>());
+				Dictionary<string, int> context = new Dictionary<string, int>() { { "x", 5 }, { "y", 6 } };
 
 			var cb = interpreter.ParseAsDelegate<Func<Dictionary<string, int>, int>>("x + y", "this");
 			Assert.AreEqual(11, cb(context));
@@ -65,12 +59,10 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		public void NonExistentMembersFallThrough()
+		public void NonFakedMembersFallThrough()
 		{
 			var interpreter = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
-			{
-				MemberAccessProvider = new DictMemberAccessProvider<TestDict>(new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) { "x" })
-			};
+				.EnableMemberAccessProvider(new DictMemberAccessProvider<TestDict>(new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) { "x" }));
 			TestDict context = new TestDict() { { "x", 5 } };
 			context.Y = 10;
 
@@ -86,9 +78,7 @@ namespace DynamicExpresso.UnitTest
 		public void AccessIsSetAtParseTime()
 		{
 			var interpreter = new Interpreter(InterpreterOptions.DefaultCaseInsensitive)
-			{
-				MemberAccessProvider = new DictMemberAccessProvider<TestDict>(new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) { "x" })
-			};
+				.EnableMemberAccessProvider(new DictMemberAccessProvider<TestDict>(new HashSet<string>(StringComparer.InvariantCultureIgnoreCase) { "x" }));
 			TestDict context = new TestDict() { { "x", 5 } };
 			context.Y = 10;
 

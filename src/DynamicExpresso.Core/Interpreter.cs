@@ -147,6 +147,13 @@ namespace DynamicExpresso
 			return this;
 		}
 
+		public Interpreter EnableMemberAccessProvider(IMemberAccessProvider memberAccessProvider)
+		{
+			_settings.MemberAccessProvider = memberAccessProvider;
+
+			return this;
+		}
+
 		#endregion
 
 		#region Visitors
@@ -559,8 +566,7 @@ namespace DynamicExpresso
 				expressionText,
 				_settings,
 				expressionType,
-				parameters,
-				MemberAccessProvider);
+				parameters);
 
 			var expression = Parser.Parse(arguments);
 
