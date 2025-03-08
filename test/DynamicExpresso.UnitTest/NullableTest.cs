@@ -26,26 +26,26 @@ namespace DynamicExpresso.UnitTest
 			// Addition
 			var expected = a + b;
 			var lambda = interpreter.Parse("a + b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Subtraction
 			expected = a - b;
 			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Division
 			expected = a / b;
 			lambda = interpreter.Parse("a / b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Multiplication
 			expected = a * b;
 			lambda = interpreter.Parse("a * b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 		}
 
 		[Test]
@@ -62,26 +62,26 @@ namespace DynamicExpresso.UnitTest
 			// Addition
 			var expected = a + b;
 			var lambda = interpreter.Parse("a + b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Subtraction
 			expected = a - b;
 			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Division
 			expected = a / b;
 			lambda = interpreter.Parse("a / b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Multiplication
 			expected = a * b;
 			lambda = interpreter.Parse("a * b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 		}
 
 		[Test]
@@ -98,26 +98,26 @@ namespace DynamicExpresso.UnitTest
 			// Addition
 			var expected = a + b;
 			var lambda = interpreter.Parse("a + b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Subtraction
 			expected = a - b;
 			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Division
 			expected = a / b;
 			lambda = interpreter.Parse("a / b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Multiplication
 			expected = a * b;
 			lambda = interpreter.Parse("a * b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 		}
 
 		[Test]
@@ -134,26 +134,26 @@ namespace DynamicExpresso.UnitTest
 			// Addition
 			var expected = a + b;
 			var lambda = interpreter.Parse("a + b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Subtraction
 			expected = a - b;
 			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Division
 			expected = a / b;
 			lambda = interpreter.Parse("a / b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Multiplication
 			expected = a * b;
 			lambda = interpreter.Parse("a * b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 		}
 
 		[Test]
@@ -170,26 +170,26 @@ namespace DynamicExpresso.UnitTest
 			// Addition
 			var expected = a + b;
 			var lambda = interpreter.Parse("a + b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Subtraction
 			expected = a - b;
 			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Division
 			expected = a / b;
 			lambda = interpreter.Parse("a / b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Multiplication
 			expected = a * b;
 			lambda = interpreter.Parse("a * b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 		}
 
 		[Test]
@@ -206,26 +206,26 @@ namespace DynamicExpresso.UnitTest
 			// Addition
 			var expected = a + b;
 			var lambda = interpreter.Parse("a + b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Subtraction
 			expected = a - b;
 			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Division
 			expected = a / b;
 			lambda = interpreter.Parse("a / b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			// Multiplication
 			expected = a * b;
 			lambda = interpreter.Parse("a * b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 		}
 
 		[Test]
@@ -243,43 +243,43 @@ namespace DynamicExpresso.UnitTest
 
 			var expected = a < b;
 			var lambda = interpreter.Parse("a < b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			expected = a > b;
 			lambda = interpreter.Parse("a > b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			expected = a == b;
 			lambda = interpreter.Parse("a == b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			expected = a != b;
 			lambda = interpreter.Parse("a != b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			expected = b == c;
 			lambda = interpreter.Parse("b == b");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			expected = b != c;
 			lambda = interpreter.Parse("b != c");
-			Assert.AreEqual(expected, lambda.Invoke());
-			Assert.AreEqual(expectedReturnType, lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(expected));
+			Assert.That(lambda.ReturnType, Is.EqualTo(expectedReturnType));
 
 			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(a - b, lambda.Invoke());
-			Assert.AreEqual(typeof(TimeSpan?), lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(a - b));
+			Assert.That(lambda.ReturnType, Is.EqualTo(typeof(TimeSpan?)));
 
 			b = null;
 			interpreter.SetVariable("b", b, typeof(DateTimeOffset?));
 			lambda = interpreter.Parse("a - b");
-			Assert.AreEqual(a - b, lambda.Invoke());
-			Assert.AreEqual(typeof(TimeSpan?), lambda.ReturnType);
+			Assert.That(lambda.Invoke(), Is.EqualTo(a - b));
+			Assert.That(lambda.ReturnType, Is.EqualTo(typeof(TimeSpan?)));
 		}
 	}
 }

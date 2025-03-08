@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
@@ -18,7 +18,7 @@ namespace DynamicExpresso.UnitTest
 				new Interpreter(InterpreterOptions.Default);
 			}
 
-			Assert.Less(stopwatch.ElapsedMilliseconds, 200);
+			Assert.That(stopwatch.ElapsedMilliseconds, Is.LessThan(200));
 		}
 	}
 }

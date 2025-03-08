@@ -14,7 +14,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetVariable("this", workingContext);
 
-			Assert.AreEqual(workingContext.FirstName, interpreter.Eval("this.FirstName"));
+			Assert.That(interpreter.Eval("this.FirstName"), Is.EqualTo(workingContext.FirstName));
 		}
 
 		[Test]
@@ -27,7 +27,7 @@ namespace DynamicExpresso.UnitTest
 			var firstNameExpression = interpreter.Parse("this.FirstName").Expression;
 			interpreter.SetExpression("FirstName", firstNameExpression);
 
-			Assert.AreEqual(workingContext.FirstName, interpreter.Eval("FirstName"));
+			Assert.That(interpreter.Eval("FirstName"), Is.EqualTo(workingContext.FirstName));
 		}
 
 		[Test]
@@ -41,7 +41,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter();
 			interpreter.SetExpression("FirstName", firstNameExpression);
 
-			Assert.AreEqual(workingContext.FirstName, interpreter.Eval("FirstName"));
+			Assert.That(interpreter.Eval("FirstName"), Is.EqualTo(workingContext.FirstName));
 		}
 	}
 }
