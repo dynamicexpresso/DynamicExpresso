@@ -435,9 +435,44 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.That(interpreter.Eval("!dyn.Foo"), Is.EqualTo(!dyn.Foo));
 			Assert.That(interpreter.Eval("-dyn.Bar"), Is.EqualTo(-dyn.Bar));
+		}
+
+		[Test]
+		public void Static_method_call_with_dynamic_arg()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = "test";
+
+			var myClass = new MyClass();
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", (object)dyn);
+
+			Assert.That(interpreter.Eval("string.IsNullOrEmpty(dyn.Foo)"), Is.EqualTo(string.IsNullOrEmpty(dyn.Foo)));
+		}
 
 
+		[Test]
+		public void Method_call_with_dynamic_arg()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = "test";
 
+			var myClass = new MyClass();
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", (object)dyn)
+				.SetVariable("myClass", myClass);
+
+			Assert.That(interpreter.Eval("myClass.MyMethod(dyn.Foo)"), Is.EqualTo(myClass.MyMethod(dyn.Foo)));
+		}
+
+		public class MyClass
+		{
+			public string MyMethod(string input)
+			{
+				return input;
+			}
 		}
 
 		public class TestDynamicClass : DynamicObject
