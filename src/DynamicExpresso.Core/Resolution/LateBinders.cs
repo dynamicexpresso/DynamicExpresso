@@ -46,7 +46,7 @@ namespace DynamicExpresso.Resolution
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
 			// if the method is static, the first argument is the type containing the method,
-			// otherwise it is the instance on which the method is called
+			// otherwise it's the instance on which the method is called
 			var context = _isStatic ? (Type)args[0] : args[0]?.GetType();
 			var argumentInfo = parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)).ToArray();
 			if (_isStatic)
