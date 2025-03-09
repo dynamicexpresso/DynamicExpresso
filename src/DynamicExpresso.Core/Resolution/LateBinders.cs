@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
@@ -34,20 +35,32 @@ namespace DynamicExpresso.Resolution
 	internal class LateInvokeMethodCallSiteBinder : CallSiteBinder
 	{
 		private readonly string _methodName;
+		private readonly bool _isStatic;
 
-		public LateInvokeMethodCallSiteBinder(string methodName)
+		public LateInvokeMethodCallSiteBinder(string methodName, bool isStatic)
 		{
 			_methodName = methodName;
+			_isStatic = isStatic;
 		}
 
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
+			// if the method is static, the first argument is the type containing the method,
+			// otherwise it is the instance on which the method is called
+			var context = _isStatic ? (Type)args[0] : args[0]?.GetType();
+			var argumentInfo = parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)).ToArray();
+			if (_isStatic)
+			{
+				// instruct the compiler that we already know the containing type of the method
+				argumentInfo[0] = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType | CSharpArgumentInfoFlags.IsStaticType, null);
+			}
+
 			var binderM = Binder.InvokeMember(
 				CSharpBinderFlags.None,
 				_methodName,
 				null,
-				TypeUtils.RemoveArrayType(args[0]?.GetType()),
-				parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null))
+				TypeUtils.RemoveArrayType(context),
+				argumentInfo
 			);
 			return binderM.Bind(args, parameters, returnLabel);
 		}

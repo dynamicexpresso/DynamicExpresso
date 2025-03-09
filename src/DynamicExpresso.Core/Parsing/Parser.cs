@@ -1691,7 +1691,7 @@ namespace DynamicExpresso.Parsing
 			if (methodInvocationExpression != null)
 				return methodInvocationExpression;
 
-			if (TypeUtils.IsDynamicType(type) || IsDynamicExpression(instance))
+			if (TypeUtils.IsDynamicType(type) || IsDynamicExpression(instance) || args.Any(IsDynamicExpression))
 				return ParseDynamicMethodInvocation(type, instance, methodName, args);
 
 			throw new NoApplicableMethodException(methodName, TypeUtils.GetTypeName(type), errorPos);
@@ -1791,8 +1791,9 @@ namespace DynamicExpresso.Parsing
 		private static Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
-			argsDynamic.Insert(0, instance);
-			return Expression.Dynamic(new LateInvokeMethodCallSiteBinder(methodName), typeof(object), argsDynamic);
+			var isStatic = instance == null;
+			argsDynamic.Insert(0, !isStatic ? instance : Expression.Constant(type));
+			return Expression.Dynamic(new LateInvokeMethodCallSiteBinder(methodName, isStatic), typeof(object), argsDynamic);
 		}
 
 		private static Expression ParseDynamicIndex(Type type, Expression instance, Expression[] args)
