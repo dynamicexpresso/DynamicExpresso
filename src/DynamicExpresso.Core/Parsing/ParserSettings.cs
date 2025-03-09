@@ -100,6 +100,12 @@ namespace DynamicExpresso.Parsing
 			set;
 		}
 
+		public IMemberAccessProvider MemberAccessProvider
+		{
+			get;
+			set;
+		}
+
 		public bool LambdaExpressions
 		{
 			get;

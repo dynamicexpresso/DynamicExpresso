@@ -26,7 +26,6 @@ namespace DynamicExpresso
 		{
 			ExpressionText = expressionText;
 			ExpressionReturnType = expressionReturnType;
-
 			Settings = settings;
 			_declaredParameters = new Dictionary<string, Parameter>(settings.KeyComparer);
 			foreach (var pe in declaredParameters)

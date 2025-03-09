@@ -147,6 +147,13 @@ namespace DynamicExpresso
 			return this;
 		}
 
+		public Interpreter EnableMemberAccessProvider(IMemberAccessProvider memberAccessProvider)
+		{
+			_settings.MemberAccessProvider = memberAccessProvider;
+
+			return this;
+		}
+
 		#endregion
 
 		#region Visitors
@@ -155,6 +162,7 @@ namespace DynamicExpresso
 		{
 			get { return _visitors; }
 		}
+		public IMemberAccessProvider MemberAccessProvider { get; set; }
 
 		/// <summary>
 		/// Enable reflection expression (like x.GetType().GetMethod() or typeof(double).Assembly) by removing the DisableReflectionVisitor.
