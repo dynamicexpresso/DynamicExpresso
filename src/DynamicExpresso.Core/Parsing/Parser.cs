@@ -1697,15 +1697,15 @@ namespace DynamicExpresso.Parsing
 			throw new NoApplicableMethodException(methodName, TypeUtils.GetTypeName(type), errorPos);
 		}
 
-		private Expression ParseExtensionMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
+		private Expression ParseExtensionMethodInvocation(Type type, Expression instance, int errorPos, string methodName, Expression[] args)
 		{
 			var extensionMethodsArguments = new Expression[args.Length + 1];
 			extensionMethodsArguments[0] = instance;
 			args.CopyTo(extensionMethodsArguments, 1);
 
-			var extensionMethods = _memberFinder.FindExtensionMethods(id, extensionMethodsArguments);
+			var extensionMethods = _memberFinder.FindExtensionMethods(methodName, extensionMethodsArguments);
 			if (extensionMethods.Length > 1)
-				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
+				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, methodName, TypeUtils.GetTypeName(type));
 
 			if (extensionMethods.Length == 1)
 			{
@@ -1719,11 +1719,11 @@ namespace DynamicExpresso.Parsing
 			return null;
 		}
 
-		private Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
+		private Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string methodName, Expression[] args)
 		{
-			var applicableMethods = _memberFinder.FindMethods(type, id, instance == null, args);
+			var applicableMethods = _memberFinder.FindMethods(type, methodName, instance == null, args);
 			if (applicableMethods.Length > 1)
-				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
+				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, methodName, TypeUtils.GetTypeName(type));
 
 			if (applicableMethods.Length == 1)
 			{
