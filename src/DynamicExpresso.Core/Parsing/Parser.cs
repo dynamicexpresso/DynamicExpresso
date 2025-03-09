@@ -1377,7 +1377,17 @@ namespace DynamicExpresso.Parsing
 				applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
 
 			if (applicableMethods.Length == 0)
+			{
+				if (args.Any(IsDynamicExpression))
+				{
+					// TODO: we could try to find the best method by using the dynamic binder
+					var candidatesWithSameArgumentCount = candidates.Where(_ => _.Method.GetParameters().Length == args.Length).ToList();
+					if (candidatesWithSameArgumentCount.Count == 1)
+						return ParseDynamicMethodGroupInvocation(candidatesWithSameArgumentCount[0].Delegate, args);
+				}
+
 				throw ParseException.Create(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
+			}
 
 			if (applicableMethods.Length > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
@@ -1794,6 +1804,13 @@ namespace DynamicExpresso.Parsing
 			var isStatic = instance == null;
 			argsDynamic.Insert(0, !isStatic ? instance : Expression.Constant(type));
 			return Expression.Dynamic(new LateInvokeMethodCallSiteBinder(methodName, isStatic), typeof(object), argsDynamic);
+		}
+
+		private Expression ParseDynamicMethodGroupInvocation(Delegate @delegate, Expression[] args)
+		{
+			var argsDynamic = args.ToList();
+			argsDynamic.Insert(0, Expression.Constant(@delegate));
+			return Expression.Dynamic(new LateInvokeDelegateCallSiteBinder(), typeof(object), argsDynamic);
 		}
 
 		private static Expression ParseDynamicIndex(Type type, Expression instance, Expression[] args)

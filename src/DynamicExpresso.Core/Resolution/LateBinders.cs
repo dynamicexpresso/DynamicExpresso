@@ -67,6 +67,33 @@ namespace DynamicExpresso.Resolution
 	}
 
 	/// <summary>
+	/// Binds to a delegate invocation as late as possible.  This allows the use of delegates with dynamic arguments.
+	/// </summary>
+	internal class LateInvokeDelegateCallSiteBinder : CallSiteBinder
+	{
+		public LateInvokeDelegateCallSiteBinder()
+		{
+		}
+
+		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+		{
+			// the first argument is the delegate to invoke
+			var _delegate = (Delegate)args[0];
+			var argumentInfo = parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)).ToArray();
+
+			// instruct the compiler that we already know the delegate's type
+			argumentInfo[0] = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null);
+
+			var binderM = Binder.Invoke(
+				CSharpBinderFlags.None,
+				null,
+				argumentInfo
+			);
+			return binderM.Bind(args, parameters, returnLabel);
+		}
+	}
+
+	/// <summary>
 	/// Binds to an items invocation of an instance as late as possible.  This allows the use of anonymous types on dynamic values.
 	/// </summary>
 	internal class LateInvokeIndexCallSiteBinder : CallSiteBinder
