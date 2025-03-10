@@ -50,13 +50,15 @@ namespace DynamicExpresso.Reflection
 			return new MethodData[0];
 		}
 
-		public MethodData FindInvokeMethod(Type type)
+		// this method is static, because we know that the Invoke method of a delegate always has this exact name
+		// and therefore we never need to search for it in case-insensitive mode
+		public static MethodData FindInvokeMethod(Type type)
 		{
 			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
-						BindingFlags.Instance | _bindingCase;
+						BindingFlags.Instance;
 			foreach (var t in SelfAndBaseTypes(type))
 			{
-				var method = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, "Invoke")
+				var method = t.FindMembers(MemberTypes.Method, flags, Type.FilterName, "Invoke")
 					.Cast<MethodBase>()
 					.SingleOrDefault();
 

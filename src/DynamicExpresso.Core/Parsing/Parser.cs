@@ -1348,7 +1348,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var args = ParseArgumentList();
 
-			var invokeMethod = _memberFinder.FindInvokeMethod(expr.Type);
+			var invokeMethod = MemberFinder.FindInvokeMethod(expr.Type);
 			if (invokeMethod == null || !MethodResolution.CheckIfMethodIsApplicableAndPrepareIt(invokeMethod, args))
 				throw ParseException.Create(errorPos, error);
 
@@ -1360,21 +1360,18 @@ namespace DynamicExpresso.Parsing
 			var args = ParseArgumentList();
 
 			// find the best delegates that can be used with the provided arguments
-			var candidates = methodGroup.Overloads
-				.Select(_ => new
-				{
-					Delegate = _,
-					Method = _.Method,
-					InvokeMethod = _memberFinder.FindInvokeMethod(_.GetType()),
-				})
-				.ToList();
-
+			// we can either use the method directly, or the Invoke method of the delegate
+			var usedInvokeMethod = false;
+			var candidates = methodGroup.Overloads;
 			var applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.Method), args);
 
 			// no method found: retry with the delegate's method
 			// (the parameters might be different, e.g. params array, default value, etc)
 			if (applicableMethods.Length == 0)
-				applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
+			{
+				usedInvokeMethod = true;
+				applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.InvokeMethod.Value), args);
+			}
 
 			if (applicableMethods.Length == 0)
 				throw ParseException.Create(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
@@ -1383,8 +1380,11 @@ namespace DynamicExpresso.Parsing
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
 
 			var applicableMethod = applicableMethods[0];
-			var usedDeledate = candidates.Single(_ => new[] { _.Method, _.InvokeMethod?.MethodBase }.Any(m => m == applicableMethod.MethodBase)).Delegate;
-			return Expression.Invoke(Expression.Constant(usedDeledate), applicableMethod.PromotedParameters);
+			var usedDelegate = usedInvokeMethod
+				? candidates.Single(_ => _.InvokeMethod.Value?.MethodBase == applicableMethod.MethodBase).Delegate
+				: candidates.Single(_ => _.Method.MethodBase == applicableMethod.MethodBase).Delegate;
+
+			return Expression.Invoke(Expression.Constant(usedDelegate), applicableMethod.PromotedParameters);
 		}
 
 		private Type ParseKnownType()

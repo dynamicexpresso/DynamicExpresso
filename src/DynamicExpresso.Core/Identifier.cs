@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using DynamicExpresso.Reflection;
 
 namespace DynamicExpresso
 {
@@ -40,9 +41,24 @@ namespace DynamicExpresso
 	/// </summary>
 	internal class MethodGroupExpression : Expression
 	{
-		private readonly List<Delegate> _overloads = new List<Delegate>();
+		public class Overload
+		{
+			public Delegate Delegate { get; }
+			public MethodData Method => MethodData.Gen(Delegate.Method);
 
-		internal IReadOnlyCollection<Delegate> Overloads
+			// lazy because we'll most likely never need this: it was needed before https://github.com/dotnet/roslyn/pull/53402
+			public Lazy<MethodData> InvokeMethod { get; }
+
+			public Overload(Delegate @delegate)
+			{
+				Delegate = @delegate;
+				InvokeMethod = new Lazy<MethodData>(() => MemberFinder.FindInvokeMethod(@delegate.GetType()));
+			}
+		}
+
+		private readonly List<Overload> _overloads = new List<Overload>();
+
+		internal IReadOnlyCollection<Overload> Overloads
 		{
 			get
 			{
@@ -59,12 +75,12 @@ namespace DynamicExpresso
 		{
 			// remove any existing delegate with the exact same signature
 			RemoveDelegateSignature(overload);
-			_overloads.Add(overload);
+			_overloads.Add(new Overload(overload));
 		}
 
 		private void RemoveDelegateSignature(Delegate overload)
 		{
-			_overloads.RemoveAll(del => HasSameSignature(overload.Method, del.Method));
+			_overloads.RemoveAll(del => HasSameSignature(overload.Method, del.Delegate.Method));
 		}
 
 		private static bool HasSameSignature(MethodInfo method, MethodInfo other)
