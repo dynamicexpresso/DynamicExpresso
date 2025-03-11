@@ -10,7 +10,7 @@ namespace DynamicExpresso.Reflection
 	{
 		public static bool IsNullableType(Type type)
 		{
-			return Nullable.GetUnderlyingType(type) != null;
+			return TryGetNonNullableType(type, out _);
 		}
 
 		public static bool IsDynamicType(Type type)
@@ -18,9 +18,22 @@ namespace DynamicExpresso.Reflection
 			return typeof(IDynamicMetaObjectProvider).IsAssignableFrom(type);
 		}
 
-		public static Type GetNonNullableType(Type type)
+		/// <summary>
+		/// Returns true if <paramref name="type"/> is nullable, and set <paramref name="nonNullableType"/> to the underlying type for value types.
+		/// In case of reference types, the method will return false, and <paramref name="nonNullableType"/> is set to null.
+		/// </summary>
+		public static bool TryGetNonNullableType(Type type, out Type nonNullableType)
 		{
-			return IsNullableType(type) ? type.GetGenericArguments()[0] : type;
+			nonNullableType = Nullable.GetUnderlyingType(type);
+			return nonNullableType != null;
+		}
+
+		/// <summary>
+		/// If <paramref name="type"/> is a nullable value type, returns the underlying type.
+		/// If <paramref name="type"/> is a reference type, or a non-nullable value type, the method will return <paramref name="type"/>.
+		private static Type GetNonNullableType(Type type)
+		{
+			return TryGetNonNullableType(type, out var underlyingType) ? underlyingType : type;
 		}
 
 		public static string GetTypeName(Type type)

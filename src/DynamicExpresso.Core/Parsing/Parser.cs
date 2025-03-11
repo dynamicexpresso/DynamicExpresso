@@ -1891,12 +1891,11 @@ namespace DynamicExpresso.Parsing
 
 		private void CheckAndPromoteOperands(Type signatures, ref Expression left, ref Expression right)
 		{
-			if ((TypeUtils.IsNullableType(left.Type) || TypeUtils.IsNullableType(right.Type)) &&
-				(TypeUtils.GetNonNullableType(left.Type) == right.Type || TypeUtils.GetNonNullableType(right.Type) == left.Type))
-			{
-				left = GenerateNullableTypeConversion(left);
+			// if one of the operands is the nullable version of the other, promote the non-nullablte to the nullable version
+			if (TypeUtils.TryGetNonNullableType(left.Type, out var nonNullableLeftType) && nonNullableLeftType == right.Type)
 				right = GenerateNullableTypeConversion(right);
-			}
+			else if (TypeUtils.TryGetNonNullableType(right.Type, out var nonNullableRightType) && nonNullableRightType == left.Type)
+				left = GenerateNullableTypeConversion(left);
 
 			var args = new[] { left, right };
 
@@ -2093,7 +2092,7 @@ namespace DynamicExpresso.Parsing
 			var errorPos = _token.pos;
 			var leftType = left.Type;
 			var rightType = right.Type;
-
+			// it's a lambda to avoid useless allocation
 			ParseException CreateAmbiguousOperatorException() => ParseException.Create(errorPos, ErrorMessages.AmbiguousBinaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(leftType), TypeUtils.GetTypeName(rightType));
 
 			var args = new[] { left, right };
@@ -2143,9 +2142,7 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression ToStringOrNull(Expression expression)
 		{
-			var nullableExpression = TypeUtils.IsNullableType(expression.Type) ?
-				expression :
-				GenerateNullableTypeConversion(expression);
+			var nullableExpression = GenerateNullableTypeConversion(expression);
 
 			var expressionTypeNullConstant = Expression.Constant(null, nullableExpression.Type);
 			var stringNullConstant = Expression.Constant(null, typeof(string));
@@ -2584,13 +2581,13 @@ namespace DynamicExpresso.Parsing
 		{
 			var exprType = expr.Type;
 
-			if (TypeUtils.IsNullableType(exprType) || !exprType.IsValueType)
+			if (!exprType.IsValueType || TypeUtils.IsNullableType(exprType))
 			{
 				return expr;
 			}
 
 			var conversionType = typeof(Nullable<>).MakeGenericType(exprType);
-			return Expression.ConvertChecked(expr, conversionType);
+			return Expression.Convert(expr, conversionType);
 		}
 	}
 }
