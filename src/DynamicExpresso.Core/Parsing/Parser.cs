@@ -2093,7 +2093,8 @@ namespace DynamicExpresso.Parsing
 			var errorPos = _token.pos;
 			var leftType = left.Type;
 			var rightType = right.Type;
-			var error = ParseException.Create(errorPos, ErrorMessages.AmbiguousBinaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(leftType), TypeUtils.GetTypeName(rightType));
+
+			ParseException CreateAmbiguousOperatorException() => ParseException.Create(errorPos, ErrorMessages.AmbiguousBinaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(leftType), TypeUtils.GetTypeName(rightType));
 
 			var args = new[] { left, right };
 
@@ -2102,7 +2103,7 @@ namespace DynamicExpresso.Parsing
 			// try to find the user defined operator on both operands
 			var opOnLeftType = _memberFinder.FindMethods(leftType, operatorName, true, args);
 			if (opOnLeftType.Length > 1)
-				throw error;
+				throw CreateAmbiguousOperatorException();
 
 			if (opOnLeftType.Length == 1)
 				userDefinedOperator = opOnLeftType[0];
@@ -2111,7 +2112,7 @@ namespace DynamicExpresso.Parsing
 			{
 				var opOnRightType = _memberFinder.FindMethods(rightType, operatorName, true, args);
 				if (opOnRightType.Length > 1)
-					throw error;
+					throw CreateAmbiguousOperatorException();
 
 				MethodData rightOperator = null;
 				if (opOnRightType.Length == 1)
@@ -2119,7 +2120,7 @@ namespace DynamicExpresso.Parsing
 
 				// we found a matching user defined operator on either type, but it might be the same method
 				if (userDefinedOperator != null && rightOperator != null && !ReferenceEquals(userDefinedOperator.MethodBase, rightOperator.MethodBase))
-					throw error;
+					throw CreateAmbiguousOperatorException();
 
 				// we didn't find an operator on the left type, but we found one on the right type
 				if (userDefinedOperator == null && rightOperator != null)
