@@ -269,7 +269,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseConditionalAnd();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.OrElse, left, right);
 			}
 			return left;
@@ -283,7 +283,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseLogicalOr();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.AndAlso, left, right);
 			}
 			return left;
@@ -297,7 +297,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseLogicalXor();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.Or, left, right);
 			}
 			return left;
@@ -311,7 +311,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseLogicalAnd();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.ExclusiveOr, left, right);
 			}
 			return left;
@@ -325,7 +325,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseComparison();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.And, left, right);
 			}
 			return left;
@@ -385,12 +385,12 @@ namespace DynamicExpresso.Parsing
 				//}
 				//else
 				//{
-				//	CheckAndPromoteOperands(isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
+				//	CheckAndPromoteOperands(isEquality ? ParseSignatures.EqualitySignatures : ParseSignatures.RelationalSignatures,
 				//			op.text, ref left, ref right, op.pos);
 				//}
 
 				CheckAndPromoteOperands(
-					isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
+					isEquality ? ParseSignatures.EqualitySignatures : ParseSignatures.RelationalSignatures,
 					ref left,
 					ref right);
 
@@ -464,12 +464,12 @@ namespace DynamicExpresso.Parsing
 						}
 						else
 						{
-							CheckAndPromoteOperands(typeof(ParseSignatures.IAddSignatures), ref left, ref right);
+							CheckAndPromoteOperands(ParseSignatures.AddSignatures, ref left, ref right);
 							left = GenerateBinary(ExpressionType.Add, left, right);
 						}
 						break;
 					case TokenId.Minus:
-						CheckAndPromoteOperands(typeof(ParseSignatures.ISubtractSignatures), ref left, ref right);
+						CheckAndPromoteOperands(ParseSignatures.SubtractSignatures, ref left, ref right);
 						left = GenerateBinary(ExpressionType.Subtract, left, right);
 						break;
 				}
@@ -485,7 +485,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseAdditive();
-				CheckAndPromoteOperands(typeof(ParseSignatures.IShiftSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.ShiftSignatures, ref left, ref right);
 				left = GenerateBinary(shiftType, left, right);
 			}
 			return left;
@@ -529,7 +529,7 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 				var right = ParseUnary();
 
-				CheckAndPromoteOperands(typeof(ParseSignatures.IArithmeticSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.ArithmeticSignatures, ref left, ref right);
 
 				switch (op.id)
 				{
@@ -575,7 +575,7 @@ namespace DynamicExpresso.Parsing
 				var expr = ParseUnary();
 				if (op.id == TokenId.Minus)
 				{
-					CheckAndPromoteOperand(typeof(ParseSignatures.INegationSignatures), ref expr);
+					CheckAndPromoteOperand(ParseSignatures.NegationSignatures, ref expr);
 					expr = GenerateUnary(ExpressionType.Negate, expr);
 				}
 				else if (op.id == TokenId.Plus)
@@ -584,12 +584,12 @@ namespace DynamicExpresso.Parsing
 				}
 				else if (op.id == TokenId.Exclamation)
 				{
-					CheckAndPromoteOperand(typeof(ParseSignatures.INotSignatures), ref expr);
+					CheckAndPromoteOperand(ParseSignatures.NotSignatures, ref expr);
 					expr = GenerateUnary(ExpressionType.Not, expr);
 				}
 				else if (op.id == TokenId.Tilde)
 				{
-					CheckAndPromoteOperand(typeof(ParseSignatures.IBitwiseComplementSignatures), ref expr);
+					CheckAndPromoteOperand(ParseSignatures.BitwiseComplementSignatures, ref expr);
 					expr = GenerateUnary(ExpressionType.OnesComplement, expr);
 				}
 				return expr;
@@ -696,7 +696,7 @@ namespace DynamicExpresso.Parsing
 						// the member access should be resolved on the underlying type
 						var memberAccess = GenerateNullableTypeConversion(ParseMemberAccess(GenerateGetNullableValue(expr)));
 						var nullExpr = ParserConstants.NullLiteralExpression;
-						CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
+						CheckAndPromoteOperands(ParseSignatures.EqualitySignatures, ref expr, ref nullExpr);
 						expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
 					}
 					else if (_token.id == TokenId.OpenBracket)
@@ -705,7 +705,7 @@ namespace DynamicExpresso.Parsing
 						// the member access should be resolved on the underlying type
 						var elementAccess = GenerateNullableTypeConversion(ParseElementAccess(GenerateGetNullableValue(expr)));
 						var nullExpr = ParserConstants.NullLiteralExpression;
-						CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
+						CheckAndPromoteOperands(ParseSignatures.EqualitySignatures, ref expr, ref nullExpr);
 						expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
 					}
 				}
@@ -1880,16 +1880,16 @@ namespace DynamicExpresso.Parsing
 		//	return GetNonNullableType(type).IsEnum;
 		//}
 
-		private void CheckAndPromoteOperand(Type signatures, ref Expression expr)
+		private void CheckAndPromoteOperand(MethodData[] unarySignatures, ref Expression expr)
 		{
 			var args = new[] { expr };
 
-			args = PrepareOperandArguments(signatures, args);
+			args = PrepareOperandArguments(unarySignatures, args);
 
 			expr = args[0];
 		}
 
-		private void CheckAndPromoteOperands(Type signatures, ref Expression left, ref Expression right)
+		private void CheckAndPromoteOperands(MethodData[] binarySignatures, ref Expression left, ref Expression right)
 		{
 			// if one of the operands is the nullable version of the other, promote the non-nullablte to the nullable version
 			if (TypeUtils.TryGetNonNullableType(left.Type, out var nonNullableLeftType) && nonNullableLeftType == right.Type)
@@ -1899,15 +1899,15 @@ namespace DynamicExpresso.Parsing
 
 			var args = new[] { left, right };
 
-			args = PrepareOperandArguments(signatures, args);
+			args = PrepareOperandArguments(binarySignatures, args);
 
 			left = args[0];
 			right = args[1];
 		}
 
-		private Expression[] PrepareOperandArguments(Type signatures, Expression[] args)
+		private Expression[] PrepareOperandArguments(MethodData[] signatures, Expression[] args)
 		{
-			var applicableMethods = _memberFinder.FindMethods(signatures, "F", false, args);
+			var applicableMethods = MethodResolution.FindBestMethod(signatures, args);
 			if (applicableMethods.Length == 1)
 				return applicableMethods[0].PromotedParameters;
 
@@ -2586,7 +2586,7 @@ namespace DynamicExpresso.Parsing
 				return expr;
 			}
 
-			var conversionType = typeof(Nullable<>).MakeGenericType(exprType);
+			var conversionType = TypeUtils.MakeNullable(exprType);
 			return Expression.Convert(expr, conversionType);
 		}
 	}

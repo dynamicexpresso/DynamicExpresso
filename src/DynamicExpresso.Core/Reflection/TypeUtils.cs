@@ -36,6 +36,11 @@ namespace DynamicExpresso.Reflection
 			return TryGetNonNullableType(type, out var underlyingType) ? underlyingType : type;
 		}
 
+		public static Type MakeNullable(Type type)
+		{
+			return typeof(Nullable<>).MakeGenericType(type);
+		}
+
 		public static string GetTypeName(Type type)
 		{
 			var baseType = GetNonNullableType(type);
