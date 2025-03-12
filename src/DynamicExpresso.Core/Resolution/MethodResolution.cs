@@ -77,7 +77,7 @@ namespace DynamicExpresso.Resolution
 				}
 				else
 				{
-					if (declaredWorkingParameters >= method.Parameters.Length)
+					if (declaredWorkingParameters >= method.Parameters.Count)
 					{
 						return false;
 					}
@@ -98,7 +98,7 @@ namespace DynamicExpresso.Resolution
 					declaredWorkingParameters++;
 				}
 
-				if (paramsArrayPromotedArgument == null && (paramsArrayTypeFound == null || args.Length == method.Parameters.Length))
+				if (paramsArrayPromotedArgument == null && (paramsArrayTypeFound == null || args.Length == method.Parameters.Count))
 				{
 					if (parameterType.IsGenericParameter)
 					{
@@ -179,7 +179,7 @@ namespace DynamicExpresso.Resolution
 				throw new Exception("No default value found!");
 			}));
 
-			method.PromotedParameters = promotedArgs.ToArray();
+			method.PromotedParameters = promotedArgs;
 
 			if (method.MethodBase != null && method.MethodBase.IsGenericMethodDefinition &&
 				method.MethodBase is MethodInfo)
@@ -190,7 +190,7 @@ namespace DynamicExpresso.Resolution
 
 				// we have all the type information we can get, update interpreter expressions and evaluate them
 				var actualMethodParameters = genericMethod.GetParameters();
-				for (var i = 0; i < method.PromotedParameters.Length; i++)
+				for (var i = 0; i < method.PromotedParameters.Count; i++)
 				{
 					if (method.PromotedParameters[i] is InterpreterExpression ie)
 					{
@@ -254,7 +254,7 @@ namespace DynamicExpresso.Resolution
 				return true;
 
 			// if a method has a params parameter, it can have less parameters than the number of arguments
-			if (method.HasParamsArray && otherMethod.HasParamsArray && method.Parameters.Length > otherMethod.Parameters.Length)
+			if (method.HasParamsArray && otherMethod.HasParamsArray && method.Parameters.Count > otherMethod.Parameters.Count)
 				return true;
 
 			if (method is IndexerData indexer && otherMethod is IndexerData otherIndexer)

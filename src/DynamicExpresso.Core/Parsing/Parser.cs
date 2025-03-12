@@ -1241,7 +1241,7 @@ namespace DynamicExpresso.Parsing
 				actions.Add(instance);
 				return Expression.Block(new ParameterExpression[] { instance }, actions);
 			}
-			return Expression.MemberInit(newExpr, bindingList.ToArray());
+			return Expression.MemberInit(newExpr, bindingList);
 		}
 
 		private void ParsePossibleMemberBinding(Type newType, int originalPos, List<MemberBinding> bindingList, List<Expression> actions, ParameterExpression instance, bool allowCollectionInit)
@@ -1711,9 +1711,7 @@ namespace DynamicExpresso.Parsing
 			{
 				var method = extensionMethods[0];
 
-				extensionMethodsArguments = method.PromotedParameters;
-
-				return Expression.Call((MethodInfo)method.MethodBase, extensionMethodsArguments);
+				return Expression.Call((MethodInfo)method.MethodBase, method.PromotedParameters);
 			}
 
 			return null;
@@ -1882,9 +1880,7 @@ namespace DynamicExpresso.Parsing
 
 		private void CheckAndPromoteOperand(MethodData[] unarySignatures, ref Expression expr)
 		{
-			var args = new[] { expr };
-
-			args = PrepareOperandArguments(unarySignatures, args);
+			var args = PrepareOperandArguments(unarySignatures, new[] { expr });
 
 			expr = args[0];
 		}
@@ -1897,15 +1893,13 @@ namespace DynamicExpresso.Parsing
 			else if (TypeUtils.TryGetNonNullableType(right.Type, out var nonNullableRightType) && nonNullableRightType == left.Type)
 				left = GenerateNullableTypeConversion(left);
 
-			var args = new[] { left, right };
-
-			args = PrepareOperandArguments(binarySignatures, args);
+			var args = PrepareOperandArguments(binarySignatures, new[] { left, right });
 
 			left = args[0];
 			right = args[1];
 		}
 
-		private Expression[] PrepareOperandArguments(MethodData[] signatures, Expression[] args)
+		private IList<Expression> PrepareOperandArguments(MethodData[] signatures, Expression[] args)
 		{
 			var applicableMethods = MethodResolution.FindBestMethod(signatures, args);
 			if (applicableMethods.Count == 1)
