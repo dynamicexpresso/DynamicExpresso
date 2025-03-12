@@ -34,7 +34,7 @@ namespace DynamicExpresso.Reflection
 			return null;
 		}
 
-		public MethodData[] FindMethods(Type type, string methodName, bool staticAccess, Expression[] args)
+		public IList<MethodData> FindMethods(Type type, string methodName, bool staticAccess, Expression[] args)
 		{
 			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
 						(staticAccess ? BindingFlags.Static : BindingFlags.Instance) | _bindingCase;
@@ -43,11 +43,11 @@ namespace DynamicExpresso.Reflection
 				var members = t.FindMembers(MemberTypes.Method, flags, _memberFilterCase, methodName);
 				var applicableMethods = MethodResolution.FindBestMethod(members.Cast<MethodBase>(), args);
 
-				if (applicableMethods.Length > 0)
+				if (applicableMethods.Count > 0)
 					return applicableMethods;
 			}
 
-			return new MethodData[0];
+			return Array.Empty<MethodData>();
 		}
 
 		// this method is static, because we know that the Invoke method of a delegate always has this exact name
@@ -69,14 +69,14 @@ namespace DynamicExpresso.Reflection
 			return null;
 		}
 
-		public MethodData[] FindExtensionMethods(string methodName, Expression[] args)
+		public IList<MethodData> FindExtensionMethods(string methodName, Expression[] args)
 		{
 			var matchMethods = _arguments.GetExtensionMethods(methodName);
 
 			return MethodResolution.FindBestMethod(matchMethods, args);
 		}
 
-		public MethodData[] FindIndexer(Type type, Expression[] args)
+		public IList<MethodData> FindIndexer(Type type, Expression[] args)
 		{
 			foreach (var t in SelfAndBaseTypes(type))
 			{
@@ -88,12 +88,12 @@ namespace DynamicExpresso.Reflection
 						Select(p => (MethodData)new IndexerData(p));
 
 					var applicableMethods = MethodResolution.FindBestMethod(methods, args);
-					if (applicableMethods.Length > 0)
+					if (applicableMethods.Count > 0)
 						return applicableMethods;
 				}
 			}
 
-			return new MethodData[0];
+			return Array.Empty<MethodData>();
 		}
 
 		private static IEnumerable<Type> SelfAndBaseTypes(Type type)

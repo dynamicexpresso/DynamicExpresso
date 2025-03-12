@@ -13,29 +13,47 @@ namespace DynamicExpresso.Resolution
 {
 	internal static class MethodResolution
 	{
-		public static MethodData[] FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
+		public static IList<MethodData> FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
 		{
 			return FindBestMethod(methods.Select(MethodData.Gen), args);
 		}
 
-		public static MethodData[] FindBestMethod(IEnumerable<MethodData> methods, Expression[] args)
+		public static IList<MethodData> FindBestMethod(IEnumerable<MethodData> methods, Expression[] args)
 		{
-			var applicable = methods.
-				Where(m => CheckIfMethodIsApplicableAndPrepareIt(m, args)).
-				ToArray();
-			if (applicable.Length > 1)
+			var applicable = new List<MethodData>();
+			foreach (var method in methods)
 			{
-				var bestCandidates = applicable
-					.Where(m => applicable.All(n => m == n || MethodHasPriority(args, m, n)))
-					.ToArray();
+				if (CheckIfMethodIsApplicableAndPrepareIt(method, args))
+					applicable.Add(method);
+			}
 
-				// bestCandidates.Length == 0 means that no applicable method has priority
+			if (applicable.Count > 1)
+			{
+				var bestCandidates = new List<MethodData>(applicable.Count);
+				foreach (var candidate in applicable)
+				{
+					if (IsBetterThanAllCandidates(candidate, applicable, args))
+						bestCandidates.Add(candidate);
+				}
+
+				// bestCandidates.Count == 0 means that no applicable method has priority
 				// we don't return bestCandidates to prevent callers from thinking no method was found
-				if (bestCandidates.Length > 0)
+				if (bestCandidates.Count > 0)
 					return bestCandidates;
 			}
 
 			return applicable;
+		}
+
+		private static bool IsBetterThanAllCandidates(MethodData candidate, IList<MethodData> otherCandidates, Expression[] args)
+		{
+			foreach (var other in otherCandidates)
+			{
+				if (candidate != other && !MethodHasPriority(args, candidate, other))
+					return false;
+			}
+
+			return true;
 		}
 
 		public static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
@@ -43,7 +61,7 @@ namespace DynamicExpresso.Resolution
 			if (method.Parameters.Count(y => !y.HasDefaultValue && !ReflectionExtensions.HasParamsArrayType(y)) > args.Length)
 				return false;
 
-			var promotedArgs = new List<Expression>();
+			var promotedArgs = new List<Expression>(args.Length);
 			var declaredWorkingParameters = 0;
 
 			Type paramsArrayTypeFound = null;

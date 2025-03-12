@@ -662,11 +662,11 @@ namespace DynamicExpresso.Parsing
 
 			// try to find the user defined operator on both operands
 			var applicableMethods = _memberFinder.FindMethods(type, operatorName, true, args);
-			if (applicableMethods.Length > 1)
+			if (applicableMethods.Count > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousUnaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(type));
 
 			MethodData userDefinedOperator = null;
-			if (applicableMethods.Length == 1)
+			if (applicableMethods.Count == 1)
 				userDefinedOperator = applicableMethods[0];
 
 			return userDefinedOperator;
@@ -1182,10 +1182,10 @@ namespace DynamicExpresso.Parsing
 			}
 
 			var applicableConstructors = MethodResolution.FindBestMethod(newType.GetConstructors(), args);
-			if (applicableConstructors.Length == 0)
+			if (applicableConstructors.Count == 0)
 				throw ParseException.Create(_token.pos, ErrorMessages.NoApplicableConstructor, newType);
 
-			if (applicableConstructors.Length > 1)
+			if (applicableConstructors.Count > 1)
 				throw ParseException.Create(_token.pos, ErrorMessages.AmbiguousConstructorInvocation, newType);
 
 			var constructor = applicableConstructors[0];
@@ -1367,16 +1367,16 @@ namespace DynamicExpresso.Parsing
 
 			// no method found: retry with the delegate's method
 			// (the parameters might be different, e.g. params array, default value, etc)
-			if (applicableMethods.Length == 0)
+			if (applicableMethods.Count == 0)
 			{
 				usedInvokeMethod = true;
 				applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.InvokeMethod.Value), args);
 			}
 
-			if (applicableMethods.Length == 0)
+			if (applicableMethods.Count == 0)
 				throw ParseException.Create(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
 
-			if (applicableMethods.Length > 1)
+			if (applicableMethods.Count > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
 
 			var applicableMethod = applicableMethods[0];
@@ -1704,10 +1704,10 @@ namespace DynamicExpresso.Parsing
 			args.CopyTo(extensionMethodsArguments, 1);
 
 			var extensionMethods = _memberFinder.FindExtensionMethods(id, extensionMethodsArguments);
-			if (extensionMethods.Length > 1)
+			if (extensionMethods.Count > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
 
-			if (extensionMethods.Length == 1)
+			if (extensionMethods.Count == 1)
 			{
 				var method = extensionMethods[0];
 
@@ -1722,10 +1722,10 @@ namespace DynamicExpresso.Parsing
 		private Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
 		{
 			var applicableMethods = _memberFinder.FindMethods(type, id, instance == null, args);
-			if (applicableMethods.Length > 1)
+			if (applicableMethods.Count > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
 
-			if (applicableMethods.Length == 1)
+			if (applicableMethods.Count == 1)
 			{
 				var method = applicableMethods[0];
 
@@ -1852,13 +1852,13 @@ namespace DynamicExpresso.Parsing
 				return ParseDynamicIndex(expr.Type, expr, args);
 
 			var applicableMethods = _memberFinder.FindIndexer(expr.Type, args);
-			if (applicableMethods.Length == 0)
+			if (applicableMethods.Count == 0)
 			{
 				throw ParseException.Create(errorPos, ErrorMessages.NoApplicableIndexer,
 					TypeUtils.GetTypeName(expr.Type));
 			}
 
-			if (applicableMethods.Length > 1)
+			if (applicableMethods.Count > 1)
 			{
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousIndexerInvocation,
 					TypeUtils.GetTypeName(expr.Type));
@@ -1908,7 +1908,7 @@ namespace DynamicExpresso.Parsing
 		private Expression[] PrepareOperandArguments(MethodData[] signatures, Expression[] args)
 		{
 			var applicableMethods = MethodResolution.FindBestMethod(signatures, args);
-			if (applicableMethods.Length == 1)
+			if (applicableMethods.Count == 1)
 				return applicableMethods[0].PromotedParameters;
 
 			return args;
@@ -2101,20 +2101,20 @@ namespace DynamicExpresso.Parsing
 
 			// try to find the user defined operator on both operands
 			var opOnLeftType = _memberFinder.FindMethods(leftType, operatorName, true, args);
-			if (opOnLeftType.Length > 1)
+			if (opOnLeftType.Count > 1)
 				throw CreateAmbiguousOperatorException();
 
-			if (opOnLeftType.Length == 1)
+			if (opOnLeftType.Count == 1)
 				userDefinedOperator = opOnLeftType[0];
 
 			if (leftType != rightType)
 			{
 				var opOnRightType = _memberFinder.FindMethods(rightType, operatorName, true, args);
-				if (opOnRightType.Length > 1)
+				if (opOnRightType.Count > 1)
 					throw CreateAmbiguousOperatorException();
 
 				MethodData rightOperator = null;
-				if (opOnRightType.Length == 1)
+				if (opOnRightType.Count == 1)
 					rightOperator = opOnRightType[0];
 
 				// we found a matching user defined operator on either type, but it might be the same method
