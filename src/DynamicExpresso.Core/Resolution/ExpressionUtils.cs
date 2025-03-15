@@ -9,7 +9,9 @@ namespace DynamicExpresso.Resolution
 	{
 		public static Expression PromoteExpression(Expression expr, Type type)
 		{
-			if (expr.Type == type) return expr;
+			if (expr.Type == type)
+				return expr;
+
 			if (expr is ConstantExpression ce && ce == ParserConstants.NullLiteralExpression)
 			{
 				if (type.ContainsGenericParameters)
@@ -27,6 +29,11 @@ namespace DynamicExpresso.Resolution
 					return ie.EvalAs(type);
 
 				return expr;
+			}
+
+			if (type.IsAssignableFrom(expr.Type))
+			{
+				return Expression.Convert(expr, type);
 			}
 
 			if (type.IsGenericType && !TypeUtils.IsNumericType(type))

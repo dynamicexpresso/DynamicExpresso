@@ -1,108 +1,143 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using DynamicExpresso.Reflection;
 
 namespace DynamicExpresso.Parsing
 {
-	internal class ParseSignatures
+	internal static class ParseSignatures
 	{
-		public interface ILogicalSignatures
+		private static MethodData[] MakeUnarySignatures(params Type[] possibleOperandTypes)
 		{
-			void F(bool x, bool y);
-			void F(bool? x, bool? y);
+			var signatures = new MethodData[possibleOperandTypes.Length];
+			for (var i = 0; i < possibleOperandTypes.Length; i++)
+			{
+				signatures[i] = new MethodData
+				{
+					Parameters = new[] { new SimpleParameterInfo(possibleOperandTypes[i]) },
+				};
+			}
+			return signatures;
 		}
 
-		public interface IArithmeticSignatures
+		private static MethodData[] MakeBinarySignatures(IList<(Type, Type)> possibleOperandTypes)
 		{
-			void F(int x, int y);
-			void F(uint x, uint y);
-			void F(long x, long y);
-			void F(ulong x, ulong y);
-			void F(float x, float y);
-			void F(double x, double y);
-			void F(decimal x, decimal y);
-			void F(int? x, int? y);
-			void F(uint? x, uint? y);
-			void F(long? x, long? y);
-			void F(ulong? x, ulong? y);
-			void F(float? x, float? y);
-			void F(double? x, double? y);
-			void F(decimal? x, decimal? y);
+			var signatures = new MethodData[possibleOperandTypes.Count];
+			for (var i = 0; i < possibleOperandTypes.Count; i++)
+			{
+				var (left, right) = possibleOperandTypes[i];
+				signatures[i] = new MethodData
+				{
+					Parameters = new[] { new SimpleParameterInfo(left), new SimpleParameterInfo(right) },
+				};
+			}
+			return signatures;
 		}
 
-		public interface IRelationalSignatures : IArithmeticSignatures
+		/// <summary>
+		/// Signatures for the binary logical operators.
+		/// </summary>
+		public static MethodData[] LogicalSignatures = MakeBinarySignatures(new[]
 		{
-			void F(string x, string y);
-			void F(char x, char y);
-			void F(DateTime x, DateTime y);
-			void F(TimeSpan x, TimeSpan y);
-			void F(char? x, char? y);
-			void F(DateTime? x, DateTime? y);
-			void F(TimeSpan? x, TimeSpan? y);
-		}
+			(typeof(bool),  typeof(bool) ),
+			(typeof(bool?), typeof(bool?)),
+		});
 
-		public interface IEqualitySignatures : IRelationalSignatures
+		/// <summary>
+		/// Signatures for the binary arithmetic operators.
+		/// </summary>
+		public static MethodData[] ArithmeticSignatures = MakeBinarySignatures(new[]
 		{
-			void F(bool x, bool y);
-			void F(bool? x, bool? y);
-		}
+			(typeof(int),      typeof(int)     ),
+			(typeof(uint),     typeof(uint)    ),
+			(typeof(long),     typeof(long)    ),
+			(typeof(ulong),    typeof(ulong)   ),
+			(typeof(float),    typeof(float)   ),
+			(typeof(double),   typeof(double)  ),
+			(typeof(decimal),  typeof(decimal) ),
+			(typeof(int?),     typeof(int?)    ),
+			(typeof(uint?),    typeof(uint?)   ),
+			(typeof(long?),    typeof(long?)   ),
+			(typeof(ulong?),   typeof(ulong?)  ),
+			(typeof(float?),   typeof(float?)  ),
+			(typeof(double?),  typeof(double?) ),
+			(typeof(decimal?), typeof(decimal?)),
+		});
 
-		public interface IAddSignatures : IArithmeticSignatures
+		/// <summary>
+		/// Signatures for the binary relational operators.
+		/// </summary>
+		public static MethodData[] RelationalSignatures = ArithmeticSignatures.Concat(MakeBinarySignatures(new[]
 		{
-			void F(DateTime x, TimeSpan y);
-			void F(TimeSpan x, TimeSpan y);
-			void F(DateTime? x, TimeSpan? y);
-			void F(TimeSpan? x, TimeSpan? y);
-		}
+			(typeof(string),    typeof(string)   ),
+			(typeof(char),      typeof(char)     ),
+			(typeof(DateTime),  typeof(DateTime) ),
+			(typeof(TimeSpan),  typeof(TimeSpan) ),
+			(typeof(char?),     typeof(char?)    ),
+			(typeof(DateTime?), typeof(DateTime?)),
+			(typeof(TimeSpan?), typeof(TimeSpan?)),
+		})).ToArray();
 
-		public interface ISubtractSignatures : IAddSignatures
-		{
-			void F(DateTime x, DateTime y);
-			void F(DateTime? x, DateTime? y);
-		}
+		/// <summary>
+		/// Signatures for the binary equality operators.
+		/// </summary>
+		public static MethodData[] EqualitySignatures = RelationalSignatures.Concat(LogicalSignatures).ToArray();
 
-		public interface INegationSignatures
+		/// <summary>
+		/// Signatures for the binary + operators.
+		/// </summary>
+		public static MethodData[] AddSignatures = ArithmeticSignatures.Concat(MakeBinarySignatures(new[]
 		{
-			void F(int x);
-			void F(long x);
-			void F(float x);
-			void F(double x);
-			void F(decimal x);
-			void F(int? x);
-			void F(long? x);
-			void F(float? x);
-			void F(double? x);
-			void F(decimal? x);
-		}
+			(typeof(DateTime),  typeof(TimeSpan) ),
+			(typeof(TimeSpan),  typeof(TimeSpan) ),
+			(typeof(DateTime?), typeof(TimeSpan?)),
+			(typeof(TimeSpan?), typeof(TimeSpan?)),
+		})).ToArray();
 
-		public interface INotSignatures
+		/// <summary>
+		/// Signatures for the binary - operators.
+		/// </summary>
+		public static MethodData[] SubtractSignatures = AddSignatures.Concat(MakeBinarySignatures(new[]
 		{
-			void F(bool x);
-			void F(bool? x);
-		}
+			(typeof(DateTime),  typeof(DateTime)),
+			(typeof(DateTime?), typeof(DateTime?)),
+		})).ToArray();
 
-		public interface IBitwiseComplementSignatures
-		{
-			void F(int x, int count);
-			void F(uint x, int count);
-			void F(long x, int count);
-			void F(ulong x, int count);
-			void F(int? x, int? count);
-			void F(uint? x, int? count);
-			void F(long? x, int? count);
-			void F(ulong? x, int? count);
-		}
+		/// <summary>
+		/// Signatures for the unary - operators.
+		/// </summary>
+		public static MethodData[] NegationSignatures = MakeUnarySignatures(
+			typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal),
+			typeof(int?), typeof(uint?), typeof(long?), typeof(ulong?), typeof(float?), typeof(double?), typeof(decimal?)
+		);
 
-		// the signatures are the same for the left and right shifts
-		public interface IShiftSignatures
+		/// <summary>
+		/// Signatures for the unary not (!) operator.
+		/// </summary>
+		public static MethodData[] NotSignatures = MakeUnarySignatures(typeof(bool), typeof(bool?));
+
+		/// <summary>
+		/// Signatures for the bitwise completement operators.
+		/// </summary>
+		public static MethodData[] BitwiseComplementSignatures = MakeUnarySignatures(
+			typeof(int), typeof(uint), typeof(long), typeof(ulong),
+			typeof(int?), typeof(uint?), typeof(long?), typeof(ulong?)
+		);
+
+		/// <summary>
+		/// Signatures for the left and right shift operators.
+		/// </summary>
+		public static MethodData[] ShiftSignatures = MakeBinarySignatures(new[]
 		{
-			void F(int x);
-			void F(uint x);
-			void F(long x);
-			void F(ulong x);
-			void F(int? x);
-			void F(uint? x);
-			void F(long? x);
-			void F(ulong? x);
-		}
+			(typeof(int),   typeof(int) ),
+			(typeof(uint),  typeof(int) ),
+			(typeof(long),  typeof(int) ),
+			(typeof(ulong), typeof(int) ),
+			(typeof(int?),  typeof(int?) ),
+			(typeof(uint?), typeof(int?) ),
+			(typeof(long?), typeof(int?) ),
+			(typeof(ulong?),typeof(int?) ),
+		});
 
 		//interface IEnumerableSignatures
 		//{

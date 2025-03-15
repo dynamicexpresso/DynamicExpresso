@@ -1,12 +1,12 @@
-using DynamicExpresso.Parsing;
-using DynamicExpresso.Reflection;
-using DynamicExpresso.Visitors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using DynamicExpresso.Exceptions;
+using DynamicExpresso.Parsing;
+using DynamicExpresso.Reflection;
 using DynamicExpresso.Resources;
+using DynamicExpresso.Visitors;
 
 namespace DynamicExpresso
 {
@@ -187,7 +187,7 @@ namespace DynamicExpresso
 				throw new ArgumentNullException(nameof(name));
 
 			if (_settings.Identifiers.TryGetValue(name, out var identifier) &&
-			    identifier is FunctionIdentifier fIdentifier)
+				identifier is FunctionIdentifier fIdentifier)
 			{
 				fIdentifier.AddOverload(value);
 			}
@@ -389,11 +389,7 @@ namespace DynamicExpresso
 				throw new ArgumentNullException(nameof(type));
 
 			_settings.KnownTypes[type.Name] = type;
-
-			foreach (var extensionMethod in type.ExtensionMethods)
-			{
-				_settings.ExtensionMethods.Add(extensionMethod);
-			}
+			_settings.ExtensionMethods.UnionWith(type.ExtensionMethods);
 
 			return this;
 		}
