@@ -803,8 +803,11 @@ namespace DynamicExpresso.Parsing
 
 		private string EvalEscapeStringLiteral(string source)
 		{
-			var builder = new StringBuilder();
+			// most of the string will not have escape sequences; avoid allocation if possible
+			if (source.IndexOf('\\') < 0)
+				return source;
 
+			var builder = new StringBuilder(source.Length);
 			for (int i = 0; i < source.Length; i++)
 			{
 				var c = source[i];
