@@ -160,24 +160,23 @@ namespace DynamicExpresso.Resolution
 			}
 
 			// Add default params, if needed.
-			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select<ParameterInfo, Expression>(x =>
+			foreach (var parameter in method.Parameters.Skip(promotedArgs.Count))
 			{
-				if (x.HasDefaultValue)
+				if (parameter.HasDefaultValue)
 				{
-					var parameterType = TypeUtils.GetConcreteTypeForGenericMethod(x.ParameterType, promotedArgs, method);
-
-					return Expression.Constant(x.DefaultValue, parameterType);
+					var parameterType = TypeUtils.GetConcreteTypeForGenericMethod(parameter.ParameterType, promotedArgs, method);
+					promotedArgs.Add(Expression.Constant(parameter.DefaultValue, parameterType));
 				}
-
-
-				if (ReflectionExtensions.HasParamsArrayType(x))
+				else if (ReflectionExtensions.HasParamsArrayType(parameter))
 				{
 					method.HasParamsArray = true;
-					return Expression.NewArrayInit(x.ParameterType.GetElementType());
+					promotedArgs.Add(Expression.NewArrayInit(parameter.ParameterType.GetElementType()));
 				}
-
-				throw new Exception("No default value found!");
-			}));
+				else
+				{
+					throw new Exception("No default value found!");
+				}
+			}
 
 			method.PromotedParameters = promotedArgs;
 
