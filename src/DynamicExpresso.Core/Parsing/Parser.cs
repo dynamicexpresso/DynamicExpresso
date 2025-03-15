@@ -1380,9 +1380,7 @@ namespace DynamicExpresso.Parsing
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
 
 			var applicableMethod = applicableMethods[0];
-			var usedDelegate = usedInvokeMethod
-				? candidates.Single(_ => _.InvokeMethod.Value?.MethodBase == applicableMethod.MethodBase).Delegate
-				: candidates.Single(_ => _.Method.MethodBase == applicableMethod.MethodBase).Delegate;
+			var usedDelegate = methodGroup.FindUsedOverload(usedInvokeMethod, applicableMethod);
 
 			return Expression.Invoke(Expression.Constant(usedDelegate), applicableMethod.PromotedParameters);
 		}

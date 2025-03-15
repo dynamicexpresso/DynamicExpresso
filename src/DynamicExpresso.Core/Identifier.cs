@@ -103,5 +103,29 @@ namespace DynamicExpresso
 
 			return true;
 		}
+
+		/// <summary>
+		/// The resolution process will find the best overload for the given arguments,
+		/// which we then need to match to the correct delegate.
+		/// </summary>
+		internal Delegate FindUsedOverload(bool usedInvokeMethod, MethodData methodData)
+		{
+			foreach (var overload in _overloads)
+			{
+				if (usedInvokeMethod)
+				{
+					if (overload.InvokeMethod.Value.MethodBase == methodData.MethodBase)
+						return overload.Delegate;
+				}
+				else
+				{
+					if (overload.Method.MethodBase == methodData.MethodBase)
+						return overload.Delegate;
+				}
+			}
+
+			// this should never happen
+			throw new InvalidOperationException("No overload matches the method");
+		}
 	}
 }
