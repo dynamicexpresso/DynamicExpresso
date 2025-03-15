@@ -1382,7 +1382,6 @@ namespace DynamicExpresso.Parsing
 
 			var applicableMethod = applicableMethods[0];
 			var usedDelegate = methodGroup.FindUsedOverload(usedInvokeMethod, applicableMethod);
-
 			return Expression.Invoke(Expression.Constant(usedDelegate), applicableMethod.PromotedParameters);
 		}
 

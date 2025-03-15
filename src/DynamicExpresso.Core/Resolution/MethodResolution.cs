@@ -61,7 +61,7 @@ namespace DynamicExpresso.Resolution
 			if (method.Parameters.Count(y => !y.HasDefaultValue && !ReflectionExtensions.HasParamsArrayType(y)) > args.Length)
 				return false;
 
-			var promotedArgs = new List<Expression>(args.Length);
+			var promotedArgs = new List<Expression>(method.Parameters.Count);
 			var declaredWorkingParameters = 0;
 
 			Type paramsArrayTypeFound = null;
