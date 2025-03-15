@@ -827,11 +827,9 @@ namespace DynamicExpresso.Parsing
 			switch (source)
 			{
 				case '\'':
-					return '\'';
 				case '"':
-					return '"';
 				case '\\':
-					return '\\';
+					return source;
 				case '0':
 					return '\0';
 				case 'a':
