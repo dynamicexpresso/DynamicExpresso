@@ -5,27 +5,27 @@ using DynamicExpresso.Reflection;
 
 namespace DynamicExpresso.Parsing
 {
-	internal class ParseSignatures
+	internal static class ParseSignatures
 	{
-		private static MethodData[] MakeUnarySignatures(params Type[] possibleParamTypes)
+		private static MethodData[] MakeUnarySignatures(params Type[] possibleOperandTypes)
 		{
-			var signatures = new MethodData[possibleParamTypes.Length];
-			for (var i = 0; i < possibleParamTypes.Length; i++)
+			var signatures = new MethodData[possibleOperandTypes.Length];
+			for (var i = 0; i < possibleOperandTypes.Length; i++)
 			{
 				signatures[i] = new MethodData
 				{
-					Parameters = new[] { new SimpleParameterInfo(possibleParamTypes[i]) },
+					Parameters = new[] { new SimpleParameterInfo(possibleOperandTypes[i]) },
 				};
 			}
 			return signatures;
 		}
 
-		private static MethodData[] MakeBinarySignatures(IList<(Type, Type)> possibleParamTypes)
+		private static MethodData[] MakeBinarySignatures(IList<(Type, Type)> possibleOperandTypes)
 		{
-			var signatures = new MethodData[possibleParamTypes.Count];
-			for (var i = 0; i < possibleParamTypes.Count; i++)
+			var signatures = new MethodData[possibleOperandTypes.Count];
+			for (var i = 0; i < possibleOperandTypes.Count; i++)
 			{
-				var (left, right) = possibleParamTypes[i];
+				var (left, right) = possibleOperandTypes[i];
 				signatures[i] = new MethodData
 				{
 					Parameters = new[] { new SimpleParameterInfo(left), new SimpleParameterInfo(right) },

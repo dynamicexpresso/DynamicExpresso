@@ -1371,7 +1371,7 @@ namespace DynamicExpresso.Parsing
 			if (applicableMethods.Count == 0)
 			{
 				usedInvokeMethod = true;
-				applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.InvokeMethod.Value), args);
+				applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
 			}
 
 			if (applicableMethods.Count == 0)

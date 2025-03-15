@@ -44,15 +44,35 @@ namespace DynamicExpresso
 		public class Overload
 		{
 			public Delegate Delegate { get; }
-			public MethodData Method => MethodData.Gen(Delegate.Method);
 
-			// lazy because we'll most likely never need this: it was needed before https://github.com/dotnet/roslyn/pull/53402
-			public Lazy<MethodData> InvokeMethod { get; }
+			private MethodData _methodData;
+			public MethodData Method
+			{
+				get
+				{
+					if (_methodData == null)
+						_methodData = MethodData.Gen(Delegate.Method);
+
+					return _methodData;
+				}
+			}
+
+			// we'll most likely never need this: it was needed before https://github.com/dotnet/roslyn/pull/53402
+			private MethodData _invokeMethod;
+			public MethodData InvokeMethod
+			{
+				get
+				{
+					if (_invokeMethod == null)
+						_invokeMethod = MemberFinder.FindInvokeMethod(Delegate.GetType());
+
+					return _invokeMethod;
+				}
+			}
 
 			public Overload(Delegate @delegate)
 			{
 				Delegate = @delegate;
-				InvokeMethod = new Lazy<MethodData>(() => MemberFinder.FindInvokeMethod(@delegate.GetType()));
 			}
 		}
 
@@ -114,7 +134,7 @@ namespace DynamicExpresso
 			{
 				if (usedInvokeMethod)
 				{
-					if (overload.InvokeMethod.Value.MethodBase == methodData.MethodBase)
+					if (overload.InvokeMethod.MethodBase == methodData.MethodBase)
 						return overload.Delegate;
 				}
 				else
