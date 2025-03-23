@@ -777,7 +777,6 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		[Ignore("The fix suggested in #296 break other use cases, so let's ignore this test for now")]
 		public void GitHub_Issue_295()
 		{
 			var evaluator = new Interpreter();
@@ -791,11 +790,11 @@ namespace DynamicExpresso.UnitTest
 			globalSettings.MyTestPath = "C:\\delme\\";
 			evaluator.SetVariable("GlobalSettings", globalSettings);
 
-			var works = (string)evaluator.Eval("StringConcat((string)GlobalSettings.MyTestPath,\"test.txt\")");
-			Assert.That(works, Is.EqualTo("C:\\delme\\test.txt"));
+			var worksWithCast = (string)evaluator.Eval("StringConcat((string)GlobalSettings.MyTestPath,\"test.txt\")");
+			Assert.That(worksWithCast, Is.EqualTo("C:\\delme\\test.txt"));
 
-			var doesntWork = (string)evaluator.Eval("StringConcat(GlobalSettings.MyTestPath,\"test.txt\")");
-			Assert.That(doesntWork, Is.EqualTo("C:\\delme\\test.txt"));
+			var worksWithoutCast = (string)evaluator.Eval("StringConcat(GlobalSettings.MyTestPath,\"test.txt\")");
+			Assert.That(worksWithoutCast, Is.EqualTo("C:\\delme\\test.txt"));
 		}
 
 		#region GitHub_Issue_305

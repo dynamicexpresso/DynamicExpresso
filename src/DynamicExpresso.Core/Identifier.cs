@@ -38,6 +38,7 @@ namespace DynamicExpresso
 
 	/// <summary>
 	/// Custom expression that simulates a method group (ie. a group of methods with the same name).
+	/// It's used when custom functions are added to the interpreter via <see cref="Interpreter.SetFunction(string, Delegate)"/>.
 	/// </summary>
 	internal class MethodGroupExpression : Expression
 	{

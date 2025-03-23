@@ -1375,7 +1375,17 @@ namespace DynamicExpresso.Parsing
 			}
 
 			if (applicableMethods.Count == 0)
+			{
+				if (args.Any(IsDynamicExpression))
+				{
+					// TODO: we could try to find the best method by using the dynamic binder
+					var candidatesWithSameArgumentCount = candidates.Where(_ => _.Method.Parameters.Count == args.Length).ToList();
+					if (candidatesWithSameArgumentCount.Count == 1)
+						return ParseDynamicMethodGroupInvocation(candidatesWithSameArgumentCount[0].Delegate, args);
+				}
+
 				throw ParseException.Create(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
+			}
 
 			if (applicableMethods.Count > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
@@ -1689,21 +1699,21 @@ namespace DynamicExpresso.Parsing
 			if (methodInvocationExpression != null)
 				return methodInvocationExpression;
 
-			if (TypeUtils.IsDynamicType(type) || IsDynamicExpression(instance))
+			if (TypeUtils.IsDynamicType(type) || IsDynamicExpression(instance) || args.Any(IsDynamicExpression))
 				return ParseDynamicMethodInvocation(type, instance, methodName, args);
 
 			throw new NoApplicableMethodException(methodName, TypeUtils.GetTypeName(type), errorPos);
 		}
 
-		private Expression ParseExtensionMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
+		private Expression ParseExtensionMethodInvocation(Type type, Expression instance, int errorPos, string methodName, Expression[] args)
 		{
 			var extensionMethodsArguments = new Expression[args.Length + 1];
 			extensionMethodsArguments[0] = instance;
 			args.CopyTo(extensionMethodsArguments, 1);
 
-			var extensionMethods = _memberFinder.FindExtensionMethods(id, extensionMethodsArguments);
+			var extensionMethods = _memberFinder.FindExtensionMethods(methodName, extensionMethodsArguments);
 			if (extensionMethods.Count > 1)
-				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
+				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, methodName, TypeUtils.GetTypeName(type));
 
 			if (extensionMethods.Count == 1)
 			{
@@ -1715,11 +1725,11 @@ namespace DynamicExpresso.Parsing
 			return null;
 		}
 
-		private Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string id, Expression[] args)
+		private Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string methodName, Expression[] args)
 		{
-			var applicableMethods = _memberFinder.FindMethods(type, id, instance == null, args);
+			var applicableMethods = _memberFinder.FindMethods(type, methodName, instance == null, args);
 			if (applicableMethods.Count > 1)
-				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, id, TypeUtils.GetTypeName(type));
+				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, methodName, TypeUtils.GetTypeName(type));
 
 			if (applicableMethods.Count == 1)
 			{
@@ -1787,8 +1797,16 @@ namespace DynamicExpresso.Parsing
 		private static Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
-			argsDynamic.Insert(0, instance);
-			return Expression.Dynamic(new LateInvokeMethodCallSiteBinder(methodName), typeof(object), argsDynamic);
+			var isStatic = instance == null;
+			argsDynamic.Insert(0, !isStatic ? instance : Expression.Constant(type));
+			return Expression.Dynamic(new LateInvokeMethodCallSiteBinder(methodName, isStatic), typeof(object), argsDynamic);
+		}
+
+		private Expression ParseDynamicMethodGroupInvocation(Delegate @delegate, Expression[] args)
+		{
+			var argsDynamic = args.ToList();
+			argsDynamic.Insert(0, Expression.Constant(@delegate));
+			return Expression.Dynamic(new LateInvokeDelegateCallSiteBinder(), typeof(object), argsDynamic);
 		}
 
 		private static Expression ParseDynamicIndex(Type type, Expression instance, Expression[] args)

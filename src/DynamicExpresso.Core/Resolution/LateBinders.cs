@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
@@ -34,20 +35,59 @@ namespace DynamicExpresso.Resolution
 	internal class LateInvokeMethodCallSiteBinder : CallSiteBinder
 	{
 		private readonly string _methodName;
+		private readonly bool _isStatic;
 
-		public LateInvokeMethodCallSiteBinder(string methodName)
+		public LateInvokeMethodCallSiteBinder(string methodName, bool isStatic)
 		{
 			_methodName = methodName;
+			_isStatic = isStatic;
 		}
 
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
+			// if the method is static, the first argument is the type containing the method,
+			// otherwise it's the instance on which the method is called
+			var context = _isStatic ? (Type)args[0] : args[0]?.GetType();
+			var argumentInfo = parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)).ToArray();
+			if (_isStatic)
+			{
+				// instruct the compiler that we already know the containing type of the method
+				argumentInfo[0] = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType | CSharpArgumentInfoFlags.IsStaticType, null);
+			}
+
 			var binderM = Binder.InvokeMember(
 				CSharpBinderFlags.None,
 				_methodName,
 				null,
-				TypeUtils.RemoveArrayType(args[0]?.GetType()),
-				parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null))
+				TypeUtils.RemoveArrayType(context),
+				argumentInfo
+			);
+			return binderM.Bind(args, parameters, returnLabel);
+		}
+	}
+
+	/// <summary>
+	/// Binds to a delegate invocation as late as possible.  This allows the use of delegates with dynamic arguments.
+	/// </summary>
+	internal class LateInvokeDelegateCallSiteBinder : CallSiteBinder
+	{
+		public LateInvokeDelegateCallSiteBinder()
+		{
+		}
+
+		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+		{
+			// the first argument is the delegate to invoke
+			var _delegate = (Delegate)args[0];
+			var argumentInfo = parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)).ToArray();
+
+			// instruct the compiler that we already know the delegate's type
+			argumentInfo[0] = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null);
+
+			var binderM = Binder.Invoke(
+				CSharpBinderFlags.None,
+				null,
+				argumentInfo
 			);
 			return binderM.Bind(args, parameters, returnLabel);
 		}
