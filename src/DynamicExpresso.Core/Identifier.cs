@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using DynamicExpresso.Reflection;
 
 namespace DynamicExpresso
 {
@@ -41,9 +42,44 @@ namespace DynamicExpresso
 	/// </summary>
 	internal class MethodGroupExpression : Expression
 	{
-		private readonly List<Delegate> _overloads = new List<Delegate>();
+		public class Overload
+		{
+			public Delegate Delegate { get; }
 
-		internal IReadOnlyCollection<Delegate> Overloads
+			private MethodData _methodData;
+			public MethodData Method
+			{
+				get
+				{
+					if (_methodData == null)
+						_methodData = MethodData.Gen(Delegate.Method);
+
+					return _methodData;
+				}
+			}
+
+			// we'll most likely never need this: it was needed before https://github.com/dotnet/roslyn/pull/53402
+			private MethodData _invokeMethod;
+			public MethodData InvokeMethod
+			{
+				get
+				{
+					if (_invokeMethod == null)
+						_invokeMethod = MemberFinder.FindInvokeMethod(Delegate.GetType());
+
+					return _invokeMethod;
+				}
+			}
+
+			public Overload(Delegate @delegate)
+			{
+				Delegate = @delegate;
+			}
+		}
+
+		private readonly List<Overload> _overloads = new List<Overload>();
+
+		internal IReadOnlyCollection<Overload> Overloads
 		{
 			get
 			{
@@ -60,12 +96,12 @@ namespace DynamicExpresso
 		{
 			// remove any existing delegate with the exact same signature
 			RemoveDelegateSignature(overload);
-			_overloads.Add(overload);
+			_overloads.Add(new Overload(overload));
 		}
 
 		private void RemoveDelegateSignature(Delegate overload)
 		{
-			_overloads.RemoveAll(del => HasSameSignature(overload.Method, del.Method));
+			_overloads.RemoveAll(del => HasSameSignature(overload.Method, del.Delegate.Method));
 		}
 
 		private static bool HasSameSignature(MethodInfo method, MethodInfo other)
@@ -87,6 +123,30 @@ namespace DynamicExpresso
 			}
 
 			return true;
+		}
+
+		/// <summary>
+		/// The resolution process will find the best overload for the given arguments,
+		/// which we then need to match to the correct delegate.
+		/// </summary>
+		internal Delegate FindUsedOverload(bool usedInvokeMethod, MethodData methodData)
+		{
+			foreach (var overload in _overloads)
+			{
+				if (usedInvokeMethod)
+				{
+					if (overload.InvokeMethod.MethodBase == methodData.MethodBase)
+						return overload.Delegate;
+				}
+				else
+				{
+					if (overload.Method.MethodBase == methodData.MethodBase)
+						return overload.Delegate;
+				}
+			}
+
+			// this should never happen
+			throw new InvalidOperationException("No overload matches the method");
 		}
 	}
 }

@@ -269,7 +269,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseConditionalAnd();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.OrElse, left, right);
 			}
 			return left;
@@ -283,7 +283,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseLogicalOr();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.AndAlso, left, right);
 			}
 			return left;
@@ -297,7 +297,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseLogicalXor();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.Or, left, right);
 			}
 			return left;
@@ -311,7 +311,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseLogicalAnd();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.ExclusiveOr, left, right);
 			}
 			return left;
@@ -325,7 +325,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseComparison();
-				CheckAndPromoteOperands(typeof(ParseSignatures.ILogicalSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.LogicalSignatures, ref left, ref right);
 				left = GenerateBinary(ExpressionType.And, left, right);
 			}
 			return left;
@@ -385,12 +385,12 @@ namespace DynamicExpresso.Parsing
 				//}
 				//else
 				//{
-				//	CheckAndPromoteOperands(isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
+				//	CheckAndPromoteOperands(isEquality ? ParseSignatures.EqualitySignatures : ParseSignatures.RelationalSignatures,
 				//			op.text, ref left, ref right, op.pos);
 				//}
 
 				CheckAndPromoteOperands(
-					isEquality ? typeof(ParseSignatures.IEqualitySignatures) : typeof(ParseSignatures.IRelationalSignatures),
+					isEquality ? ParseSignatures.EqualitySignatures : ParseSignatures.RelationalSignatures,
 					ref left,
 					ref right);
 
@@ -464,12 +464,12 @@ namespace DynamicExpresso.Parsing
 						}
 						else
 						{
-							CheckAndPromoteOperands(typeof(ParseSignatures.IAddSignatures), ref left, ref right);
+							CheckAndPromoteOperands(ParseSignatures.AddSignatures, ref left, ref right);
 							left = GenerateBinary(ExpressionType.Add, left, right);
 						}
 						break;
 					case TokenId.Minus:
-						CheckAndPromoteOperands(typeof(ParseSignatures.ISubtractSignatures), ref left, ref right);
+						CheckAndPromoteOperands(ParseSignatures.SubtractSignatures, ref left, ref right);
 						left = GenerateBinary(ExpressionType.Subtract, left, right);
 						break;
 				}
@@ -485,7 +485,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var right = ParseAdditive();
-				CheckAndPromoteOperands(typeof(ParseSignatures.IShiftSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.ShiftSignatures, ref left, ref right);
 				left = GenerateBinary(shiftType, left, right);
 			}
 			return left;
@@ -529,7 +529,7 @@ namespace DynamicExpresso.Parsing
 				NextToken();
 				var right = ParseUnary();
 
-				CheckAndPromoteOperands(typeof(ParseSignatures.IArithmeticSignatures), ref left, ref right);
+				CheckAndPromoteOperands(ParseSignatures.ArithmeticSignatures, ref left, ref right);
 
 				switch (op.id)
 				{
@@ -575,7 +575,7 @@ namespace DynamicExpresso.Parsing
 				var expr = ParseUnary();
 				if (op.id == TokenId.Minus)
 				{
-					CheckAndPromoteOperand(typeof(ParseSignatures.INegationSignatures), ref expr);
+					CheckAndPromoteOperand(ParseSignatures.NegationSignatures, ref expr);
 					expr = GenerateUnary(ExpressionType.Negate, expr);
 				}
 				else if (op.id == TokenId.Plus)
@@ -584,12 +584,12 @@ namespace DynamicExpresso.Parsing
 				}
 				else if (op.id == TokenId.Exclamation)
 				{
-					CheckAndPromoteOperand(typeof(ParseSignatures.INotSignatures), ref expr);
+					CheckAndPromoteOperand(ParseSignatures.NotSignatures, ref expr);
 					expr = GenerateUnary(ExpressionType.Not, expr);
 				}
 				else if (op.id == TokenId.Tilde)
 				{
-					CheckAndPromoteOperand(typeof(ParseSignatures.IBitwiseComplementSignatures), ref expr);
+					CheckAndPromoteOperand(ParseSignatures.BitwiseComplementSignatures, ref expr);
 					expr = GenerateUnary(ExpressionType.OnesComplement, expr);
 				}
 				return expr;
@@ -662,11 +662,11 @@ namespace DynamicExpresso.Parsing
 
 			// try to find the user defined operator on both operands
 			var applicableMethods = _memberFinder.FindMethods(type, operatorName, true, args);
-			if (applicableMethods.Length > 1)
+			if (applicableMethods.Count > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousUnaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(type));
 
 			MethodData userDefinedOperator = null;
-			if (applicableMethods.Length == 1)
+			if (applicableMethods.Count == 1)
 				userDefinedOperator = applicableMethods[0];
 
 			return userDefinedOperator;
@@ -696,7 +696,7 @@ namespace DynamicExpresso.Parsing
 						// the member access should be resolved on the underlying type
 						var memberAccess = GenerateNullableTypeConversion(ParseMemberAccess(GenerateGetNullableValue(expr)));
 						var nullExpr = ParserConstants.NullLiteralExpression;
-						CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
+						CheckAndPromoteOperands(ParseSignatures.EqualitySignatures, ref expr, ref nullExpr);
 						expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, memberAccess, _token.pos);
 					}
 					else if (_token.id == TokenId.OpenBracket)
@@ -705,7 +705,7 @@ namespace DynamicExpresso.Parsing
 						// the member access should be resolved on the underlying type
 						var elementAccess = GenerateNullableTypeConversion(ParseElementAccess(GenerateGetNullableValue(expr)));
 						var nullExpr = ParserConstants.NullLiteralExpression;
-						CheckAndPromoteOperands(typeof(ParseSignatures.IEqualitySignatures), ref expr, ref nullExpr);
+						CheckAndPromoteOperands(ParseSignatures.EqualitySignatures, ref expr, ref nullExpr);
 						expr = GenerateConditional(GenerateEqual(expr, nullExpr), ParserConstants.NullLiteralExpression, elementAccess, _token.pos);
 					}
 				}
@@ -803,8 +803,11 @@ namespace DynamicExpresso.Parsing
 
 		private string EvalEscapeStringLiteral(string source)
 		{
-			var builder = new StringBuilder();
+			// most of the string will not have escape sequences; avoid allocation if possible
+			if (source.IndexOf('\\') < 0)
+				return source;
 
+			var builder = new StringBuilder(source.Length);
 			for (int i = 0; i < source.Length; i++)
 			{
 				var c = source[i];
@@ -827,11 +830,9 @@ namespace DynamicExpresso.Parsing
 			switch (source)
 			{
 				case '\'':
-					return '\'';
 				case '"':
-					return '"';
 				case '\\':
-					return '\\';
+					return source;
 				case '0':
 					return '\0';
 				case 'a':
@@ -1182,10 +1183,10 @@ namespace DynamicExpresso.Parsing
 			}
 
 			var applicableConstructors = MethodResolution.FindBestMethod(newType.GetConstructors(), args);
-			if (applicableConstructors.Length == 0)
+			if (applicableConstructors.Count == 0)
 				throw ParseException.Create(_token.pos, ErrorMessages.NoApplicableConstructor, newType);
 
-			if (applicableConstructors.Length > 1)
+			if (applicableConstructors.Count > 1)
 				throw ParseException.Create(_token.pos, ErrorMessages.AmbiguousConstructorInvocation, newType);
 
 			var constructor = applicableConstructors[0];
@@ -1241,7 +1242,7 @@ namespace DynamicExpresso.Parsing
 				actions.Add(instance);
 				return Expression.Block(new ParameterExpression[] { instance }, actions);
 			}
-			return Expression.MemberInit(newExpr, bindingList.ToArray());
+			return Expression.MemberInit(newExpr, bindingList);
 		}
 
 		private void ParsePossibleMemberBinding(Type newType, int originalPos, List<MemberBinding> bindingList, List<Expression> actions, ParameterExpression instance, bool allowCollectionInit)
@@ -1348,7 +1349,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var args = ParseArgumentList();
 
-			var invokeMethod = _memberFinder.FindInvokeMethod(expr.Type);
+			var invokeMethod = MemberFinder.FindInvokeMethod(expr.Type);
 			if (invokeMethod == null || !MethodResolution.CheckIfMethodIsApplicableAndPrepareIt(invokeMethod, args))
 				throw ParseException.Create(errorPos, error);
 
@@ -1360,28 +1361,25 @@ namespace DynamicExpresso.Parsing
 			var args = ParseArgumentList();
 
 			// find the best delegates that can be used with the provided arguments
-			var candidates = methodGroup.Overloads
-				.Select(_ => new
-				{
-					Delegate = _,
-					Method = _.Method,
-					InvokeMethod = _memberFinder.FindInvokeMethod(_.GetType()),
-				})
-				.ToList();
-
+			// we can either use the method directly, or the Invoke method of the delegate
+			var usedInvokeMethod = false;
+			var candidates = methodGroup.Overloads;
 			var applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.Method), args);
 
 			// no method found: retry with the delegate's method
 			// (the parameters might be different, e.g. params array, default value, etc)
-			if (applicableMethods.Length == 0)
+			if (applicableMethods.Count == 0)
+			{
+				usedInvokeMethod = true;
 				applicableMethods = MethodResolution.FindBestMethod(candidates.Select(_ => _.InvokeMethod), args);
+			}
 
-			if (applicableMethods.Length == 0)
+			if (applicableMethods.Count == 0)
 			{
 				if (args.Any(IsDynamicExpression))
 				{
 					// TODO: we could try to find the best method by using the dynamic binder
-					var candidatesWithSameArgumentCount = candidates.Where(_ => _.Method.GetParameters().Length == args.Length).ToList();
+					var candidatesWithSameArgumentCount = candidates.Where(_ => _.Method.Parameters.Count == args.Length).ToList();
 					if (candidatesWithSameArgumentCount.Count == 1)
 						return ParseDynamicMethodGroupInvocation(candidatesWithSameArgumentCount[0].Delegate, args);
 				}
@@ -1389,12 +1387,12 @@ namespace DynamicExpresso.Parsing
 				throw ParseException.Create(errorPos, ErrorMessages.ArgsIncompatibleWithDelegate);
 			}
 
-			if (applicableMethods.Length > 1)
+			if (applicableMethods.Count > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousDelegateInvocation);
 
 			var applicableMethod = applicableMethods[0];
-			var usedDeledate = candidates.Single(_ => new[] { _.Method, _.InvokeMethod?.MethodBase }.Any(m => m == applicableMethod.MethodBase)).Delegate;
-			return Expression.Invoke(Expression.Constant(usedDeledate), applicableMethod.PromotedParameters);
+			var usedDelegate = methodGroup.FindUsedOverload(usedInvokeMethod, applicableMethod);
+			return Expression.Invoke(Expression.Constant(usedDelegate), applicableMethod.PromotedParameters);
 		}
 
 		private Type ParseKnownType()
@@ -1714,16 +1712,14 @@ namespace DynamicExpresso.Parsing
 			args.CopyTo(extensionMethodsArguments, 1);
 
 			var extensionMethods = _memberFinder.FindExtensionMethods(methodName, extensionMethodsArguments);
-			if (extensionMethods.Length > 1)
+			if (extensionMethods.Count > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, methodName, TypeUtils.GetTypeName(type));
 
-			if (extensionMethods.Length == 1)
+			if (extensionMethods.Count == 1)
 			{
 				var method = extensionMethods[0];
 
-				extensionMethodsArguments = method.PromotedParameters;
-
-				return Expression.Call((MethodInfo)method.MethodBase, extensionMethodsArguments);
+				return Expression.Call((MethodInfo)method.MethodBase, method.PromotedParameters);
 			}
 
 			return null;
@@ -1732,10 +1728,10 @@ namespace DynamicExpresso.Parsing
 		private Expression ParseNormalMethodInvocation(Type type, Expression instance, int errorPos, string methodName, Expression[] args)
 		{
 			var applicableMethods = _memberFinder.FindMethods(type, methodName, instance == null, args);
-			if (applicableMethods.Length > 1)
+			if (applicableMethods.Count > 1)
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousMethodInvocation, methodName, TypeUtils.GetTypeName(type));
 
-			if (applicableMethods.Length == 1)
+			if (applicableMethods.Count == 1)
 			{
 				var method = applicableMethods[0];
 
@@ -1870,13 +1866,13 @@ namespace DynamicExpresso.Parsing
 				return ParseDynamicIndex(expr.Type, expr, args);
 
 			var applicableMethods = _memberFinder.FindIndexer(expr.Type, args);
-			if (applicableMethods.Length == 0)
+			if (applicableMethods.Count == 0)
 			{
 				throw ParseException.Create(errorPos, ErrorMessages.NoApplicableIndexer,
 					TypeUtils.GetTypeName(expr.Type));
 			}
 
-			if (applicableMethods.Length > 1)
+			if (applicableMethods.Count > 1)
 			{
 				throw ParseException.Create(errorPos, ErrorMessages.AmbiguousIndexerInvocation,
 					TypeUtils.GetTypeName(expr.Type));
@@ -1898,36 +1894,31 @@ namespace DynamicExpresso.Parsing
 		//	return GetNonNullableType(type).IsEnum;
 		//}
 
-		private void CheckAndPromoteOperand(Type signatures, ref Expression expr)
+		private void CheckAndPromoteOperand(MethodData[] unarySignatures, ref Expression expr)
 		{
-			var args = new[] { expr };
-
-			args = PrepareOperandArguments(signatures, args);
+			var args = PrepareOperandArguments(unarySignatures, new[] { expr });
 
 			expr = args[0];
 		}
 
-		private void CheckAndPromoteOperands(Type signatures, ref Expression left, ref Expression right)
+		private void CheckAndPromoteOperands(MethodData[] binarySignatures, ref Expression left, ref Expression right)
 		{
-			if ((TypeUtils.IsNullableType(left.Type) || TypeUtils.IsNullableType(right.Type)) &&
-				(TypeUtils.GetNonNullableType(left.Type) == right.Type || TypeUtils.GetNonNullableType(right.Type) == left.Type))
-			{
-				left = GenerateNullableTypeConversion(left);
+			// if one of the operands is the nullable version of the other, promote the non-nullablte to the nullable version
+			if (TypeUtils.TryGetNonNullableType(left.Type, out var nonNullableLeftType) && nonNullableLeftType == right.Type)
 				right = GenerateNullableTypeConversion(right);
-			}
+			else if (TypeUtils.TryGetNonNullableType(right.Type, out var nonNullableRightType) && nonNullableRightType == left.Type)
+				left = GenerateNullableTypeConversion(left);
 
-			var args = new[] { left, right };
-
-			args = PrepareOperandArguments(signatures, args);
+			var args = PrepareOperandArguments(binarySignatures, new[] { left, right });
 
 			left = args[0];
 			right = args[1];
 		}
 
-		private Expression[] PrepareOperandArguments(Type signatures, Expression[] args)
+		private IList<Expression> PrepareOperandArguments(MethodData[] signatures, Expression[] args)
 		{
-			var applicableMethods = _memberFinder.FindMethods(signatures, "F", false, args);
-			if (applicableMethods.Length == 1)
+			var applicableMethods = MethodResolution.FindBestMethod(signatures, args);
+			if (applicableMethods.Count == 1)
 				return applicableMethods[0].PromotedParameters;
 
 			return args;
@@ -2111,7 +2102,8 @@ namespace DynamicExpresso.Parsing
 			var errorPos = _token.pos;
 			var leftType = left.Type;
 			var rightType = right.Type;
-			var error = ParseException.Create(errorPos, ErrorMessages.AmbiguousBinaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(leftType), TypeUtils.GetTypeName(rightType));
+			// it's a lambda to avoid useless allocation
+			ParseException CreateAmbiguousOperatorException() => ParseException.Create(errorPos, ErrorMessages.AmbiguousBinaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(leftType), TypeUtils.GetTypeName(rightType));
 
 			var args = new[] { left, right };
 
@@ -2119,25 +2111,25 @@ namespace DynamicExpresso.Parsing
 
 			// try to find the user defined operator on both operands
 			var opOnLeftType = _memberFinder.FindMethods(leftType, operatorName, true, args);
-			if (opOnLeftType.Length > 1)
-				throw error;
+			if (opOnLeftType.Count > 1)
+				throw CreateAmbiguousOperatorException();
 
-			if (opOnLeftType.Length == 1)
+			if (opOnLeftType.Count == 1)
 				userDefinedOperator = opOnLeftType[0];
 
 			if (leftType != rightType)
 			{
 				var opOnRightType = _memberFinder.FindMethods(rightType, operatorName, true, args);
-				if (opOnRightType.Length > 1)
-					throw error;
+				if (opOnRightType.Count > 1)
+					throw CreateAmbiguousOperatorException();
 
 				MethodData rightOperator = null;
-				if (opOnRightType.Length == 1)
+				if (opOnRightType.Count == 1)
 					rightOperator = opOnRightType[0];
 
 				// we found a matching user defined operator on either type, but it might be the same method
 				if (userDefinedOperator != null && rightOperator != null && !ReferenceEquals(userDefinedOperator.MethodBase, rightOperator.MethodBase))
-					throw error;
+					throw CreateAmbiguousOperatorException();
 
 				// we didn't find an operator on the left type, but we found one on the right type
 				if (userDefinedOperator == null && rightOperator != null)
@@ -2160,9 +2152,7 @@ namespace DynamicExpresso.Parsing
 
 		private static Expression ToStringOrNull(Expression expression)
 		{
-			var nullableExpression = TypeUtils.IsNullableType(expression.Type) ?
-				expression :
-				GenerateNullableTypeConversion(expression);
+			var nullableExpression = GenerateNullableTypeConversion(expression);
 
 			var expressionTypeNullConstant = Expression.Constant(null, nullableExpression.Type);
 			var stringNullConstant = Expression.Constant(null, typeof(string));
@@ -2601,13 +2591,13 @@ namespace DynamicExpresso.Parsing
 		{
 			var exprType = expr.Type;
 
-			if (TypeUtils.IsNullableType(exprType) || !exprType.IsValueType)
+			if (!exprType.IsValueType || TypeUtils.IsNullableType(exprType))
 			{
 				return expr;
 			}
 
-			var conversionType = typeof(Nullable<>).MakeGenericType(exprType);
-			return Expression.ConvertChecked(expr, conversionType);
+			var conversionType = TypeUtils.MakeNullable(exprType);
+			return Expression.Convert(expr, conversionType);
 		}
 	}
 }

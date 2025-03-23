@@ -473,10 +473,12 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("date2", date2);
 
 			Assert.That(interpreter.Eval("(date1 - date2)?.Days"), Is.Null);
+			Assert.That(interpreter.Eval("(date2 - date1)?.Days"), Is.Null);
 
 			date2 = date1.AddDays(1);
 			interpreter.SetVariable("date2", date2);
 			Assert.That(interpreter.Eval("(date1 - date2)?.Days"), Is.EqualTo(-1));
+			Assert.That(interpreter.Eval("(date2 - date1)?.Days"), Is.EqualTo(1));
 		}
 
 		[Test]

@@ -13,29 +13,47 @@ namespace DynamicExpresso.Resolution
 {
 	internal static class MethodResolution
 	{
-		public static MethodData[] FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
+		public static IList<MethodData> FindBestMethod(IEnumerable<MethodBase> methods, Expression[] args)
 		{
 			return FindBestMethod(methods.Select(MethodData.Gen), args);
 		}
 
-		public static MethodData[] FindBestMethod(IEnumerable<MethodData> methods, Expression[] args)
+		public static IList<MethodData> FindBestMethod(IEnumerable<MethodData> methods, Expression[] args)
 		{
-			var applicable = methods.
-				Where(m => CheckIfMethodIsApplicableAndPrepareIt(m, args)).
-				ToArray();
-			if (applicable.Length > 1)
+			var applicable = new List<MethodData>();
+			foreach (var method in methods)
 			{
-				var bestCandidates = applicable
-					.Where(m => applicable.All(n => m == n || MethodHasPriority(args, m, n)))
-					.ToArray();
+				if (CheckIfMethodIsApplicableAndPrepareIt(method, args))
+					applicable.Add(method);
+			}
 
-				// bestCandidates.Length == 0 means that no applicable method has priority
+			if (applicable.Count > 1)
+			{
+				var bestCandidates = new List<MethodData>(applicable.Count);
+				foreach (var candidate in applicable)
+				{
+					if (IsBetterThanAllCandidates(candidate, applicable, args))
+						bestCandidates.Add(candidate);
+				}
+
+				// bestCandidates.Count == 0 means that no applicable method has priority
 				// we don't return bestCandidates to prevent callers from thinking no method was found
-				if (bestCandidates.Length > 0)
+				if (bestCandidates.Count > 0)
 					return bestCandidates;
 			}
 
 			return applicable;
+		}
+
+		private static bool IsBetterThanAllCandidates(MethodData candidate, IList<MethodData> otherCandidates, Expression[] args)
+		{
+			foreach (var other in otherCandidates)
+			{
+				if (candidate != other && !MethodHasPriority(args, candidate, other))
+					return false;
+			}
+
+			return true;
 		}
 
 		public static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
@@ -43,7 +61,7 @@ namespace DynamicExpresso.Resolution
 			if (method.Parameters.Count(y => !y.HasDefaultValue && !ReflectionExtensions.HasParamsArrayType(y)) > args.Length)
 				return false;
 
-			var promotedArgs = new List<Expression>();
+			var promotedArgs = new List<Expression>(method.Parameters.Count);
 			var declaredWorkingParameters = 0;
 
 			Type paramsArrayTypeFound = null;
@@ -59,7 +77,7 @@ namespace DynamicExpresso.Resolution
 				}
 				else
 				{
-					if (declaredWorkingParameters >= method.Parameters.Length)
+					if (declaredWorkingParameters >= method.Parameters.Count)
 					{
 						return false;
 					}
@@ -80,7 +98,7 @@ namespace DynamicExpresso.Resolution
 					declaredWorkingParameters++;
 				}
 
-				if (paramsArrayPromotedArgument == null && (paramsArrayTypeFound == null || args.Length == method.Parameters.Length))
+				if (paramsArrayPromotedArgument == null && (paramsArrayTypeFound == null || args.Length == method.Parameters.Count))
 				{
 					if (parameterType.IsGenericParameter)
 					{
@@ -142,26 +160,25 @@ namespace DynamicExpresso.Resolution
 			}
 
 			// Add default params, if needed.
-			promotedArgs.AddRange(method.Parameters.Skip(promotedArgs.Count).Select<ParameterInfo, Expression>(x =>
+			foreach (var parameter in method.Parameters.Skip(promotedArgs.Count))
 			{
-				if (x.HasDefaultValue)
+				if (parameter.HasDefaultValue)
 				{
-					var parameterType = TypeUtils.GetConcreteTypeForGenericMethod(x.ParameterType, promotedArgs, method);
-
-					return Expression.Constant(x.DefaultValue, parameterType);
+					var parameterType = TypeUtils.GetConcreteTypeForGenericMethod(parameter.ParameterType, promotedArgs, method);
+					promotedArgs.Add(Expression.Constant(parameter.DefaultValue, parameterType));
 				}
-
-
-				if (ReflectionExtensions.HasParamsArrayType(x))
+				else if (ReflectionExtensions.HasParamsArrayType(parameter))
 				{
 					method.HasParamsArray = true;
-					return Expression.NewArrayInit(x.ParameterType.GetElementType());
+					promotedArgs.Add(Expression.NewArrayInit(parameter.ParameterType.GetElementType()));
 				}
+				else
+				{
+					throw new Exception("No default value found!");
+				}
+			}
 
-				throw new Exception("No default value found!");
-			}));
-
-			method.PromotedParameters = promotedArgs.ToArray();
+			method.PromotedParameters = promotedArgs;
 
 			if (method.MethodBase != null && method.MethodBase.IsGenericMethodDefinition &&
 				method.MethodBase is MethodInfo)
@@ -172,7 +189,7 @@ namespace DynamicExpresso.Resolution
 
 				// we have all the type information we can get, update interpreter expressions and evaluate them
 				var actualMethodParameters = genericMethod.GetParameters();
-				for (var i = 0; i < method.PromotedParameters.Length; i++)
+				for (var i = 0; i < method.PromotedParameters.Count; i++)
 				{
 					if (method.PromotedParameters[i] is InterpreterExpression ie)
 					{
@@ -236,7 +253,7 @@ namespace DynamicExpresso.Resolution
 				return true;
 
 			// if a method has a params parameter, it can have less parameters than the number of arguments
-			if (method.HasParamsArray && otherMethod.HasParamsArray && method.Parameters.Length > otherMethod.Parameters.Length)
+			if (method.HasParamsArray && otherMethod.HasParamsArray && method.Parameters.Count > otherMethod.Parameters.Count)
 				return true;
 
 			if (method is IndexerData indexer && otherMethod is IndexerData otherIndexer)
