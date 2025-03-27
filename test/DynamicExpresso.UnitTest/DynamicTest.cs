@@ -24,12 +24,38 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Set_Property_of_an_ExpandoObject()
+		{
+			dynamic dyn = new ExpandoObject();
+			var interpreter = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LateBindObject)
+				.SetVariable("dyn", (object)dyn);
+
+			interpreter.Eval("dyn.Foo = 10");
+
+			Assert.That(dyn.Foo, Is.EqualTo(10));
+		}
+
+		[Test]
 		public void Get_Property_of_a_nested_anonymous()
 		{
 			dynamic dyn = new ExpandoObject();
 			dyn.Sub = new { Foo = new { Bar = new { Foo2 = "bar" } } };
 			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
 			Assert.That(interpreter.Eval("dyn.Sub.Foo.Bar.Foo2"), Is.EqualTo(dyn.Sub.Foo.Bar.Foo2));
+		}
+
+		[Test]
+		public void Set_Property_of_a_nested_ExpandoObject()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new ExpandoObject();
+			dyn.Sub.Foo = "bar";
+
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+
+			interpreter.Eval("dyn.Sub.Foo = \"foobar\"");
+
+			Assert.That(dyn.Sub.Foo, Is.EqualTo("foobar"));
 		}
 
 		[Test]
@@ -181,6 +207,21 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.That(interpreter.Eval("dyn.Sub.ObjArr[1]"), Is.SameAs(dyn.Sub.ObjArr[1]));
 			Assert.That(interpreter.Eval("dyn.Sub.ObjArr[1].Foo"), Is.SameAs(dyn.Sub.ObjArr[1].Foo));
+		}
+
+		[Test]
+		public void Set_value_of_a_dynamic_object()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = new int[5];
+			dyn.Bar = new Dictionary<string, int>();
+
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			interpreter.Eval("dyn.Foo[2] = 5");
+			interpreter.Eval("dyn.Bar[\"foo\"] = 50");
+
+			Assert.That(dyn.Foo[2], Is.EqualTo(5));
+			Assert.That(dyn.Bar["foo"], Is.EqualTo(50));
 		}
 
 		[Test]
