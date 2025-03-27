@@ -210,6 +210,21 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void Set_value_of_a_dynamic_object()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = new int[5];
+			dyn.Bar = new Dictionary<string, int>();
+
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			interpreter.Eval("dyn.Foo[2] = 5");
+			interpreter.Eval("dyn.Bar[\"foo\"] = 50");
+
+			Assert.That(dyn.Foo[2], Is.EqualTo(5));
+			Assert.That(dyn.Bar["foo"], Is.EqualTo(50));
+		}
+
+		[Test]
 		public void Get_value_of_a_nested_array_error()
 		{
 			dynamic dyn = new ExpandoObject();

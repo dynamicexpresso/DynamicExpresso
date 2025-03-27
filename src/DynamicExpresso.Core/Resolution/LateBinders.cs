@@ -24,11 +24,12 @@ namespace DynamicExpresso.Resolution
 
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
+			// there's only one argument: the instance on which the member is accessed
 			var binder = Binder.GetMember(
 				CSharpBinderFlags.None,
 				_propertyOrFieldName,
 				TypeUtils.RemoveArrayType(args[0]?.GetType()),
-				new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) }
+				parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null))
 			);
 			return binder.Bind(args, parameters, returnLabel);
 		}
@@ -50,15 +51,12 @@ namespace DynamicExpresso.Resolution
 
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
+			// there are two arguments: the instance on which the member is set and the value to set
 			var binder = Binder.SetMember(
 				CSharpBinderFlags.None,
 				_propertyOrFieldName,
 				TypeUtils.RemoveArrayType(args[0]?.GetType()),
-				new[]
-				{
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null), // instruct the compiler that we already know the type of the value
-				}
+				parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null))
 			);
 			return binder.Bind(args, parameters, returnLabel);
 		}
@@ -131,11 +129,31 @@ namespace DynamicExpresso.Resolution
 	/// <summary>
 	/// Binds to an items invocation of an instance as late as possible.  This allows the use of anonymous types on dynamic values.
 	/// </summary>
-	internal class LateInvokeIndexCallSiteBinder : CallSiteBinder
+	internal class LateGetIndexCallSiteBinder : CallSiteBinder, IConvertibleToWritableBinder
 	{
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
+			// there are two arguments: the instance on which the member is set and the value of the indexer
 			var binder = Binder.GetIndex(
+				CSharpBinderFlags.None,
+				TypeUtils.RemoveArrayType(args[0]?.GetType()),
+				parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null))
+			);
+			return binder.Bind(args, parameters, returnLabel);
+		}
+
+		public CallSiteBinder ToWritableBinder()
+		{
+			return new LateSetIndexCallSiteBinder();
+		}
+	}
+
+	internal class LateSetIndexCallSiteBinder : CallSiteBinder
+	{
+		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+		{
+			// there are three arguments: the instance on which the member is set, the value of the indexer, and the value to set
+			var binder = Binder.SetIndex(
 				CSharpBinderFlags.None,
 				TypeUtils.RemoveArrayType(args[0]?.GetType()),
 				parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null))

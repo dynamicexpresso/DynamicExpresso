@@ -1815,7 +1815,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
-			return Expression.Dynamic(new LateInvokeIndexCallSiteBinder(), typeof(object), argsDynamic);
+			return Expression.Dynamic(new LateGetIndexCallSiteBinder(), typeof(object), argsDynamic);
 		}
 
 		private Expression[] ParseArgumentList(TokenId openToken, string missingOpenTokenMsg,
