@@ -8,7 +8,12 @@ using Microsoft.CSharp.RuntimeBinder;
 
 namespace DynamicExpresso.Resolution
 {
-	internal class LateGetMemberCallSiteBinder : CallSiteBinder
+	internal interface IConvertibleToWritableBinder
+	{
+		CallSiteBinder ToWritableBinder();
+	}
+
+	internal class LateGetMemberCallSiteBinder : CallSiteBinder, IConvertibleToWritableBinder
 	{
 		private readonly string _propertyOrFieldName;
 
@@ -24,6 +29,36 @@ namespace DynamicExpresso.Resolution
 				_propertyOrFieldName,
 				TypeUtils.RemoveArrayType(args[0]?.GetType()),
 				new[] { CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null) }
+			);
+			return binder.Bind(args, parameters, returnLabel);
+		}
+
+		public CallSiteBinder ToWritableBinder()
+		{
+			return new LateSetMemberCallSiteBinder(_propertyOrFieldName);
+		}
+	}
+
+	internal class LateSetMemberCallSiteBinder : CallSiteBinder
+	{
+		private readonly string _propertyOrFieldName;
+
+		public LateSetMemberCallSiteBinder(string propertyOrFieldName)
+		{
+			_propertyOrFieldName = propertyOrFieldName;
+		}
+
+		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
+		{
+			var binder = Binder.SetMember(
+				CSharpBinderFlags.None,
+				_propertyOrFieldName,
+				TypeUtils.RemoveArrayType(args[0]?.GetType()),
+				new[]
+				{
+					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
+					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null), // instruct the compiler that we already know the type of the value
+				}
 			);
 			return binder.Bind(args, parameters, returnLabel);
 		}
