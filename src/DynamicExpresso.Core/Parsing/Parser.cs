@@ -221,8 +221,8 @@ namespace DynamicExpresso.Parsing
 				if (!_arguments.Settings.AssignmentOperators.HasFlag(AssignmentOperators.AssignmentEqual))
 					throw new AssignmentOperatorDisabledException("=", _token.pos);
 
-
-				if (!IsWritable(left))
+				Func<Expression, Expression> assignLeftDynamic = null;
+				if (!IsWritable(left) && !IsDynamicWritable(left, out assignLeftDynamic))
 					throw ParseException.Create(_token.pos, ErrorMessages.ExpressionMustBeWritable);
 
 				NextToken();
@@ -233,7 +233,9 @@ namespace DynamicExpresso.Parsing
 					throw ParseException.Create(_token.pos, ErrorMessages.CannotConvertValue,
 						TypeUtils.GetTypeName(right.Type), TypeUtils.GetTypeName(left.Type));
 
-				left = Expression.Assign(left, promoted);
+				left = assignLeftDynamic == null
+					? Expression.Assign(left, promoted)
+					: assignLeftDynamic(promoted);
 			}
 			return left;
 		}
@@ -1813,7 +1815,7 @@ namespace DynamicExpresso.Parsing
 		{
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
-			return Expression.Dynamic(new LateInvokeIndexCallSiteBinder(), typeof(object), argsDynamic);
+			return Expression.Dynamic(new LateGetIndexCallSiteBinder(), typeof(object), argsDynamic);
 		}
 
 		private Expression[] ParseArgumentList(TokenId openToken, string missingOpenTokenMsg,
@@ -1946,6 +1948,20 @@ namespace DynamicExpresso.Parsing
 			}
 
 			return false;
+		}
+
+		private static bool IsDynamicWritable(Expression expression, out Func<Expression, Expression> toWritableExpression)
+		{
+			toWritableExpression = null;
+			if (expression.NodeType != ExpressionType.Dynamic)
+				return false;
+
+			var dynamicExpression = (DynamicExpression)expression;
+			if (!(dynamicExpression.Binder is IConvertibleToWritableBinder convertibleBinder))
+				return false;
+
+			toWritableExpression = value => Expression.Dynamic(convertibleBinder.ToWritableBinder(), typeof(object), dynamicExpression.Arguments.Concat(new[] { value }));
+			return true;
 		}
 
 		private Expression GenerateEqual(Expression left, Expression right)
