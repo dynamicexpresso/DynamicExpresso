@@ -706,6 +706,11 @@ namespace DynamicExpresso.UnitTest
 			{
 				return list.Select(i => transform(i)).ToList();
 			}
+
+			public Guid ReturnsGuid(Guid guid = default)
+			{
+				return guid;
+			}
 		}
 
 		[Test]
@@ -876,6 +881,15 @@ namespace DynamicExpresso.UnitTest
 			interpreter.SetVariable("x", x);
 
 			Assert.That(interpreter.Eval<bool>("(int)x == 1"), Is.EqualTo((int)x == 1));
+		}
+
+		[Test]
+		public void GitHub_Issue_354()
+		{
+			var interpreter = new Interpreter();
+			interpreter.SetVariable("b", new Functions());
+
+			Assert.That(interpreter.Eval<Guid>("b.ReturnsGuid()"), Is.EqualTo(Guid.Empty));
 		}
 	}
 

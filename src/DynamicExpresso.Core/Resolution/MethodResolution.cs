@@ -165,7 +165,12 @@ namespace DynamicExpresso.Resolution
 				if (parameter.HasDefaultValue)
 				{
 					var parameterType = TypeUtils.GetConcreteTypeForGenericMethod(parameter.ParameterType, promotedArgs, method);
-					promotedArgs.Add(Expression.Constant(parameter.DefaultValue, parameterType));
+
+					var defaultValue = parameter.DefaultValue;
+					if (defaultValue is null && parameterType.IsValueType)
+						defaultValue = Activator.CreateInstance(parameterType);
+
+					promotedArgs.Add(Expression.Constant(defaultValue, parameterType));
 				}
 				else if (ReflectionExtensions.HasParamsArrayType(parameter))
 				{
