@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using DynamicExpresso.Exceptions;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -342,6 +343,35 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 			var detectedIdentifiers = target.DetectIdentifiers(code);
 			Assert.That(detectedIdentifiers.UnknownIdentifiers, Is.Empty);
+		}
+
+		class TestClass
+		{
+			public int Age { get; set; }
+			public string Name { get; set; }
+		}
+
+		[Test]
+		public void Detect_class_members_invocations()
+		{
+			TestClass customer = new() { Age = 1, Name = "abc" };
+			Interpreter target = new Interpreter();
+			target.SetVariable("test", customer);
+
+			// Known properties
+			IdentifiersInfo detectedIdentifiers = target.DetectIdentifiers("test.Name");
+			Assert.That(detectedIdentifiers.UnknownIdentifiers, Is.Empty);
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(1));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Name, Is.EqualTo("test"));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Expression.Type, Is.EqualTo(typeof(TestClass)));
+			Assert.That(target.Eval("test.Name"), Is.EqualTo("abc"));
+
+			// Unknown properties, for now we don't detect them, eval how to support this for the future
+			detectedIdentifiers = target.DetectIdentifiers("test.Unknown");
+			Assert.That(detectedIdentifiers.UnknownIdentifiers.Count(), Is.EqualTo(0));
+			Assert.That(detectedIdentifiers.Identifiers.Count(), Is.EqualTo(1));
+			Assert.That(detectedIdentifiers.Identifiers.ElementAt(0).Name, Is.EqualTo("test"));
+			Assert.That(() => target.Eval("test.Unknown"), Throws.TypeOf<ParseException>());
 		}
 	}
 }
