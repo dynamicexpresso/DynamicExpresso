@@ -44,19 +44,6 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
-		public void Detect_unknown_identifiers_with_complete_variable_name()
-		{
-			var target = new Interpreter();
-
-			var detectedIdentifiers = target.DetectIdentifiers("Contact.Personal.Year_of_birth = 1987",
-				DetectorOptions.IncludeChildren);
-
-			Assert.That(
-				detectedIdentifiers.UnknownIdentifiers,
-				Is.EqualTo(new[] { "Contact.Personal.Year_of_birth" }));
-		}
-
-		[Test]
 		public void Should_detect_various_format_of_identifiers()
 		{
 			var target = new Interpreter();

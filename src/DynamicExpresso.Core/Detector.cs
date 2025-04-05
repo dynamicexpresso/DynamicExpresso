@@ -14,11 +14,6 @@ namespace DynamicExpresso
 		private static readonly Regex RootIdentifierDetectionRegex =
 			new Regex(@"(?<=[^\w@]|^)(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)", RegexOptions.Compiled);
 
-		private static readonly Regex ChildIdentifierDetectionRegex = new Regex(
-			@"(?<=[^\w@]|^)(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)*)",
-			RegexOptions.Compiled);
-
-
 		private static readonly string Id = RootIdentifierDetectionRegex.ToString();
 		private static readonly string Type = Id.Replace("<id>", "<type>");
 
@@ -80,11 +75,7 @@ namespace DynamicExpresso
 				}
 			}
 
-			var identifierRegex = option == DetectorOptions.IncludeChildren
-				? ChildIdentifierDetectionRegex
-				: RootIdentifierDetectionRegex;
-
-			foreach (Match match in identifierRegex.Matches(expression))
+			foreach (Match match in RootIdentifierDetectionRegex.Matches(expression))
 			{
 				var idGroup = match.Groups["id"];
 				var identifier = idGroup.Value;
