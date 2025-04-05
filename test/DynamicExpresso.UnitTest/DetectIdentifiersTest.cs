@@ -354,7 +354,7 @@ namespace DynamicExpresso.UnitTest
 		[Test]
 		public void Detect_class_members_invocations()
 		{
-			TestClass customer = new() { Age = 1, Name = "abc" };
+			TestClass customer = new TestClass() { Age = 1, Name = "abc" };
 			Interpreter target = new Interpreter();
 			target.SetVariable("test", customer);
 
