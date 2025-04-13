@@ -20,32 +20,55 @@ namespace DynamicExpresso.Resolution
 
 		public static IList<MethodData> FindBestMethod(IEnumerable<MethodData> methods, Expression[] args)
 		{
-			var applicable = new List<MethodData>();
+			List<MethodData> applicable = null;
+			bool allowPartial = true;
 			foreach (var method in methods)
 			{
-				if (CheckIfMethodIsApplicableAndPrepareIt(method, args))
-					applicable.Add(method);
-			}
-
-			if (applicable.Count > 1)
-			{
-				var bestCandidates = new List<MethodData>(applicable.Count);
-				foreach (var candidate in applicable)
+				var matchLevel = CheckMethodMatchAndPrepareIt(!allowPartial, method, args);
+				if (matchLevel == MethodMatchLevel.Exact || allowPartial && matchLevel == MethodMatchLevel.Partial)
 				{
-					if (IsBetterThanAllCandidates(candidate, applicable, args))
-						bestCandidates.Add(candidate);
+					allowPartial = matchLevel != MethodMatchLevel.Exact;
+					if (applicable?.Count > 0)
+					{
+						if (IsBetterThanAllCandidates(method, applicable, args))
+						{
+							applicable.Clear();
+						}
+						else
+						{
+							//Are the existing ones better?
+							bool skip = false;
+							foreach (var priorCandidate in applicable)
+							{
+								if (MethodHasPriority(args, priorCandidate, method))
+								{
+									//The current method is not as good as the existing candidate(s)
+									skip = true;
+									break;
+								}
+							}
+							if (skip)
+							{
+								continue;
+							}
+						}
+					}
+					if (applicable == null)
+					{
+						applicable = new List<MethodData>();
+					}
+					applicable.Add(method);
+					if (!allowPartial && applicable.Count > 1)
+					{
+						//We've hit 2 exact matches so no need to go any farther.
+						break;
+					}
 				}
-
-				// bestCandidates.Count == 0 means that no applicable method has priority
-				// we don't return bestCandidates to prevent callers from thinking no method was found
-				if (bestCandidates.Count > 0)
-					return bestCandidates;
 			}
-
-			return applicable;
+			return applicable as IList<MethodData> ?? Array.Empty<MethodData>();
 		}
 
-		private static bool IsBetterThanAllCandidates(MethodData candidate, IList<MethodData> otherCandidates, Expression[] args)
+		private static bool IsBetterThanAllCandidates(MethodData candidate, List<MethodData> otherCandidates, Expression[] args)
 		{
 			foreach (var other in otherCandidates)
 			{
@@ -56,10 +79,31 @@ namespace DynamicExpresso.Resolution
 			return true;
 		}
 
+		public enum MethodMatchLevel
+		{
+			None = 0,
+			Partial = 1,
+			Exact = 2
+		}
+
 		public static bool CheckIfMethodIsApplicableAndPrepareIt(MethodData method, Expression[] args)
 		{
-			if (method.Parameters.Count(y => !y.HasDefaultValue && !ReflectionExtensions.HasParamsArrayType(y)) > args.Length)
-				return false;
+			return CheckMethodMatchAndPrepareIt(false, method, args) != MethodMatchLevel.None;
+		}
+
+		public static MethodMatchLevel CheckMethodMatchAndPrepareIt(bool isExactMatchRequired, MethodData method, Expression[] args)
+		{
+			int count = 0;
+			foreach (var y in method.Parameters)
+			{
+				if (!y.HasDefaultValue && !ReflectionExtensions.HasParamsArrayType(y))
+				{
+					if (++count > args.Length)
+					{
+						return MethodMatchLevel.None;
+					}
+				}
+			}
 
 			var promotedArgs = new List<Expression>(method.Parameters.Count);
 			var declaredWorkingParameters = 0;
@@ -67,6 +111,7 @@ namespace DynamicExpresso.Resolution
 			Type paramsArrayTypeFound = null;
 			List<Expression> paramsArrayPromotedArgument = null;
 
+			MethodMatchLevel matchLevel = MethodMatchLevel.Exact;
 			foreach (var currentArgument in args)
 			{
 				Type parameterType;
@@ -79,13 +124,13 @@ namespace DynamicExpresso.Resolution
 				{
 					if (declaredWorkingParameters >= method.Parameters.Count)
 					{
-						return false;
+						return MethodMatchLevel.None;
 					}
 
 					var parameterDeclaration = method.Parameters[declaredWorkingParameters];
 					if (parameterDeclaration.IsOut)
 					{
-						return false;
+						return MethodMatchLevel.None;
 					}
 
 					parameterType = parameterDeclaration.ParameterType;
@@ -93,6 +138,11 @@ namespace DynamicExpresso.Resolution
 					if (ReflectionExtensions.HasParamsArrayType(parameterDeclaration))
 					{
 						paramsArrayTypeFound = parameterType;
+						if (isExactMatchRequired)
+						{
+							return MethodMatchLevel.Partial;
+						}
+						matchLevel = MethodMatchLevel.Partial;
 					}
 
 					declaredWorkingParameters++;
@@ -104,7 +154,7 @@ namespace DynamicExpresso.Resolution
 					{
 						// an interpreter expression can only be matched to a parameter of type Func
 						if (currentArgument is InterpreterExpression)
-							return false;
+							return MethodMatchLevel.None;
 
 						promotedArgs.Add(currentArgument);
 						continue;
@@ -113,6 +163,14 @@ namespace DynamicExpresso.Resolution
 					var promoted = ExpressionUtils.PromoteExpression(currentArgument, parameterType);
 					if (promoted != null)
 					{
+						if (promoted != currentArgument)
+						{
+							if (isExactMatchRequired)
+							{
+								return MethodMatchLevel.Partial;
+							}
+							matchLevel = MethodMatchLevel.Partial;
+						}
 						promotedArgs.Add(promoted);
 						continue;
 					}
@@ -137,7 +195,7 @@ namespace DynamicExpresso.Resolution
 					}
 				}
 
-				return false;
+				return MethodMatchLevel.None;
 			}
 
 			if (paramsArrayPromotedArgument != null)
@@ -190,7 +248,7 @@ namespace DynamicExpresso.Resolution
 			{
 				var genericMethod = MakeGenericMethod(method);
 				if (genericMethod == null)
-					return false;
+					return MethodMatchLevel.None;
 
 				// we have all the type information we can get, update interpreter expressions and evaluate them
 				var actualMethodParameters = genericMethod.GetParameters();
@@ -201,7 +259,7 @@ namespace DynamicExpresso.Resolution
 						var actualParamInfo = actualMethodParameters[i];
 						var lambdaExpr = ie.EvalAs(actualParamInfo.ParameterType);
 						if (lambdaExpr == null)
-							return false;
+							return MethodMatchLevel.None;
 
 						method.PromotedParameters[i] = lambdaExpr;
 
@@ -213,7 +271,7 @@ namespace DynamicExpresso.Resolution
 				method.MethodBase = genericMethod;
 			}
 
-			return true;
+			return matchLevel;
 		}
 
 		private static bool MethodHasPriority(Expression[] args, MethodData method, MethodData otherMethod)
