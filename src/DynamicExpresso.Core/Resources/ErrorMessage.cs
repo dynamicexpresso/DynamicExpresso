@@ -9,8 +9,8 @@ namespace DynamicExpresso.Resources
 	/// </summary>
 	public class ErrorMessage
 	{
-		private string _message;
-		private Func<string> _getMessage;
+		private readonly string _message;
+		private readonly Func<string> _getMessage;
 
 		/// <summary>
 		/// Initializes this instance to return the provided message.
