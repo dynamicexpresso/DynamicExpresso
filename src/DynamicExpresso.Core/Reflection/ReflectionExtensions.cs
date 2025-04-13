@@ -95,7 +95,7 @@ namespace DynamicExpresso.Reflection
 
 		public static bool HasParamsArrayType(ParameterInfo parameterInfo)
 		{
-			return parameterInfo.IsDefined(typeof(ParamArrayAttribute), false);
+			return parameterInfo.ParameterType.IsArray && parameterInfo.IsDefined(typeof(ParamArrayAttribute), false);
 		}
 
 		public static Type GetParameterType(ParameterInfo parameterInfo)

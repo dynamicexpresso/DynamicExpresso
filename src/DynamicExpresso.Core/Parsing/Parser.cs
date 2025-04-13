@@ -67,7 +67,7 @@ namespace DynamicExpresso.Parsing
 		{
 			Expression expr = ParseExpressionSegment(_arguments.ExpressionReturnType);
 
-			ValidateToken(TokenId.End, ErrorMessages.SyntaxError);
+			ValidateToken(TokenId.End, ErrorMessage.SyntaxError);
 			return expr;
 		}
 
@@ -170,7 +170,7 @@ namespace DynamicExpresso.Parsing
 			var parameters = _token.id != TokenId.CloseParen ? ParseLambdaParameters() : new ParameterWithPosition[0];
 			if (hasOpenParen)
 			{
-				ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+				ValidateToken(TokenId.CloseParen, ErrorMessage.CloseParenOrCommaExpected);
 				NextToken();
 			}
 
@@ -255,7 +255,7 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var expr1 = ParseExpressionSegment();
-				ValidateToken(TokenId.Colon, ErrorMessages.ColonExpected);
+				ValidateToken(TokenId.Colon, ErrorMessage.ColonExpected);
 				NextToken();
 				var expr2 = ParseExpressionSegment();
 				expr = GenerateConditional(expr, expr1, expr2, errorPos);
@@ -991,10 +991,10 @@ namespace DynamicExpresso.Parsing
 
 		private Expression ParseParenExpression()
 		{
-			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
+			ValidateToken(TokenId.OpenParen, ErrorMessage.OpenParenExpected);
 			NextToken();
 			Expression innerParenthesesExpression = ParseExpressionSegment();
-			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrOperatorExpected);
+			ValidateToken(TokenId.CloseParen, ErrorMessage.CloseParenOrOperatorExpected);
 
 			var constExp = innerParenthesesExpression as ConstantExpression;
 			if (constExp != null && constExp.Value is Type)
@@ -1108,11 +1108,11 @@ namespace DynamicExpresso.Parsing
 		{
 			NextToken();
 
-			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
+			ValidateToken(TokenId.OpenParen, ErrorMessage.OpenParenExpected);
 			NextToken();
 			ValidateToken(TokenId.Identifier);
 			var type = ParseKnownType();
-			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+			ValidateToken(TokenId.CloseParen, ErrorMessage.CloseParenOrCommaExpected);
 			NextToken();
 
 			return Expression.Default(type);
@@ -1162,7 +1162,7 @@ namespace DynamicExpresso.Parsing
 		private Expression ParseNew()
 		{
 			NextToken();
-			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
+			ValidateToken(TokenId.Identifier, ErrorMessage.IdentifierExpected);
 
 			var newType = ParseKnownType();
 			var args = new Expression[0];
@@ -1181,7 +1181,7 @@ namespace DynamicExpresso.Parsing
 			else
 			{
 				// no aguments: expect an object initializer
-				ValidateToken(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected);
+				ValidateToken(TokenId.OpenCurlyBracket, ErrorMessage.OpenCurlyBracketExpected);
 			}
 
 			var applicableConstructors = MethodResolution.FindBestMethod(newType.GetConstructors(), args);
@@ -1202,17 +1202,17 @@ namespace DynamicExpresso.Parsing
 
 		private Expression[] ParseArrayInitializerList()
 		{
-			return ParseArgumentList(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected,
-				TokenId.CloseCurlyBracket, ErrorMessages.CloseCurlyBracketExpected,
+			return ParseArgumentList(TokenId.OpenCurlyBracket, ErrorMessage.OpenCurlyBracketExpected,
+				TokenId.CloseCurlyBracket, ErrorMessage.CloseCurlyBracketExpected,
 				allowTrailingComma: true);
 		}
 
 		private Expression ParseWithObjectInitializer(NewExpression newExpr, Type newType)
 		{
-			ValidateToken(TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected);
+			ValidateToken(TokenId.OpenCurlyBracket, ErrorMessage.OpenCurlyBracketExpected);
 			NextToken();
 			var initializedInstance = ParseMemberAndInitializerList(newExpr, newType);
-			ValidateToken(TokenId.CloseCurlyBracket, ErrorMessages.CloseCurlyBracketExpected);
+			ValidateToken(TokenId.CloseCurlyBracket, ErrorMessage.CloseCurlyBracketExpected);
 			NextToken();
 			return initializedInstance;
 		}
@@ -1249,7 +1249,7 @@ namespace DynamicExpresso.Parsing
 
 		private void ParsePossibleMemberBinding(Type newType, int originalPos, List<MemberBinding> bindingList, List<Expression> actions, ParameterExpression instance, bool allowCollectionInit)
 		{
-			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
+			ValidateToken(TokenId.Identifier, ErrorMessage.IdentifierExpected);
 
 			var propertyOrFieldName = _token.text;
 			var member = _memberFinder.FindPropertyOrField(newType, propertyOrFieldName, false);
@@ -1282,7 +1282,7 @@ namespace DynamicExpresso.Parsing
 			}
 			NextToken();
 
-			ValidateToken(TokenId.Equal, ErrorMessages.EqualExpected);
+			ValidateToken(TokenId.Equal, ErrorMessage.EqualExpected);
 			NextToken();
 
 			var value = ParseExpressionSegment();
@@ -1323,7 +1323,7 @@ namespace DynamicExpresso.Parsing
 					SetTextPos(pos);
 					ParseExpressionSegment();
 				}
-				actions.Add(ParseMethodInvocation(newType, instance, _token.pos, "Add", TokenId.OpenCurlyBracket, ErrorMessages.OpenCurlyBracketExpected, TokenId.CloseCurlyBracket, ErrorMessages.CloseCurlyBracketExpected));
+				actions.Add(ParseMethodInvocation(newType, instance, _token.pos, "Add", TokenId.OpenCurlyBracket, ErrorMessage.OpenCurlyBracketExpected, TokenId.CloseCurlyBracket, ErrorMessage.CloseCurlyBracketExpected));
 			}
 			else
 			{
@@ -1499,7 +1499,7 @@ namespace DynamicExpresso.Parsing
 					NextToken();
 				}
 
-				ValidateToken(TokenId.CloseBracket, ErrorMessages.CloseBracketOrCommaExpected);
+				ValidateToken(TokenId.CloseBracket, ErrorMessage.CloseBracketOrCommaExpected);
 				ranks.Push(rank);
 				NextToken();
 			}
@@ -1527,7 +1527,7 @@ namespace DynamicExpresso.Parsing
 				args = new List<Type>(new Type[arity]);
 			}
 
-			ValidateToken(TokenId.GreaterThan, ErrorMessages.CloseTypeArgumentListExpected);
+			ValidateToken(TokenId.GreaterThan, ErrorMessage.CloseTypeArgumentListExpected);
 			return args;
 		}
 
@@ -1569,7 +1569,7 @@ namespace DynamicExpresso.Parsing
 				return Expression.Constant(type);
 			}
 
-			ValidateToken(TokenId.Dot, ErrorMessages.DotOrOpenParenExpected);
+			ValidateToken(TokenId.Dot, ErrorMessage.DotOrOpenParenExpected);
 			NextToken();
 			return ParseMemberAccess(type, null);
 		}
@@ -1684,11 +1684,11 @@ namespace DynamicExpresso.Parsing
 
 		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName)
 		{
-			return ParseMethodInvocation(type, instance, errorPos, methodName, TokenId.OpenParen, ErrorMessages.OpenParenExpected, TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+			return ParseMethodInvocation(type, instance, errorPos, methodName, TokenId.OpenParen, ErrorMessage.OpenParenExpected, TokenId.CloseParen, ErrorMessage.CloseParenOrCommaExpected);
 
 		}
 
-		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName, TokenId open, string openExpected, TokenId close, string closeExpected)
+		private Expression ParseMethodInvocation(Type type, Expression instance, int errorPos, string methodName, TokenId open, ErrorMessage openExpected, TokenId close, ErrorMessage closeExpected)
 		{
 			var args = ParseArgumentList(open, openExpected, close, closeExpected);
 
@@ -1818,8 +1818,8 @@ namespace DynamicExpresso.Parsing
 			return Expression.Dynamic(new LateGetIndexCallSiteBinder(), typeof(object), argsDynamic);
 		}
 
-		private Expression[] ParseArgumentList(TokenId openToken, string missingOpenTokenMsg,
-			TokenId closeToken, string missingCloseTokenMsg,
+		private Expression[] ParseArgumentList(TokenId openToken, ErrorMessage missingOpenTokenMsg,
+			TokenId closeToken, ErrorMessage missingCloseTokenMsg,
 			bool allowTrailingComma = false)
 		{
 			ValidateToken(openToken, missingOpenTokenMsg);
@@ -1840,15 +1840,15 @@ namespace DynamicExpresso.Parsing
 
 		private Expression[] ParseArgumentList()
 		{
-			return ParseArgumentList(TokenId.OpenParen, ErrorMessages.OpenParenExpected,
-				TokenId.CloseParen, ErrorMessages.CloseParenOrCommaExpected);
+			return ParseArgumentList(TokenId.OpenParen, ErrorMessage.OpenParenExpected,
+				TokenId.CloseParen, ErrorMessage.CloseParenOrCommaExpected);
 		}
 
 		private Expression ParseElementAccess(Expression expr)
 		{
 			var errorPos = _token.pos;
-			var args = ParseArgumentList(TokenId.OpenBracket, ErrorMessages.OpenParenExpected,
-				TokenId.CloseBracket, ErrorMessages.CloseBracketOrCommaExpected);
+			var args = ParseArgumentList(TokenId.OpenBracket, ErrorMessage.OpenParenExpected,
+				TokenId.CloseBracket, ErrorMessage.CloseBracketOrCommaExpected);
 			if (expr.Type.IsArray)
 			{
 				if (expr.Type.GetArrayRank() != args.Length)
@@ -2571,7 +2571,7 @@ namespace DynamicExpresso.Parsing
 
 		private string GetIdentifier()
 		{
-			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
+			ValidateToken(TokenId.Identifier, ErrorMessage.IdentifierExpected);
 			var id = _token.text;
 			if (id.Length > 1 && id[0] == '@')
 				id = id.Substring(1);
@@ -2585,7 +2585,7 @@ namespace DynamicExpresso.Parsing
 		}
 
 		// ReSharper disable once UnusedParameter.Local
-		private void ValidateToken(TokenId t, string errorMessage)
+		private void ValidateToken(TokenId t, ErrorMessage errorMessage)
 		{
 			if (_token.id != t)
 				throw ParseException.Create(_token.pos, errorMessage);
