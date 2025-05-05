@@ -995,16 +995,15 @@ namespace DynamicExpresso.Parsing
 			var innerParenthesesExpression = ParseExpressionSegment();
 			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrOperatorExpected);
 
-			var constExp = innerParenthesesExpression as ConstantExpression;
-			if (constExp != null && constExp.Value is Type)
+			if (innerParenthesesExpression is ConstantExpression constExp && constExp.Value is Type constType)
 			{
 				NextToken();
 
 				// we're in a cast expression, the next expression can only be a unary expression
 				var nextExpression = ParseUnary();
 
-				// cast: (constExp)nextExpression
-				return Expression.Convert(nextExpression, (Type)constExp.Value);
+				// cast: (constType)nextExpression
+				return Expression.Convert(nextExpression, constType);
 			}
 
 			NextToken();
@@ -1096,8 +1095,7 @@ namespace DynamicExpresso.Parsing
 			if (args.Length != 1)
 				throw ParseException.Create(errorPos, ErrorMessages.TypeofRequiresOneArg);
 
-			var constExp = args[0] as ConstantExpression;
-			if (constExp == null || !(constExp.Value is Type))
+			if (!(args[0] is ConstantExpression constExp && constExp.Value is Type))
 				throw ParseException.Create(errorPos, ErrorMessages.TypeofRequiresAType);
 
 			return constExp;
