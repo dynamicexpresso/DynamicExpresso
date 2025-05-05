@@ -1230,7 +1230,7 @@ namespace DynamicExpresso.Parsing
 				}
 				else
 				{
-					ParsePossibleMemberBinding(newType, originalPos, bindingList, actions, instance, allowCollectionInit);
+					ParsePossibleMemberBinding(newType, bindingList, actions, instance, allowCollectionInit);
 				}
 				if (_token.id != TokenId.Comma) break;
 				NextToken();
@@ -1244,7 +1244,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.MemberInit(newExpr, bindingList);
 		}
 
-		private void ParsePossibleMemberBinding(Type newType, int originalPos, List<MemberBinding> bindingList, List<Expression> actions, ParameterExpression instance, bool allowCollectionInit)
+		private void ParsePossibleMemberBinding(Type newType, List<MemberBinding> bindingList, List<Expression> actions, ParameterExpression instance, bool allowCollectionInit)
 		{
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
 
@@ -1674,7 +1674,7 @@ namespace DynamicExpresso.Parsing
 			}
 
 			if (TypeUtils.IsDynamicType(type) || IsDynamicExpression(instance))
-				return ParseDynamicProperty(type, instance, propertyOrFieldName);
+				return ParseDynamicProperty(instance, propertyOrFieldName);
 
 			throw ParseException.Create(errorPos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, TypeUtils.GetTypeName(type));
 		}
@@ -1788,7 +1788,7 @@ namespace DynamicExpresso.Parsing
 		//    return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
 		//}
 
-		private static Expression ParseDynamicProperty(Type type, Expression instance, string propertyOrFieldName)
+		private static Expression ParseDynamicProperty(Expression instance, string propertyOrFieldName)
 		{
 			return Expression.Dynamic(new LateGetMemberCallSiteBinder(propertyOrFieldName), typeof(object), instance);
 		}
@@ -1808,7 +1808,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.Dynamic(new LateInvokeDelegateCallSiteBinder(), typeof(object), argsDynamic);
 		}
 
-		private static Expression ParseDynamicIndex(Type type, Expression instance, Expression[] args)
+		private static Expression ParseDynamicIndex(Expression instance, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
@@ -1862,7 +1862,7 @@ namespace DynamicExpresso.Parsing
 			}
 
 			if (TypeUtils.IsDynamicType(expr.Type) || IsDynamicExpression(expr))
-				return ParseDynamicIndex(expr.Type, expr, args);
+				return ParseDynamicIndex(expr, args);
 
 			var applicableMethods = _memberFinder.FindIndexer(expr.Type, args);
 			if (applicableMethods.Count == 0)
