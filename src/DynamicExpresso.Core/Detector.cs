@@ -67,7 +67,7 @@ namespace DynamicExpresso
 					// there might be several lambda parameters with the same name
 					//  -> in that case, we ignore the detected type
 					if (lambdaParameters.TryGetValue(identifier, out var already) &&
-					    already.Expression.Type != type)
+						already.Expression.Type != type)
 						type = typeof(object);
 
 					var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
