@@ -12,19 +12,19 @@ namespace DynamicExpresso.Reflection
 
 		public static DelegateInfo GetDelegateInfo(Type delegateType, params string[] parametersNames)
 		{
-			MethodInfo method = delegateType.GetMethod("Invoke");
+			var method = delegateType.GetMethod("Invoke");
 			if (method == null)
 				throw new ArgumentException("The specified type is not a delegate");
 
 			var delegateParameters = method.GetParameters();
 			var parameters = new Parameter[delegateParameters.Length];
 
-			bool useCustomNames = parametersNames != null && parametersNames.Length > 0;
+			var useCustomNames = parametersNames != null && parametersNames.Length > 0;
 
 			if (useCustomNames && parametersNames.Length != parameters.Length)
 				throw new ArgumentException(string.Format("Provided parameters names doesn't match delegate parameters, {0} parameters expected.", parameters.Length));
 
-			for (int i = 0; i < parameters.Length; i++)
+			for (var i = 0; i < parameters.Length; i++)
 			{
 				var paramName = useCustomNames ? parametersNames[i] : delegateParameters[i].Name;
 				var paramType = delegateParameters[i].ParameterType;
