@@ -433,8 +433,7 @@ namespace DynamicExpresso.Parsing
 				var op = _token;
 				NextToken();
 
-				Type knownType;
-				if (!TryParseKnownType(_token.text, out knownType))
+				if (!TryParseKnownType(_token.text, out var knownType))
 					throw ParseException.Create(op.pos, ErrorMessages.TypeIdentifierExpected);
 
 				if (typeOperator == ParserConstants.KeywordIs)
