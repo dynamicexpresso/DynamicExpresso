@@ -1,6 +1,6 @@
-using DynamicExpresso.Parsing;
 using System;
 using System.Linq.Expressions;
+using DynamicExpresso.Parsing;
 
 namespace DynamicExpresso
 {
@@ -9,25 +9,25 @@ namespace DynamicExpresso
 		public const string This = "this";
 
 		public static readonly ReferenceType[] PrimitiveTypes = {
-            new ReferenceType(typeof(object)),
-            new ReferenceType(typeof(bool)),
-            new ReferenceType(typeof(char)),
-            new ReferenceType(typeof(string)),
-            new ReferenceType(typeof(sbyte)),
-            new ReferenceType(typeof(byte)),
-            new ReferenceType(typeof(short)),
-            new ReferenceType(typeof(ushort)),
-            new ReferenceType(typeof(int)),
-            new ReferenceType(typeof(uint)),
-            new ReferenceType(typeof(long)),
-            new ReferenceType(typeof(ulong)),
-            new ReferenceType(typeof(float)),
-            new ReferenceType(typeof(double)),
-            new ReferenceType(typeof(decimal)),
-            new ReferenceType(typeof(DateTime)),
-            new ReferenceType(typeof(TimeSpan)),
-            new ReferenceType(typeof(Guid))
-        };
+			new ReferenceType(typeof(object)),
+			new ReferenceType(typeof(bool)),
+			new ReferenceType(typeof(char)),
+			new ReferenceType(typeof(string)),
+			new ReferenceType(typeof(sbyte)),
+			new ReferenceType(typeof(byte)),
+			new ReferenceType(typeof(short)),
+			new ReferenceType(typeof(ushort)),
+			new ReferenceType(typeof(int)),
+			new ReferenceType(typeof(uint)),
+			new ReferenceType(typeof(long)),
+			new ReferenceType(typeof(ulong)),
+			new ReferenceType(typeof(float)),
+			new ReferenceType(typeof(double)),
+			new ReferenceType(typeof(decimal)),
+			new ReferenceType(typeof(DateTime)),
+			new ReferenceType(typeof(TimeSpan)),
+			new ReferenceType(typeof(Guid))
+		};
 
 		/// <summary>
 		/// Primitive types alias (string, int, ...)
@@ -54,10 +54,10 @@ namespace DynamicExpresso
 		/// Common .NET Types (Math, Convert, Enumerable)
 		/// </summary>
 		public static readonly ReferenceType[] CommonTypes = {
-            new ReferenceType(typeof(Math)),
-            new ReferenceType(typeof(Convert)),
-            new ReferenceType(typeof(System.Linq.Enumerable))
-        };
+			new ReferenceType(typeof(Math)),
+			new ReferenceType(typeof(Convert)),
+			new ReferenceType(typeof(System.Linq.Enumerable))
+		};
 
 		/// <summary>
 		/// true, false, null

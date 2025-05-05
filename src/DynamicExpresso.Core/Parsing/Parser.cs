@@ -65,7 +65,7 @@ namespace DynamicExpresso.Parsing
 
 		private Expression Parse()
 		{
-			Expression expr = ParseExpressionSegment(_arguments.ExpressionReturnType);
+			var expr = ParseExpressionSegment(_arguments.ExpressionReturnType);
 
 			ValidateToken(TokenId.End, ErrorMessages.SyntaxError);
 			return expr;
@@ -73,7 +73,7 @@ namespace DynamicExpresso.Parsing
 
 		private Expression ParseExpressionSegment(Type returnType)
 		{
-			int errorPos = _token.pos;
+			var errorPos = _token.pos;
 			var expression = ParseExpressionSegment();
 
 			if (returnType != typeof(void))
@@ -433,8 +433,7 @@ namespace DynamicExpresso.Parsing
 				var op = _token;
 				NextToken();
 
-				Type knownType;
-				if (!TryParseKnownType(_token.text, out knownType))
+				if (!TryParseKnownType(_token.text, out var knownType))
 					throw ParseException.Create(op.pos, ErrorMessages.TypeIdentifierExpected);
 
 				if (typeOperator == ParserConstants.KeywordIs)
@@ -810,7 +809,7 @@ namespace DynamicExpresso.Parsing
 				return source;
 
 			var builder = new StringBuilder(source.Length);
-			for (int i = 0; i < source.Length; i++)
+			for (var i = 0; i < source.Length; i++)
 			{
 				var c = source[i];
 				if (c == '\\')
@@ -920,7 +919,7 @@ namespace DynamicExpresso.Parsing
 			}
 			else
 			{
-				if (!long.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out long value))
+				if (!long.TryParse(text, ParseLiteralNumberStyle, ParseCulture, out var value))
 					throw ParseException.Create(_token.pos, ErrorMessages.InvalidIntegerLiteral, text);
 
 				NextToken();
@@ -941,17 +940,17 @@ namespace DynamicExpresso.Parsing
 
 			if (last == 'F' || last == 'f')
 			{
-				if (float.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out float f))
+				if (float.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out var f))
 					value = f;
 			}
 			else if (last == 'M' || last == 'm')
 			{
-				if (decimal.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out decimal dc))
+				if (decimal.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDecimalNumberStyle, ParseCulture, out var dc))
 					value = dc;
 			}
 			else if (last == 'D' || last == 'd')
 			{
-				if (double.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDoubleNumberStyle, ParseCulture, out double d))
+				if (double.TryParse(text.Substring(0, text.Length - 1), ParseLiteralDoubleNumberStyle, ParseCulture, out var d))
 					value = d;
 			}
 			else
@@ -959,17 +958,17 @@ namespace DynamicExpresso.Parsing
 				// No suffix find, use DefaultNumberType settigns if specified (Double default)
 				if (_defaultNumberType == DefaultNumberType.Decimal)
 				{
-					if (decimal.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out decimal dc))
+					if (decimal.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out var dc))
 						value = dc;
 				}
 				else if (_defaultNumberType == DefaultNumberType.Single)
 				{
-					if (float.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out float f))
+					if (float.TryParse(text, ParseLiteralDecimalNumberStyle, ParseCulture, out var f))
 						value = f;
 				}
 				else
 				{
-					if (double.TryParse(text, ParseLiteralDoubleNumberStyle, ParseCulture, out double d))
+					if (double.TryParse(text, ParseLiteralDoubleNumberStyle, ParseCulture, out var d))
 						value = d;
 				}
 			}
@@ -993,19 +992,18 @@ namespace DynamicExpresso.Parsing
 		{
 			ValidateToken(TokenId.OpenParen, ErrorMessages.OpenParenExpected);
 			NextToken();
-			Expression innerParenthesesExpression = ParseExpressionSegment();
+			var innerParenthesesExpression = ParseExpressionSegment();
 			ValidateToken(TokenId.CloseParen, ErrorMessages.CloseParenOrOperatorExpected);
 
-			var constExp = innerParenthesesExpression as ConstantExpression;
-			if (constExp != null && constExp.Value is Type)
+			if (innerParenthesesExpression is ConstantExpression constExp && constExp.Value is Type constType)
 			{
 				NextToken();
 
 				// we're in a cast expression, the next expression can only be a unary expression
 				var nextExpression = ParseUnary();
 
-				// cast: (constExp)nextExpression
-				return Expression.Convert(nextExpression, (Type)constExp.Value);
+				// cast: (constType)nextExpression
+				return Expression.Convert(nextExpression, constType);
 			}
 
 			NextToken();
@@ -1027,19 +1025,19 @@ namespace DynamicExpresso.Parsing
 			if (_token.text == ParserConstants.KeywordDefault)
 				return ParseDefaultOperator();
 
-			if (_arguments.TryGetIdentifier(_token.text, out Expression keywordExpression))
+			if (_arguments.TryGetIdentifier(_token.text, out var keywordExpression))
 			{
 				NextToken();
 				return keywordExpression;
 			}
 
-			if (_arguments.TryGetParameters(_token.text, out ParameterExpression parameterExpression))
+			if (_arguments.TryGetParameters(_token.text, out var parameterExpression))
 			{
 				NextToken();
 				return parameterExpression;
 			}
 
-			if (TryParseKnownType(_token.text, out Type knownType))
+			if (TryParseKnownType(_token.text, out var knownType))
 			{
 				return ParseTypeKeyword(knownType);
 			}
@@ -1097,8 +1095,7 @@ namespace DynamicExpresso.Parsing
 			if (args.Length != 1)
 				throw ParseException.Create(errorPos, ErrorMessages.TypeofRequiresOneArg);
 
-			var constExp = args[0] as ConstantExpression;
-			if (constExp == null || !(constExp.Value is Type))
+			if (!(args[0] is ConstantExpression constExp && constExp.Value is Type))
 				throw ParseException.Create(errorPos, ErrorMessages.TypeofRequiresAType);
 
 			return constExp;
@@ -1233,7 +1230,7 @@ namespace DynamicExpresso.Parsing
 				}
 				else
 				{
-					ParsePossibleMemberBinding(newType, originalPos, bindingList, actions, instance, allowCollectionInit);
+					ParsePossibleMemberBinding(newType, bindingList, actions, instance, allowCollectionInit);
 				}
 				if (_token.id != TokenId.Comma) break;
 				NextToken();
@@ -1247,7 +1244,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.MemberInit(newExpr, bindingList);
 		}
 
-		private void ParsePossibleMemberBinding(Type newType, int originalPos, List<MemberBinding> bindingList, List<Expression> actions, ParameterExpression instance, bool allowCollectionInit)
+		private void ParsePossibleMemberBinding(Type newType, List<MemberBinding> bindingList, List<Expression> actions, ParameterExpression instance, bool allowCollectionInit)
 		{
 			ValidateToken(TokenId.Identifier, ErrorMessages.IdentifierExpected);
 
@@ -1677,7 +1674,7 @@ namespace DynamicExpresso.Parsing
 			}
 
 			if (TypeUtils.IsDynamicType(type) || IsDynamicExpression(instance))
-				return ParseDynamicProperty(type, instance, propertyOrFieldName);
+				return ParseDynamicProperty(instance, propertyOrFieldName);
 
 			throw ParseException.Create(errorPos, ErrorMessages.UnknownPropertyOrField, propertyOrFieldName, TypeUtils.GetTypeName(type));
 		}
@@ -1791,7 +1788,7 @@ namespace DynamicExpresso.Parsing
 		//    return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
 		//}
 
-		private static Expression ParseDynamicProperty(Type type, Expression instance, string propertyOrFieldName)
+		private static Expression ParseDynamicProperty(Expression instance, string propertyOrFieldName)
 		{
 			return Expression.Dynamic(new LateGetMemberCallSiteBinder(propertyOrFieldName), typeof(object), instance);
 		}
@@ -1811,7 +1808,7 @@ namespace DynamicExpresso.Parsing
 			return Expression.Dynamic(new LateInvokeDelegateCallSiteBinder(), typeof(object), argsDynamic);
 		}
 
-		private static Expression ParseDynamicIndex(Type type, Expression instance, Expression[] args)
+		private static Expression ParseDynamicIndex(Expression instance, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
 			argsDynamic.Insert(0, instance);
@@ -1854,7 +1851,7 @@ namespace DynamicExpresso.Parsing
 				if (expr.Type.GetArrayRank() != args.Length)
 					throw ParseException.Create(errorPos, ErrorMessages.IncorrectNumberOfIndexes);
 
-				for (int i = 0; i < args.Length; i++)
+				for (var i = 0; i < args.Length; i++)
 				{
 					args[i] = ExpressionUtils.PromoteExpression(args[i], typeof(int));
 					if (args[i] == null)
@@ -1865,7 +1862,7 @@ namespace DynamicExpresso.Parsing
 			}
 
 			if (TypeUtils.IsDynamicType(expr.Type) || IsDynamicExpression(expr))
-				return ParseDynamicIndex(expr.Type, expr, args);
+				return ParseDynamicIndex(expr, args);
 
 			var applicableMethods = _memberFinder.FindIndexer(expr.Type, args);
 			if (applicableMethods.Count == 0)
@@ -1931,10 +1928,10 @@ namespace DynamicExpresso.Parsing
 			switch (expression.NodeType)
 			{
 				case ExpressionType.Index:
-					PropertyInfo indexer = ((IndexExpression)expression).Indexer;
+					var indexer = ((IndexExpression)expression).Indexer;
 					return indexer == null || indexer.CanWrite;
 				case ExpressionType.MemberAccess:
-					MemberInfo member = ((MemberExpression)expression).Member;
+					var member = ((MemberExpression)expression).Member;
 					var prop = member as PropertyInfo;
 					if (prop != null)
 						return prop.CanWrite;
@@ -2400,8 +2397,8 @@ namespace DynamicExpresso.Parsing
 					break;
 				case '"':
 					NextChar();
-					bool isEscapeS = false;
-					bool isEndS = _parseChar == '\"';
+					var isEscapeS = false;
+					var isEndS = _parseChar == '\"';
 					while (_parsePosition < _expressionTextLength && !isEndS)
 					{
 						isEscapeS = _parseChar == '\\' && !isEscapeS;
@@ -2418,8 +2415,8 @@ namespace DynamicExpresso.Parsing
 					break;
 				case '\'':
 					NextChar();
-					bool isEscapeC = false;
-					bool isEndC = false;
+					var isEscapeC = false;
+					var isEndC = false;
 					while (_parsePosition < _expressionTextLength && !isEndC)
 					{
 						isEscapeC = _parseChar == '\\' && !isEscapeC;

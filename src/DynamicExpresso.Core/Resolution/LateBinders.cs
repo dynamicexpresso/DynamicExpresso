@@ -110,11 +110,9 @@ namespace DynamicExpresso.Resolution
 
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
-			// the first argument is the delegate to invoke
-			var _delegate = (Delegate)args[0];
 			var argumentInfo = parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)).ToArray();
 
-			// instruct the compiler that we already know the delegate's type
+			// the first argument is the delegate to invoke: instruct the compiler that we already know its type
 			argumentInfo[0] = CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null);
 
 			var binderM = Binder.Invoke(
