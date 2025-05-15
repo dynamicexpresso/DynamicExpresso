@@ -7,29 +7,23 @@ namespace DynamicExpresso.Parsing
 {
 	internal static class ParseSignatures
 	{
-		private static MethodData[] MakeUnarySignatures(params Type[] possibleOperandTypes)
+		private static SimpleMethodSignature[] MakeUnarySignatures(params Type[] possibleOperandTypes)
 		{
-			var signatures = new MethodData[possibleOperandTypes.Length];
+			var signatures = new SimpleMethodSignature[possibleOperandTypes.Length];
 			for (var i = 0; i < possibleOperandTypes.Length; i++)
 			{
-				signatures[i] = new MethodData
-				{
-					Parameters = new[] { new SimpleParameterInfo(possibleOperandTypes[i]) },
-				};
+				signatures[i] = new SimpleMethodSignature(possibleOperandTypes[i]);
 			}
 			return signatures;
 		}
 
-		private static MethodData[] MakeBinarySignatures(IList<(Type, Type)> possibleOperandTypes)
+		private static SimpleMethodSignature[] MakeBinarySignatures(IList<(Type, Type)> possibleOperandTypes)
 		{
-			var signatures = new MethodData[possibleOperandTypes.Count];
+			var signatures = new SimpleMethodSignature[possibleOperandTypes.Count];
 			for (var i = 0; i < possibleOperandTypes.Count; i++)
 			{
 				var (left, right) = possibleOperandTypes[i];
-				signatures[i] = new MethodData
-				{
-					Parameters = new[] { new SimpleParameterInfo(left), new SimpleParameterInfo(right) },
-				};
+				signatures[i] = new SimpleMethodSignature(left, right);
 			}
 			return signatures;
 		}
@@ -37,7 +31,7 @@ namespace DynamicExpresso.Parsing
 		/// <summary>
 		/// Signatures for the binary logical operators.
 		/// </summary>
-		public static MethodData[] LogicalSignatures = MakeBinarySignatures(new[]
+		public static SimpleMethodSignature[] LogicalSignatures = MakeBinarySignatures(new[]
 		{
 			(typeof(bool),  typeof(bool) ),
 			(typeof(bool?), typeof(bool?)),
@@ -46,7 +40,7 @@ namespace DynamicExpresso.Parsing
 		/// <summary>
 		/// Signatures for the binary arithmetic operators.
 		/// </summary>
-		public static MethodData[] ArithmeticSignatures = MakeBinarySignatures(new[]
+		public static SimpleMethodSignature[] ArithmeticSignatures = MakeBinarySignatures(new[]
 		{
 			(typeof(int),      typeof(int)     ),
 			(typeof(uint),     typeof(uint)    ),
@@ -67,7 +61,7 @@ namespace DynamicExpresso.Parsing
 		/// <summary>
 		/// Signatures for the binary relational operators.
 		/// </summary>
-		public static MethodData[] RelationalSignatures = ArithmeticSignatures.Concat(MakeBinarySignatures(new[]
+		public static SimpleMethodSignature[] RelationalSignatures = ArithmeticSignatures.Concat(MakeBinarySignatures(new[]
 		{
 			(typeof(string),    typeof(string)   ),
 			(typeof(char),      typeof(char)     ),
@@ -81,12 +75,12 @@ namespace DynamicExpresso.Parsing
 		/// <summary>
 		/// Signatures for the binary equality operators.
 		/// </summary>
-		public static MethodData[] EqualitySignatures = RelationalSignatures.Concat(LogicalSignatures).ToArray();
+		public static SimpleMethodSignature[] EqualitySignatures = RelationalSignatures.Concat(LogicalSignatures).ToArray();
 
 		/// <summary>
 		/// Signatures for the binary + operators.
 		/// </summary>
-		public static MethodData[] AddSignatures = ArithmeticSignatures.Concat(MakeBinarySignatures(new[]
+		public static SimpleMethodSignature[] AddSignatures = ArithmeticSignatures.Concat(MakeBinarySignatures(new[]
 		{
 			(typeof(DateTime),  typeof(TimeSpan) ),
 			(typeof(TimeSpan),  typeof(TimeSpan) ),
@@ -97,7 +91,7 @@ namespace DynamicExpresso.Parsing
 		/// <summary>
 		/// Signatures for the binary - operators.
 		/// </summary>
-		public static MethodData[] SubtractSignatures = AddSignatures.Concat(MakeBinarySignatures(new[]
+		public static SimpleMethodSignature[] SubtractSignatures = AddSignatures.Concat(MakeBinarySignatures(new[]
 		{
 			(typeof(DateTime),  typeof(DateTime)),
 			(typeof(DateTime?), typeof(DateTime?)),
@@ -106,7 +100,7 @@ namespace DynamicExpresso.Parsing
 		/// <summary>
 		/// Signatures for the unary - operators.
 		/// </summary>
-		public static MethodData[] NegationSignatures = MakeUnarySignatures(
+		public static SimpleMethodSignature[] NegationSignatures = MakeUnarySignatures(
 			typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal),
 			typeof(int?), typeof(uint?), typeof(long?), typeof(ulong?), typeof(float?), typeof(double?), typeof(decimal?)
 		);
@@ -114,12 +108,12 @@ namespace DynamicExpresso.Parsing
 		/// <summary>
 		/// Signatures for the unary not (!) operator.
 		/// </summary>
-		public static MethodData[] NotSignatures = MakeUnarySignatures(typeof(bool), typeof(bool?));
+		public static SimpleMethodSignature[] NotSignatures = MakeUnarySignatures(typeof(bool), typeof(bool?));
 
 		/// <summary>
 		/// Signatures for the bitwise completement operators.
 		/// </summary>
-		public static MethodData[] BitwiseComplementSignatures = MakeUnarySignatures(
+		public static SimpleMethodSignature[] BitwiseComplementSignatures = MakeUnarySignatures(
 			typeof(int), typeof(uint), typeof(long), typeof(ulong),
 			typeof(int?), typeof(uint?), typeof(long?), typeof(ulong?)
 		);
@@ -127,7 +121,7 @@ namespace DynamicExpresso.Parsing
 		/// <summary>
 		/// Signatures for the left and right shift operators.
 		/// </summary>
-		public static MethodData[] ShiftSignatures = MakeBinarySignatures(new[]
+		public static SimpleMethodSignature[] ShiftSignatures = MakeBinarySignatures(new[]
 		{
 			(typeof(int),   typeof(int) ),
 			(typeof(uint),  typeof(int) ),

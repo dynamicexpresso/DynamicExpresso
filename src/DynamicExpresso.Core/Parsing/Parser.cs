@@ -1893,14 +1893,14 @@ namespace DynamicExpresso.Parsing
 		//	return GetNonNullableType(type).IsEnum;
 		//}
 
-		private void CheckAndPromoteOperand(MethodData[] unarySignatures, ref Expression expr)
+		private void CheckAndPromoteOperand(MethodBase[] unarySignatures, ref Expression expr)
 		{
 			var args = PrepareOperandArguments(unarySignatures, new[] { expr });
 
 			expr = args[0];
 		}
 
-		private void CheckAndPromoteOperands(MethodData[] binarySignatures, ref Expression left, ref Expression right)
+		private void CheckAndPromoteOperands(MethodBase[] binarySignatures, ref Expression left, ref Expression right)
 		{
 			// if one of the operands is the nullable version of the other, promote the non-nullablte to the nullable version
 			if (TypeUtils.TryGetNonNullableType(left.Type, out var nonNullableLeftType) && nonNullableLeftType == right.Type)
@@ -1914,7 +1914,7 @@ namespace DynamicExpresso.Parsing
 			right = args[1];
 		}
 
-		private IList<Expression> PrepareOperandArguments(MethodData[] signatures, Expression[] args)
+		private IList<Expression> PrepareOperandArguments(MethodBase[] signatures, Expression[] args)
 		{
 			var applicableMethods = MethodResolution.FindBestMethod(signatures, args);
 			if (applicableMethods.Count == 1)
