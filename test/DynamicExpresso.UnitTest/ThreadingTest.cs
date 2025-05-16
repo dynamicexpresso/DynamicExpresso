@@ -67,5 +67,30 @@ namespace DynamicExpresso.UnitTest
 				await taskToRunLater;
 			}
 		}
+
+		[Test]
+		public void Should_Pass_Parallel_Eval()
+		{
+			var target = new Interpreter();
+			var conds = Enumerable.Repeat("Country != \"France\"", 10);
+			var parameters = new[] { new Parameter("Country", "Italy") };
+			Parallel.ForEach(conds, exp =>
+			{
+				Assert.That(target.Eval(exp, parameters), Is.True);
+			});
+		}
+
+		[Test]
+		public void Should_Fail_Parallel_Eval()
+		{
+			var target = new Interpreter();
+			var conds = Enumerable.Repeat("Country != \"France\"", 10);
+
+			Parallel.ForEach(conds, exp =>
+			{
+				var parameters = new[] { new Parameter("Country", "Italy") };
+				Assert.That(target.Eval(exp, parameters), Is.True);
+			});
+		}
 	}
 }
