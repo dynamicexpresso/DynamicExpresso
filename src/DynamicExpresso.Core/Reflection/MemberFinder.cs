@@ -49,7 +49,7 @@ namespace DynamicExpresso.Reflection
 
 			public int GetHashCode(MemberTypeKey obj)
 			{
-				return obj._type.GetHashCode() ^ obj._flags.GetHashCode() ^ StringComparer.InvariantCulture.GetHashCode(obj._memberName);
+				return obj._type.GetHashCode() ^ obj._flags.GetHashCode() ^ StringComparer.OrdinalIgnoreCase.GetHashCode(obj._memberName);
 			}
 		}
 
@@ -106,10 +106,6 @@ namespace DynamicExpresso.Reflection
 						members = subMembers;
 					}
 				}
-			}
-			if (members.Length == 0)
-			{
-				members = Array.Empty<MemberInfo>();
 			}
 			_members[key] = members;
 			return members;
@@ -211,7 +207,7 @@ namespace DynamicExpresso.Reflection
 
 		private static IEnumerable<Type> AddInterface(HashSet<Type> types, Type type)
 		{
-			if (!types.Contains(type))
+			if (types.Add(type))
 			{
 				yield return type;
 				foreach (var i in type.GetInterfaces().SelectMany(x => AddInterface(types, x)))
