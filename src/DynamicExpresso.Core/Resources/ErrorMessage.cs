@@ -7,20 +7,9 @@ namespace DynamicExpresso.Resources
 	/// <summary>
 	/// Used to provide a lazily accessed Error Message.
 	/// </summary>
-	public class ErrorMessage
+	internal sealed class ErrorMessage
 	{
-		private readonly string _message;
 		private readonly Func<string> _getMessage;
-
-		/// <summary>
-		/// Initializes this instance to return the provided message.
-		/// </summary>
-		/// <param name="message"></param>
-		public ErrorMessage(string message)
-		{
-			_message = message;
-			_getMessage = null;
-		}
 
 		/// <summary>
 		/// Initializes this instance to call the provided method to retrieve the message.
@@ -28,7 +17,6 @@ namespace DynamicExpresso.Resources
 		/// <param name="message"></param>
 		public ErrorMessage(Func<string> message)
 		{
-			_message = null;
 			_getMessage = message;
 		}
 
@@ -38,7 +26,7 @@ namespace DynamicExpresso.Resources
 		/// <returns></returns>
 		public override string ToString()
 		{
-			return _message ?? _getMessage();
+			return _getMessage();
 		}
 
 		public static implicit operator string(ErrorMessage message)
