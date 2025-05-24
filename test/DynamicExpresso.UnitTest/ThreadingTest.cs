@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -90,6 +91,21 @@ namespace DynamicExpresso.UnitTest
 			{
 				var parameters = new[] { new Parameter("Country", "Italy") };
 				Assert.That(target.Eval(exp, parameters), Is.True);
+			});
+		}
+
+		[Test]
+		public void Should_Pass_Parallel_Invoke_MethodGroup()
+		{
+			var interpreter = new Interpreter();
+
+			Func<IEnumerable<int>, int> minFunc = Enumerable.Min;
+			interpreter.SetFunction("min", minFunc);
+
+			Parallel.ForEach(Enumerable.Range(1, 25), i =>
+			{
+				var arguments = new[] { i, i + 1, i + 2 };
+				Assert.That(interpreter.Eval("min(x)", new Parameter("x", arguments)), Is.EqualTo(i));
 			});
 		}
 	}

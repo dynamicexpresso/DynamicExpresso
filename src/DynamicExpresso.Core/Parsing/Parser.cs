@@ -1349,10 +1349,14 @@ namespace DynamicExpresso.Parsing
 			var args = ParseArgumentList();
 
 			var invokeMethod = MemberFinder.FindInvokeMethod(expr.Type);
-			if (invokeMethod == null || !MethodResolution.CheckIfMethodIsApplicableAndPrepareIt(invokeMethod, args))
-				throw ParseException.Create(errorPos, error);
+			if (invokeMethod != null)
+			{
+				var invokeMethodData = MethodData.Gen(invokeMethod);
+				if (MethodResolution.CheckIfMethodIsApplicableAndPrepareIt(invokeMethodData, args))
+					return Expression.Invoke(expr, invokeMethodData.PromotedParameters);
+			}
 
-			return Expression.Invoke(expr, invokeMethod.PromotedParameters);
+			throw ParseException.Create(errorPos, error);
 		}
 
 		private Expression ParseMethodGroupInvocation(MethodGroupExpression methodGroup, int errorPos)
@@ -1378,7 +1382,7 @@ namespace DynamicExpresso.Parsing
 				if (args.Any(IsDynamicExpression))
 				{
 					// TODO: we could try to find the best method by using the dynamic binder
-					var candidatesWithSameArgumentCount = candidates.Where(_ => _.Method.Parameters.Count == args.Length).ToList();
+					var candidatesWithSameArgumentCount = candidates.Where(_ => _.Method.GetParameters().Length == args.Length).ToList();
 					if (candidatesWithSameArgumentCount.Count == 1)
 						return ParseDynamicMethodGroupInvocation(candidatesWithSameArgumentCount[0].Delegate, args);
 				}
