@@ -52,7 +52,7 @@ namespace DynamicExpresso.Reflection
 
 		// this method is static, because we know that the Invoke method of a delegate always has this exact name
 		// and therefore we never need to search for it in case-insensitive mode
-		public static MethodData FindInvokeMethod(Type type)
+		public static MethodBase FindInvokeMethod(Type type)
 		{
 			var flags = BindingFlags.Public | BindingFlags.DeclaredOnly |
 						BindingFlags.Instance;
@@ -63,7 +63,7 @@ namespace DynamicExpresso.Reflection
 					.SingleOrDefault();
 
 				if (method != null)
-					return MethodData.Gen(method);
+					return method;
 			}
 
 			return null;

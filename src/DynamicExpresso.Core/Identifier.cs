@@ -46,21 +46,21 @@ namespace DynamicExpresso
 		{
 			public Delegate Delegate { get; }
 
-			private MethodData _methodData;
-			public MethodData Method
+			private MethodBase _method;
+			public MethodBase Method
 			{
 				get
 				{
-					if (_methodData == null)
-						_methodData = MethodData.Gen(Delegate.Method);
+					if (_method == null)
+						_method = Delegate.Method;
 
-					return _methodData;
+					return _method;
 				}
 			}
 
 			// we'll most likely never need this: it was needed before https://github.com/dotnet/roslyn/pull/53402
-			private MethodData _invokeMethod;
-			public MethodData InvokeMethod
+			private MethodBase _invokeMethod;
+			public MethodBase InvokeMethod
 			{
 				get
 				{
@@ -135,12 +135,12 @@ namespace DynamicExpresso
 			{
 				if (usedInvokeMethod)
 				{
-					if (overload.InvokeMethod.MethodBase == methodData.MethodBase)
+					if (methodData.MethodBase == overload.InvokeMethod)
 						return overload.Delegate;
 				}
 				else
 				{
-					if (overload.Method.MethodBase == methodData.MethodBase)
+					if (methodData.MethodBase == overload.Method)
 						return overload.Delegate;
 				}
 			}
