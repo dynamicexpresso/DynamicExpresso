@@ -891,6 +891,16 @@ namespace DynamicExpresso.UnitTest
 
 			Assert.That(interpreter.Eval<Guid>("b.ReturnsGuid()"), Is.EqualTo(Guid.Empty));
 		}
+
+		[Test]
+		public void GitHub_Issue_367()
+		{
+			var interpreter = new DynamicExpresso.Interpreter();
+			interpreter.SetVariable("MyValue", null, typeof(int?));
+
+			var result = interpreter.Eval<int>("MyValue ?? 10");
+			Assert.That(result, Is.EqualTo(10));
+		}
 	}
 
 	internal static class GithubIssuesTestExtensionsMethods
