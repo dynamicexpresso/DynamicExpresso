@@ -249,7 +249,16 @@ namespace DynamicExpresso.Parsing
 			{
 				NextToken();
 				var exprRight = ParseExpressionSegment();
-				expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), exprRight, expr, errorPos);
+				if (TypeUtils.IsNullableType(expr.Type))
+				{
+					// expr.HasValue ? expr.Value : exprRight
+					expr = GenerateConditional(GenerateGetNullableHasValue(expr), GenerateGetNullableValue(expr), exprRight, errorPos);
+				}
+				else
+				{
+					// expr == null ? exprRight : expr
+					expr = GenerateConditional(GenerateEqual(expr, ParserConstants.NullLiteralExpression), exprRight, expr, errorPos);
+				}
 			}
 			else if (_token.id == TokenId.Question)
 			{
@@ -732,6 +741,16 @@ namespace DynamicExpresso.Parsing
 				}
 			}
 			return expr;
+		}
+
+		/// <summary>
+		/// Generate a call to the HasValue property of the Nullable type */
+		/// </summary>
+		private Expression GenerateGetNullableHasValue(Expression expr)
+		{
+			if (!TypeUtils.IsNullableType(expr.Type))
+				return expr;
+			return GeneratePropertyOrFieldExpression(expr.Type, expr, _token.pos, "HasValue");
 		}
 
 		/// <summary>
