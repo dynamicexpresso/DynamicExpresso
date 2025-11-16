@@ -16,16 +16,73 @@ namespace DynamicExpresso
 	{
 		private readonly Expression _expression;
 		private readonly ParserArguments _parserArguments;
-		private readonly Lazy<Delegate> _delegate;
 
-		internal Lambda(Expression expression, ParserArguments parserArguments)
+		// Delegate whose parameters are in UsedParameters order.
+		private readonly Lazy<Delegate> _delegate;
+		private readonly bool _preferInterpretation;
+
+		// Snapshots taken at construction time so we don't re-enumerate and allocate on every call.
+		private readonly Parameter[] _usedParameters;
+		private readonly ParameterExpression[] _declaredParameterExpressions;
+
+		// For each used parameter index, which declared parameter index it corresponds to.
+		private readonly int[] _usedToDeclaredIndex;
+		private readonly int _declaredCount;
+		private readonly int _usedCount;
+
+		// Fast path: declared-order object[] -> result.
+		private readonly Lazy<Func<object[], object>> _fastInvokerFromDeclared;
+
+		internal Lambda(Expression expression, ParserArguments parserArguments, bool preferInterpretation = false)
 		{
 			_expression = expression ?? throw new ArgumentNullException(nameof(expression));
 			_parserArguments = parserArguments ?? throw new ArgumentNullException(nameof(parserArguments));
 
-			// Note: I always lazy compile the generic lambda. Maybe in the future this can be a setting because if I generate a typed delegate this compilation is not required.
+			_preferInterpretation = preferInterpretation;
+
+			// Snapshot parameters once: avoids repeated enumeration/allocation.
+			var declaredParameters = _parserArguments.DeclaredParameters.ToArray();
+			_usedParameters = _parserArguments.UsedParameters.ToArray();
+
+			_declaredParameterExpressions = declaredParameters.Select(p => p.Expression).ToArray();
+
+			_declaredCount = declaredParameters.Length;
+			_usedCount = _usedParameters.Length;
+
 			_delegate = new Lazy<Delegate>(() =>
-				Expression.Lambda(_expression, _parserArguments.UsedParameters.Select(p => p.Expression).ToArray()).Compile());
+				Expression.Lambda(_expression, _usedParameters.Select(p => p.Expression).ToArray())
+					.Compile(_preferInterpretation));
+
+			// Precompute used-index -> declared-index mapping for the fast path.
+			if (_usedCount > 0)
+			{
+				if (_declaredCount == 0)
+					throw new InvalidOperationException("Used parameters exist but there are no declared parameters.");
+
+				var nameToDeclaredIndex =
+					new Dictionary<string, int>(_declaredCount, _parserArguments.Settings.KeyComparer);
+				for (var i = 0; i < declaredParameters.Length; i++)
+				{
+					nameToDeclaredIndex[declaredParameters[i].Name] = i;
+				}
+
+				_usedToDeclaredIndex = new int[_usedCount];
+				for (var i = 0; i < _usedCount; i++)
+				{
+					var usedName = _usedParameters[i].Name;
+					if (!nameToDeclaredIndex.TryGetValue(usedName, out var declaredIndex))
+						throw new InvalidOperationException(
+							$"Used parameter '{usedName}' was not found in declared parameters.");
+
+					_usedToDeclaredIndex[i] = declaredIndex;
+				}
+			}
+			else
+			{
+				_usedToDeclaredIndex = Array.Empty<int>();
+			}
+
+			_fastInvokerFromDeclared = new Lazy<Func<object[], object>>(BuildFastInvokerFromDeclared);
 		}
 
 		public Expression Expression { get { return _expression; } }
@@ -45,6 +102,7 @@ namespace DynamicExpresso
 		/// </summary>
 		/// <value>The used parameters.</value>
 		public IEnumerable<Parameter> UsedParameters { get { return _parserArguments.UsedParameters; } }
+
 		/// <summary>
 		/// Gets the parameters declared when parsing the expression.
 		/// </summary>
@@ -56,7 +114,14 @@ namespace DynamicExpresso
 
 		public object Invoke()
 		{
-			return InvokeWithUsedParameters(new object[0]);
+			if (_usedCount == 0)
+			{
+				return _fastInvokerFromDeclared.Value(Array.Empty<object>());
+			}
+
+			// Fallback: preserve the original behavior where missing parameters
+			// TargetParameterCountException is likely to be thrown.
+			return InvokeWithUsedParameters(Array.Empty<object>());
 		}
 
 		public object Invoke(params Parameter[] parameters)
@@ -64,46 +129,97 @@ namespace DynamicExpresso
 			return Invoke((IEnumerable<Parameter>)parameters);
 		}
 
+		/// <summary>
+		/// Invoke the expression with the given named parameters.
+		/// Parameters are matched by name against the parameters actually used in the expression.
+		/// </summary>
 		public object Invoke(IEnumerable<Parameter> parameters)
 		{
-			var args = (from usedParameter in UsedParameters
-						from actualParameter in parameters
-						where usedParameter.Name.Equals(actualParameter.Name, _parserArguments.Settings.KeyComparison)
-						select actualParameter.Value)
-				.ToArray();
+			if (parameters == null)
+				throw new ArgumentNullException(nameof(parameters));
 
-			return InvokeWithUsedParameters(args);
-		}
+			var paramList = parameters as IList<Parameter> ?? parameters.ToArray();
+			var matchedValues = new List<object>(_usedCount);
 
-		/// <summary>
-		/// Invoke the expression with the given parameters values.
-		/// </summary>
-		/// <param name="args">Order of parameters must be the same of the parameters used during parse (DeclaredParameters).</param>
-		/// <returns></returns>
-		public object Invoke(params object[] args)
-		{
-			var parameters = new List<Parameter>();
-			var declaredParameters = DeclaredParameters.ToArray();
-
-			if (args != null)
+			foreach (var used in _usedParameters)
 			{
-				if (declaredParameters.Length != args.Length)
-					throw new InvalidOperationException(ErrorMessages.ArgumentCountMismatch);
-
-				for (var i = 0; i < args.Length; i++)
+				foreach (var actual in paramList)
 				{
-					var parameter = new Parameter(
-						declaredParameters[i].Name,
-						declaredParameters[i].Type,
-						args[i]);
-
-					parameters.Add(parameter);
+					if (actual != null &&
+					    used.Name.Equals(actual.Name, _parserArguments.Settings.KeyComparison))
+					{
+						matchedValues.Add(actual.Value);
+					}
 				}
 			}
 
-			return Invoke(parameters);
+			if (_usedCount == 0)
+			{
+				return _fastInvokerFromDeclared.Value(Array.Empty<object>());
+			}
+
+			if (matchedValues.Count == _usedCount)
+			{
+				var declaredArgs = new object[_declaredCount];
+				for (var i = 0; i < _usedCount; i++)
+				{
+					var declaredIndex = _usedToDeclaredIndex[i];
+					declaredArgs[declaredIndex] = matchedValues[i];
+				}
+
+				return Invoke(declaredArgs);
+			}
+
+			return InvokeWithUsedParameters(matchedValues.ToArray());
 		}
 
+		/// <summary>
+		/// Invoke the expression with the given parameter values.
+		/// The values are in the same order as the parameters declared when parsing (DeclaredParameters).
+		/// Only the parameters actually used in the expression are passed to the underlying delegate.
+		/// </summary>
+		/// <param name="args">Values for declared parameters, in declared order.</param>
+		public object Invoke(params object[] args)
+		{
+			if (args == null)
+			{
+				return Invoke();
+			}
+
+			if (_declaredCount != args.Length)
+				throw new InvalidOperationException(ErrorMessages.ArgumentCountMismatch);
+
+			// No parameters are actually used: ignore any supplied values.
+			if (_usedCount == 0)
+			{
+				return _fastInvokerFromDeclared.Value(Array.Empty<object>());
+			}
+
+			// Fast path: all values already directly assignable to the expected parameter types.
+			if (CanUseFastInvoker(args))
+			{
+				try
+				{
+					return _fastInvokerFromDeclared.Value(args);
+				}
+				catch (TargetInvocationException exc)
+				{
+					if (exc.InnerException != null)
+						ExceptionDispatchInfo.Capture(exc.InnerException).Throw();
+
+					throw;
+				}
+			}
+
+			var usedArgs = BuildUsedArgsFromDeclared(args);
+			return InvokeWithUsedParameters(usedArgs);
+		}
+
+		/// <summary>
+		/// orderedUsedArgs must be in UsedParameters order (the same order used to compile _delegate).
+		/// This method preserves the original DynamicInvoke-based behavior, including exception types
+		/// for mismatched argument counts and conversion failures.
+		/// </summary>
 		private object InvokeWithUsedParameters(object[] orderedArgs)
 		{
 			try
@@ -119,6 +235,125 @@ namespace DynamicExpresso
 			}
 		}
 
+		private object[] BuildUsedArgsFromDeclared(object[] declaredArgs)
+		{
+			if (_usedCount == 0)
+				return Array.Empty<object>();
+
+			var used = new object[_usedCount];
+			for (var i = 0; i < _usedCount; i++)
+			{
+				var declaredIndex = _usedToDeclaredIndex[i];
+				used[i] = declaredArgs[declaredIndex];
+			}
+
+			return used;
+		}
+
+		private bool CanUseFastInvoker(object[] declaredArgs)
+		{
+			if (_usedCount == 0)
+				return true;
+
+			if (declaredArgs == null || declaredArgs.Length != _declaredCount)
+				return false;
+
+			for (var i = 0; i < _usedCount; i++)
+			{
+				var declaredIndex = _usedToDeclaredIndex[i];
+				var value = declaredArgs[declaredIndex];
+				var targetType = _usedParameters[i].Type;
+
+				if (!IsDirectlyAssignable(value, targetType))
+					return false;
+			}
+
+			return true;
+		}
+
+		private static bool IsDirectlyAssignable(object value, Type targetType)
+		{
+			if (targetType == typeof(object))
+				return true;
+
+			var underlying = Nullable.GetUnderlyingType(targetType);
+
+			if (value == null)
+			{
+				// null is allowed for reference types and Nullable<T>
+				return underlying != null || !targetType.IsValueType;
+			}
+
+			// If it's a Nullable<T>, we allow values of T directly.
+			var effectiveType = underlying ?? targetType;
+			return effectiveType.IsInstanceOfType(value);
+		}
+
+		private Func<object[], object> BuildFastInvokerFromDeclared()
+		{
+			// Ensure the underlying delegate is compiled once.
+			var del = _delegate.Value;
+			var delType = del.GetType();
+
+			var argsParam = Expression.Parameter(typeof(object[]), "args");
+
+			Expression body;
+
+			if (_usedCount == 0)
+			{
+				var invokeExpr = Expression.Invoke(Expression.Constant(del, delType));
+				if (invokeExpr.Type == typeof(void))
+				{
+					body = Expression.Block(invokeExpr, Expression.Constant(null, typeof(object)));
+				}
+				else if (invokeExpr.Type.IsValueType)
+				{
+					body = Expression.Convert(invokeExpr, typeof(object));
+				}
+				else
+				{
+					body = invokeExpr;
+				}
+			}
+			else
+			{
+				var callArgs = new Expression[_usedCount];
+
+				for (var i = 0; i < _usedCount; i++)
+				{
+					var declaredIndex = _usedToDeclaredIndex[i];
+
+					// args[declaredIndex]
+					var indexExpr = Expression.Constant(declaredIndex);
+					var accessExpr = Expression.ArrayIndex(argsParam, indexExpr);
+
+					// We only use this fast path when IsDirectlyAssignable has already confirmed
+					// that the runtime value is compatible with the target type, so this Convert
+					// can't introduce new InvalidCastExceptions compared to DynamicInvoke.
+					var converted = Expression.Convert(accessExpr, _usedParameters[i].Type);
+					callArgs[i] = converted;
+				}
+
+				var invokeExpr = Expression.Invoke(Expression.Constant(del, delType), callArgs);
+
+				if (invokeExpr.Type == typeof(void))
+				{
+					body = Expression.Block(invokeExpr, Expression.Constant(null, typeof(object)));
+				}
+				else if (invokeExpr.Type.IsValueType)
+				{
+					body = Expression.Convert(invokeExpr, typeof(object));
+				}
+				else
+				{
+					body = invokeExpr;
+				}
+			}
+
+			var lambda = Expression.Lambda<Func<object[], object>>(body, argsParam);
+			return lambda.Compile(_preferInterpretation);
+		}
+
 		public override string ToString()
 		{
 			return ExpressionText;
@@ -127,7 +362,10 @@ namespace DynamicExpresso
 		/// <summary>
 		/// Generate the given delegate by compiling the lambda expression.
 		/// </summary>
-		/// <typeparam name="TDelegate">The delegate to generate. Delegate parameters must match the one defined when creating the expression, see UsedParameters.</typeparam>
+		/// <typeparam name="TDelegate">
+		/// The delegate to generate. Delegate parameters must match the ones defined
+		/// when creating the expression, see DeclaredParameters.
+		/// </typeparam>
 		public TDelegate Compile<TDelegate>()
 		{
 			var lambdaExpression = LambdaExpression<TDelegate>();
@@ -145,22 +383,25 @@ namespace DynamicExpresso
 		/// Generate a lambda expression.
 		/// </summary>
 		/// <returns>The lambda expression.</returns>
-		/// <typeparam name="TDelegate">The delegate to generate. Delegate parameters must match the one defined when creating the expression, see UsedParameters.</typeparam>
+		/// <typeparam name="TDelegate">
+		/// The delegate to generate. Delegate parameters must match the ones defined
+		/// when creating the expression, see DeclaredParameters.
+		/// </typeparam>
 		public Expression<TDelegate> LambdaExpression<TDelegate>()
 		{
-			return Expression.Lambda<TDelegate>(_expression, DeclaredParameters.Select(p => p.Expression).ToArray());
+			return Expression.Lambda<TDelegate>(_expression, _declaredParameterExpressions);
 		}
 
 		internal LambdaExpression LambdaExpression(Type delegateType)
 		{
-			var parameterExpressions = DeclaredParameters.Select(p => p.Expression).ToArray();
+			var parameterExpressions = _declaredParameterExpressions;
 			var types = delegateType.GetGenericArguments();
 
 			// return type
-			if (delegateType.GetGenericTypeDefinition() == ReflectionExtensions.GetFuncType(parameterExpressions.Length))
+			var genericType = delegateType.GetGenericTypeDefinition();
+			if (genericType == ReflectionExtensions.GetFuncType(parameterExpressions.Length))
 				types[types.Length - 1] = _expression.Type;
 
-			var genericType = delegateType.GetGenericTypeDefinition();
 			var inferredDelegateType = genericType.MakeGenericType(types);
 			return Expression.Lambda(inferredDelegateType, _expression, parameterExpressions);
 		}
