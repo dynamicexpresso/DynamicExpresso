@@ -22,11 +22,15 @@ namespace DynamicExpresso
 		private readonly bool _preferInterpretation;
 
 		// Snapshots taken at construction time so we don't re-enumerate and allocate on every call.
+		private readonly Parameter[] _declaredParameters;
 		private readonly Parameter[] _usedParameters;
 		private readonly ParameterExpression[] _declaredParameterExpressions;
 
 		// For each used parameter index, which declared parameter index it corresponds to.
 		private readonly int[] _usedToDeclaredIndex;
+		private readonly bool _allUsedAndInDeclaredOrder;
+		private readonly Type[] _effectiveUsedTypes;
+		private readonly bool[] _usedAllowsNull;
 		private readonly int _declaredCount;
 		private readonly int _usedCount;
 
@@ -42,11 +46,12 @@ namespace DynamicExpresso
 
 			// Snapshot parameters once: avoids repeated enumeration/allocation.
 			var declaredParameters = _parserArguments.DeclaredParameters.ToArray();
+			_declaredParameters = declaredParameters;
 			_usedParameters = _parserArguments.UsedParameters.ToArray();
 
-			_declaredParameterExpressions = declaredParameters.Select(p => p.Expression).ToArray();
+			_declaredParameterExpressions = _declaredParameters.Select(p => p.Expression).ToArray();
 
-			_declaredCount = declaredParameters.Length;
+			_declaredCount = _declaredParameters.Length;
 			_usedCount = _usedParameters.Length;
 
 			_delegate = new Lazy<Delegate>(() =>
@@ -82,6 +87,37 @@ namespace DynamicExpresso
 				_usedToDeclaredIndex = Array.Empty<int>();
 			}
 
+			_allUsedAndInDeclaredOrder =
+				_usedCount == _declaredCount &&
+				Enumerable.Range(0, _usedCount).All(i => _usedToDeclaredIndex[i] == i);
+
+			if (_usedCount == 0)
+			{
+				_effectiveUsedTypes = Array.Empty<Type>();
+				_usedAllowsNull = Array.Empty<bool>();
+			}
+			else
+			{
+				_effectiveUsedTypes = new Type[_usedCount];
+				_usedAllowsNull = new bool[_usedCount];
+
+				for (var i = 0; i < _usedCount; i++)
+				{
+					var t = _usedParameters[i].Type;
+					if (t == typeof(object))
+					{
+						_effectiveUsedTypes[i] = typeof(object);
+						_usedAllowsNull[i] = true;
+					}
+					else
+					{
+						var underlying = Nullable.GetUnderlyingType(t);
+						_effectiveUsedTypes[i] = underlying ?? t;
+						_usedAllowsNull[i] = underlying != null || !t.IsValueType;
+					}
+				}
+			}
+
 			_fastInvokerFromDeclared = new Lazy<Func<object[], object>>(BuildFastInvokerFromDeclared);
 		}
 
@@ -95,19 +131,19 @@ namespace DynamicExpresso
 		/// </summary>
 		/// <value>The used parameters.</value>
 		[Obsolete("Use UsedParameters or DeclaredParameters")]
-		public IEnumerable<Parameter> Parameters { get { return _parserArguments.UsedParameters; } }
+		public IEnumerable<Parameter> Parameters { get { return _usedParameters; } }
 
 		/// <summary>
 		/// Gets the parameters actually used in the expression parsed.
 		/// </summary>
 		/// <value>The used parameters.</value>
-		public IEnumerable<Parameter> UsedParameters { get { return _parserArguments.UsedParameters; } }
+		public IEnumerable<Parameter> UsedParameters { get { return _usedParameters; } }
 
 		/// <summary>
 		/// Gets the parameters declared when parsing the expression.
 		/// </summary>
 		/// <value>The declared parameters.</value>
-		public IEnumerable<Parameter> DeclaredParameters { get { return _parserArguments.DeclaredParameters; } }
+		public IEnumerable<Parameter> DeclaredParameters { get { return _declaredParameters; } }
 
 		public IEnumerable<ReferenceType> Types { get { return _parserArguments.UsedTypes; } }
 		public IEnumerable<Identifier> Identifiers { get { return _parserArguments.UsedIdentifiers; } }
@@ -240,6 +276,9 @@ namespace DynamicExpresso
 			if (_usedCount == 0)
 				return Array.Empty<object>();
 
+			if (_allUsedAndInDeclaredOrder)
+				return declaredArgs;
+
 			var used = new object[_usedCount];
 			for (var i = 0; i < _usedCount; i++)
 			{
@@ -262,31 +301,26 @@ namespace DynamicExpresso
 			{
 				var declaredIndex = _usedToDeclaredIndex[i];
 				var value = declaredArgs[declaredIndex];
-				var targetType = _usedParameters[i].Type;
 
-				if (!IsDirectlyAssignable(value, targetType))
+				if (!IsDirectlyAssignable(i, value))
 					return false;
 			}
 
 			return true;
 		}
 
-		private static bool IsDirectlyAssignable(object value, Type targetType)
+		private bool IsDirectlyAssignable(int usedIndex, object value)
 		{
-			if (targetType == typeof(object))
+			if (_effectiveUsedTypes[usedIndex] == typeof(object))
 				return true;
-
-			var underlying = Nullable.GetUnderlyingType(targetType);
 
 			if (value == null)
 			{
 				// null is allowed for reference types and Nullable<T>
-				return underlying != null || !targetType.IsValueType;
+				return _usedAllowsNull[usedIndex];
 			}
 
-			// If it's a Nullable<T>, we allow values of T directly.
-			var effectiveType = underlying ?? targetType;
-			return effectiveType.IsInstanceOfType(value);
+			return _effectiveUsedTypes[usedIndex].IsInstanceOfType(value);
 		}
 
 		private Func<object[], object> BuildFastInvokerFromDeclared()
@@ -294,26 +328,20 @@ namespace DynamicExpresso
 			// Ensure the underlying delegate is compiled once.
 			var del = _delegate.Value;
 			var delType = del.GetType();
+			var invokeMethod = delType.GetMethod("Invoke");
+			if (invokeMethod == null)
+				throw new InvalidOperationException("Delegate Invoke method not found.");
 
 			var argsParam = Expression.Parameter(typeof(object[]), "args");
+			var target = Expression.Constant(del, delType);
 
 			Expression body;
-
 			if (_usedCount == 0)
 			{
-				var invokeExpr = Expression.Invoke(Expression.Constant(del, delType));
-				if (invokeExpr.Type == typeof(void))
-				{
-					body = Expression.Block(invokeExpr, Expression.Constant(null, typeof(object)));
-				}
-				else if (invokeExpr.Type.IsValueType)
-				{
-					body = Expression.Convert(invokeExpr, typeof(object));
-				}
-				else
-				{
-					body = invokeExpr;
-				}
+				var call = Expression.Call(target, invokeMethod);
+				body = call.Type == typeof(void)
+					? Expression.Block(call, Expression.Constant(null, typeof(object)))
+					: (Expression)Expression.Convert(call, typeof(object));
 			}
 			else
 			{
@@ -330,24 +358,13 @@ namespace DynamicExpresso
 					// We only use this fast path when IsDirectlyAssignable has already confirmed
 					// that the runtime value is compatible with the target type, so this Convert
 					// can't introduce new InvalidCastExceptions compared to DynamicInvoke.
-					var converted = Expression.Convert(accessExpr, _usedParameters[i].Type);
-					callArgs[i] = converted;
+					callArgs[i] = Expression.Convert(accessExpr, _usedParameters[i].Type);
 				}
 
-				var invokeExpr = Expression.Invoke(Expression.Constant(del, delType), callArgs);
-
-				if (invokeExpr.Type == typeof(void))
-				{
-					body = Expression.Block(invokeExpr, Expression.Constant(null, typeof(object)));
-				}
-				else if (invokeExpr.Type.IsValueType)
-				{
-					body = Expression.Convert(invokeExpr, typeof(object));
-				}
-				else
-				{
-					body = invokeExpr;
-				}
+				var call = Expression.Call(target, invokeMethod, callArgs);
+				body = call.Type == typeof(void)
+					? Expression.Block(call, Expression.Constant(null, typeof(object)))
+					: (Expression)Expression.Convert(call, typeof(object));
 			}
 
 			var lambda = Expression.Lambda<Func<object[], object>>(body, argsParam);
