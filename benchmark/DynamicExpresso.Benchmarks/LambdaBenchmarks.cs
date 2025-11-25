@@ -5,6 +5,9 @@ namespace DynamicExpresso.Benchmarks;
 [MemoryDiagnoser]
 public class LambdaBenchmarks
 {
+	private const string ExpressionText =
+		"((a + b) * c - (double)d / (e + f + 1)) + Math.Max(a, b)";
+
 	private Interpreter _interpreter = null!;
 
 	private Lambda _lambda = null!;
@@ -36,7 +39,7 @@ public class LambdaBenchmarks
 		};
 
 		_lambda = _interpreter.Parse(
-			"((a + b) * c - (double)d / (e + f + 1)) + Math.Max(a, b)",
+			ExpressionText,
 			typeof(double),
 			_declared);
 
@@ -72,6 +75,18 @@ public class LambdaBenchmarks
 		for (var i = 0; i < 100_000; i++)
 		{
 			sum += (double)_lambda.Invoke(_parameterValues);
+		}
+
+		return sum;
+	}
+
+	[Benchmark(Description = "Eval (IEnumerable<Parameter>)")]
+	public double Eval_ParametersEnumerable()
+	{
+		double sum = 0;
+		for (var i = 0; i < 100_000; i++)
+		{
+			sum += _interpreter.Eval<double>(ExpressionText, _parameterValues);
 		}
 
 		return sum;
