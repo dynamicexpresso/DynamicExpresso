@@ -157,6 +157,9 @@ namespace DynamicExpresso
 			// Delegate with parameters in UsedParameters order.
 			private readonly Lazy<Delegate> _delegate;
 
+			// Fast path: declared-order object[] -> result.
+			private readonly Lazy<Func<object[], object>> _fastInvokerFromDeclared;
+
 			public InvocationContext(
 				Expression expression,
 				Parameter[] declaredParameters,
@@ -179,6 +182,8 @@ namespace DynamicExpresso
 						.Compile(_preferInterpretation));
 
 				_usedToDeclaredIndex = BuildUsedToDeclaredIndex(_declaredParameters, _usedParameters, _keyComparer);
+
+				_fastInvokerFromDeclared = new Lazy<Func<object[], object>>(BuildFastInvokerFromDeclared);
 			}
 
 			public Parameter[] DeclaredParameters => _declaredParameters;
@@ -187,6 +192,9 @@ namespace DynamicExpresso
 
 			public object InvokeNoArgs()
 			{
+				if (_usedParameters.Length == 0)
+					return _fastInvokerFromDeclared.Value(Array.Empty<object>());
+
 				return InvokeWithUsedParameters(Array.Empty<object>());
 			}
 
@@ -199,7 +207,10 @@ namespace DynamicExpresso
 					throw new InvalidOperationException(ErrorMessages.ArgumentCountMismatch);
 
 				if (_usedParameters.Length == 0)
-					return InvokeWithUsedParameters(Array.Empty<object>());
+					return _fastInvokerFromDeclared.Value(Array.Empty<object>());
+
+				if (CanUseFastInvoker(args))
+					return _fastInvokerFromDeclared.Value(args);
 
 				var usedArgs = BuildUsedArgsFromDeclared(args);
 				return InvokeWithUsedParameters(usedArgs);
@@ -211,7 +222,7 @@ namespace DynamicExpresso
 					throw new ArgumentNullException(nameof(parameters));
 
 				if (_usedParameters.Length == 0)
-					return InvokeWithUsedParameters(Array.Empty<object>());
+					return _fastInvokerFromDeclared.Value(Array.Empty<object>());
 
 				var paramList = parameters as IList<Parameter> ?? parameters.ToArray();
 				var matchedValues = new List<object>(_usedParameters.Length);
@@ -290,6 +301,115 @@ namespace DynamicExpresso
 				}
 
 				return used;
+			}
+
+			private bool CanUseFastInvoker(object[] declaredArgs)
+			{
+				if (_usedParameters.Length == 0)
+					return true;
+
+				if (declaredArgs == null || declaredArgs.Length != _declaredParameters.Length)
+					return false;
+
+				for (var i = 0; i < _usedParameters.Length; i++)
+				{
+					var declaredIndex = _usedToDeclaredIndex[i];
+					var value = declaredArgs[declaredIndex];
+					var targetType = _usedParameters[i].Type;
+
+					if (!IsDirectlyAssignable(targetType, value))
+						return false;
+				}
+
+				return true;
+			}
+
+			private static bool IsDirectlyAssignable(Type targetType, object value)
+			{
+				if (targetType == typeof(object))
+					return true;
+
+				if (value == null)
+				{
+					if (!targetType.IsValueType)
+						return true;
+
+					return Nullable.GetUnderlyingType(targetType) != null;
+				}
+
+				var underlying = Nullable.GetUnderlyingType(targetType);
+				var effectiveType = underlying ?? targetType;
+				return effectiveType.IsInstanceOfType(value);
+			}
+
+			private Func<object[], object> BuildFastInvokerFromDeclared()
+			{
+				var argsParam = Expression.Parameter(typeof(object[]), "args");
+
+				Expression body;
+				if (_usedParameters.Length == 0)
+				{
+					body = _expression.Type == typeof(void)
+						? (Expression)Expression.Block(_expression, Expression.Constant(null, typeof(object)))
+						: (Expression)Expression.Convert(_expression, typeof(object));
+				}
+				else
+				{
+					var locals = new ParameterExpression[_usedParameters.Length];
+					var assignments = new Expression[_usedParameters.Length];
+					var map = new Dictionary<ParameterExpression, ParameterExpression>(_usedParameters.Length);
+
+					for (var i = 0; i < _usedParameters.Length; i++)
+					{
+						var used = _usedParameters[i];
+						var declaredIndex = _usedToDeclaredIndex[i];
+
+						var local = Expression.Variable(used.Type, used.Name);
+						locals[i] = local;
+						map[used.Expression] = local;
+
+						var access = Expression.ArrayIndex(argsParam, Expression.Constant(declaredIndex));
+						assignments[i] = Expression.Assign(local, Expression.Convert(access, used.Type));
+					}
+
+					var rewrittenBody = new ParameterReplaceVisitor(map).Visit(_expression);
+
+					var statements = new List<Expression>(assignments.Length + 2);
+					statements.AddRange(assignments);
+
+					if (rewrittenBody.Type == typeof(void))
+					{
+						statements.Add(rewrittenBody);
+						statements.Add(Expression.Constant(null, typeof(object)));
+					}
+					else
+					{
+						statements.Add(Expression.Convert(rewrittenBody, typeof(object)));
+					}
+
+					body = Expression.Block(locals, statements);
+				}
+
+				return Expression.Lambda<Func<object[], object>>(body, argsParam)
+					.Compile(_preferInterpretation);
+			}
+
+			private sealed class ParameterReplaceVisitor : ExpressionVisitor
+			{
+				private readonly IReadOnlyDictionary<ParameterExpression, ParameterExpression> _map;
+
+				public ParameterReplaceVisitor(IReadOnlyDictionary<ParameterExpression, ParameterExpression> map)
+				{
+					_map = map;
+				}
+
+				protected override Expression VisitParameter(ParameterExpression node)
+				{
+					if (_map.TryGetValue(node, out var replacement))
+						return replacement;
+
+					return node;
+				}
 			}
 
 		}
