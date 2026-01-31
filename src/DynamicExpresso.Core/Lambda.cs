@@ -157,9 +157,6 @@ namespace DynamicExpresso
 			// Delegate with parameters in UsedParameters order.
 			private readonly Lazy<Delegate> _delegate;
 
-			// Fast path: declared-order object[] -> result.
-			private readonly Lazy<Func<object[], object>> _fastInvokerFromDeclared;
-
 			public InvocationContext(
 				Expression expression,
 				Parameter[] declaredParameters,
@@ -182,8 +179,6 @@ namespace DynamicExpresso
 						.Compile(_preferInterpretation));
 
 				_usedToDeclaredIndex = BuildUsedToDeclaredIndex(_declaredParameters, _usedParameters, _keyComparer);
-
-				_fastInvokerFromDeclared = new Lazy<Func<object[], object>>(BuildFastInvokerFromDeclared);
 			}
 
 			public Parameter[] DeclaredParameters => _declaredParameters;
@@ -192,9 +187,6 @@ namespace DynamicExpresso
 
 			public object InvokeNoArgs()
 			{
-				if (_usedParameters.Length == 0)
-					return _fastInvokerFromDeclared.Value(Array.Empty<object>());
-
 				return InvokeWithUsedParameters(Array.Empty<object>());
 			}
 
@@ -207,22 +199,7 @@ namespace DynamicExpresso
 					throw new InvalidOperationException(ErrorMessages.ArgumentCountMismatch);
 
 				if (_usedParameters.Length == 0)
-					return _fastInvokerFromDeclared.Value(Array.Empty<object>());
-
-				if (CanUseFastInvoker(args))
-				{
-					try
-					{
-						return _fastInvokerFromDeclared.Value(args);
-					}
-					catch (TargetInvocationException exc)
-					{
-						if (exc.InnerException != null)
-							ExceptionDispatchInfo.Capture(exc.InnerException).Throw();
-
-						throw;
-					}
-				}
+					return InvokeWithUsedParameters(Array.Empty<object>());
 
 				var usedArgs = BuildUsedArgsFromDeclared(args);
 				return InvokeWithUsedParameters(usedArgs);
@@ -234,7 +211,7 @@ namespace DynamicExpresso
 					throw new ArgumentNullException(nameof(parameters));
 
 				if (_usedParameters.Length == 0)
-					return _fastInvokerFromDeclared.Value(Array.Empty<object>());
+					return InvokeWithUsedParameters(Array.Empty<object>());
 
 				var paramList = parameters as IList<Parameter> ?? parameters.ToArray();
 				var matchedValues = new List<object>(_usedParameters.Length);
@@ -249,18 +226,6 @@ namespace DynamicExpresso
 							matchedValues.Add(actual.Value);
 						}
 					}
-				}
-
-				if (matchedValues.Count == _usedParameters.Length)
-				{
-					var declaredArgs = new object[_declaredParameters.Length];
-					for (var i = 0; i < _usedParameters.Length; i++)
-					{
-						var declaredIndex = _usedToDeclaredIndex[i];
-						declaredArgs[declaredIndex] = matchedValues[i];
-					}
-
-					return InvokeFromDeclared(declaredArgs);
 				}
 
 				return InvokeWithUsedParameters(matchedValues.ToArray());
@@ -327,87 +292,6 @@ namespace DynamicExpresso
 				return used;
 			}
 
-			private bool CanUseFastInvoker(object[] declaredArgs)
-			{
-				if (_usedParameters.Length == 0)
-					return true;
-
-				if (declaredArgs == null || declaredArgs.Length != _declaredParameters.Length)
-					return false;
-
-				for (var i = 0; i < _usedParameters.Length; i++)
-				{
-					var declaredIndex = _usedToDeclaredIndex[i];
-					var value = declaredArgs[declaredIndex];
-					var targetType = _usedParameters[i].Type;
-
-					if (!IsDirectlyAssignable(targetType, value))
-						return false;
-				}
-
-				return true;
-			}
-
-			private static bool IsDirectlyAssignable(Type targetType, object value)
-			{
-				if (targetType == typeof(object))
-					return true;
-
-				if (value == null)
-				{
-					if (!targetType.IsValueType)
-						return true;
-
-					return Nullable.GetUnderlyingType(targetType) != null;
-				}
-
-				var underlying = Nullable.GetUnderlyingType(targetType);
-				var effectiveType = underlying ?? targetType;
-				return effectiveType.IsInstanceOfType(value);
-			}
-
-			private Func<object[], object> BuildFastInvokerFromDeclared()
-			{
-				var del = _delegate.Value;
-				var delType = del.GetType();
-				var invokeMethod = delType.GetMethod("Invoke");
-				if (invokeMethod == null)
-					throw new InvalidOperationException("Delegate Invoke method not found.");
-
-				var argsParam = Expression.Parameter(typeof(object[]), "args");
-				var target = Expression.Constant(del, delType);
-
-				Expression body;
-				if (_usedParameters.Length == 0)
-				{
-					var call = Expression.Call(target, invokeMethod);
-					body = call.Type == typeof(void)
-						? Expression.Block(call, Expression.Constant(null, typeof(object)))
-						: (Expression)Expression.Convert(call, typeof(object));
-				}
-				else
-				{
-					var callArgs = new Expression[_usedParameters.Length];
-
-					for (var i = 0; i < _usedParameters.Length; i++)
-					{
-						var declaredIndex = _usedToDeclaredIndex[i];
-
-						var indexExpr = Expression.Constant(declaredIndex);
-						var accessExpr = Expression.ArrayIndex(argsParam, indexExpr);
-
-						callArgs[i] = Expression.Convert(accessExpr, _usedParameters[i].Type);
-					}
-
-					var call = Expression.Call(target, invokeMethod, callArgs);
-					body = call.Type == typeof(void)
-						? Expression.Block(call, Expression.Constant(null, typeof(object)))
-						: (Expression)Expression.Convert(call, typeof(object));
-				}
-
-				var lambda = Expression.Lambda<Func<object[], object>>(body, argsParam);
-				return lambda.Compile(_preferInterpretation);
-			}
 		}
 	}
 }
