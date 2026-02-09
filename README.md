@@ -187,7 +187,7 @@ public void Linq_Where()
 	Assert.That(customers.Where(dynamicWhere).Count(), Is.EqualTo(1));
 }
 ```
-This is the preferred way to parse an expression that you known at compile time what parameters can accept and what value must return.
+This is the preferred way to parse an expression when the parameters it can accept and the value it must return are known at compile time.
 
 ### Generate lambda expressions
 You can use the `Interpreter.ParseAsExpression<TDelegate>` method to directly parse an expression into a .NET lambda expression (`Expression<TDelegate>`). 
