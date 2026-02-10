@@ -523,7 +523,9 @@ namespace DynamicExpresso
 		/// <returns></returns>
 		public object Eval(string expressionText, Type expressionType, params Parameter[] parameters)
 		{
-			return Parse(expressionText, expressionType, parameters).Invoke(parameters);
+			// Eval is intended for one-off expressions: prefer interpretation to avoid IL generation cost.
+			var lambda = ParseAsLambda(expressionText, expressionType, parameters, preferInterpretation: true);
+			return lambda.Invoke(parameters);
 		}
 
 		#endregion
@@ -548,7 +550,7 @@ namespace DynamicExpresso
 
 		#region Private methods
 
-		private Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters)
+		private Lambda ParseAsLambda(string expressionText, Type expressionType, Parameter[] parameters, bool preferInterpretation = false)
 		{
 			var arguments = new ParserArguments(
 				expressionText,
@@ -561,7 +563,7 @@ namespace DynamicExpresso
 			foreach (var visitor in Visitors)
 				expression = visitor.Visit(expression);
 
-			var lambda = new Lambda(expression, arguments);
+			var lambda = new Lambda(expression, arguments, preferInterpretation);
 
 #if TEST_DetectIdentifiers
 			AssertDetectIdentifiers(lambda);

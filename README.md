@@ -560,6 +560,12 @@ or run unit tests for a specific project with a specific framework:
 
 Add `--logger:trx` to generate test results for VSTS.
 
+## Benchmarks
+
+This repository includes a BenchmarkDotNet project under `benchmark/DynamicExpresso.Benchmarks` to measure interpreter hot-paths.
+
+	dotnet run -c Release --project benchmark/DynamicExpresso.Benchmarks
+
 ## Release notes
 
 See [releases page](https://github.com/dynamicexpresso/DynamicExpresso/releases).
