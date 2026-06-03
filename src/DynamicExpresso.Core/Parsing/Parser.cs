@@ -1996,7 +1996,7 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GenerateGreaterThan(Expression left, Expression right)
 		{
-			if (left.Type == typeof(string))
+			if (left.Type == typeof(string) && right.Type == typeof(string))
 			{
 				return Expression.GreaterThan(
 					GenerateStaticMethodCall("Compare", left, right),
@@ -2008,7 +2008,7 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GenerateGreaterThanEqual(Expression left, Expression right)
 		{
-			if (left.Type == typeof(string))
+			if (left.Type == typeof(string) && right.Type == typeof(string))
 			{
 				return Expression.GreaterThanOrEqual(
 					GenerateStaticMethodCall("Compare", left, right),
@@ -2020,7 +2020,7 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GenerateLessThan(Expression left, Expression right)
 		{
-			if (left.Type == typeof(string))
+			if (left.Type == typeof(string) && right.Type == typeof(string))
 			{
 				return Expression.LessThan(
 					GenerateStaticMethodCall("Compare", left, right),
@@ -2033,7 +2033,7 @@ namespace DynamicExpresso.Parsing
 
 		private Expression GenerateLessThanEqual(Expression left, Expression right)
 		{
-			if (left.Type == typeof(string))
+			if (left.Type == typeof(string) && right.Type == typeof(string))
 			{
 				return Expression.LessThanOrEqual(
 					GenerateStaticMethodCall("Compare", left, right),
@@ -2081,6 +2081,10 @@ namespace DynamicExpresso.Parsing
 			}
 
 			var applicableMethod = FindBinaryOperator(opName, left, right);
+			if (applicableMethod == null)
+			{
+				applicableMethod = FindBinaryOperatorWithImplicitConversion(opName, ref left, ref right);
+			}
 
 			MethodInfo operatorMethod = null;
 			if (applicableMethod != null)
@@ -2173,6 +2177,64 @@ namespace DynamicExpresso.Parsing
 			}
 
 			return userDefinedOperator;
+		}
+
+		private MethodData FindBinaryOperatorWithImplicitConversion(string operatorName, ref Expression left, ref Expression right)
+		{
+			if (operatorName == null)
+				return null;
+
+			var leftType = left.Type;
+			var rightType = right.Type;
+			var convertedLeft = TryGenerateImplicitConversion(left, rightType);
+			var leftConvertedOperator = convertedLeft != null
+				? FindBinaryOperator(operatorName, convertedLeft, right)
+				: null;
+
+			var convertedRight = TryGenerateImplicitConversion(right, leftType);
+			var rightConvertedOperator = convertedRight != null
+				? FindBinaryOperator(operatorName, left, convertedRight)
+				: null;
+
+			if (leftConvertedOperator != null && rightConvertedOperator != null && !ReferenceEquals(leftConvertedOperator.MethodBase, rightConvertedOperator.MethodBase))
+			{
+				throw ParseException.Create(_token.pos, ErrorMessages.AmbiguousBinaryOperatorInvocation, operatorName, TypeUtils.GetTypeName(leftType), TypeUtils.GetTypeName(rightType));
+			}
+
+			if (leftConvertedOperator != null)
+			{
+				left = convertedLeft;
+				return leftConvertedOperator;
+			}
+
+			if (rightConvertedOperator != null)
+			{
+				right = convertedRight;
+				return rightConvertedOperator;
+			}
+
+			return null;
+		}
+
+		private static Expression TryGenerateImplicitConversion(Expression expression, Type type)
+		{
+			if (!HasImplicitConversion(expression.Type, type))
+				return null;
+
+			return Expression.Convert(expression, type);
+		}
+
+		private static bool HasImplicitConversion(Type sourceType, Type targetType)
+		{
+			return HasImplicitConversionOperator(sourceType, sourceType, targetType) ||
+				HasImplicitConversionOperator(targetType, sourceType, targetType);
+		}
+
+		private static bool HasImplicitConversionOperator(Type declaringType, Type sourceType, Type targetType)
+		{
+			return declaringType.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy)
+				.Any(method => method.Name == "op_Implicit" && method.ReturnType == targetType &&
+					method.GetParameters().Length == 1 && method.GetParameters()[0].ParameterType == sourceType);
 		}
 
 		private static Expression GenerateStringConcat(Expression left, Expression right)
