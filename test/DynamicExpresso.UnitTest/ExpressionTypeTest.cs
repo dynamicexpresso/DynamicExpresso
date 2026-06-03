@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
@@ -11,10 +11,10 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(typeof(string), target.Parse("\"ciao\"").ReturnType);
-			Assert.AreEqual(typeof(int), target.Parse("45").ReturnType);
-			Assert.AreEqual(typeof(double), target.Parse("45.4").ReturnType);
-			Assert.AreEqual(typeof(object), target.Parse("null").ReturnType);
+			Assert.That(target.Parse("\"ciao\"").ReturnType, Is.EqualTo(typeof(string)));
+			Assert.That(target.Parse("45").ReturnType, Is.EqualTo(typeof(int)));
+			Assert.That(target.Parse("45.4").ReturnType, Is.EqualTo(typeof(double)));
+			Assert.That(target.Parse("null").ReturnType, Is.EqualTo(typeof(object)));
 		}
 
 		[Test]
@@ -25,8 +25,8 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("213", expressionType);
 
-			Assert.AreEqual(expressionType, lambda.ReturnType);
-			Assert.AreEqual((double)213, lambda.Invoke());
+			Assert.That(lambda.ReturnType, Is.EqualTo(expressionType));
+			Assert.That(lambda.Invoke(), Is.EqualTo((double)213));
 		}
 
 		[Test]
@@ -37,8 +37,8 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("213.46", expressionType);
 
-			Assert.AreEqual(expressionType, lambda.ReturnType);
-			Assert.AreEqual((int)213.46, lambda.Invoke());
+			Assert.That(lambda.ReturnType, Is.EqualTo(expressionType));
+			Assert.That(lambda.Invoke(), Is.EqualTo((int)213.46));
 		}
 
 		[Test]
@@ -47,12 +47,12 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var lambda = target.Parse("null", typeof(string));
-			Assert.AreEqual(typeof(string), lambda.ReturnType);
-			Assert.IsNull(lambda.Invoke());
+			Assert.That(lambda.ReturnType, Is.EqualTo(typeof(string)));
+			Assert.That(lambda.Invoke(), Is.Null);
 
 			lambda = target.Parse("null", typeof(TestReferenceType));
-			Assert.AreEqual(typeof(TestReferenceType), lambda.ReturnType);
-			Assert.IsNull(lambda.Invoke());
+			Assert.That(lambda.ReturnType, Is.EqualTo(typeof(TestReferenceType)));
+			Assert.That(lambda.Invoke(), Is.Null);
 		}
 
 		[Test]
@@ -61,12 +61,12 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var lambda = target.Parse("null", typeof(int?));
-			Assert.AreEqual(typeof(int?), lambda.ReturnType);
-			Assert.IsNull(lambda.Invoke());
+			Assert.That(lambda.ReturnType, Is.EqualTo(typeof(int?)));
+			Assert.That(lambda.Invoke(), Is.Null);
 
 			lambda = target.Parse("null", typeof(DateTime?));
-			Assert.AreEqual(typeof(DateTime?), lambda.ReturnType);
-			Assert.IsNull(lambda.Invoke());
+			Assert.That(lambda.ReturnType, Is.EqualTo(typeof(DateTime?)));
+			Assert.That(lambda.Invoke(), Is.Null);
 		}
 
 		[Test]
@@ -75,12 +75,12 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter();
 
 			var lambda = target.Parse("null", typeof(int?));
-			Assert.AreEqual(typeof(int?), lambda.ReturnType);
-			Assert.IsNull(lambda.Invoke());
+			Assert.That(lambda.ReturnType, Is.EqualTo(typeof(int?)));
+			Assert.That(lambda.Invoke(), Is.Null);
 
 			lambda = target.Parse("4651", typeof(int?));
-			Assert.AreEqual(typeof(int?), lambda.ReturnType);
-			Assert.AreEqual(4651, lambda.Invoke());
+			Assert.That(lambda.ReturnType, Is.EqualTo(typeof(int?)));
+			Assert.That(lambda.Invoke(), Is.EqualTo(4651));
 		}
 
 		[Test]
@@ -92,7 +92,7 @@ namespace DynamicExpresso.UnitTest
 													new Parameter("x", typeof(double), 10),
 													new Parameter("y", typeof(double), 2));
 
-			Assert.AreEqual(Math.Pow(10, 2) + 5, result);
+			Assert.That(result, Is.EqualTo(Math.Pow(10, 2) + 5));
 		}
 
 		private class TestReferenceType { };

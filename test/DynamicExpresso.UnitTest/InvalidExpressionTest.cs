@@ -71,9 +71,9 @@ namespace DynamicExpresso.UnitTest
 
 			var ex = Assert.Throws<UnknownIdentifierException>(() => target.Parse("x + y * Math.Pow(x, 2)", typeof(void)));
 
-			Assert.AreEqual("Unknown identifier 'x' (at index 0).", ex.Message);
-			Assert.AreEqual("x", ex.Identifier);
-			Assert.AreEqual(0, ex.Position);
+			Assert.That(ex.Message, Is.EqualTo("Unknown identifier 'x' (at index 0)."));
+			Assert.That(ex.Identifier, Is.EqualTo("x"));
+			Assert.That(ex.Position, Is.EqualTo(0));
 		}
 
 		[Test]
@@ -84,8 +84,8 @@ namespace DynamicExpresso.UnitTest
 
 			var ex = Assert.Throws<UnknownIdentifierException>(() => target.Parse("x + y * Math.Pow(x, 2)", typeof(void)));
 
-			Assert.AreEqual("y", ex.Identifier);
-			Assert.AreEqual(4, ex.Position);
+			Assert.That(ex.Identifier, Is.EqualTo("y"));
+			Assert.That(ex.Position, Is.EqualTo(4));
 		}
 
 		[Test]
@@ -96,9 +96,9 @@ namespace DynamicExpresso.UnitTest
 
 			var ex = Assert.Throws<NoApplicableMethodException>(() => target.Parse("Math.NotExistingMethod(x, 2)", typeof(void)));
 
-			Assert.AreEqual("NotExistingMethod", ex.MethodName);
-			Assert.AreEqual("Math", ex.MethodTypeName);
-			Assert.AreEqual(5, ex.Position);
+			Assert.That(ex.MethodName, Is.EqualTo("NotExistingMethod"));
+			Assert.That(ex.MethodTypeName, Is.EqualTo("Math"));
+			Assert.That(ex.Position, Is.EqualTo(5));
 		}
 
 		[Test]

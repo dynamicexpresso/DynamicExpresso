@@ -30,7 +30,7 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("list.Select(str => str.Length)");
 
-			Assert.AreEqual(typeof(IEnumerable<int>), lambda.ReturnType);
+			Assert.That(lambda.ReturnType, Is.EqualTo(typeof(IEnumerable<int>)));
 		}
 
 		[Test]
@@ -42,8 +42,8 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<IEnumerable<int>>("myList.Where(x => x >= 19)");
 
-			Assert.AreEqual(2, results.Count());
-			Assert.AreEqual(new[] { 19, 21 }, results);
+			Assert.That(results.Count(), Is.EqualTo(2));
+			Assert.That(results, Is.EqualTo(new[] { 19, 21 }));
 		}
 
 		[Test]
@@ -55,8 +55,8 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<IEnumerable<int>>("myList.Where((int x) => x >= 19)");
 
-			Assert.AreEqual(2, results.Count());
-			Assert.AreEqual(new[] { 19, 21 }, results);
+			Assert.That(results.Count(), Is.EqualTo(2));
+			Assert.That(results, Is.EqualTo(new[] { 19, 21 }));
 		}
 
 		[Test]
@@ -68,8 +68,8 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<IEnumerable<char>>("myList.Select(i => i.ToString()).Select(str => str[0])");
 
-			Assert.AreEqual(4, results.Count());
-			Assert.AreEqual(new[] { '1', '1', '1', '2' }, results);
+			Assert.That(results.Count(), Is.EqualTo(4));
+			Assert.That(results, Is.EqualTo(new[] { '1', '1', '1', '2' }));
 		}
 
 		[Test]
@@ -81,8 +81,8 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<IEnumerable<string>>("myList.Where(str => str.Length > 5).Select(str => str.ToUpper())");
 
-			Assert.AreEqual(1, results.Count());
-			Assert.AreEqual(new[] { "AWESOME" }, results);
+			Assert.That(results.Count(), Is.EqualTo(1));
+			Assert.That(results, Is.EqualTo(new[] { "AWESOME" }));
 		}
 
 		[Test]
@@ -90,7 +90,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(_options);
 			var lambda = target.Eval<Func<string, string>>("str => str.ToUpper()");
-			Assert.AreEqual("TEST", lambda.Invoke("test"));
+			Assert.That(lambda.Invoke("test"), Is.EqualTo("TEST"));
 		}
 
 		[Test]
@@ -98,7 +98,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(_options);
 			var lambda = target.Eval<Func<int>>("() => 5 + 6");
-			Assert.AreEqual(11, lambda.Invoke());
+			Assert.That(lambda.Invoke(), Is.EqualTo(11));
 		}
 
 		[Test]
@@ -107,7 +107,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter(_options);
 			target.SetVariable("increment", 3);
 			var lambda = target.Eval<Func<int, string, string>>("(i, str) => str.ToUpper() + (i + increment)");
-			Assert.AreEqual("TEST8", lambda.Invoke(5, "test"));
+			Assert.That(lambda.Invoke(5, "test"), Is.EqualTo("TEST8"));
 		}
 
 		[Test]
@@ -119,8 +119,8 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<IEnumerable<char>>("myList.SelectMany(str => str)");
 
-			Assert.AreEqual(4, results.Count());
-			Assert.AreEqual(new[] { 'a', 'b', 'c', 'd' }, results);
+			Assert.That(results.Count(), Is.EqualTo(4));
+			Assert.That(results, Is.EqualTo(new[] { 'a', 'b', 'c', 'd' }));
 		}
 
 		[Test]
@@ -136,8 +136,8 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<IEnumerable<string>>("myList.SelectMany(obj => obj.Strings)");
 
-			Assert.AreEqual(4, results.Count());
-			Assert.AreEqual(new[] { "ab", "cd", "ef", "gh" }, results);
+			Assert.That(results.Count(), Is.EqualTo(4));
+			Assert.That(results, Is.EqualTo(new[] { "ab", "cd", "ef", "gh" }));
 		}
 
 		[Test]
@@ -149,8 +149,8 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<IEnumerable<char>>("myList.Select(str => str.SingleOrDefault(c => c == 'd')).Where(c => c != '\0')");
 
-			Assert.AreEqual(1, results.Count());
-			Assert.AreEqual(new[] { 'd' }, results);
+			Assert.That(results.Count(), Is.EqualTo(1));
+			Assert.That(results, Is.EqualTo(new[] { 'd' }));
 		}
 
 		[Test]
@@ -161,7 +161,7 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("str", str);
 
 			var result = target.Eval<char>("str.MySingleOrDefault(c => c == 'd')");
-			Assert.AreEqual(str.SingleOrDefault(c => c == 'd'), result);
+			Assert.That(result, Is.EqualTo(str.SingleOrDefault(c => c == 'd')));
 		}
 
 		[Test]
@@ -172,13 +172,13 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("str", str);
 
 			var result = target.Eval<char>("str.WithSeveralParams((c) => c == 'd')");
-			Assert.AreEqual('d', result);
+			Assert.That(result, Is.EqualTo('d'));
 
 			result = target.Eval<char>("str.WithSeveralParams((c, i) => c == 'd')");
-			Assert.AreEqual('d', result);
+			Assert.That(result, Is.EqualTo('d'));
 
 			result = target.Eval<char>("str.WithSeveralParams((c, i, str2) => c == 'd')");
-			Assert.AreEqual('d', result);
+			Assert.That(result, Is.EqualTo('d'));
 		}
 
 		[Test]
@@ -190,7 +190,7 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<int>("myList.Sum()");
 
-			Assert.AreEqual(6, results);
+			Assert.That(results, Is.EqualTo(6));
 		}
 
 		[Test]
@@ -202,7 +202,7 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<int>("myList.Max()");
 
-			Assert.AreEqual(3, results);
+			Assert.That(results, Is.EqualTo(3));
 		}
 
 		[Test]
@@ -214,7 +214,7 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<int>("myList.Sum(str => str.Length)");
 
-			Assert.AreEqual(10, results);
+			Assert.That(results, Is.EqualTo(10));
 		}
 
 		[Test]
@@ -227,8 +227,8 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<IEnumerable<int>>("myList.Select(i => i + increment)");
 
-			Assert.AreEqual(3, results.Count());
-			Assert.AreEqual(new[] { 4, 5, 6 }, results);
+			Assert.That(results.Count(), Is.EqualTo(3));
+			Assert.That(results, Is.EqualTo(new[] { 4, 5, 6 }));
 		}
 
 		[Test]
@@ -240,8 +240,8 @@ namespace DynamicExpresso.UnitTest
 
 			var results = target.Eval<IEnumerable<string>>("myList.TakeWhile((item, idx) => idx <= 2 && item.Length >= 3)");
 
-			Assert.AreEqual(3, results.Count());
-			Assert.AreEqual(new[] { "aaaaa", "bbbb", "ccc" }, results);
+			Assert.That(results.Count(), Is.EqualTo(3));
+			Assert.That(results, Is.EqualTo(new[] { "aaaaa", "bbbb", "ccc" }));
 		}
 
 		[Test]
@@ -254,8 +254,8 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("myList", list);
 			var results = target.Eval<Dictionary<string, int>>("myList.ToDictionary(str => new WithProp { MyStr = str }.MyStr, str => str.Length)");
 
-			Assert.AreEqual(4, results.Count);
-			Assert.AreEqual(list.ToDictionary(str => new WithProp { MyStr = str }.MyStr, str => str.Length), results);
+			Assert.That(results.Count, Is.EqualTo(4));
+			Assert.That(results, Is.EqualTo(list.ToDictionary(str => new WithProp { MyStr = str }.MyStr, str => str.Length)));
 		}
 
 		private class WithProp
@@ -273,8 +273,8 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("intList", intList);
 			var results = target.Eval<IEnumerable<string>>("strList.Zip(intList, (str, i) => str + i)");
 
-			Assert.AreEqual(3, results.Count());
-			Assert.AreEqual(strList.Zip(intList, (str, i) => str + i), results);
+			Assert.That(results.Count(), Is.EqualTo(3));
+			Assert.That(results, Is.EqualTo(strList.Zip(intList, (str, i) => str + i)));
 		}
 
 		[Test]
@@ -282,11 +282,11 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 			var listInt = target.Eval<IEnumerable<int>>("list.Where(n => n > x)", new Parameter("list", new[] { 1, 2, 3 }), new Parameter("x", 1));
-			Assert.AreEqual(new[] { 2, 3 }, listInt);
+			Assert.That(listInt, Is.EqualTo(new[] { 2, 3 }));
 
 			// ensure the parameters can be reused with different values
 			listInt = target.Eval<IEnumerable<int>>("list.Where(n => n > x)", new Parameter("list", new[] { 2, 4, 5 }), new Parameter("x", 2));
-			Assert.AreEqual(new[] { 4, 5 }, listInt);
+			Assert.That(listInt, Is.EqualTo(new[] { 4, 5 }));
 		}
 
 		[Test]
@@ -297,14 +297,14 @@ namespace DynamicExpresso.UnitTest
 			var list = new Parameter("list", new[] { 1, 2, 3 });
 			var listLamba = target.Parse("list.Where(n => n > x)", list, parm).Compile<Func<int[], int, IEnumerable<int>>>();
 			var result = listLamba(list.Value as int[], 2);
-			Assert.AreEqual(new[] { 3 }, result);
+			Assert.That(result, Is.EqualTo(new[] { 3 }));
 
 			var listInt = listLamba(list.Value as int[], 1);
-			Assert.AreEqual(new[] { 2, 3 }, listInt);
+			Assert.That(listInt, Is.EqualTo(new[] { 2, 3 }));
 
 			// ensure the parameters can be reused with different values
 			listInt = target.Eval<IEnumerable<int>>("list.Where(n => n > x)", new Parameter("list", new[] { 2, 4, 5 }), new Parameter("x", 2));
-			Assert.AreEqual(new[] { 4, 5 }, listInt);
+			Assert.That(listInt, Is.EqualTo(new[] { 4, 5 }));
 		}
 
 		[Test]
@@ -312,7 +312,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
 			var listInt = target.Eval<IEnumerable<int>>("list.Select(n => n - 1).Where(n => n > x).Select(n => n + x)", new Parameter("list", new[] { 1, 2, 3 }), new Parameter("x", 1));
-			Assert.AreEqual(new[] { 3 }, listInt);
+			Assert.That(listInt, Is.EqualTo(new[] { 3 }));
 		}
 
 		[Test]
@@ -323,7 +323,7 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("x", 1);
 
 			var listInt = target.Eval<IEnumerable<int>>("list.Where(n => n > x)");
-			Assert.AreEqual(new[] { 2, 3 }, listInt);
+			Assert.That(listInt, Is.EqualTo(new[] { 2, 3 }));
 		}
 
 		public class NestedLambdaTestClass
@@ -379,7 +379,7 @@ namespace DynamicExpresso.UnitTest
 						l3 => l3.Name + l2.Name + l3.GetChildrenIdentifiers(
 							l4 => l4.Name + l2.Name + l3.Name + l1.Name + root.Name)
 							)))", new Parameter(nameof(root), root));
-			Assert.AreEqual(expectedResult, evalResult);
+			Assert.That(evalResult, Is.EqualTo(expectedResult));
 		}
 
 		[Test]
@@ -405,7 +405,7 @@ namespace DynamicExpresso.UnitTest
 						l3 => l3.Name + l2.Name + l3.GetChildrenIdentifiers(
 							l4 => l4.Name + l2.Name + l3.Name + l1.Name + root.Name)
 							)))", new Parameter(nameof(root), root));
-			Assert.AreEqual(expectedResult, evalResult);
+			Assert.That(evalResult, Is.EqualTo(expectedResult));
 		}
 
 		[Test]
@@ -438,8 +438,8 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("list", list);
 
 			var result = target.Eval(@"list.ForEach(n => n.Money = 5)");
-			Assert.IsNull(result);
-			Assert.AreEqual(5, list[0].Money);
+			Assert.That(result, Is.Null);
+			Assert.That(list[0].Money, Is.EqualTo(5));
 		}
 
 		[Test]
@@ -451,8 +451,8 @@ namespace DynamicExpresso.UnitTest
 			target.SetVariable("npc", npc);
 
 			var result = target.Eval(@"npc.AddMoney((n, i, str) => n.Money = i + str.Length)");
-			Assert.IsNull(result);
-			Assert.AreEqual(14, npc.Money);
+			Assert.That(result, Is.Null);
+			Assert.That(npc.Money, Is.EqualTo(14));
 		}
 
 		private static NestedLambdaTestClass BuildNestedTestClassHierarchy()

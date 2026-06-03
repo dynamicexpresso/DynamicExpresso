@@ -13,7 +13,7 @@ namespace DynamicExpresso.UnitTest
 			Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
 			target.SetFunction("pow", pow);
 
-			Assert.AreEqual(25, target.Eval("pow(5, 2)"));
+			Assert.That(target.Eval("pow(5, 2)"), Is.EqualTo(25));
 		}
 
 		[Test]
@@ -23,7 +23,7 @@ namespace DynamicExpresso.UnitTest
 			Func<double, double, double> pow = (x, y) => Math.Pow(x, y);
 			target.SetFunction("pow", pow);
 
-			Assert.AreEqual("25", target.Eval("pow(5, 2).ToString()"));
+			Assert.That(target.Eval("pow(5, 2).ToString()"), Is.EqualTo("25"));
 		}
     }
 }

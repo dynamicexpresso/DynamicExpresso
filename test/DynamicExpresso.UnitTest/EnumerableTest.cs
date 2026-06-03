@@ -1,6 +1,6 @@
-﻿using System.Linq;
-using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -16,13 +16,13 @@ namespace DynamicExpresso.UnitTest
 									.Reference(typeof(System.Linq.Enumerable))
 									.SetVariable("x", x);
 
-			Assert.AreEqual(x.Count(), target.Eval("x.Count()"));
-			Assert.AreEqual(x.Average(), target.Eval("x.Average()"));
-			Assert.AreEqual(x.First(), target.Eval("x.First()"));
-			Assert.AreEqual(x.Last(), target.Eval("x.Last()"));
-			Assert.AreEqual(x.Max(), target.Eval("x.Max()"));
-			CollectionAssert.AreEqual(x.Skip(2).ToArray(), target.Eval<IEnumerable<int>>("x.Skip(2)").ToArray());
-			CollectionAssert.AreEqual(x.Skip(2).ToArray(), target.Eval<IEnumerable<int>>("x.Skip(2)").ToArray());
+			Assert.That(target.Eval("x.Count()"), Is.EqualTo(x.Count()));
+			Assert.That(target.Eval("x.Average()"), Is.EqualTo(x.Average()));
+			Assert.That(target.Eval("x.First()"), Is.EqualTo(x.First()));
+			Assert.That(target.Eval("x.Last()"), Is.EqualTo(x.Last()));
+			Assert.That(target.Eval("x.Max()"), Is.EqualTo(x.Max()));
+			Assert.That(target.Eval<IEnumerable<int>>("x.Skip(2)"), Is.EqualTo(x.Skip(2)));
+			Assert.That(target.Eval<IEnumerable<int>>("x.Skip(2)"), Is.EqualTo(x.Skip(2)));
 		}
 	}
 }

@@ -1,11 +1,11 @@
-using DynamicExpresso.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using DynamicExpresso.Exceptions;
 using System.Text.RegularExpressions;
+using DynamicExpresso.Exceptions;
+using DynamicExpresso.Parsing;
 
 namespace DynamicExpresso
 {
@@ -18,8 +18,8 @@ namespace DynamicExpresso
 		private readonly HashSet<Identifier> _usedIdentifiers = new HashSet<Identifier>();
 
 		public ParserArguments(
-			string expressionText, 
-			ParserSettings settings, 
+			string expressionText,
+			ParserSettings settings,
 			Type expressionReturnType,
 			IEnumerable<Parameter> declaredParameters
 		)
@@ -42,7 +42,7 @@ namespace DynamicExpresso
 			}
 		}
 
-		public ParserSettings Settings { get; private set;}
+		public ParserSettings Settings { get; private set; }
 		public string ExpressionText { get; private set; }
 		public Type ExpressionReturnType { get; private set; }
 		public IEnumerable<Parameter> DeclaredParameters { get { return _declaredParameters.Values; } }
@@ -64,8 +64,7 @@ namespace DynamicExpresso
 
 		public bool TryGetKnownType(string name, out Type type)
 		{
-			ReferenceType reference;
-			if (Settings.KnownTypes.TryGetValue(name, out reference))
+			if (Settings.KnownTypes.TryGetValue(name, out var reference))
 			{
 				_usedTypes.Add(reference);
 				type = reference.Type;
@@ -87,8 +86,7 @@ namespace DynamicExpresso
 
 		public bool TryGetIdentifier(string name, out Expression expression)
 		{
-			Identifier identifier;
-			if (Settings.Identifiers.TryGetValue(name, out identifier))
+			if (Settings.Identifiers.TryGetValue(name, out var identifier))
 			{
 				_usedIdentifiers.Add(identifier);
 				expression = identifier.Expression;
@@ -104,11 +102,10 @@ namespace DynamicExpresso
 		/// </summary>
 		public bool TryGetParameters(string name, out ParameterExpression expression)
 		{
-			Parameter parameter;
-			if (_declaredParameters.TryGetValue(name, out parameter))
+			if (_declaredParameters.TryGetValue(name, out var parameter))
 			{
 				_usedParameters.Add(parameter);
-				expression = parameter.Expression; 
+				expression = parameter.Expression;
 				return true;
 			}
 

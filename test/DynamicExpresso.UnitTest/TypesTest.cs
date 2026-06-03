@@ -47,7 +47,7 @@ namespace DynamicExpresso.UnitTest
                 };
 
 			foreach (var t in predefinedTypes)
-				Assert.AreEqual(t.Value, target.Eval(string.Format("typeof({0})", t.Key)));
+				Assert.That(target.Eval(string.Format("typeof({0})", t.Key)), Is.EqualTo(t.Value));
 		}
 
 		[Test]
@@ -64,8 +64,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.Reference(typeof(Uri));
 
-			Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
-			Assert.AreEqual(new Uri("http://test"), target.Eval("new Uri(\"http://test\")"));
+			Assert.That(target.Eval("typeof(Uri)"), Is.EqualTo(typeof(Uri)));
+			Assert.That(target.Eval("new Uri(\"http://test\")"), Is.EqualTo(new Uri("http://test")));
 		}
 
 		[Test]
@@ -78,8 +78,8 @@ namespace DynamicExpresso.UnitTest
 											.Reference(typeof(Uri))
 											.Reference(typeof(Uri));
 
-			Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
-			Assert.AreEqual(new Uri("http://test"), target.Eval("new Uri(\"http://test\")"));
+			Assert.That(target.Eval("typeof(Uri)"), Is.EqualTo(typeof(Uri)));
+			Assert.That(target.Eval("new Uri(\"http://test\")"), Is.EqualTo(new Uri("http://test")));
 		}
 
 		[Test]
@@ -89,10 +89,10 @@ namespace DynamicExpresso.UnitTest
 											.Reference(typeof(string))
 											.Reference(typeof(Uri));
 
-			Assert.AreEqual(typeof(Uri), target.Eval("typeof(Uri)"));
-			Assert.AreEqual(typeof(Uri), target.Eval("typeof(uri)"));
-			Assert.AreEqual(typeof(Uri), target.Eval("typeof(URI)"));
-			Assert.AreEqual(string.Empty, target.Eval("STRING.Empty"));
+			Assert.That(target.Eval("typeof(Uri)"), Is.EqualTo(typeof(Uri)));
+			Assert.That(target.Eval("typeof(uri)"), Is.EqualTo(typeof(Uri)));
+			Assert.That(target.Eval("typeof(URI)"), Is.EqualTo(typeof(Uri)));
+			Assert.That(target.Eval("STRING.Empty"), Is.EqualTo(string.Empty));
 		}
 
 		[Test]
@@ -101,8 +101,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.Reference(typeof(MyDataContract));
 
-			Assert.AreEqual(new MyDataContract("davide").Name, target.Eval("new MyDataContract(\"davide\").Name"));
-			Assert.AreEqual(new MyDataContract(44, 88).Name, target.Eval("new MyDataContract(44 , 88).Name"));
+			Assert.That(target.Eval("new MyDataContract(\"davide\").Name"), Is.EqualTo(new MyDataContract("davide").Name));
+			Assert.That(target.Eval("new MyDataContract(44 , 88).Name"), Is.EqualTo(new MyDataContract(44, 88).Name));
 		}
 
 		[Test]
@@ -111,7 +111,7 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.Reference(typeof(MyDataContract), "DC");
 
-			Assert.AreEqual(typeof(MyDataContract), target.Parse("new DC(\"davide\")").ReturnType);
+			Assert.That(target.Parse("new DC(\"davide\")").ReturnType, Is.EqualTo(typeof(MyDataContract)));
 		}
 
 		[Test]
@@ -120,8 +120,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.Reference(typeof(MyCustomEnum));
 
-			Assert.AreEqual(MyCustomEnum.Value1, target.Eval("MyCustomEnum.Value1"));
-			Assert.AreEqual(MyCustomEnum.Value2, target.Eval("MyCustomEnum.Value2"));
+			Assert.That(target.Eval("MyCustomEnum.Value1"), Is.EqualTo(MyCustomEnum.Value1));
+			Assert.That(target.Eval("MyCustomEnum.Value2"), Is.EqualTo(MyCustomEnum.Value2));
 		}
 
 		[Test]
@@ -130,8 +130,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.Reference(typeof(EnumCaseSensitive));
 
-			Assert.AreEqual(EnumCaseSensitive.Test, target.Eval("EnumCaseSensitive.Test"));
-			Assert.AreEqual(EnumCaseSensitive.TEST, target.Eval("EnumCaseSensitive.TEST"));
+			Assert.That(target.Eval("EnumCaseSensitive.Test"), Is.EqualTo(EnumCaseSensitive.Test));
+			Assert.That(target.Eval("EnumCaseSensitive.TEST"), Is.EqualTo(EnumCaseSensitive.TEST));
 		}
 
 		[Test]
@@ -141,9 +141,9 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("Math.Max(a, typeof(string).Name.Length)", new Parameter("a", 1));
 
-			Assert.AreEqual(2, lambda.Types.Count());
-			Assert.AreEqual("Math", lambda.Types.ElementAt(0).Name);
-			Assert.AreEqual("string", lambda.Types.ElementAt(1).Name);
+			Assert.That(lambda.Types.Count(), Is.EqualTo(2));
+			Assert.That(lambda.Types.ElementAt(0).Name, Is.EqualTo("Math"));
+			Assert.That(lambda.Types.ElementAt(1).Name, Is.EqualTo("string"));
 		}
 
 		public enum EnumCaseSensitive

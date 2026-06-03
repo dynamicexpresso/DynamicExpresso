@@ -1,10 +1,10 @@
-using Microsoft.CSharp.RuntimeBinder;
-using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq.Expressions;
-using System.Collections.Generic;
 using DynamicExpresso.Exceptions;
+using Microsoft.CSharp.RuntimeBinder;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -20,7 +20,19 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(dyn.Foo, interpreter.Eval("dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo"), Is.EqualTo(dyn.Foo));
+		}
+
+		[Test]
+		public void Set_Property_of_an_ExpandoObject()
+		{
+			dynamic dyn = new ExpandoObject();
+			var interpreter = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LateBindObject)
+				.SetVariable("dyn", (object)dyn);
+
+			interpreter.Eval("dyn.Foo = 10");
+
+			Assert.That(dyn.Foo, Is.EqualTo(10));
 		}
 
 		[Test]
@@ -29,7 +41,21 @@ namespace DynamicExpresso.UnitTest
 			dynamic dyn = new ExpandoObject();
 			dyn.Sub = new { Foo = new { Bar = new { Foo2 = "bar" } } };
 			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
-			Assert.AreEqual(dyn.Sub.Foo.Bar.Foo2, interpreter.Eval("dyn.Sub.Foo.Bar.Foo2"));
+			Assert.That(interpreter.Eval("dyn.Sub.Foo.Bar.Foo2"), Is.EqualTo(dyn.Sub.Foo.Bar.Foo2));
+		}
+
+		[Test]
+		public void Set_Property_of_a_nested_ExpandoObject()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Sub = new ExpandoObject();
+			dyn.Sub.Foo = "bar";
+
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+
+			interpreter.Eval("dyn.Sub.Foo = \"foobar\"");
+
+			Assert.That(dyn.Sub.Foo, Is.EqualTo("foobar"));
 		}
 
 		[Test]
@@ -42,7 +68,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 					.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(dyn.Sub.Foo, interpreter.Eval("dyn.Sub.Foo"));
+			Assert.That(interpreter.Eval("dyn.Sub.Foo"), Is.EqualTo(dyn.Sub.Foo));
 		}
 
 		//[Test]
@@ -55,7 +81,7 @@ namespace DynamicExpresso.UnitTest
 
 		//	interpreter.Eval("dyn.Foo = 6");
 
-		//	Assert.AreEqual(6, dyn.Foo);
+		//	Assert.That(dyn.Foo, Is.EqualTo(6));
 		//}
 
 		[Test]
@@ -67,7 +93,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", dyn);
 
-			Assert.AreEqual(dyn.RealProperty, interpreter.Eval("dyn.RealProperty"));
+			Assert.That(interpreter.Eval("dyn.RealProperty"), Is.EqualTo(dyn.RealProperty));
 		}
 
 		[Test]
@@ -79,7 +105,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", dyn);
 
-			Assert.AreEqual(dyn.Foo(), interpreter.Eval("dyn.Foo()"));
+			Assert.That(interpreter.Eval("dyn.Foo()"), Is.EqualTo(dyn.Foo()));
 		}
 
 		[Test]
@@ -92,7 +118,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 					.SetVariable("dyn", dyn);
 
-			Assert.AreEqual(dyn.Sub.Foo(), interpreter.Eval("dyn.Sub.Foo()"));
+			Assert.That(interpreter.Eval("dyn.Sub.Foo()"), Is.EqualTo(dyn.Sub.Foo()));
 		}
 
 		[Test]
@@ -105,7 +131,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 					.SetVariable("dyn", dyn);
 
-			Assert.AreEqual(dyn.Sub.Foo.Func(), interpreter.Eval("dyn.Sub.Foo.Func()"));
+			Assert.That(interpreter.Eval("dyn.Sub.Foo.Func()"), Is.EqualTo(dyn.Sub.Foo.Func()));
 		}
 
 		[Test]
@@ -116,7 +142,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", dyn);
 
-			Assert.AreEqual(dyn.ToString(), interpreter.Eval("dyn.ToString()"));
+			Assert.That(interpreter.Eval("dyn.ToString()"), Is.EqualTo(dyn.ToString()));
 		}
 
 		[Test]
@@ -133,9 +159,9 @@ namespace DynamicExpresso.UnitTest
 		public void Get_value_of_a_nested_array()
 		{
 			dynamic dyn = new ExpandoObject();
-			dyn.Sub = new int[] {42};
+			dyn.Sub = new int[] { 42 };
 			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
-			Assert.AreEqual(dyn.Sub[0], interpreter.Eval("dyn.Sub[0]"));
+			Assert.That(interpreter.Eval("dyn.Sub[0]"), Is.EqualTo(dyn.Sub[0]));
 		}
 
 		[Test]
@@ -144,9 +170,9 @@ namespace DynamicExpresso.UnitTest
 			dynamic dyn = new ExpandoObject();
 			dyn.Sub = new { Foo = new int[] { 42 }, Bar = new { Sub = new int[] { 43 } } };
 			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
-			Assert.AreEqual(dyn.Sub.Foo[0], interpreter.Eval("dyn.Sub.Foo[0]"));
-			Assert.AreEqual(dyn.Sub.Bar.Sub[0], interpreter.Eval("dyn.Sub.Bar.Sub[0]"));
-			Assert.AreEqual(dyn.Sub.Bar.Sub.Length, interpreter.Eval("dyn.Sub.Bar.Sub.Length"));
+			Assert.That(interpreter.Eval("dyn.Sub.Foo[0]"), Is.EqualTo(dyn.Sub.Foo[0]));
+			Assert.That(interpreter.Eval("dyn.Sub.Bar.Sub[0]"), Is.EqualTo(dyn.Sub.Bar.Sub[0]));
+			Assert.That(interpreter.Eval("dyn.Sub.Bar.Sub.Length"), Is.EqualTo(dyn.Sub.Bar.Sub.Length));
 		}
 
 		[Test]
@@ -166,28 +192,43 @@ namespace DynamicExpresso.UnitTest
 				ObjArr = new object[] { "Test", anonType1 }
 			};
 			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
-			Assert.AreSame(dyn.Sub.Arg1.Foo, interpreter.Eval("dyn.Sub.Arg1.Foo"));
-			Assert.AreSame(dyn.Sub.Arg2.Foo, interpreter.Eval("dyn.Sub.Arg2.Foo"));
+			Assert.That(interpreter.Eval("dyn.Sub.Arg1.Foo"), Is.SameAs(dyn.Sub.Arg1.Foo));
+			Assert.That(interpreter.Eval("dyn.Sub.Arg2.Foo"), Is.SameAs(dyn.Sub.Arg2.Foo));
 			Assert.Throws<RuntimeBinderException>(() => Console.WriteLine(dyn.Sub.Arg3.Foo));
 			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Sub.Arg3.Foo"));
-			Assert.AreSame(dyn.Sub.Arr[0].Foo, interpreter.Eval("dyn.Sub.Arr[0].Foo"));
-			Assert.AreSame(dyn.Sub.Arr[1].Foo, interpreter.Eval("dyn.Sub.Arr[1].Foo"));
+			Assert.That(interpreter.Eval("dyn.Sub.Arr[0].Foo"), Is.SameAs(dyn.Sub.Arr[0].Foo));
+			Assert.That(interpreter.Eval("dyn.Sub.Arr[1].Foo"), Is.SameAs(dyn.Sub.Arr[1].Foo));
 
 			Assert.Throws<RuntimeBinderException>(() => Console.WriteLine(dyn.Sub.Arr[2].Foo));
 			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Sub.Arr[2].Foo"));
 
-			Assert.AreSame(dyn.Sub.ObjArr[0], interpreter.Eval("dyn.Sub.ObjArr[0]"));
-			Assert.AreEqual(dyn.Sub.ObjArr[0].Length, interpreter.Eval("dyn.Sub.ObjArr[0].Length"));
+			Assert.That(interpreter.Eval("dyn.Sub.ObjArr[0]"), Is.SameAs(dyn.Sub.ObjArr[0]));
+			Assert.That(interpreter.Eval("dyn.Sub.ObjArr[0].Length"), Is.EqualTo(dyn.Sub.ObjArr[0].Length));
 
-			Assert.AreSame(dyn.Sub.ObjArr[1], interpreter.Eval("dyn.Sub.ObjArr[1]"));
-			Assert.AreSame(dyn.Sub.ObjArr[1].Foo, interpreter.Eval("dyn.Sub.ObjArr[1].Foo"));
+			Assert.That(interpreter.Eval("dyn.Sub.ObjArr[1]"), Is.SameAs(dyn.Sub.ObjArr[1]));
+			Assert.That(interpreter.Eval("dyn.Sub.ObjArr[1].Foo"), Is.SameAs(dyn.Sub.ObjArr[1].Foo));
+		}
+
+		[Test]
+		public void Set_value_of_a_dynamic_object()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = new int[5];
+			dyn.Bar = new Dictionary<string, int>();
+
+			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
+			interpreter.Eval("dyn.Foo[2] = 5");
+			interpreter.Eval("dyn.Bar[\"foo\"] = 50");
+
+			Assert.That(dyn.Foo[2], Is.EqualTo(5));
+			Assert.That(dyn.Bar["foo"], Is.EqualTo(50));
 		}
 
 		[Test]
 		public void Get_value_of_a_nested_array_error()
 		{
 			dynamic dyn = new ExpandoObject();
-			dyn.Sub = new int[] {42};
+			dyn.Sub = new int[] { 42 };
 			dyn.Bar = 123;
 			var interpreter = new Interpreter().SetVariable("dyn", (object)dyn);
 			Assert.Throws<RuntimeBinderException>(() => interpreter.Eval("dyn.Bar[0]")); // use index for a property that is not an array
@@ -208,7 +249,7 @@ namespace DynamicExpresso.UnitTest
 			var methodCallExpression = Expression.Call(Expression.Constant(myInstance), methodInfo);
 			var expression = Expression.Lambda(methodCallExpression);
 
-			Assert.AreEqual(myInstance.ToUniversalTime(), expression.Compile().DynamicInvoke());
+			Assert.That(expression.Compile().DynamicInvoke(), Is.EqualTo(myInstance.ToUniversalTime()));
 		}
 
 		[Test]
@@ -227,7 +268,7 @@ namespace DynamicExpresso.UnitTest
 			var methodCallExpression = Expression.Dynamic(binder, typeof(object), Expression.Constant(myInstance));
 			var expression = Expression.Lambda(methodCallExpression);
 
-			Assert.AreEqual(myInstance.MyMethod(), expression.Compile().DynamicInvoke());
+			Assert.That(expression.Compile().DynamicInvoke(), Is.EqualTo(myInstance.MyMethod()));
 		}
 
 		[Test]
@@ -236,8 +277,8 @@ namespace DynamicExpresso.UnitTest
 			DynamicIndexAccess globals = new DynamicIndexAccess();
 			Interpreter interpreter = new Interpreter()
 				.SetVariable("Values", new DynamicIndexAccess());
-			
-			Assert.AreEqual(globals.Values["Hello"], interpreter.Eval<string>("Values[\"Hello\"]"));
+
+			Assert.That(interpreter.Eval<string>("Values[\"Hello\"]"), Is.EqualTo(globals.Values["Hello"]));
 		}
 
 		[Test]
@@ -249,26 +290,26 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(dyn.Foo == 500, interpreter.Eval("dyn.Foo == 500"));
-			Assert.AreEqual(500 == dyn.Foo, interpreter.Eval("500 == dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo == 500"), Is.EqualTo(dyn.Foo == 500));
+			Assert.That(interpreter.Eval("500 == dyn.Foo"), Is.EqualTo(500 == dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo != 200, interpreter.Eval("dyn.Foo != 200"));
-			Assert.AreEqual(200 != dyn.Foo, interpreter.Eval("200 != dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo != 200"), Is.EqualTo(dyn.Foo != 200));
+			Assert.That(interpreter.Eval("200 != dyn.Foo"), Is.EqualTo(200 != dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo > 200, interpreter.Eval("dyn.Foo > 200"));
-			Assert.AreEqual(600 > dyn.Foo, interpreter.Eval("600 > dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo > 200"), Is.EqualTo(dyn.Foo > 200));
+			Assert.That(interpreter.Eval("600 > dyn.Foo"), Is.EqualTo(600 > dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo < 600, interpreter.Eval("dyn.Foo < 600"));
-			Assert.AreEqual(200 < dyn.Foo, interpreter.Eval("200 < dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo < 600"), Is.EqualTo(dyn.Foo < 600));
+			Assert.That(interpreter.Eval("200 < dyn.Foo"), Is.EqualTo(200 < dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo >= 500, interpreter.Eval("dyn.Foo >= 500"));
-			Assert.AreEqual(500 >= dyn.Foo, interpreter.Eval("500 >= dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo >= 500"), Is.EqualTo(dyn.Foo >= 500));
+			Assert.That(interpreter.Eval("500 >= dyn.Foo"), Is.EqualTo(500 >= dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo <= 500, interpreter.Eval("dyn.Foo <= 500"));
-			Assert.AreEqual(500 <= dyn.Foo, interpreter.Eval("500 <= dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo <= 500"), Is.EqualTo(dyn.Foo <= 500));
+			Assert.That(interpreter.Eval("500 <= dyn.Foo"), Is.EqualTo(500 <= dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo + 500, interpreter.Eval("dyn.Foo + 500"));
-			Assert.AreEqual(500 + dyn.Foo, interpreter.Eval("500 + dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo + 500"), Is.EqualTo(dyn.Foo + 500));
+			Assert.That(interpreter.Eval("500 + dyn.Foo"), Is.EqualTo(500 + dyn.Foo));
 		}
 
 		[Test]
@@ -281,7 +322,7 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(dyn.Bar>0?100:200, interpreter.Eval("dyn.Bar>0?100:200"));
+			Assert.That(interpreter.Eval("dyn.Bar>0?100:200"), Is.EqualTo(dyn.Bar > 0 ? 100 : 200));
 		}
 
 		[Test]
@@ -294,22 +335,22 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(dyn.Foo == 500 && dyn.Bar == 100, interpreter.Eval("dyn.Foo == 500 && dyn.Bar == 100"));
-			Assert.AreEqual(dyn.Foo == 500 && dyn.Bar != 100, interpreter.Eval("dyn.Foo == 500 && dyn.Bar != 100"));
-			Assert.AreEqual(dyn.Foo != 500 && dyn.Bar == 100, interpreter.Eval("dyn.Foo != 500 && dyn.Bar == 100"));
-			Assert.AreEqual(dyn.Foo != 500 && dyn.Bar != 100, interpreter.Eval("dyn.Foo != 500 && dyn.Bar != 100"));
+			Assert.That(interpreter.Eval("dyn.Foo == 500 && dyn.Bar == 100"), Is.EqualTo(dyn.Foo == 500 && dyn.Bar == 100));
+			Assert.That(interpreter.Eval("dyn.Foo == 500 && dyn.Bar != 100"), Is.EqualTo(dyn.Foo == 500 && dyn.Bar != 100));
+			Assert.That(interpreter.Eval("dyn.Foo != 500 && dyn.Bar == 100"), Is.EqualTo(dyn.Foo != 500 && dyn.Bar == 100));
+			Assert.That(interpreter.Eval("dyn.Foo != 500 && dyn.Bar != 100"), Is.EqualTo(dyn.Foo != 500 && dyn.Bar != 100));
 
 			//check non dynamic right side
-			Assert.AreEqual(dyn.Foo == 500 && 100 == 100, interpreter.Eval("dyn.Foo == 500 && 100 == 100"));
-			Assert.AreEqual(dyn.Foo == 500 && 100 != 100, interpreter.Eval("dyn.Foo == 500 && 100 != 100"));
-			Assert.AreEqual(dyn.Foo != 500 && 100 == 100, interpreter.Eval("dyn.Foo != 500 && 100 == 100"));
-			Assert.AreEqual(dyn.Foo != 500 && 100 != 100, interpreter.Eval("dyn.Foo != 500 && 100 != 100"));
+			Assert.That(interpreter.Eval("dyn.Foo == 500 && 100 == 100"), Is.EqualTo(dyn.Foo == 500 && 100 == 100));
+			Assert.That(interpreter.Eval("dyn.Foo == 500 && 100 != 100"), Is.EqualTo(dyn.Foo == 500 && 100 != 100));
+			Assert.That(interpreter.Eval("dyn.Foo != 500 && 100 == 100"), Is.EqualTo(dyn.Foo != 500 && 100 == 100));
+			Assert.That(interpreter.Eval("dyn.Foo != 500 && 100 != 100"), Is.EqualTo(dyn.Foo != 500 && 100 != 100));
 
 			//check non dynamic left side
-			Assert.AreEqual(100 == 100 && dyn.Foo == 500, interpreter.Eval("100 == 100 && dyn.Foo == 500"));
-			Assert.AreEqual(100 != 100 && dyn.Foo == 500, interpreter.Eval("100 != 100 && dyn.Foo == 500"));
-			Assert.AreEqual(100 == 100 && dyn.Foo != 500, interpreter.Eval("100 == 100 && dyn.Foo != 500"));
-			Assert.AreEqual(100 != 100 && dyn.Foo != 500, interpreter.Eval("100 != 100 && dyn.Foo != 500"));
+			Assert.That(interpreter.Eval("100 == 100 && dyn.Foo == 500"), Is.EqualTo(100 == 100 && dyn.Foo == 500));
+			Assert.That(interpreter.Eval("100 != 100 && dyn.Foo == 500"), Is.EqualTo(100 != 100 && dyn.Foo == 500));
+			Assert.That(interpreter.Eval("100 == 100 && dyn.Foo != 500"), Is.EqualTo(100 == 100 && dyn.Foo != 500));
+			Assert.That(interpreter.Eval("100 != 100 && dyn.Foo != 500"), Is.EqualTo(100 != 100 && dyn.Foo != 500));
 		}
 
 		[Test]
@@ -322,22 +363,22 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(dyn.Foo == 500 || dyn.Bar == 100, interpreter.Eval("dyn.Foo == 500 || dyn.Bar == 100"));
-			Assert.AreEqual(dyn.Foo == 500 || dyn.Bar != 100, interpreter.Eval("dyn.Foo == 500 || dyn.Bar != 100"));
-			Assert.AreEqual(dyn.Foo != 500 || dyn.Bar == 100, interpreter.Eval("dyn.Foo != 500 || dyn.Bar == 100"));
-			Assert.AreEqual(dyn.Foo != 500 || dyn.Bar != 100, interpreter.Eval("dyn.Foo != 500 || dyn.Bar != 100"));
+			Assert.That(interpreter.Eval("dyn.Foo == 500 || dyn.Bar == 100"), Is.EqualTo(dyn.Foo == 500 || dyn.Bar == 100));
+			Assert.That(interpreter.Eval("dyn.Foo == 500 || dyn.Bar != 100"), Is.EqualTo(dyn.Foo == 500 || dyn.Bar != 100));
+			Assert.That(interpreter.Eval("dyn.Foo != 500 || dyn.Bar == 100"), Is.EqualTo(dyn.Foo != 500 || dyn.Bar == 100));
+			Assert.That(interpreter.Eval("dyn.Foo != 500 || dyn.Bar != 100"), Is.EqualTo(dyn.Foo != 500 || dyn.Bar != 100));
 
 			//check non dynamic right side
-			Assert.AreEqual(dyn.Foo == 500 || 100 == 100, interpreter.Eval("dyn.Foo == 500 || 100 == 100"));
-			Assert.AreEqual(dyn.Foo == 500 || 100 != 100, interpreter.Eval("dyn.Foo == 500 || 100 != 100"));
-			Assert.AreEqual(dyn.Foo != 500 || 100 == 100, interpreter.Eval("dyn.Foo != 500 || 100 == 100"));
-			Assert.AreEqual(dyn.Foo != 500 || 100 != 100, interpreter.Eval("dyn.Foo != 500 || 100 != 100"));
+			Assert.That(interpreter.Eval("dyn.Foo == 500 || 100 == 100"), Is.EqualTo(dyn.Foo == 500 || 100 == 100));
+			Assert.That(interpreter.Eval("dyn.Foo == 500 || 100 != 100"), Is.EqualTo(dyn.Foo == 500 || 100 != 100));
+			Assert.That(interpreter.Eval("dyn.Foo != 500 || 100 == 100"), Is.EqualTo(dyn.Foo != 500 || 100 == 100));
+			Assert.That(interpreter.Eval("dyn.Foo != 500 || 100 != 100"), Is.EqualTo(dyn.Foo != 500 || 100 != 100));
 
 			//check non dynamic left side
-			Assert.AreEqual(100 == 100 || dyn.Foo == 500, interpreter.Eval("100 == 100 || dyn.Foo == 500"));
-			Assert.AreEqual(100 != 100 || dyn.Foo == 500, interpreter.Eval("100 != 100 || dyn.Foo == 500"));
-			Assert.AreEqual(100 == 100 || dyn.Foo != 500, interpreter.Eval("100 == 100 || dyn.Foo != 500"));
-			Assert.AreEqual(100 != 100 || dyn.Foo != 500, interpreter.Eval("100 != 100 || dyn.Foo != 500"));
+			Assert.That(interpreter.Eval("100 == 100 || dyn.Foo == 500"), Is.EqualTo(100 == 100 || dyn.Foo == 500));
+			Assert.That(interpreter.Eval("100 != 100 || dyn.Foo == 500"), Is.EqualTo(100 != 100 || dyn.Foo == 500));
+			Assert.That(interpreter.Eval("100 == 100 || dyn.Foo != 500"), Is.EqualTo(100 == 100 || dyn.Foo != 500));
+			Assert.That(interpreter.Eval("100 != 100 || dyn.Foo != 500"), Is.EqualTo(100 != 100 || dyn.Foo != 500));
 		}
 
 		[Test]
@@ -349,37 +390,38 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(dyn.Foo + 500, interpreter.Eval("dyn.Foo + 500"));
-			Assert.AreEqual(500 + dyn.Foo, interpreter.Eval("500 + dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo + 500"), Is.EqualTo(dyn.Foo + 500));
+			Assert.That(interpreter.Eval("500 + dyn.Foo"), Is.EqualTo(500 + dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo - 500, interpreter.Eval("dyn.Foo - 500"));
-			Assert.AreEqual(500 - dyn.Foo, interpreter.Eval("500 - dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo - 500"), Is.EqualTo(dyn.Foo - 500));
+			Assert.That(interpreter.Eval("500 - dyn.Foo"), Is.EqualTo(500 - dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo / 500, interpreter.Eval("dyn.Foo / 500"));
-			Assert.AreEqual(500 / dyn.Foo, interpreter.Eval("500 / dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo / 500"), Is.EqualTo(dyn.Foo / 500));
+			Assert.That(interpreter.Eval("500 / dyn.Foo"), Is.EqualTo(500 / dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo * 500, interpreter.Eval("dyn.Foo * 500"));
-			Assert.AreEqual(500 * dyn.Foo, interpreter.Eval("500 * dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo * 500"), Is.EqualTo(dyn.Foo * 500));
+			Assert.That(interpreter.Eval("500 * dyn.Foo"), Is.EqualTo(500 * dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo % 500, interpreter.Eval("dyn.Foo % 500"));
-			Assert.AreEqual(500 % dyn.Foo, interpreter.Eval("500 % dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo % 500"), Is.EqualTo(dyn.Foo % 500));
+			Assert.That(interpreter.Eval("500 % dyn.Foo"), Is.EqualTo(500 % dyn.Foo));
 		}
 
 		public class ClassWithObjectProperties
-        {
+		{
 			public object Foo => 100;
 			public object Bar() => 100;
-        }
+		}
 
 		[Test]
 		public void ObjectLateBinding()
 		{
-			
+
 
 			var classWithObjectProperties = new ClassWithObjectProperties();
-						
 
-			Assert.Throws<ParseException>(() => {
+
+			Assert.Throws<ParseException>(() =>
+			{
 
 				var noLateBindingInterpreter = new Interpreter();
 				var noLateBindingDel = noLateBindingInterpreter.ParseAsDelegate<Func<ClassWithObjectProperties, int>>("d.Foo+d.Bar()", new[] { "d" });
@@ -388,19 +430,19 @@ namespace DynamicExpresso.UnitTest
 			});
 
 
-			var lateBindingInterpreter = new Interpreter(InterpreterOptions.Default|InterpreterOptions.LateBindObject);
+			var lateBindingInterpreter = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LateBindObject);
 			var lateBindingInterpreterDel = lateBindingInterpreter.ParseAsDelegate<Func<ClassWithObjectProperties, int>>("d.Foo+d.Bar()", new[] { "d" });
 			var lateBindingResult = lateBindingInterpreterDel.Invoke(classWithObjectProperties);
-			Assert.AreEqual((dynamic)classWithObjectProperties.Foo + (dynamic)classWithObjectProperties.Bar(), lateBindingResult);
+			Assert.That(lateBindingResult, Is.EqualTo((dynamic)classWithObjectProperties.Foo + (dynamic)classWithObjectProperties.Bar()));
 
 
 			lateBindingInterpreter.SetVariable("d", classWithObjectProperties);
 			var evalResult = lateBindingInterpreter.Eval("d.Foo+d.Bar()");
-			Assert.IsTrue(evalResult.GetType() == typeof(int));
-			Assert.AreEqual((dynamic)classWithObjectProperties.Foo + (dynamic)classWithObjectProperties.Bar(), evalResult);
+			Assert.That(evalResult.GetType(), Is.EqualTo(typeof(int)));
+			Assert.That(evalResult, Is.EqualTo((dynamic)classWithObjectProperties.Foo + (dynamic)classWithObjectProperties.Bar()));
 
 		}
-	
+
 
 		[Test]
 		public void Bitwise_with_dynamic_properties()
@@ -411,15 +453,15 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(dyn.Foo & 500, interpreter.Eval("dyn.Foo & 500"));
-			Assert.AreEqual(500 & dyn.Foo, interpreter.Eval("500 & dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo & 500"), Is.EqualTo(dyn.Foo & 500));
+			Assert.That(interpreter.Eval("500 & dyn.Foo"), Is.EqualTo(500 & dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo | 500, interpreter.Eval("dyn.Foo | 500"));
-			Assert.AreEqual(500 | dyn.Foo, interpreter.Eval("500 | dyn.Foo"));
+			Assert.That(interpreter.Eval("dyn.Foo | 500"), Is.EqualTo(dyn.Foo | 500));
+			Assert.That(interpreter.Eval("500 | dyn.Foo"), Is.EqualTo(500 | dyn.Foo));
 
-			Assert.AreEqual(dyn.Foo ^ 500, interpreter.Eval("dyn.Foo ^ 500"));
-			Assert.AreEqual(500 ^ dyn.Foo, interpreter.Eval("500 ^ dyn.Foo"));
-			
+			Assert.That(interpreter.Eval("dyn.Foo ^ 500"), Is.EqualTo(dyn.Foo ^ 500));
+			Assert.That(interpreter.Eval("500 ^ dyn.Foo"), Is.EqualTo(500 ^ dyn.Foo));
+
 		}
 
 		[Test]
@@ -432,11 +474,46 @@ namespace DynamicExpresso.UnitTest
 			var interpreter = new Interpreter()
 				.SetVariable("dyn", (object)dyn);
 
-			Assert.AreEqual(!dyn.Foo, interpreter.Eval("!dyn.Foo"));
-			Assert.AreEqual(-dyn.Bar, interpreter.Eval("-dyn.Bar"));
+			Assert.That(interpreter.Eval("!dyn.Foo"), Is.EqualTo(!dyn.Foo));
+			Assert.That(interpreter.Eval("-dyn.Bar"), Is.EqualTo(-dyn.Bar));
+		}
+
+		[Test]
+		public void Static_method_call_with_dynamic_arg()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = "test";
+
+			var myClass = new MyClass();
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", (object)dyn);
+
+			Assert.That(interpreter.Eval("string.IsNullOrEmpty(dyn.Foo)"), Is.EqualTo(string.IsNullOrEmpty(dyn.Foo)));
+		}
 
 
+		[Test]
+		public void Method_call_with_dynamic_arg()
+		{
+			dynamic dyn = new ExpandoObject();
+			dyn.Foo = "test";
 
+			var myClass = new MyClass();
+
+			var interpreter = new Interpreter()
+				.SetVariable("dyn", (object)dyn)
+				.SetVariable("myClass", myClass);
+
+			Assert.That(interpreter.Eval("myClass.MyMethod(dyn.Foo)"), Is.EqualTo(myClass.MyMethod(dyn.Foo)));
+		}
+
+		public class MyClass
+		{
+			public string MyMethod(string input)
+			{
+				return input;
+			}
 		}
 
 		public class TestDynamicClass : DynamicObject
@@ -457,13 +534,13 @@ namespace DynamicExpresso.UnitTest
 			}
 		}
 
-		public class DynamicIndexAccess : DynamicObject 
+		public class DynamicIndexAccess : DynamicObject
 		{
-			public dynamic Values 
-			{ 
-				get 
-				{ 
-					return _values; 
+			public dynamic Values
+			{
+				get
+				{
+					return _values;
 				}
 			}
 			private readonly IReadOnlyDictionary<string, object> _values;

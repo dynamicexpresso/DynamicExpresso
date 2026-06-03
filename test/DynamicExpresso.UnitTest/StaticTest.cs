@@ -11,14 +11,14 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(int.MaxValue, target.Eval("Int32.MaxValue"));
-			Assert.AreEqual(double.MaxValue, target.Eval("Double.MaxValue"));
-			Assert.AreEqual(DateTime.MaxValue, target.Eval("DateTime.MaxValue"));
-			Assert.AreEqual(DateTime.Today, target.Eval("DateTime.Today"));
-			Assert.AreEqual(string.Empty, target.Eval("String.Empty"));
-			Assert.AreEqual(bool.FalseString, target.Eval("Boolean.FalseString"));
-			Assert.AreEqual(TimeSpan.TicksPerMillisecond, target.Eval("TimeSpan.TicksPerMillisecond"));
-			Assert.AreEqual(Guid.Empty, target.Eval("Guid.Empty"));
+			Assert.That(target.Eval("Int32.MaxValue"), Is.EqualTo(int.MaxValue));
+			Assert.That(target.Eval("Double.MaxValue"), Is.EqualTo(double.MaxValue));
+			Assert.That(target.Eval("DateTime.MaxValue"), Is.EqualTo(DateTime.MaxValue));
+			Assert.That(target.Eval("DateTime.Today"), Is.EqualTo(DateTime.Today));
+			Assert.That(target.Eval("String.Empty"), Is.EqualTo(string.Empty));
+			Assert.That(target.Eval("Boolean.FalseString"), Is.EqualTo(bool.FalseString));
+			Assert.That(target.Eval("TimeSpan.TicksPerMillisecond"), Is.EqualTo(TimeSpan.TicksPerMillisecond));
+			Assert.That(target.Eval("Guid.Empty"), Is.EqualTo(Guid.Empty));
 		}
 
 		[Test]
@@ -26,8 +26,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(TimeSpan.FromMilliseconds(2000.49), target.Eval("TimeSpan.FromMilliseconds(2000.49)"));
-			Assert.AreEqual(DateTime.DaysInMonth(2094, 11), target.Eval("DateTime.DaysInMonth(2094, 11)"));
+			Assert.That(target.Eval("TimeSpan.FromMilliseconds(2000.49)"), Is.EqualTo(TimeSpan.FromMilliseconds(2000.49)));
+			Assert.That(target.Eval("DateTime.DaysInMonth(2094, 11)"), Is.EqualTo(DateTime.DaysInMonth(2094, 11)));
 		}
 
 		[Test]
@@ -35,8 +35,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(Math.Pow(3, 4), target.Eval("Math.Pow(3, 4)"));
-			Assert.AreEqual(Math.Sin(30.234), target.Eval("Math.Sin(30.234)"));
+			Assert.That(target.Eval("Math.Pow(3, 4)"), Is.EqualTo(Math.Pow(3, 4)));
+			Assert.That(target.Eval("Math.Sin(30.234)"), Is.EqualTo(Math.Sin(30.234)));
 		}
 
 		[Test]
@@ -44,8 +44,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(Convert.ToString(3), target.Eval("Convert.ToString(3)"));
-			Assert.AreEqual(Convert.ToInt16("23"), target.Eval("Convert.ToInt16(\"23\")"));
+			Assert.That(target.Eval("Convert.ToString(3)"), Is.EqualTo(Convert.ToString(3)));
+			Assert.That(target.Eval("Convert.ToInt16(\"23\")"), Is.EqualTo(Convert.ToInt16("23")));
 		}
 
 		[Test]
@@ -53,12 +53,12 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(int.MaxValue, target.Eval("int.MaxValue"));
-			Assert.AreEqual(double.MaxValue, target.Eval("double.MaxValue"));
-			Assert.AreEqual(string.Empty, target.Eval("string.Empty"));
-			Assert.AreEqual(bool.FalseString, target.Eval("bool.FalseString"));
-			Assert.AreEqual(char.MinValue, target.Eval("char.MinValue"));
-			Assert.AreEqual(byte.MinValue, target.Eval("byte.MinValue"));
+			Assert.That(target.Eval("int.MaxValue"), Is.EqualTo(int.MaxValue));
+			Assert.That(target.Eval("double.MaxValue"), Is.EqualTo(double.MaxValue));
+			Assert.That(target.Eval("string.Empty"), Is.EqualTo(string.Empty));
+			Assert.That(target.Eval("bool.FalseString"), Is.EqualTo(bool.FalseString));
+			Assert.That(target.Eval("char.MinValue"), Is.EqualTo(char.MinValue));
+			Assert.That(target.Eval("byte.MinValue"), Is.EqualTo(byte.MinValue));
 		}
 
 		[Test]
@@ -68,8 +68,8 @@ namespace DynamicExpresso.UnitTest
 											.Reference(typeof(Uri))
 											.Reference(typeof(MyTestService));
 
-			Assert.AreEqual(Uri.UriSchemeHttp, target.Eval("Uri.UriSchemeHttp"));
-			Assert.AreEqual(MyTestService.MyStaticMethod(), target.Eval("MyTestService.MyStaticMethod()"));
+			Assert.That(target.Eval("Uri.UriSchemeHttp"), Is.EqualTo(Uri.UriSchemeHttp));
+			Assert.That(target.Eval("MyTestService.MyStaticMethod()"), Is.EqualTo(MyTestService.MyStaticMethod()));
 		}
 
 		[Test]
@@ -78,8 +78,8 @@ namespace DynamicExpresso.UnitTest
 			var target = new Interpreter()
 											.Reference(typeof(Type));
 
-			Assert.AreEqual(Type.GetType("System.Globalization.CultureInfo"), target.Eval("Type.GetType(\"System.Globalization.CultureInfo\")"));
-			Assert.AreEqual(DateTime.Now.GetType(), target.Eval("DateTime.Now.GetType()"));
+			Assert.That(target.Eval("Type.GetType(\"System.Globalization.CultureInfo\")"), Is.EqualTo(Type.GetType("System.Globalization.CultureInfo")));
+			Assert.That(target.Eval("DateTime.Now.GetType()"), Is.EqualTo(DateTime.Now.GetType()));
 		}
 
 		private class MyTestService

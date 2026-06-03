@@ -19,7 +19,7 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("y", 7)
                             };
 
-			Assert.AreEqual(30, target.Eval("x + y", parameters));
+			Assert.That(target.Eval("x + y", parameters), Is.EqualTo(30));
 		}
 
 		[Test]
@@ -32,7 +32,7 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("A", "A"),
                             };
 
-			Assert.AreEqual("AB", target.Eval("A + B", parameters));
+			Assert.That(target.Eval("A + B", parameters), Is.EqualTo("AB"));
 		}
 
 		[Test]
@@ -47,7 +47,7 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("A + B", parameters);
 
-			Assert.AreEqual("AB", lambda.Invoke(parameters.Reverse()));
+			Assert.That(lambda.Invoke(parameters.Reverse()), Is.EqualTo("AB"));
 		}
 
 		[Test]
@@ -59,7 +59,7 @@ namespace DynamicExpresso.UnitTest
 
 			var exp = target.Parse("10+5", parameters);
 
-			Assert.AreEqual(15, exp.Invoke());
+			Assert.That(exp.Invoke(), Is.EqualTo(15));
 		}
 
 		[Test]
@@ -98,14 +98,14 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("y", 5)
                             };
 
-			Assert.AreEqual(30, myFunc.Invoke(parameters1));
+			Assert.That(myFunc.Invoke(parameters1), Is.EqualTo(30));
 
 			var parameters2 = new[] {
                             new Parameter("x", 60),
                             new Parameter("y", -2)
                             };
 
-			Assert.AreEqual(58, myFunc.Invoke(parameters2));
+			Assert.That(myFunc.Invoke(parameters2), Is.EqualTo(58));
 		}
 
 		[Test]
@@ -120,8 +120,8 @@ namespace DynamicExpresso.UnitTest
 
 			var myFunc = target.Parse("x + y", parameters);
 
-			Assert.AreEqual(30, myFunc.Invoke(23, 7));
-			Assert.AreEqual(30, myFunc.Invoke(32, -2));
+			Assert.That(myFunc.Invoke(23, 7), Is.EqualTo(30));
+			Assert.That(myFunc.Invoke(32, -2), Is.EqualTo(30));
 		}
 
 		[Test]
@@ -136,11 +136,11 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("y", y.GetType(), y)
                             };
 
-			Assert.AreEqual(x, target.Eval("x", parameters));
-			Assert.AreEqual(x + x + x, target.Eval("x+x+x", parameters));
-			Assert.AreEqual(x * x, target.Eval("x * x", parameters));
-			Assert.AreEqual(y, target.Eval("y", parameters));
-			Assert.AreEqual(y.Length + x, target.Eval("y.Length + x", parameters));
+			Assert.That(target.Eval("x", parameters), Is.EqualTo(x));
+			Assert.That(target.Eval("x+x+x", parameters), Is.EqualTo(x + x + x));
+			Assert.That(target.Eval("x * x", parameters), Is.EqualTo(x * x));
+			Assert.That(target.Eval("y", parameters), Is.EqualTo(y));
+			Assert.That(target.Eval("y.Length + x", parameters), Is.EqualTo(y.Length + x));
 		}
 
 		[Test]
@@ -155,8 +155,8 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("X", X.GetType(), X)
                             };
 
-			Assert.AreEqual(x, target.Eval("x", parameters));
-			Assert.AreEqual(X, target.Eval("X", parameters));
+			Assert.That(target.Eval("x", parameters), Is.EqualTo(x));
+			Assert.That(target.Eval("X", parameters), Is.EqualTo(X));
 		}
 
 		[Test]
@@ -169,8 +169,8 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("x", x.GetType(), x)
                             };
 
-			Assert.AreEqual(x, target.Eval("x", parameters));
-			Assert.AreEqual(x, target.Eval("X", parameters));
+			Assert.That(target.Eval("x", parameters), Is.EqualTo(x));
+			Assert.That(target.Eval("X", parameters), Is.EqualTo(x));
 		}
 
 		[Test]
@@ -194,7 +194,7 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("x", new Parameter("x", x.GetType()));
 
-			Assert.AreEqual(x, lambda.Invoke(new Parameter("X", x)));
+			Assert.That(lambda.Invoke(new Parameter("X", x)), Is.EqualTo(x));
 		}
 
 		[Test]
@@ -211,9 +211,9 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("z", z.GetType(), z)
                             };
 
-			Assert.AreEqual(x, target.Eval("x", parameters));
-			Assert.AreEqual(y, target.Eval("y", parameters));
-			Assert.AreEqual(z, target.Eval("z", parameters));
+			Assert.That(target.Eval("x", parameters), Is.EqualTo(x));
+			Assert.That(target.Eval("y", parameters), Is.EqualTo(y));
+			Assert.That(target.Eval("z", parameters), Is.EqualTo(z));
 		}
 
 		[Test]
@@ -232,10 +232,10 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("w", w.GetType(), w)
                             };
 
-			Assert.AreEqual(x.HelloWorld(), target.Eval("x.HelloWorld()", parameters));
-			Assert.AreEqual(x.CallMethod(y, z, w), target.Eval("x.CallMethod( y, z,w)", parameters));
-			Assert.AreEqual(x.AProperty + 1, target.Eval("x.AProperty + 1", parameters));
-			Assert.AreEqual(x.AField, target.Eval("x.AField", parameters));
+			Assert.That(target.Eval("x.HelloWorld()", parameters), Is.EqualTo(x.HelloWorld()));
+			Assert.That(target.Eval("x.CallMethod( y, z,w)", parameters), Is.EqualTo(x.CallMethod(y, z, w)));
+			Assert.That(target.Eval("x.AProperty + 1", parameters), Is.EqualTo(x.AProperty + 1));
+			Assert.That(target.Eval("x.AField", parameters), Is.EqualTo(x.AField));
 		}
 
 		[Test]
@@ -253,10 +253,10 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("y", typeof(int?), y)
                             };
 
-			Assert.AreEqual(x, target.Eval("x", parameters));
-			Assert.AreEqual(y, target.Eval("y", parameters));
-			Assert.AreEqual(x.HasValue, target.Eval("x.HasValue", parameters));
-			Assert.AreEqual(y.HasValue, target.Eval("y.HasValue", parameters));
+			Assert.That(target.Eval("x", parameters), Is.EqualTo(x));
+			Assert.That(target.Eval("y", parameters), Is.EqualTo(y));
+			Assert.That(target.Eval("x.HasValue", parameters), Is.EqualTo(x.HasValue));
+			Assert.That(target.Eval("y.HasValue", parameters), Is.EqualTo(y.HasValue));
 		}
 
 		[Test]
@@ -272,8 +272,8 @@ namespace DynamicExpresso.UnitTest
                             new Parameter("myDelegate", myDelegate.GetType(), myDelegate)
                             };
 
-			Assert.AreEqual(9.0, target.Eval("pow(3, 2)", parameters));
-			Assert.AreEqual(4, target.Eval("myDelegate(\"test\")", parameters));
+			Assert.That(target.Eval("pow(3, 2)", parameters), Is.EqualTo(9.0));
+			Assert.That(target.Eval("myDelegate(\"test\")", parameters), Is.EqualTo(4));
 		}
 
 		[Test]
@@ -290,14 +290,14 @@ namespace DynamicExpresso.UnitTest
 			var lambda = target.Parse("x + y", parameters);
 
 			// parameter 'z' is not used
-			Assert.AreEqual(2, lambda.UsedParameters.Count());
-			Assert.AreEqual("x", lambda.UsedParameters.ElementAt(0).Name);
-			Assert.AreEqual("y", lambda.UsedParameters.ElementAt(1).Name);
+			Assert.That(lambda.UsedParameters.Count(), Is.EqualTo(2));
+			Assert.That(lambda.UsedParameters.ElementAt(0).Name, Is.EqualTo("x"));
+			Assert.That(lambda.UsedParameters.ElementAt(1).Name, Is.EqualTo("y"));
 
-			Assert.AreEqual(3, lambda.DeclaredParameters.Count());
-			Assert.AreEqual("x", lambda.DeclaredParameters.ElementAt(0).Name);
-			Assert.AreEqual("y", lambda.DeclaredParameters.ElementAt(1).Name);
-			Assert.AreEqual("z", lambda.DeclaredParameters.ElementAt(2).Name);
+			Assert.That(lambda.DeclaredParameters.Count(), Is.EqualTo(3));
+			Assert.That(lambda.DeclaredParameters.ElementAt(0).Name, Is.EqualTo("x"));
+			Assert.That(lambda.DeclaredParameters.ElementAt(1).Name, Is.EqualTo("y"));
+			Assert.That(lambda.DeclaredParameters.ElementAt(2).Name, Is.EqualTo("z"));
 		}
 
 		[Test]
@@ -312,9 +312,9 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("x * y + x * y", parameters);
 
-			Assert.AreEqual(2, lambda.UsedParameters.Count());
-			Assert.AreEqual("x", lambda.UsedParameters.ElementAt(0).Name);
-			Assert.AreEqual("y", lambda.UsedParameters.ElementAt(1).Name);
+			Assert.That(lambda.UsedParameters.Count(), Is.EqualTo(2));
+			Assert.That(lambda.UsedParameters.ElementAt(0).Name, Is.EqualTo("x"));
+			Assert.That(lambda.UsedParameters.ElementAt(1).Name, Is.EqualTo("y"));
 		}
 
 		[Test]
@@ -329,7 +329,7 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("y-x", parameters);
 
-			Assert.AreEqual(4, lambda.Invoke(1, 5));
+			Assert.That(lambda.Invoke(1, 5), Is.EqualTo(4));
 		}
 
 		[Test]
@@ -344,7 +344,7 @@ namespace DynamicExpresso.UnitTest
 
 			var lambda = target.Parse("y+5", parameters);
 
-			Assert.AreEqual(7, lambda.Invoke(new Parameter("y", 2)));
+			Assert.That(lambda.Invoke(new Parameter("y", 2)), Is.EqualTo(7));
 		}
 
 		[Test]
@@ -355,8 +355,8 @@ namespace DynamicExpresso.UnitTest
 			var myDelegate = target.ParseAsDelegate<TestDelegate>("x + y");
 
 			// parameter 'z' is not used but the delegate accept it in any case without problem
-			Assert.AreEqual(3, myDelegate(1, 2, 123123));
-			Assert.AreEqual(24, myDelegate(21, 3, 433123));
+			Assert.That(myDelegate(1, 2, 123123), Is.EqualTo(3));
+			Assert.That(myDelegate(21, 3, 433123), Is.EqualTo(24));
 		}
 
 		public delegate int TestDelegate(int x, int y, int z);

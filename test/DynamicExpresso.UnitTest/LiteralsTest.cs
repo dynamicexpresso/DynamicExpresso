@@ -1,7 +1,8 @@
-using NUnit.Framework;
-using System.Threading;
+using System;
 using System.Globalization;
+using System.Threading;
 using DynamicExpresso.Exceptions;
+using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
 {
@@ -13,8 +14,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual("ciao", target.Eval("\"ciao\""));
-			Assert.AreEqual('c', target.Eval("'c'"));
+			Assert.That(target.Eval("\"ciao\""), Is.EqualTo("ciao"));
+			Assert.That(target.Eval("'c'"), Is.EqualTo('c'));
 		}
 
 		[Test]
@@ -22,8 +23,8 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.IsTrue((bool)target.Eval("true"));
-			Assert.IsFalse((bool)target.Eval("false"));
+			Assert.That((bool)target.Eval("true"), Is.True);
+			Assert.That((bool)target.Eval("false"), Is.False);
 		}
 
 		[Test]
@@ -31,50 +32,50 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(0, target.Eval("0"));
-			Assert.AreEqual(0.0, target.Eval("0.0"));
-			Assert.AreEqual(45, target.Eval("45"));
-			Assert.AreEqual(45, target.Eval("45u"));
-			Assert.AreEqual(-45u, target.Eval("-45u"));
-			Assert.AreEqual(-565, target.Eval("-565"));
-			Assert.AreEqual(23423423423434, target.Eval("23423423423434"));
-			Assert.AreEqual(45.5, target.Eval("45.5"));
-			Assert.AreEqual(-0.5, target.Eval("-0.5"));
-			Assert.AreEqual(.2, target.Eval(".2"));
-			Assert.AreEqual(-.2, target.Eval("-.2"));
-			Assert.AreEqual(+.2, target.Eval("+.2"));
-			Assert.AreEqual(.02, target.Eval(".02"));
-			Assert.AreEqual(-.02, target.Eval("-.02"));
-			Assert.AreEqual(+.02, target.Eval("+.02"));
-			Assert.AreEqual(.20, target.Eval(".20"));
-			Assert.AreEqual(-.20, target.Eval("-.20"));
-			Assert.AreEqual(+.20, target.Eval("+.20"));
-			Assert.AreEqual(.201, target.Eval(".201"));
-			Assert.AreEqual(-.201, target.Eval("-.201"));
-			Assert.AreEqual(+.201, target.Eval("+.201"));
-			Assert.AreEqual(2e+201, target.Eval("2e+201"));
-			Assert.AreEqual(2e+20, target.Eval("2e+20"));
+			Assert.That(target.Eval("0"), Is.EqualTo(0));
+			Assert.That(target.Eval("0.0"), Is.EqualTo(0.0));
+			Assert.That(target.Eval("45"), Is.EqualTo(45));
+			Assert.That(target.Eval("45u"), Is.EqualTo(45));
+			Assert.That(target.Eval("-45u"), Is.EqualTo(-45u));
+			Assert.That(target.Eval("-565"), Is.EqualTo(-565));
+			Assert.That(target.Eval("23423423423434"), Is.EqualTo(23423423423434));
+			Assert.That(target.Eval("45.5"), Is.EqualTo(45.5));
+			Assert.That(target.Eval("-0.5"), Is.EqualTo(-0.5));
+			Assert.That(target.Eval(".2"), Is.EqualTo(.2));
+			Assert.That(target.Eval("-.2"), Is.EqualTo(-.2));
+			Assert.That(target.Eval("+.2"), Is.EqualTo(+.2));
+			Assert.That(target.Eval(".02"), Is.EqualTo(.02));
+			Assert.That(target.Eval("-.02"), Is.EqualTo(-.02));
+			Assert.That(target.Eval("+.02"), Is.EqualTo(+.02));
+			Assert.That(target.Eval(".20"), Is.EqualTo(.20));
+			Assert.That(target.Eval("-.20"), Is.EqualTo(-.20));
+			Assert.That(target.Eval("+.20"), Is.EqualTo(+.20));
+			Assert.That(target.Eval(".201"), Is.EqualTo(.201));
+			Assert.That(target.Eval("-.201"), Is.EqualTo(-.201));
+			Assert.That(target.Eval("+.201"), Is.EqualTo(+.201));
+			Assert.That(target.Eval("2e+201"), Is.EqualTo(2e+201));
+			Assert.That(target.Eval("2e+20"), Is.EqualTo(2e+20));
 
 			// f suffix (single)
-			Assert.AreEqual(4f, target.Eval("4f"));
-			Assert.AreEqual(45F, target.Eval("45F"));
-			Assert.AreEqual(45.8f, target.Eval("45.8f"));
-			Assert.AreEqual(45.8F, target.Eval("45.8F"));
-			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
-			Assert.AreEqual(.2f, target.Eval(".2f"));
-			Assert.AreEqual(.2F, target.Eval(".2F"));
-			Assert.AreEqual(-.2f, target.Eval("-.2f"));
-			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+			Assert.That(target.Eval("4f"), Is.EqualTo(4f));
+			Assert.That(target.Eval("45F"), Is.EqualTo(45F));
+			Assert.That(target.Eval("45.8f"), Is.EqualTo(45.8f));
+			Assert.That(target.Eval("45.8F"), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(" 45.8F "), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(".2f"), Is.EqualTo(.2f));
+			Assert.That(target.Eval(".2F"), Is.EqualTo(.2F));
+			Assert.That(target.Eval("-.2f"), Is.EqualTo(-.2f));
+			Assert.That(target.Eval("-.2F"), Is.EqualTo(-.2F));
 
 			// m suffix (decimal)
-			Assert.AreEqual(5M, target.Eval("5M"));
-			Assert.AreEqual(254m, target.Eval("254m"));
-			Assert.AreEqual(45.232M, target.Eval("45.232M"));
-			Assert.AreEqual(45.232m, target.Eval("45.232m"));
-			Assert.AreEqual(.022M, target.Eval(".022M"));
-			Assert.AreEqual(.022m, target.Eval(".022m"));
-			Assert.AreEqual(-.022m, target.Eval("-.022m"));
-			Assert.AreEqual(-.022M, target.Eval("-.022M"));
+			Assert.That(target.Eval("5M"), Is.EqualTo(5M));
+			Assert.That(target.Eval("254m"), Is.EqualTo(254m));
+			Assert.That(target.Eval("45.232M"), Is.EqualTo(45.232M));
+			Assert.That(target.Eval("45.232m"), Is.EqualTo(45.232m));
+			Assert.That(target.Eval(".022M"), Is.EqualTo(.022M));
+			Assert.That(target.Eval(".022m"), Is.EqualTo(.022m));
+			Assert.That(target.Eval("-.022m"), Is.EqualTo(-.022m));
+			Assert.That(target.Eval("-.022M"), Is.EqualTo(-.022M));
 		}
 
 		[Test]
@@ -82,63 +83,63 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.IsInstanceOf(typeof(System.Int32), target.Eval("81"));
-			Assert.IsInstanceOf(typeof(System.Double), target.Eval("81.5"));
-			Assert.IsInstanceOf(typeof(System.Int64), target.Eval("23423423423434"));
+			Assert.That(target.Eval("81"), Is.InstanceOf<int>());
+			Assert.That(target.Eval("81.5"), Is.InstanceOf<double>());
+			Assert.That(target.Eval("23423423423434"), Is.InstanceOf<long>());
 		}
 
 		[Test]
 		public void Numeric_Literals_DefaultLong()
 		{
 			var target = new Interpreter();
-			
+
 			target.SetDefaultNumberType(DefaultNumberType.Long);
 
-			Assert.IsInstanceOf(typeof(System.Int64), target.Eval("45"));
+			Assert.That(target.Eval("45"), Is.InstanceOf<long>());
 
-			Assert.AreEqual(0L, target.Eval("0"));
-			Assert.AreEqual(0.0, target.Eval("0.0"));
-			Assert.AreEqual(45L, target.Eval("45"));
-			Assert.AreEqual(45L, target.Eval("45u"));
-			Assert.AreEqual(-45L, target.Eval("-45u"));
-			Assert.AreEqual(23423423423434L, target.Eval("23423423423434"));
-			Assert.AreEqual(45.5, target.Eval("45.5"));
-			Assert.AreEqual(-0.5, target.Eval("-0.5"));
-			Assert.AreEqual(.2, target.Eval(".2"));
-			Assert.AreEqual(-.2, target.Eval("-.2"));
-			Assert.AreEqual(+.2, target.Eval("+.2"));
-			Assert.AreEqual(.02, target.Eval(".02"));
-			Assert.AreEqual(-.02, target.Eval("-.02"));
-			Assert.AreEqual(+.02, target.Eval("+.02"));
-			Assert.AreEqual(.20, target.Eval(".20"));
-			Assert.AreEqual(-.20, target.Eval("-.20"));
-			Assert.AreEqual(+.20, target.Eval("+.20"));
-			Assert.AreEqual(.201, target.Eval(".201"));
-			Assert.AreEqual(-.201, target.Eval("-.201"));
-			Assert.AreEqual(+.201, target.Eval("+.201"));
-			Assert.AreEqual(2e+201, target.Eval("2e+201"));
-			Assert.AreEqual(2e+20, target.Eval("2e+20"));
+			Assert.That(target.Eval("0"), Is.EqualTo(0L));
+			Assert.That(target.Eval("0.0"), Is.EqualTo(0.0));
+			Assert.That(target.Eval("45"), Is.EqualTo(45L));
+			Assert.That(target.Eval("45u"), Is.EqualTo(45L));
+			Assert.That(target.Eval("-45u"), Is.EqualTo(-45L));
+			Assert.That(target.Eval("23423423423434"), Is.EqualTo(23423423423434L));
+			Assert.That(target.Eval("45.5"), Is.EqualTo(45.5));
+			Assert.That(target.Eval("-0.5"), Is.EqualTo(-0.5));
+			Assert.That(target.Eval(".2"), Is.EqualTo(.2));
+			Assert.That(target.Eval("-.2"), Is.EqualTo(-.2));
+			Assert.That(target.Eval("+.2"), Is.EqualTo(+.2));
+			Assert.That(target.Eval(".02"), Is.EqualTo(.02));
+			Assert.That(target.Eval("-.02"), Is.EqualTo(-.02));
+			Assert.That(target.Eval("+.02"), Is.EqualTo(+.02));
+			Assert.That(target.Eval(".20"), Is.EqualTo(.20));
+			Assert.That(target.Eval("-.20"), Is.EqualTo(-.20));
+			Assert.That(target.Eval("+.20"), Is.EqualTo(+.20));
+			Assert.That(target.Eval(".201"), Is.EqualTo(.201));
+			Assert.That(target.Eval("-.201"), Is.EqualTo(-.201));
+			Assert.That(target.Eval("+.201"), Is.EqualTo(+.201));
+			Assert.That(target.Eval("2e+201"), Is.EqualTo(2e+201));
+			Assert.That(target.Eval("2e+20"), Is.EqualTo(2e+20));
 
 			// f suffix (single)
-			Assert.AreEqual(4f, target.Eval("4f"));
-			Assert.AreEqual(45F, target.Eval("45F"));
-			Assert.AreEqual(45.8f, target.Eval("45.8f"));
-			Assert.AreEqual(45.8F, target.Eval("45.8F"));
-			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
-			Assert.AreEqual(.2f, target.Eval(".2f"));
-			Assert.AreEqual(.2F, target.Eval(".2F"));
-			Assert.AreEqual(-.2f, target.Eval("-.2f"));
-			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+			Assert.That(target.Eval("4f"), Is.EqualTo(4f));
+			Assert.That(target.Eval("45F"), Is.EqualTo(45F));
+			Assert.That(target.Eval("45.8f"), Is.EqualTo(45.8f));
+			Assert.That(target.Eval("45.8F"), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(" 45.8F "), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(".2f"), Is.EqualTo(.2f));
+			Assert.That(target.Eval(".2F"), Is.EqualTo(.2F));
+			Assert.That(target.Eval("-.2f"), Is.EqualTo(-.2f));
+			Assert.That(target.Eval("-.2F"), Is.EqualTo(-.2F));
 
 			// m suffix (decimal)
-			Assert.AreEqual(5M, target.Eval("5M"));
-			Assert.AreEqual(254m, target.Eval("254m"));
-			Assert.AreEqual(45.232M, target.Eval("45.232M"));
-			Assert.AreEqual(45.232m, target.Eval("45.232m"));
-			Assert.AreEqual(.022M, target.Eval(".022M"));
-			Assert.AreEqual(.022m, target.Eval(".022m"));
-			Assert.AreEqual(-.022m, target.Eval("-.022m"));
-			Assert.AreEqual(-.022M, target.Eval("-.022M"));
+			Assert.That(target.Eval("5M"), Is.EqualTo(5M));
+			Assert.That(target.Eval("254m"), Is.EqualTo(254m));
+			Assert.That(target.Eval("45.232M"), Is.EqualTo(45.232M));
+			Assert.That(target.Eval("45.232m"), Is.EqualTo(45.232m));
+			Assert.That(target.Eval(".022M"), Is.EqualTo(.022M));
+			Assert.That(target.Eval(".022m"), Is.EqualTo(.022m));
+			Assert.That(target.Eval("-.022m"), Is.EqualTo(-.022m));
+			Assert.That(target.Eval("-.022M"), Is.EqualTo(-.022M));
 		}
 
 		[Test]
@@ -148,49 +149,49 @@ namespace DynamicExpresso.UnitTest
 
 			target.SetDefaultNumberType(DefaultNumberType.Single);
 
-			Assert.IsInstanceOf(typeof(System.Single), target.Eval("45"));
-			Assert.AreEqual(10F / 3f, target.Eval("10/3"));
+			Assert.That(target.Eval("45"), Is.InstanceOf<Single>());
+			Assert.That(target.Eval("10/3"), Is.EqualTo(10F / 3f));
 
-			Assert.AreEqual(0F, target.Eval("0"));
-			Assert.AreEqual(0.0F, target.Eval("0.0"));
-			Assert.AreEqual(45F, target.Eval("45"));
-			Assert.AreEqual(-565F, target.Eval("-565"));
-			Assert.AreEqual(23423423423434F, target.Eval("23423423423434"));
-			Assert.AreEqual(45.5F, target.Eval("45.5"));
-			Assert.AreEqual(-0.5F, target.Eval("-0.5"));
-			Assert.AreEqual(.2F, target.Eval(".2"));
-			Assert.AreEqual(-.2F, target.Eval("-.2"));
-			Assert.AreEqual(+.2F, target.Eval("+.2"));
-			Assert.AreEqual(.02F, target.Eval(".02"));
-			Assert.AreEqual(-.02F, target.Eval("-.02"));
-			Assert.AreEqual(+.02F, target.Eval("+.02"));
-			Assert.AreEqual(.20F, target.Eval(".20"));
-			Assert.AreEqual(-.20F, target.Eval("-.20"));
-			Assert.AreEqual(+.20F, target.Eval("+.20"));
-			Assert.AreEqual(.201F, target.Eval(".201"));
-			Assert.AreEqual(-.201F, target.Eval("-.201"));
-			Assert.AreEqual(+.201F, target.Eval("+.201"));
+			Assert.That(target.Eval("0"), Is.EqualTo(0F));
+			Assert.That(target.Eval("0.0"), Is.EqualTo(0.0F));
+			Assert.That(target.Eval("45"), Is.EqualTo(45F));
+			Assert.That(target.Eval("-565"), Is.EqualTo(-565F));
+			Assert.That(target.Eval("23423423423434"), Is.EqualTo(23423423423434F));
+			Assert.That(target.Eval("45.5"), Is.EqualTo(45.5F));
+			Assert.That(target.Eval("-0.5"), Is.EqualTo(-0.5F));
+			Assert.That(target.Eval(".2"), Is.EqualTo(.2F));
+			Assert.That(target.Eval("-.2"), Is.EqualTo(-.2F));
+			Assert.That(target.Eval("+.2"), Is.EqualTo(+.2F));
+			Assert.That(target.Eval(".02"), Is.EqualTo(.02F));
+			Assert.That(target.Eval("-.02"), Is.EqualTo(-.02F));
+			Assert.That(target.Eval("+.02"), Is.EqualTo(+.02F));
+			Assert.That(target.Eval(".20"), Is.EqualTo(.20F));
+			Assert.That(target.Eval("-.20"), Is.EqualTo(-.20F));
+			Assert.That(target.Eval("+.20"), Is.EqualTo(+.20F));
+			Assert.That(target.Eval(".201"), Is.EqualTo(.201F));
+			Assert.That(target.Eval("-.201"), Is.EqualTo(-.201F));
+			Assert.That(target.Eval("+.201"), Is.EqualTo(+.201F));
 
 			// f suffix (single)
-			Assert.AreEqual(4f, target.Eval("4f"));
-			Assert.AreEqual(45F, target.Eval("45F"));
-			Assert.AreEqual(45.8f, target.Eval("45.8f"));
-			Assert.AreEqual(45.8F, target.Eval("45.8F"));
-			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
-			Assert.AreEqual(.2f, target.Eval(".2f"));
-			Assert.AreEqual(.2F, target.Eval(".2F"));
-			Assert.AreEqual(-.2f, target.Eval("-.2f"));
-			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+			Assert.That(target.Eval("4f"), Is.EqualTo(4f));
+			Assert.That(target.Eval("45F"), Is.EqualTo(45F));
+			Assert.That(target.Eval("45.8f"), Is.EqualTo(45.8f));
+			Assert.That(target.Eval("45.8F"), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(" 45.8F "), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(".2f"), Is.EqualTo(.2f));
+			Assert.That(target.Eval(".2F"), Is.EqualTo(.2F));
+			Assert.That(target.Eval("-.2f"), Is.EqualTo(-.2f));
+			Assert.That(target.Eval("-.2F"), Is.EqualTo(-.2F));
 
 			// m suffix (decimal)
-			Assert.AreEqual(5M, target.Eval("5M"));
-			Assert.AreEqual(254m, target.Eval("254m"));
-			Assert.AreEqual(45.232M, target.Eval("45.232M"));
-			Assert.AreEqual(45.232m, target.Eval("45.232m"));
-			Assert.AreEqual(.022M, target.Eval(".022M"));
-			Assert.AreEqual(.022m, target.Eval(".022m"));
-			Assert.AreEqual(-.022m, target.Eval("-.022m"));
-			Assert.AreEqual(-.022M, target.Eval("-.022M"));
+			Assert.That(target.Eval("5M"), Is.EqualTo(5M));
+			Assert.That(target.Eval("254m"), Is.EqualTo(254m));
+			Assert.That(target.Eval("45.232M"), Is.EqualTo(45.232M));
+			Assert.That(target.Eval("45.232m"), Is.EqualTo(45.232m));
+			Assert.That(target.Eval(".022M"), Is.EqualTo(.022M));
+			Assert.That(target.Eval(".022m"), Is.EqualTo(.022m));
+			Assert.That(target.Eval("-.022m"), Is.EqualTo(-.022m));
+			Assert.That(target.Eval("-.022M"), Is.EqualTo(-.022M));
 		}
 
 		[Test]
@@ -200,51 +201,51 @@ namespace DynamicExpresso.UnitTest
 
 			target.SetDefaultNumberType(DefaultNumberType.Double);
 
-			Assert.IsInstanceOf(typeof(System.Double), target.Eval("45"));
-			Assert.AreEqual(10D / 3D, target.Eval("10/3"));
+			Assert.That(target.Eval("45"), Is.InstanceOf<double>());
+			Assert.That(target.Eval("10/3"), Is.EqualTo(10D / 3D));
 
-			Assert.AreEqual(0D, target.Eval("0"));
-			Assert.AreEqual(0.0D, target.Eval("0.0"));
-			Assert.AreEqual(45D, target.Eval("45"));
-			Assert.AreEqual(-565D, target.Eval("-565"));
-			Assert.AreEqual(23423423423434D, target.Eval("23423423423434"));
-			Assert.AreEqual(45.5D, target.Eval("45.5"));
-			Assert.AreEqual(-0.5D, target.Eval("-0.5"));
-			Assert.AreEqual(.2D, target.Eval(".2"));
-			Assert.AreEqual(-.2D, target.Eval("-.2"));
-			Assert.AreEqual(+.2D, target.Eval("+.2"));
-			Assert.AreEqual(.02D, target.Eval(".02"));
-			Assert.AreEqual(-.02D, target.Eval("-.02"));
-			Assert.AreEqual(+.02D, target.Eval("+.02"));
-			Assert.AreEqual(.20D, target.Eval(".20"));
-			Assert.AreEqual(-.20D, target.Eval("-.20"));
-			Assert.AreEqual(+.20D, target.Eval("+.20"));
-			Assert.AreEqual(.201D, target.Eval(".201"));
-			Assert.AreEqual(-.201D, target.Eval("-.201"));
-			Assert.AreEqual(+.201D, target.Eval("+.201"));
-			Assert.AreEqual(2e+201, target.Eval("2e+201"));
-			Assert.AreEqual(2e+20, target.Eval("2e+20"));
+			Assert.That(target.Eval("0"), Is.EqualTo(0D));
+			Assert.That(target.Eval("0.0"), Is.EqualTo(0.0D));
+			Assert.That(target.Eval("45"), Is.EqualTo(45D));
+			Assert.That(target.Eval("-565"), Is.EqualTo(-565D));
+			Assert.That(target.Eval("23423423423434"), Is.EqualTo(23423423423434D));
+			Assert.That(target.Eval("45.5"), Is.EqualTo(45.5D));
+			Assert.That(target.Eval("-0.5"), Is.EqualTo(-0.5D));
+			Assert.That(target.Eval(".2"), Is.EqualTo(.2D));
+			Assert.That(target.Eval("-.2"), Is.EqualTo(-.2D));
+			Assert.That(target.Eval("+.2"), Is.EqualTo(+.2D));
+			Assert.That(target.Eval(".02"), Is.EqualTo(.02D));
+			Assert.That(target.Eval("-.02"), Is.EqualTo(-.02D));
+			Assert.That(target.Eval("+.02"), Is.EqualTo(+.02D));
+			Assert.That(target.Eval(".20"), Is.EqualTo(.20D));
+			Assert.That(target.Eval("-.20"), Is.EqualTo(-.20D));
+			Assert.That(target.Eval("+.20"), Is.EqualTo(+.20D));
+			Assert.That(target.Eval(".201"), Is.EqualTo(.201D));
+			Assert.That(target.Eval("-.201"), Is.EqualTo(-.201D));
+			Assert.That(target.Eval("+.201"), Is.EqualTo(+.201D));
+			Assert.That(target.Eval("2e+201"), Is.EqualTo(2e+201));
+			Assert.That(target.Eval("2e+20"), Is.EqualTo(2e+20));
 
 			// f suffix (single)
-			Assert.AreEqual(4f, target.Eval("4f"));
-			Assert.AreEqual(45F, target.Eval("45F"));
-			Assert.AreEqual(45.8f, target.Eval("45.8f"));
-			Assert.AreEqual(45.8F, target.Eval("45.8F"));
-			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
-			Assert.AreEqual(.2f, target.Eval(".2f"));
-			Assert.AreEqual(.2F, target.Eval(".2F"));
-			Assert.AreEqual(-.2f, target.Eval("-.2f"));
-			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+			Assert.That(target.Eval("4f"), Is.EqualTo(4f));
+			Assert.That(target.Eval("45F"), Is.EqualTo(45F));
+			Assert.That(target.Eval("45.8f"), Is.EqualTo(45.8f));
+			Assert.That(target.Eval("45.8F"), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(" 45.8F "), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(".2f"), Is.EqualTo(.2f));
+			Assert.That(target.Eval(".2F"), Is.EqualTo(.2F));
+			Assert.That(target.Eval("-.2f"), Is.EqualTo(-.2f));
+			Assert.That(target.Eval("-.2F"), Is.EqualTo(-.2F));
 
 			// m suffix (decimal)
-			Assert.AreEqual(5M, target.Eval("5M"));
-			Assert.AreEqual(254m, target.Eval("254m"));
-			Assert.AreEqual(45.232M, target.Eval("45.232M"));
-			Assert.AreEqual(45.232m, target.Eval("45.232m"));
-			Assert.AreEqual(.022M, target.Eval(".022M"));
-			Assert.AreEqual(.022m, target.Eval(".022m"));
-			Assert.AreEqual(-.022m, target.Eval("-.022m"));
-			Assert.AreEqual(-.022M, target.Eval("-.022M"));
+			Assert.That(target.Eval("5M"), Is.EqualTo(5M));
+			Assert.That(target.Eval("254m"), Is.EqualTo(254m));
+			Assert.That(target.Eval("45.232M"), Is.EqualTo(45.232M));
+			Assert.That(target.Eval("45.232m"), Is.EqualTo(45.232m));
+			Assert.That(target.Eval(".022M"), Is.EqualTo(.022M));
+			Assert.That(target.Eval(".022m"), Is.EqualTo(.022m));
+			Assert.That(target.Eval("-.022m"), Is.EqualTo(-.022m));
+			Assert.That(target.Eval("-.022M"), Is.EqualTo(-.022M));
 		}
 
 		[Test]
@@ -254,50 +255,49 @@ namespace DynamicExpresso.UnitTest
 
 			target.SetDefaultNumberType(DefaultNumberType.Decimal);
 
-			Assert.IsInstanceOf(typeof(System.Decimal), target.Eval("45"));
-			Assert.AreEqual(10M/3M, target.Eval("10/3"));
+			Assert.That(target.Eval("45"), Is.InstanceOf<Decimal>());
+			Assert.That(target.Eval("10/3"), Is.EqualTo(10M / 3M));
 
-			Assert.AreEqual(0M, target.Eval("0"));
-			Assert.AreEqual(0.0M, target.Eval("0.0"));
-			Assert.AreEqual(45M, target.Eval("45"));
-			Assert.AreEqual(-565M, target.Eval("-565"));
-			Assert.AreEqual(23423423423434M, target.Eval("23423423423434"));
-			Assert.AreEqual(45.5M, target.Eval("45.5"));
-			Assert.AreEqual(-0.5M, target.Eval("-0.5"));
-			Assert.AreEqual(.2M, target.Eval(".2"));
-			Assert.AreEqual(-.2M, target.Eval("-.2"));
-			Assert.AreEqual(+.2M, target.Eval("+.2"));
-			Assert.AreEqual(.02M, target.Eval(".02"));
-			Assert.AreEqual(-.02M, target.Eval("-.02"));
-			Assert.AreEqual(+.02M, target.Eval("+.02"));
-			Assert.AreEqual(.20M, target.Eval(".20"));
-			Assert.AreEqual(-.20M, target.Eval("-.20"));
-			Assert.AreEqual(+.20M, target.Eval("+.20"));
-			Assert.AreEqual(.201M, target.Eval(".201"));
-			Assert.AreEqual(-.201M, target.Eval("-.201"));
-			Assert.AreEqual(+.201M, target.Eval("+.201"));
-			
+			Assert.That(target.Eval("0"), Is.EqualTo(0M));
+			Assert.That(target.Eval("0.0"), Is.EqualTo(0.0M));
+			Assert.That(target.Eval("45"), Is.EqualTo(45M));
+			Assert.That(target.Eval("-565"), Is.EqualTo(-565M));
+			Assert.That(target.Eval("23423423423434"), Is.EqualTo(23423423423434M));
+			Assert.That(target.Eval("45.5"), Is.EqualTo(45.5M));
+			Assert.That(target.Eval("-0.5"), Is.EqualTo(-0.5M));
+			Assert.That(target.Eval(".2"), Is.EqualTo(.2M));
+			Assert.That(target.Eval("-.2"), Is.EqualTo(-.2M));
+			Assert.That(target.Eval("+.2"), Is.EqualTo(+.2M));
+			Assert.That(target.Eval(".02"), Is.EqualTo(.02M));
+			Assert.That(target.Eval("-.02"), Is.EqualTo(-.02M));
+			Assert.That(target.Eval("+.02"), Is.EqualTo(+.02M));
+			Assert.That(target.Eval(".20"), Is.EqualTo(.20M));
+			Assert.That(target.Eval("-.20"), Is.EqualTo(-.20M));
+			Assert.That(target.Eval("+.20"), Is.EqualTo(+.20M));
+			Assert.That(target.Eval(".201"), Is.EqualTo(.201M));
+			Assert.That(target.Eval("-.201"), Is.EqualTo(-.201M));
+			Assert.That(target.Eval("+.201"), Is.EqualTo(+.201M));
 
 			// f suffix (single)
-			Assert.AreEqual(4f, target.Eval("4f"));
-			Assert.AreEqual(45F, target.Eval("45F"));
-			Assert.AreEqual(45.8f, target.Eval("45.8f"));
-			Assert.AreEqual(45.8F, target.Eval("45.8F"));
-			Assert.AreEqual(45.8F, target.Eval(" 45.8F "));
-			Assert.AreEqual(.2f, target.Eval(".2f"));
-			Assert.AreEqual(.2F, target.Eval(".2F"));
-			Assert.AreEqual(-.2f, target.Eval("-.2f"));
-			Assert.AreEqual(-.2F, target.Eval("-.2F"));
+			Assert.That(target.Eval("4f"), Is.EqualTo(4f));
+			Assert.That(target.Eval("45F"), Is.EqualTo(45F));
+			Assert.That(target.Eval("45.8f"), Is.EqualTo(45.8f));
+			Assert.That(target.Eval("45.8F"), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(" 45.8F "), Is.EqualTo(45.8F));
+			Assert.That(target.Eval(".2f"), Is.EqualTo(.2f));
+			Assert.That(target.Eval(".2F"), Is.EqualTo(.2F));
+			Assert.That(target.Eval("-.2f"), Is.EqualTo(-.2f));
+			Assert.That(target.Eval("-.2F"), Is.EqualTo(-.2F));
 
 			// m suffix (decimal)
-			Assert.AreEqual(5M, target.Eval("5M"));
-			Assert.AreEqual(254m, target.Eval("254m"));
-			Assert.AreEqual(45.232M, target.Eval("45.232M"));
-			Assert.AreEqual(45.232m, target.Eval("45.232m"));
-			Assert.AreEqual(.022M, target.Eval(".022M"));
-			Assert.AreEqual(.022m, target.Eval(".022m"));
-			Assert.AreEqual(-.022m, target.Eval("-.022m"));
-			Assert.AreEqual(-.022M, target.Eval("-.022M"));
+			Assert.That(target.Eval("5M"), Is.EqualTo(5M));
+			Assert.That(target.Eval("254m"), Is.EqualTo(254m));
+			Assert.That(target.Eval("45.232M"), Is.EqualTo(45.232M));
+			Assert.That(target.Eval("45.232m"), Is.EqualTo(45.232m));
+			Assert.That(target.Eval(".022M"), Is.EqualTo(.022M));
+			Assert.That(target.Eval(".022m"), Is.EqualTo(.022m));
+			Assert.That(target.Eval("-.022m"), Is.EqualTo(-.022m));
+			Assert.That(target.Eval("-.022M"), Is.EqualTo(-.022M));
 		}
 
 		[Test]
@@ -358,9 +358,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(0b101ul, target.Eval("0b101ul"));
-			Assert.AreEqual(0B1111L, target.Eval("0B1111l"));
-			Assert.AreEqual(8, target.Eval("4+0b10+2"));
+			Assert.That(target.Eval("0b101ul"), Is.EqualTo(0b101ul));
+			Assert.That(target.Eval("0B1111l"), Is.EqualTo(0B1111L));
+			Assert.That(target.Eval("4+0b10+2"), Is.EqualTo(8));
 
 			Assert.Throws<ParseException>(() => target.Eval("0b"));
 			Assert.Throws<ParseException>(() => target.Eval("0b12"));
@@ -374,10 +374,10 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(0x012EFul, target.Eval("0x012EFul"));
-			Assert.AreEqual(0XAAe2L, target.Eval("0XAAe2l"));
-			Assert.AreEqual(170, target.Eval("4+0xA1+5"));
-			Assert.AreEqual(170, target.Eval("4+(0xA1)+5"));
+			Assert.That(target.Eval("0x012EFul"), Is.EqualTo(0x012EFul));
+			Assert.That(target.Eval("0XAAe2l"), Is.EqualTo(0XAAe2L));
+			Assert.That(target.Eval("4+0xA1+5"), Is.EqualTo(170));
+			Assert.That(target.Eval("4+(0xA1)+5"), Is.EqualTo(170));
 
 			Assert.Throws<ParseException>(() => target.Eval("0x"));
 			Assert.Throws<ParseException>(() => target.Eval("0x1Gl"));
@@ -389,59 +389,58 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual("ciao".GetType(), target.Eval("\"ciao\".GetType()"));
-			Assert.AreEqual('c'.GetType(), target.Eval("'c'.GetType()"));
-			Assert.AreEqual(true.GetType(), target.Eval("true.GetType()"));
-			Assert.AreEqual(false.GetType(), target.Eval("false.GetType()"));
+			Assert.That(target.Eval("\"ciao\".GetType()"), Is.EqualTo("ciao".GetType()));
+			Assert.That(target.Eval("'c'.GetType()"), Is.EqualTo('c'.GetType()));
+			Assert.That(target.Eval("true.GetType()"), Is.EqualTo(true.GetType()));
+			Assert.That(target.Eval("false.GetType()"), Is.EqualTo(false.GetType()));
 
-			Assert.AreEqual(45.GetType(), target.Eval("45.GetType()"));
-			Assert.AreEqual(23423423423434.GetType(), target.Eval("23423423423434.GetType()"));
-			Assert.AreEqual(45.5.GetType(), target.Eval("45.5.GetType()"));
-			Assert.AreEqual(45.8f.GetType(), target.Eval("45.8f.GetType()"));
-			Assert.AreEqual(45.232M.GetType(), target.Eval("45.232M.GetType()"));
+			Assert.That(target.Eval("45.GetType()"), Is.EqualTo(45.GetType()));
+			Assert.That(target.Eval("23423423423434.GetType()"), Is.EqualTo(23423423423434.GetType()));
+			Assert.That(target.Eval("45.5.GetType()"), Is.EqualTo(45.5.GetType()));
+			Assert.That(target.Eval("45.8f.GetType()"), Is.EqualTo(45.8f.GetType()));
+			Assert.That(target.Eval("45.232M.GetType()"), Is.EqualTo(45.232M.GetType()));
 
 			// Note: in C# I cannot compile "-565.GetType()" , I need to add parentheses
-			Assert.AreEqual((-565).GetType(), target.Eval("-565.GetType()"));
-			Assert.AreEqual((-0.5).GetType(), target.Eval("-0.5.GetType()"));
+			Assert.That(target.Eval("-565.GetType()"), Is.EqualTo((-565).GetType()));
+			Assert.That(target.Eval("-0.5.GetType()"), Is.EqualTo((-0.5).GetType()));
 
-			Assert.AreEqual((-.5).GetType(), target.Eval("-.5.GetType()"));
-			Assert.AreEqual((-.5f).GetType(), target.Eval("-.5f.GetType()"));
+			Assert.That(target.Eval("-.5.GetType()"), Is.EqualTo((-.5).GetType()));
+			Assert.That(target.Eval("-.5f.GetType()"), Is.EqualTo((-.5f).GetType()));
 
-			Assert.AreEqual((+.5).GetType(), target.Eval("+.5.GetType()"));
-			Assert.AreEqual((+.5f).GetType(), target.Eval("+.5f.GetType()"));
+			Assert.That(target.Eval("+.5.GetType()"), Is.EqualTo((+.5).GetType()));
+			Assert.That(target.Eval("+.5f.GetType()"), Is.EqualTo((+.5f).GetType()));
 		}
 
 		[Test]
 		public void Long_strings()
 		{
 			var target = new Interpreter();
-			Assert.AreEqual(
-				"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-				target.Eval("\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\""));
+			Assert.That(
+				target.Eval("\"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\""), Is.EqualTo("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."));
 		}
 
 		[Test]
 		public void Null_Keyword()
 		{
 			var target = new Interpreter();
-			Assert.IsNull(target.Eval("null"));
+			Assert.That(target.Eval("null"), Is.Null);
 		}
 
 		[Test]
 		public void Empty_String()
 		{
 			var target = new Interpreter();
-			Assert.AreEqual(string.Empty, target.Eval("\"\""));
+			Assert.That(target.Eval("\"\""), Is.EqualTo(string.Empty));
 		}
 
 		[Test]
 		public void Whitespace_String()
 		{
 			var target = new Interpreter();
-			Assert.AreEqual(" ", target.Eval("\" \""));
-			Assert.AreEqual(" \t ", target.Eval("\" \t \""));
-			Assert.AreEqual("   ", target.Eval("\"   \""));
-			Assert.AreEqual(" \r\n", target.Eval("\" \r\n\""));
+			Assert.That(target.Eval("\" \""), Is.EqualTo(" "));
+			Assert.That(target.Eval("\" \t \""), Is.EqualTo(" \t "));
+			Assert.That(target.Eval("\"   \""), Is.EqualTo("   "));
+			Assert.That(target.Eval("\" \r\n\""), Is.EqualTo(" \r\n"));
 		}
 
 		[Test]
@@ -449,7 +448,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual("l'aquila", target.Eval("\"l'aquila\""));
+			Assert.That(target.Eval("\"l'aquila\""), Is.EqualTo("l'aquila"));
 		}
 
 		[Test]
@@ -457,15 +456,15 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual("汉语/漢語", target.Eval("\"汉语/漢語\""));
-			Assert.AreEqual('汉', target.Eval("'汉'"));
+			Assert.That(target.Eval("\"汉语/漢語\""), Is.EqualTo("汉语/漢語"));
+			Assert.That(target.Eval("'汉'"), Is.EqualTo('汉'));
 
 			for (char c = char.MinValue; c < char.MaxValue; c++)
 			{
 				if (c != '\"' && c != '\\')
-					Assert.AreEqual(new string(c, 1), target.Eval(string.Format("\"{0}\"", c)), string.Format("Failed to parse string literals \"{0}\".", c));
+					Assert.That(target.Eval(string.Format("\"{0}\"", c)), Is.EqualTo(new string(c, 1)), string.Format("Failed to parse string literals \"{0}\".", c));
 				if (c != '\'' && c != '\\')
-					Assert.AreEqual(c, target.Eval(string.Format("'{0}'", c)), string.Format("Failed to parse char literals '{0}'.", c));
+					Assert.That(target.Eval(string.Format("'{0}'", c)), Is.EqualTo(c), string.Format("Failed to parse char literals '{0}'.", c));
 			}
 		}
 
@@ -474,17 +473,17 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual('\'', target.Eval("'\\''"));
-			Assert.AreEqual('\"', target.Eval("'\\\"'"));
-			Assert.AreEqual('\\', target.Eval("'\\\\'"));
-			Assert.AreEqual('\0', target.Eval("'\\0'"));
-			Assert.AreEqual('\a', target.Eval("'\\a'"));
-			Assert.AreEqual('\b', target.Eval("'\\b'"));
-			Assert.AreEqual('\f', target.Eval("'\\f'"));
-			Assert.AreEqual('\n', target.Eval("'\\n'"));
-			Assert.AreEqual('\r', target.Eval("'\\r'"));
-			Assert.AreEqual('\t', target.Eval("'\\t'"));
-			Assert.AreEqual('\v', target.Eval("'\\v'"));
+			Assert.That(target.Eval("'\\''"), Is.EqualTo('\''));
+			Assert.That(target.Eval("'\\\"'"), Is.EqualTo('\"'));
+			Assert.That(target.Eval("'\\\\'"), Is.EqualTo('\\'));
+			Assert.That(target.Eval("'\\0'"), Is.EqualTo('\0'));
+			Assert.That(target.Eval("'\\a'"), Is.EqualTo('\a'));
+			Assert.That(target.Eval("'\\b'"), Is.EqualTo('\b'));
+			Assert.That(target.Eval("'\\f'"), Is.EqualTo('\f'));
+			Assert.That(target.Eval("'\\n'"), Is.EqualTo('\n'));
+			Assert.That(target.Eval("'\\r'"), Is.EqualTo('\r'));
+			Assert.That(target.Eval("'\\t'"), Is.EqualTo('\t'));
+			Assert.That(target.Eval("'\\v'"), Is.EqualTo('\v'));
 		}
 
 		[Test]
@@ -492,19 +491,19 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual("\'", target.Eval("\"\\'\""));
-			Assert.AreEqual("\"", target.Eval("\"\\\"\""));
-			Assert.AreEqual("\\", target.Eval("\"\\\\\""));
-			Assert.AreEqual("\0", target.Eval("\"\\0\""));
-			Assert.AreEqual("\a", target.Eval("\"\\a\""));
-			Assert.AreEqual("\b", target.Eval("\"\\b\""));
-			Assert.AreEqual("\f", target.Eval("\"\\f\""));
-			Assert.AreEqual("\n", target.Eval("\"\\n\""));
-			Assert.AreEqual("\r", target.Eval("\"\\r\""));
-			Assert.AreEqual("\t", target.Eval("\"\\t\""));
-			Assert.AreEqual("\v", target.Eval("\"\\v\""));
+			Assert.That(target.Eval("\"\\'\""), Is.EqualTo("\'"));
+			Assert.That(target.Eval("\"\\\"\""), Is.EqualTo("\""));
+			Assert.That(target.Eval("\"\\\\\""), Is.EqualTo("\\"));
+			Assert.That(target.Eval("\"\\0\""), Is.EqualTo("\0"));
+			Assert.That(target.Eval("\"\\a\""), Is.EqualTo("\a"));
+			Assert.That(target.Eval("\"\\b\""), Is.EqualTo("\b"));
+			Assert.That(target.Eval("\"\\f\""), Is.EqualTo("\f"));
+			Assert.That(target.Eval("\"\\n\""), Is.EqualTo("\n"));
+			Assert.That(target.Eval("\"\\r\""), Is.EqualTo("\r"));
+			Assert.That(target.Eval("\"\\t\""), Is.EqualTo("\t"));
+			Assert.That(target.Eval("\"\\v\""), Is.EqualTo("\v"));
 
-			Assert.AreEqual("L\'aquila\r\n\tè\tbella.", target.Eval("\"L\\'aquila\\r\\n\\tè\\tbella.\""));
+			Assert.That(target.Eval("\"L\\'aquila\\r\\n\\tè\\tbella.\""), Is.EqualTo("L\'aquila\r\n\tè\tbella."));
 		}
 
 		[Test]
@@ -560,42 +559,42 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.AreEqual(typeof(string), target.Parse("\"some string\"").ReturnType);
-			Assert.AreEqual(typeof(string), target.Parse("\"\"").ReturnType);
-			Assert.AreEqual(typeof(int), target.Parse("234").ReturnType);
-			Assert.AreEqual(typeof(int), target.Parse("-234").ReturnType);
-			Assert.AreEqual(typeof(uint), target.Parse("123u").ReturnType);
-			Assert.AreEqual(typeof(uint), target.Parse("123U").ReturnType);
-			Assert.AreEqual(typeof(long), target.Parse("-123l").ReturnType);
-			Assert.AreEqual(typeof(long), target.Parse("123l").ReturnType);
-			Assert.AreEqual(typeof(long), target.Parse("123L").ReturnType);
-			Assert.AreEqual(typeof(ulong), target.Parse("123UL").ReturnType);
-			Assert.AreEqual(typeof(ulong), target.Parse("123Ul").ReturnType);
-			Assert.AreEqual(typeof(ulong), target.Parse("123uL").ReturnType);
-			Assert.AreEqual(typeof(ulong), target.Parse("123ul").ReturnType);
-			Assert.AreEqual(typeof(ulong), target.Parse("123LU").ReturnType);
-			Assert.AreEqual(typeof(ulong), target.Parse("123Lu").ReturnType);
-			Assert.AreEqual(typeof(ulong), target.Parse("123lU").ReturnType);
-			Assert.AreEqual(typeof(ulong), target.Parse("123lu").ReturnType);
-			Assert.AreEqual(typeof(double), target.Parse("234.54").ReturnType);
-			Assert.AreEqual(typeof(double), target.Parse(".9").ReturnType);
-			Assert.AreEqual(typeof(double), target.Parse("-.9").ReturnType);
-			Assert.AreEqual(typeof(double), target.Parse("234d").ReturnType);
-			Assert.AreEqual(typeof(double), target.Parse("234D").ReturnType);
-			Assert.AreEqual(typeof(float), target.Parse("4.5f").ReturnType);
-			Assert.AreEqual(typeof(float), target.Parse("4.5F").ReturnType);
-			Assert.AreEqual(typeof(float), target.Parse(".5f").ReturnType);
-			Assert.AreEqual(typeof(float), target.Parse(".5F").ReturnType);
-			Assert.AreEqual(typeof(decimal), target.Parse("234.48m").ReturnType);
-			Assert.AreEqual(typeof(decimal), target.Parse("234.48M").ReturnType);
-			Assert.AreEqual(typeof(decimal), target.Parse(".48m").ReturnType);
-			Assert.AreEqual(typeof(decimal), target.Parse(".48M").ReturnType);
-			Assert.AreEqual(typeof(object), target.Parse("null").ReturnType);
+			Assert.That(target.Parse("\"some string\"").ReturnType, Is.EqualTo(typeof(string)));
+			Assert.That(target.Parse("\"\"").ReturnType, Is.EqualTo(typeof(string)));
+			Assert.That(target.Parse("234").ReturnType, Is.EqualTo(typeof(int)));
+			Assert.That(target.Parse("-234").ReturnType, Is.EqualTo(typeof(int)));
+			Assert.That(target.Parse("123u").ReturnType, Is.EqualTo(typeof(uint)));
+			Assert.That(target.Parse("123U").ReturnType, Is.EqualTo(typeof(uint)));
+			Assert.That(target.Parse("-123l").ReturnType, Is.EqualTo(typeof(long)));
+			Assert.That(target.Parse("123l").ReturnType, Is.EqualTo(typeof(long)));
+			Assert.That(target.Parse("123L").ReturnType, Is.EqualTo(typeof(long)));
+			Assert.That(target.Parse("123UL").ReturnType, Is.EqualTo(typeof(ulong)));
+			Assert.That(target.Parse("123Ul").ReturnType, Is.EqualTo(typeof(ulong)));
+			Assert.That(target.Parse("123uL").ReturnType, Is.EqualTo(typeof(ulong)));
+			Assert.That(target.Parse("123ul").ReturnType, Is.EqualTo(typeof(ulong)));
+			Assert.That(target.Parse("123LU").ReturnType, Is.EqualTo(typeof(ulong)));
+			Assert.That(target.Parse("123Lu").ReturnType, Is.EqualTo(typeof(ulong)));
+			Assert.That(target.Parse("123lU").ReturnType, Is.EqualTo(typeof(ulong)));
+			Assert.That(target.Parse("123lu").ReturnType, Is.EqualTo(typeof(ulong)));
+			Assert.That(target.Parse("234.54").ReturnType, Is.EqualTo(typeof(double)));
+			Assert.That(target.Parse(".9").ReturnType, Is.EqualTo(typeof(double)));
+			Assert.That(target.Parse("-.9").ReturnType, Is.EqualTo(typeof(double)));
+			Assert.That(target.Parse("234d").ReturnType, Is.EqualTo(typeof(double)));
+			Assert.That(target.Parse("234D").ReturnType, Is.EqualTo(typeof(double)));
+			Assert.That(target.Parse("4.5f").ReturnType, Is.EqualTo(typeof(float)));
+			Assert.That(target.Parse("4.5F").ReturnType, Is.EqualTo(typeof(float)));
+			Assert.That(target.Parse(".5f").ReturnType, Is.EqualTo(typeof(float)));
+			Assert.That(target.Parse(".5F").ReturnType, Is.EqualTo(typeof(float)));
+			Assert.That(target.Parse("234.48m").ReturnType, Is.EqualTo(typeof(decimal)));
+			Assert.That(target.Parse("234.48M").ReturnType, Is.EqualTo(typeof(decimal)));
+			Assert.That(target.Parse(".48m").ReturnType, Is.EqualTo(typeof(decimal)));
+			Assert.That(target.Parse(".48M").ReturnType, Is.EqualTo(typeof(decimal)));
+			Assert.That(target.Parse("null").ReturnType, Is.EqualTo(typeof(object)));
 
-			Assert.AreEqual((45.5).GetType(), target.Eval("45.5").GetType());
-			Assert.AreEqual((45.8f).GetType(), target.Eval("45.8f").GetType());
-			Assert.AreEqual((45.232M).GetType(), target.Eval("45.232M").GetType());
-			Assert.AreEqual((2e+201).GetType(), target.Eval("2e+201").GetType());
+			Assert.That(target.Eval("45.5").GetType(), Is.EqualTo((45.5).GetType()));
+			Assert.That(target.Eval("45.8f").GetType(), Is.EqualTo((45.8f).GetType()));
+			Assert.That(target.Eval("45.232M").GetType(), Is.EqualTo((45.232M).GetType()));
+			Assert.That(target.Eval("2e+201").GetType(), Is.EqualTo((2e+201).GetType()));
 		}
 
 		[Test]
@@ -604,7 +603,7 @@ namespace DynamicExpresso.UnitTest
 			var originalCulture = Thread.CurrentThread.CurrentCulture;
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en-US");
 			var target = new Interpreter();
-			Assert.AreEqual(45.5, target.Eval("45.5"));
+			Assert.That(target.Eval("45.5"), Is.EqualTo(45.5));
 			Thread.CurrentThread.CurrentCulture = originalCulture;
 		}
 
@@ -614,7 +613,7 @@ namespace DynamicExpresso.UnitTest
 			var originalCulture = Thread.CurrentThread.CurrentCulture;
 			Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("it-IT");
 			var target = new Interpreter();
-			Assert.AreEqual(45.5, target.Eval("45.5"));
+			Assert.That(target.Eval("45.5"), Is.EqualTo(45.5));
 			Thread.CurrentThread.CurrentCulture = originalCulture;
 		}
 

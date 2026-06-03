@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -6,8 +7,8 @@ namespace DynamicExpresso.Reflection
 	internal class MethodData
 	{
 		public MethodBase MethodBase;
-		public ParameterInfo[] Parameters;
-		public Expression[] PromotedParameters;
+		public IList<ParameterInfo> Parameters;
+		public IList<Expression> PromotedParameters;
 		public bool HasParamsArray;
 
 		public static MethodData Gen(MethodBase method)

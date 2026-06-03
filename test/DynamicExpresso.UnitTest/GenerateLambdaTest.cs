@@ -14,7 +14,7 @@ namespace DynamicExpresso.UnitTest
 
 			Expression<Func<double, double>> lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + 5");
 
-			Assert.AreEqual(15, lambdaExpression.Compile()(10));
+			Assert.That(lambdaExpression.Compile()(10), Is.EqualTo(15));
 		}
 
 		[Test]
@@ -24,10 +24,10 @@ namespace DynamicExpresso.UnitTest
 
 			Expression<Func<double, double>> lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + 5");
 
-			Assert.AreEqual(15, lambdaExpression.Compile()(10));
+			Assert.That(lambdaExpression.Compile()(10), Is.EqualTo(15));
 
 			lambdaExpression = target.ParseAsExpression<Func<double, double>>("arg + .5");
-			Assert.AreEqual(10.5, lambdaExpression.Compile()(10));
+			Assert.That(lambdaExpression.Compile()(10), Is.EqualTo(10.5));
 		}
 
 		[Test]
@@ -37,8 +37,8 @@ namespace DynamicExpresso.UnitTest
 
 			var lambdaExpression = target.ParseAsExpression<Func<double, double, double>>("arg1 * arg2");
 
-			Assert.AreEqual(6, lambdaExpression.Compile()(3, 2));
-			Assert.AreEqual(50, lambdaExpression.Compile()(5, 10));
+			Assert.That(lambdaExpression.Compile()(3, 2), Is.EqualTo(6));
+			Assert.That(lambdaExpression.Compile()(5, 10), Is.EqualTo(50));
 		}
 
 		[Test]
@@ -49,8 +49,8 @@ namespace DynamicExpresso.UnitTest
 			var argumentNames = new string[] { "x", "y" };
 			var lambdaExpression = target.ParseAsExpression<Func<double, double, double>>("x * y", argumentNames);
 
-			Assert.AreEqual(6, lambdaExpression.Compile()(3, 2));
-			Assert.AreEqual(50, lambdaExpression.Compile()(5, 10));
+			Assert.That(lambdaExpression.Compile()(3, 2), Is.EqualTo(6));
+			Assert.That(lambdaExpression.Compile()(5, 10), Is.EqualTo(50));
 		}
 
 		[Test]
@@ -65,7 +65,7 @@ namespace DynamicExpresso.UnitTest
 
 			Expression<Func<double, double, double>> lambdaExpression = lambda.LambdaExpression<Func<double, double, double>>();
 
-			Assert.AreEqual(Math.Pow(10, 2) + 5, lambdaExpression.Compile()(10, 2));
+			Assert.That(lambdaExpression.Compile()(10, 2), Is.EqualTo(Math.Pow(10, 2) + 5));
 		}
 
 		[Test]

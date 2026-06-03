@@ -13,9 +13,9 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter();
 
-			Assert.IsTrue(target.ReferencedTypes.Any(p => p.Name == "string"));
-			Assert.IsTrue(target.ReferencedTypes.Any(p => p.Name == "int"));
-			Assert.IsTrue(target.ReferencedTypes.Any(p => p.Name == "Guid"));
+			Assert.That(target.ReferencedTypes.Any(p => p.Name == "string"), Is.True);
+			Assert.That(target.ReferencedTypes.Any(p => p.Name == "int"), Is.True);
+			Assert.That(target.ReferencedTypes.Any(p => p.Name == "Guid"), Is.True);
 		}
 
 		[Test]
@@ -23,7 +23,7 @@ namespace DynamicExpresso.UnitTest
 		{
 			var target = new Interpreter(InterpreterOptions.None);
 
-			Assert.IsFalse(target.ReferencedTypes.Any());
+			Assert.That(target.ReferencedTypes.Any(), Is.False);
 		}
 
 		[Test]
@@ -33,7 +33,7 @@ namespace DynamicExpresso.UnitTest
 
 			target.Reference(typeof(FakeClass));
 
-			Assert.IsTrue(target.ReferencedTypes.Any(p => p.Type == typeof(FakeClass)));
+			Assert.That(target.ReferencedTypes.Any(p => p.Type == typeof(FakeClass)), Is.True);
 		}
 
 		public class FakeClass

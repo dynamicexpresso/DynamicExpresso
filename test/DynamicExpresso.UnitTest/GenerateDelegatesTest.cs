@@ -14,10 +14,10 @@ namespace DynamicExpresso.UnitTest
 
 			var func = target.ParseAsDelegate<Func<double, double, double>>("Math.Pow(x, y) + 5", "x", "y");
 
-			Assert.AreEqual(Math.Pow(10, 2) + 5, func(10, 2));
+			Assert.That(func(10, 2), Is.EqualTo(Math.Pow(10, 2) + 5));
 
             func = target.ParseAsDelegate<Func<double, double, double>>("Math.Pow(x, y) + .5", "x", "y");
-            Assert.AreEqual(Math.Pow(10, 2) + .5, func(10, 2));
+            Assert.That(func(10, 2), Is.EqualTo(Math.Pow(10, 2) + .5));
         }
 
 		[Test]
@@ -27,7 +27,7 @@ namespace DynamicExpresso.UnitTest
 
 			var func = target.ParseAsDelegate<Func<int>>("50");
 
-			Assert.AreEqual(50, func());
+			Assert.That(func(), Is.EqualTo(50));
 		}
 
 		[Test]
@@ -37,8 +37,8 @@ namespace DynamicExpresso.UnitTest
 
 			var func = target.ParseAsDelegate<Func<string, int>>("arg.Length");
 
-			Assert.AreEqual(4, func("ciao"));
-			Assert.AreEqual(9, func("123456879"));
+			Assert.That(func("ciao"), Is.EqualTo(4));
+			Assert.That(func("123456879"), Is.EqualTo(9));
 		}
 
 		[Test]
@@ -49,8 +49,8 @@ namespace DynamicExpresso.UnitTest
 			var argumentName = "val"; // if not specified the delegate parameter is used which is "arg"
 			var func = target.ParseAsDelegate<Func<string, int>>("val.Length", argumentName);
 
-			Assert.AreEqual(4, func("ciao"));
-			Assert.AreEqual(9, func("123456879"));
+			Assert.That(func("ciao"), Is.EqualTo(4));
+			Assert.That(func("123456879"), Is.EqualTo(9));
 		}
 
 		[Test]
@@ -60,8 +60,8 @@ namespace DynamicExpresso.UnitTest
 
 			var func = target.ParseAsDelegate<Func<double, double, double>>("arg1 * arg2");
 
-			Assert.AreEqual(6, func(3, 2));
-			Assert.AreEqual(50, func(5, 10));
+			Assert.That(func(3, 2), Is.EqualTo(6));
+			Assert.That(func(5, 10), Is.EqualTo(50));
 		}
 
 		[Test]
@@ -72,8 +72,8 @@ namespace DynamicExpresso.UnitTest
 			var argumentNames = new [] { "x", "y" };
 			var func = target.ParseAsDelegate<Func<double, double, double>>("x * y", argumentNames);
 
-			Assert.AreEqual(6, func(3, 2));
-			Assert.AreEqual(50, func(5, 10));
+			Assert.That(func(3, 2), Is.EqualTo(6));
+			Assert.That(func(5, 10), Is.EqualTo(50));
 		}
 
 		[Test]
@@ -83,8 +83,8 @@ namespace DynamicExpresso.UnitTest
 
 			var func = target.ParseAsDelegate<MyCustomDelegate>("x + y.Length");
 
-			Assert.AreEqual(7, func(3, "ciao"));
-			Assert.AreEqual(10, func(5, "mondo"));
+			Assert.That(func(3, "ciao"), Is.EqualTo(7));
+			Assert.That(func(5, "mondo"), Is.EqualTo(10));
 		}
 
 		private delegate int MyCustomDelegate(int x, string y);

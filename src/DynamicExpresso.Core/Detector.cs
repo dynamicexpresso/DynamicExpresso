@@ -14,11 +14,6 @@ namespace DynamicExpresso
 		private static readonly Regex RootIdentifierDetectionRegex =
 			new Regex(@"(?<=[^\w@]|^)(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)", RegexOptions.Compiled);
 
-		private static readonly Regex ChildIdentifierDetectionRegex = new Regex(
-			@"(?<=[^\w@]|^)(?<id>@?[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*(\.[\p{L}\p{Nl}_][\p{L}\p{Nl}\p{Nd}\p{Mn}\p{Mc}\p{Pc}\p{Cf}_]*)*)",
-			RegexOptions.Compiled);
-
-
 		private static readonly string Id = RootIdentifierDetectionRegex.ToString();
 		private static readonly string Type = Id.Replace("<id>", "<type>");
 
@@ -63,7 +58,7 @@ namespace DynamicExpresso
 					if (withtype != identifier)
 					{
 						var typeName = types[t].Value;
-						if (_settings.KnownTypes.TryGetValue(typeName, out ReferenceType knownType))
+						if (_settings.KnownTypes.TryGetValue(typeName, out var knownType))
 							type = knownType.Type;
 
 						t++;
@@ -71,8 +66,8 @@ namespace DynamicExpresso
 
 					// there might be several lambda parameters with the same name
 					//  -> in that case, we ignore the detected type
-					if (lambdaParameters.TryGetValue(identifier, out Identifier already) &&
-					    already.Expression.Type != type)
+					if (lambdaParameters.TryGetValue(identifier, out var already) &&
+						already.Expression.Type != type)
 						type = typeof(object);
 
 					var defaultValue = type.IsValueType ? Activator.CreateInstance(type) : null;
@@ -80,11 +75,7 @@ namespace DynamicExpresso
 				}
 			}
 
-			var identifierRegex = option == DetectorOptions.IncludeChildren
-				? ChildIdentifierDetectionRegex
-				: RootIdentifierDetectionRegex;
-
-			foreach (Match match in identifierRegex.Matches(expression))
+			foreach (Match match in RootIdentifierDetectionRegex.Matches(expression))
 			{
 				var idGroup = match.Groups["id"];
 				var identifier = idGroup.Value;
@@ -105,11 +96,11 @@ namespace DynamicExpresso
 						continue;
 				}
 
-				if (_settings.Identifiers.TryGetValue(identifier, out Identifier knownIdentifier))
+				if (_settings.Identifiers.TryGetValue(identifier, out var knownIdentifier))
 					knownIdentifiers.Add(knownIdentifier);
-				else if (lambdaParameters.TryGetValue(identifier, out Identifier knownLambdaParam))
+				else if (lambdaParameters.TryGetValue(identifier, out var knownLambdaParam))
 					knownIdentifiers.Add(knownLambdaParam);
-				else if (_settings.KnownTypes.TryGetValue(identifier, out ReferenceType knownType))
+				else if (_settings.KnownTypes.TryGetValue(identifier, out var knownType))
 					knownTypes.Add(knownType);
 				else
 					unknownIdentifiers.Add(identifier);
