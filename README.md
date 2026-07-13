@@ -532,7 +532,8 @@ For one reason or another none of these projects exactly fit my needs so I decid
 - CS-Script - http://www.csscript.net/
 - IronJS, IronRuby, IronPython
 - paxScript.NET http://eco148-88394.innterhost.net/paxscriptnet/
-
+- TagBites.Expressions - Roslyn-based C# expression parser and evaluator - https://github.com/TagBites/TagBites.Expressions
+  
 ## Continuous Integration
 
 A continuous integration pipeline is configured using Github Actions, see `.github/workflows` folder.
