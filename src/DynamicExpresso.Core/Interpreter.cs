@@ -554,7 +554,8 @@ namespace DynamicExpresso
 				expressionText,
 				_settings,
 				expressionType,
-				parameters);
+				parameters,
+				!Visitors.Any(p => p is DisableReflectionVisitor));
 
 			var expression = Parser.Parse(arguments);
 

@@ -28,6 +28,40 @@ namespace DynamicExpresso.UnitTest
 		}
 
 		[Test]
+		public void By_default_late_bound_reflection_is_not_permitted()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LateBindObject);
+			var member = new Parameter("member", typeof(object), typeof(string).GetProperty("Length"));
+
+			Assert.Throws<ReflectionNotAllowedException>(() => target.Eval("((object)typeof(string)).Assembly"));
+			Assert.Throws<ReflectionNotAllowedException>(() => target.Eval("((object)typeof(string)).GetMethods()"));
+			Assert.Throws<ReflectionNotAllowedException>(() => target.Eval("((object)typeof(string)).GetProperty(\"Length\")"));
+			Assert.Throws<ReflectionNotAllowedException>(() => target.Eval("member.DeclaringType", member));
+			Assert.Throws<ReflectionNotAllowedException>(() => target.Eval("member.GetValue(\"abc\")", member));
+			Assert.Throws<ReflectionNotAllowedException>(() => target.Eval("member.Name = \"Other\"", member));
+		}
+
+		[Test]
+		public void Late_bound_reflection_to_get_name_is_permitted()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LateBindObject);
+			var member = new Parameter("member", typeof(object), typeof(string).GetProperty("Length"));
+
+			Assert.That(target.Eval("((object)typeof(string)).Name"), Is.EqualTo("String"));
+			Assert.That(target.Eval("member.Name", member), Is.EqualTo("Length"));
+		}
+
+		[Test]
+		public void Late_bound_reflection_can_be_enabled()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LateBindObject)
+				.EnableReflection();
+
+			Assert.That(target.Eval("((object)typeof(string)).Assembly"), Is.EqualTo(typeof(string).Assembly));
+			Assert.That(target.Eval("((object)typeof(string)).GetMethods()"), Is.EqualTo(typeof(string).GetMethods()));
+		}
+
+		[Test]
 		public void Reflection_can_be_enabled()
 		{
 			var target = new Interpreter()

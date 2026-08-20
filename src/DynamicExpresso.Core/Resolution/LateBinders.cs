@@ -3,8 +3,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using DynamicExpresso.Exceptions;
 using DynamicExpresso.Reflection;
 using Microsoft.CSharp.RuntimeBinder;
+using MemberInfo = System.Reflection.MemberInfo;
 
 namespace DynamicExpresso.Resolution
 {
@@ -16,15 +18,18 @@ namespace DynamicExpresso.Resolution
 	internal class LateGetMemberCallSiteBinder : CallSiteBinder, IConvertibleToWritableBinder
 	{
 		private readonly string _propertyOrFieldName;
+		private readonly bool _reflectionEnabled;
 
-		public LateGetMemberCallSiteBinder(string propertyOrFieldName)
+		public LateGetMemberCallSiteBinder(string propertyOrFieldName, bool reflectionEnabled)
 		{
 			_propertyOrFieldName = propertyOrFieldName;
+			_reflectionEnabled = reflectionEnabled;
 		}
 
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
 			// there's only one argument: the instance on which the member is accessed
+			LateBindingSecurity.ValidateReflectionTarget(args[0], _propertyOrFieldName, _reflectionEnabled, true);
 			var binder = Binder.GetMember(
 				CSharpBinderFlags.None,
 				_propertyOrFieldName,
@@ -36,22 +41,25 @@ namespace DynamicExpresso.Resolution
 
 		public CallSiteBinder ToWritableBinder()
 		{
-			return new LateSetMemberCallSiteBinder(_propertyOrFieldName);
+			return new LateSetMemberCallSiteBinder(_propertyOrFieldName, _reflectionEnabled);
 		}
 	}
 
 	internal class LateSetMemberCallSiteBinder : CallSiteBinder
 	{
 		private readonly string _propertyOrFieldName;
+		private readonly bool _reflectionEnabled;
 
-		public LateSetMemberCallSiteBinder(string propertyOrFieldName)
+		public LateSetMemberCallSiteBinder(string propertyOrFieldName, bool reflectionEnabled)
 		{
 			_propertyOrFieldName = propertyOrFieldName;
+			_reflectionEnabled = reflectionEnabled;
 		}
 
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
 			// there are two arguments: the instance on which the member is set and the value to set
+			LateBindingSecurity.ValidateReflectionTarget(args[0], _propertyOrFieldName, _reflectionEnabled, false);
 			var binder = Binder.SetMember(
 				CSharpBinderFlags.None,
 				_propertyOrFieldName,
@@ -69,17 +77,22 @@ namespace DynamicExpresso.Resolution
 	{
 		private readonly string _methodName;
 		private readonly bool _isStatic;
+		private readonly bool _reflectionEnabled;
 
-		public LateInvokeMethodCallSiteBinder(string methodName, bool isStatic)
+		public LateInvokeMethodCallSiteBinder(string methodName, bool isStatic, bool reflectionEnabled)
 		{
 			_methodName = methodName;
 			_isStatic = isStatic;
+			_reflectionEnabled = reflectionEnabled;
 		}
 
 		public override Expression Bind(object[] args, ReadOnlyCollection<ParameterExpression> parameters, LabelTarget returnLabel)
 		{
 			// if the method is static, the first argument is the type containing the method,
 			// otherwise it's the instance on which the method is called
+			if (!_isStatic)
+				LateBindingSecurity.ValidateReflectionTarget(args[0], _methodName, _reflectionEnabled, false);
+
 			var context = _isStatic ? (Type)args[0] : args[0]?.GetType();
 			var argumentInfo = parameters.Select(x => CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null)).ToArray();
 			if (_isStatic)
@@ -96,6 +109,19 @@ namespace DynamicExpresso.Resolution
 				argumentInfo
 			);
 			return binderM.Bind(args, parameters, returnLabel);
+		}
+	}
+
+	internal static class LateBindingSecurity
+	{
+		public static void ValidateReflectionTarget(object target, string memberName, bool reflectionEnabled, bool allowNameMember)
+		{
+			if (!reflectionEnabled
+				&& (target is Type || target is MemberInfo)
+				&& (!allowNameMember || memberName != "Name"))
+			{
+				throw new ReflectionNotAllowedException();
+			}
 		}
 	}
 

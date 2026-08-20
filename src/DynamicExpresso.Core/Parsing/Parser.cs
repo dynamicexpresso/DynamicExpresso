@@ -1811,17 +1811,17 @@ namespace DynamicExpresso.Parsing
 		//    return Expression.Call(typeof(Enumerable), signature.Name, typeArgs, args);
 		//}
 
-		private static Expression ParseDynamicProperty(Expression instance, string propertyOrFieldName)
+		private Expression ParseDynamicProperty(Expression instance, string propertyOrFieldName)
 		{
-			return Expression.Dynamic(new LateGetMemberCallSiteBinder(propertyOrFieldName), typeof(object), instance);
+			return Expression.Dynamic(new LateGetMemberCallSiteBinder(propertyOrFieldName, _arguments.ReflectionEnabled), typeof(object), instance);
 		}
 
-		private static Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
+		private Expression ParseDynamicMethodInvocation(Type type, Expression instance, string methodName, Expression[] args)
 		{
 			var argsDynamic = args.ToList();
 			var isStatic = instance == null;
 			argsDynamic.Insert(0, !isStatic ? instance : Expression.Constant(type));
-			return Expression.Dynamic(new LateInvokeMethodCallSiteBinder(methodName, isStatic), typeof(object), argsDynamic);
+			return Expression.Dynamic(new LateInvokeMethodCallSiteBinder(methodName, isStatic, _arguments.ReflectionEnabled), typeof(object), argsDynamic);
 		}
 
 		private Expression ParseDynamicMethodGroupInvocation(Delegate @delegate, Expression[] args)
