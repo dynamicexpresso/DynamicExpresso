@@ -858,6 +858,202 @@ namespace DynamicExpresso.UnitTest
 			Assert.That(target.Eval<bool>("(x + z) == \"13\"", new Parameter("z", z)), Is.True);
 		}
 
+		[TestCase("m < \"60\"", true)]
+		[TestCase("m <= \"50\"", true)]
+		[TestCase("m > \"40\"", true)]
+		[TestCase("m >= \"50\"", true)]
+		[TestCase("\"40\" < m", true)]
+		[TestCase("\"50\" <= m", true)]
+		[TestCase("\"60\" > m", true)]
+		[TestCase("\"50\" >= m", true)]
+		public void Can_use_string_relational_operators_on_custom_type(string expression, bool expected)
+		{
+			var target = new Interpreter()
+				.SetVariable("m", new MoneyWithStringRelationalOperators(50));
+
+			Assert.That(target.Eval<bool>(expression), Is.EqualTo(expected));
+		}
+
+		[TestCase("m < \"60\"", true)]
+		[TestCase("m <= \"50\"", true)]
+		[TestCase("m > \"40\"", true)]
+		[TestCase("m >= \"50\"", true)]
+		[TestCase("\"40\" < m", true)]
+		[TestCase("\"50\" <= m", true)]
+		[TestCase("\"60\" > m", true)]
+		[TestCase("\"50\" >= m", true)]
+		public void Can_use_implicit_conversion_fallback_for_string_relational_operators_on_custom_type(string expression, bool expected)
+		{
+			var target = new Interpreter()
+				.SetVariable("m", new MoneyWithImplicitConversionOnlyRelationalOperators(50));
+
+			Assert.That(target.Eval<bool>(expression), Is.EqualTo(expected));
+		}
+
+		[TestCase("m == \"50\"", true)]
+		[TestCase("m != \"10\"", true)]
+		[TestCase("\"50\" == m", true)]
+		[TestCase("\"10\" != m", true)]
+		public void Can_use_string_equality_operators_on_custom_type(string expression, bool expected)
+		{
+			var target = new Interpreter()
+				.SetVariable("m", new MoneyWithStringRelationalOperators(50));
+
+			Assert.That(target.Eval<bool>(expression), Is.EqualTo(expected));
+		}
+
+		private sealed class MoneyWithStringRelationalOperators
+		{
+			private readonly decimal _amount;
+
+			public MoneyWithStringRelationalOperators(decimal amount)
+			{
+				_amount = amount;
+			}
+
+			public static implicit operator MoneyWithStringRelationalOperators(string value)
+			{
+				return new MoneyWithStringRelationalOperators(decimal.Parse(value));
+			}
+
+			public static bool operator <(MoneyWithStringRelationalOperators left, string right)
+			{
+				return left._amount < decimal.Parse(right);
+			}
+
+			public static bool operator >(MoneyWithStringRelationalOperators left, string right)
+			{
+				return left._amount > decimal.Parse(right);
+			}
+
+			public static bool operator <=(MoneyWithStringRelationalOperators left, string right)
+			{
+				return left._amount <= decimal.Parse(right);
+			}
+
+			public static bool operator >=(MoneyWithStringRelationalOperators left, string right)
+			{
+				return left._amount >= decimal.Parse(right);
+			}
+
+			public static bool operator <(string left, MoneyWithStringRelationalOperators right)
+			{
+				return decimal.Parse(left) < right._amount;
+			}
+
+			public static bool operator >(string left, MoneyWithStringRelationalOperators right)
+			{
+				return decimal.Parse(left) > right._amount;
+			}
+
+			public static bool operator <=(string left, MoneyWithStringRelationalOperators right)
+			{
+				return decimal.Parse(left) <= right._amount;
+			}
+
+			public static bool operator >=(string left, MoneyWithStringRelationalOperators right)
+			{
+				return decimal.Parse(left) >= right._amount;
+			}
+
+			public static bool operator ==(MoneyWithStringRelationalOperators left, string right)
+			{
+				return !ReferenceEquals(left, null) && left._amount == decimal.Parse(right);
+			}
+
+			public static bool operator !=(MoneyWithStringRelationalOperators left, string right)
+			{
+				return !(left == right);
+			}
+
+			public static bool operator ==(string left, MoneyWithStringRelationalOperators right)
+			{
+				return !ReferenceEquals(right, null) && decimal.Parse(left) == right._amount;
+			}
+
+			public static bool operator !=(string left, MoneyWithStringRelationalOperators right)
+			{
+				return !(left == right);
+			}
+
+			public override bool Equals(object obj)
+			{
+				var money = obj as MoneyWithStringRelationalOperators;
+				return money != null && _amount == money._amount;
+			}
+
+			public override int GetHashCode()
+			{
+				return _amount.GetHashCode();
+			}
+		}
+
+		private sealed class MoneyWithImplicitConversionOnlyRelationalOperators
+		{
+			private readonly decimal _amount;
+
+			public MoneyWithImplicitConversionOnlyRelationalOperators(decimal amount)
+			{
+				_amount = amount;
+			}
+
+			public static implicit operator MoneyWithImplicitConversionOnlyRelationalOperators(string value)
+			{
+				return new MoneyWithImplicitConversionOnlyRelationalOperators(decimal.Parse(value));
+			}
+
+			public static bool operator <(MoneyWithImplicitConversionOnlyRelationalOperators left, string right)
+			{
+				return left._amount < decimal.Parse(right);
+			}
+
+			public static bool operator >(MoneyWithImplicitConversionOnlyRelationalOperators left, string right)
+			{
+				return left._amount > decimal.Parse(right);
+			}
+
+			public static bool operator <=(MoneyWithImplicitConversionOnlyRelationalOperators left, string right)
+			{
+				return left._amount <= decimal.Parse(right);
+			}
+
+			public static bool operator >=(MoneyWithImplicitConversionOnlyRelationalOperators left, string right)
+			{
+				return left._amount >= decimal.Parse(right);
+			}
+
+			public static bool operator <(MoneyWithImplicitConversionOnlyRelationalOperators left, MoneyWithImplicitConversionOnlyRelationalOperators right)
+			{
+				return left._amount < right._amount;
+			}
+
+			public static bool operator >(MoneyWithImplicitConversionOnlyRelationalOperators left, MoneyWithImplicitConversionOnlyRelationalOperators right)
+			{
+				return left._amount > right._amount;
+			}
+
+			public static bool operator <=(MoneyWithImplicitConversionOnlyRelationalOperators left, MoneyWithImplicitConversionOnlyRelationalOperators right)
+			{
+				return left._amount <= right._amount;
+			}
+
+			public static bool operator >=(MoneyWithImplicitConversionOnlyRelationalOperators left, MoneyWithImplicitConversionOnlyRelationalOperators right)
+			{
+				return left._amount >= right._amount;
+			}
+
+			public override bool Equals(object obj)
+			{
+				var money = obj as MoneyWithImplicitConversionOnlyRelationalOperators;
+				return money != null && _amount == money._amount;
+			}
+
+			public override int GetHashCode()
+			{
+				return _amount.GetHashCode();
+			}
+		}
+
 
 		[Test]
 		public void Throw_an_exception_if_a_custom_type_doesnt_define_equal_operator()
