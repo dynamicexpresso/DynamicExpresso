@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace DynamicExpresso.Parsing
@@ -9,6 +10,7 @@ namespace DynamicExpresso.Parsing
 		private readonly Dictionary<string, Identifier> _identifiers;
 		private readonly Dictionary<string, ReferenceType> _knownTypes;
 		private readonly HashSet<MethodInfo> _extensionMethods;
+		private readonly HashSet<ExpressionVisitor> _visitors;
 
 		public ParserSettings(bool caseInsensitive, bool lateBindObject)
 		{
@@ -26,6 +28,8 @@ namespace DynamicExpresso.Parsing
 
 			_extensionMethods = new HashSet<MethodInfo>();
 
+			_visitors = new HashSet<ExpressionVisitor>();
+
 			AssignmentOperators = AssignmentOperators.All;
 
 			DefaultNumberType = DefaultNumberType.Default;
@@ -38,6 +42,7 @@ namespace DynamicExpresso.Parsing
 			_knownTypes = new Dictionary<string, ReferenceType>(other._knownTypes, other._knownTypes.Comparer);
 			_identifiers = new Dictionary<string, Identifier>(other._identifiers, other._identifiers.Comparer);
 			_extensionMethods = new HashSet<MethodInfo>(other._extensionMethods);
+			_visitors = new HashSet<ExpressionVisitor>(other._visitors);
 
 			AssignmentOperators = other.AssignmentOperators;
 			DefaultNumberType = other.DefaultNumberType;
@@ -45,7 +50,7 @@ namespace DynamicExpresso.Parsing
 		}
 
 		/// <summary>
-		/// Creates a deep copy of the current settings, so that the identifiers/types/methods can be changed
+		/// Copies the current settings and collections, so that the identifiers/types/methods/visitors can be changed
 		/// without impacting the existing settings.
 		/// </summary>
 		public ParserSettings Clone()
@@ -66,6 +71,11 @@ namespace DynamicExpresso.Parsing
 		public HashSet<MethodInfo> ExtensionMethods
 		{
 			get { return _extensionMethods; }
+		}
+
+		public ISet<ExpressionVisitor> Visitors
+		{
+			get { return _visitors; }
 		}
 
 		public bool CaseInsensitive

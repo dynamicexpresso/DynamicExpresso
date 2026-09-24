@@ -1,4 +1,5 @@
 ﻿using DynamicExpresso.Exceptions;
+using System.Dynamic;
 using NUnit.Framework;
 
 namespace DynamicExpresso.UnitTest
@@ -6,6 +7,42 @@ namespace DynamicExpresso.UnitTest
 	[TestFixture]
 	public class VisitorsTest
 	{
+		private const string DynamicTypeSeed = "Enumerable.ToArray(Enumerable.Repeat(typeof(string), p.Name.Length))[0]";
+		private const string DynamicReflection = DynamicTypeSeed + ".Assembly";
+		private const string LambdaDynamicReflection = "Enumerable.ToArray(Enumerable.Select(new int[]{1}, x => " + DynamicReflection + "))";
+		private const string NestedLambdaDynamicReflection = "Enumerable.ToArray(Enumerable.Select(new int[]{1}, y => " + LambdaDynamicReflection + "))";
+
+		/// <summary>
+		/// Test related to GHSA-v37m-7mgv-vwv9 security advisory.
+		/// </summary>
+		[TestCase(DynamicReflection)]
+		[TestCase(LambdaDynamicReflection)]
+		[TestCase(NestedLambdaDynamicReflection)]
+		public void By_default_dynamic_reflection_is_not_permitted_in_lambda_bodies(string expression)
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions);
+			dynamic bag = new ExpandoObject();
+			bag.Name = "abcd";
+			var parameter = new Parameter("p", typeof(ExpandoObject), (object)bag);
+
+			Assert.Throws<ReflectionNotAllowedException>(() => target.Eval(expression, parameter));
+		}
+
+		/// <summary>
+		/// Test related to GHSA-v37m-7mgv-vwv9 security advisory.
+		/// </summary>
+		[Test]
+		public void Dynamic_reflection_can_be_enabled_in_lambda_bodies()
+		{
+			var target = new Interpreter(InterpreterOptions.Default | InterpreterOptions.LambdaExpressions)
+				.EnableReflection();
+			dynamic bag = new ExpandoObject();
+			bag.Name = "abcd";
+			var parameter = new Parameter("p", typeof(ExpandoObject), (object)bag);
+
+			Assert.That(target.Eval(LambdaDynamicReflection, parameter), Is.EqualTo(new object[] { typeof(string).Assembly }));
+		}
+
 		[Test]
 		public void By_default_reflection_is_not_permitted()
 		{

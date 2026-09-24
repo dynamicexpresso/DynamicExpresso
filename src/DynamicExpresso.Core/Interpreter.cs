@@ -17,7 +17,6 @@ namespace DynamicExpresso
 	public class Interpreter
 	{
 		private readonly ParserSettings _settings;
-		private readonly ISet<ExpressionVisitor> _visitors = new HashSet<ExpressionVisitor>();
 
 		#region Constructors
 
@@ -62,7 +61,7 @@ namespace DynamicExpresso
 				_settings.LambdaExpressions = true;
 			}
 
-			_visitors.Add(new DisableReflectionVisitor());
+			Visitors.Add(new DisableReflectionVisitor());
 		}
 
 		/// <summary>
@@ -153,7 +152,7 @@ namespace DynamicExpresso
 
 		public ISet<ExpressionVisitor> Visitors
 		{
-			get { return _visitors; }
+			get { return _settings.Visitors; }
 		}
 
 		/// <summary>
